@@ -1,0 +1,174 @@
+c-widget-stat-c {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Ensure left alignment */
+  text-align: left;
+  word-wrap: break-word;
+  overflow: hidden;
+  padding-left: 5px !important; /* Reduce left padding */
+}
+/* Hover effect: Slight lift and brightness increase */
+c-widget-stat-c:hover {
+  box-shadow: 0px 8px 16px rgba(50, 5, 5, 0.3);
+  transform: translateY(-5px);
+  filter: brightness(1.2);
+}
+
+/* Force BLACK text for card titles & values */
+::ng-deep c-widget-stat-c .card-title,
+::ng-deep c-widget-stat-c h5, 
+::ng-deep c-widget-stat-c h4 {
+  color: #000000 !important; /* Pure Black */
+  font-weight: bold;
+}
+
+/* Ensure widget values inside widgets are BLACK */
+::ng-deep c-widget-stat-c .card-value {
+  color: #000000 !important; /* Pure Black */
+  font-weight: bold;
+}
+
+/* Improve Card Header Text Visibility */
+::ng-deep c-card-header h3 {
+  color: #000000 !important;
+  font-weight: bold;
+}
+
+/* ========== PROGRESS BAR STYLES ========== */
+
+/* Ensure Progress Bar Text is BLACK */
+::ng-deep c-progress-bar {
+  color: black !important;
+}
+
+/* Progress bar height adjustments */
+::ng-deep c-progress {
+  height: 15px !important; /* Adjust if necessary */
+}
+
+/* If progress bar has text inside */
+::ng-deep c-progress-bar span {
+  color: black !important;
+  font-weight: bold;
+}
+
+/* ========== TEXT & TITLE STYLES ========== */
+
+/* Strong black text inside cards */
+.strong-text {
+  font-weight: bold;
+  font-size: 18px;
+  color: #000000 !important; /* Pure Black */
+  text-align: center;
+  margin-top: 10px;
+  text-shadow: none; /* Remove shadow */
+}
+
+/* PURE BLACK for "Total Collection", "Machines Installed", etc. */
+.dark-title {
+  font-weight: bold;
+  font-size: 20px;
+  color: #000000 !important; /* PURE BLACK */
+  text-align: center;
+  text-shadow: none; /* No shadow, just strong black */
+}
+
+/* Bold Headers for Card Titles */
+.header-text {
+  font-weight: bold;
+  color: #000000 !important; /* PURE BLACK */
+  text-align: center;
+  font-size: 20px;
+  text-shadow: none; /* Remove shadow for clear black */
+}
+
+/* Improve visibility inside chart containers */
+canvas {
+  background: transparent;
+}
+
+/* ========== BADGES (c-badge) STYLES ========== */
+
+/* Ensure all badge text is BLACK */
+::ng-deep c-badge {
+  color: black !important;
+  font-weight: bold !important;
+}
+
+/* Ensure badges inside buttons are black */
+::ng-deep button c-badge {
+  color: black !important;
+  font-weight: bold;
+}
+
+/* Ensure badge text inside headings is black */
+::ng-deep h1 c-badge, 
+::ng-deep h2 c-badge, 
+::ng-deep h3 c-badge, 
+::ng-deep h4 c-badge, 
+::ng-deep h5 c-badge, 
+::ng-deep h6 c-badge {
+  color: black !important;
+  font-weight: bold;
+}
+
+/* Override CoreUI badge styles */
+::ng-deep c-badge[color] {
+  color: black !important;
+}
+
+/* If background color is affecting visibility, make text contrast better */
+::ng-deep c-badge[color] {
+  text-shadow: none !important;
+}
+
+/* ========== RESPONSIVE FIXES ========== */
+
+/* Adjustments for mobile views */
+@media (max-width: 768px) {
+  .strong-text, .dark-title, .header-text {
+    font-size: 16px;
+  }
+  
+  c-widget-stat-c {
+    padding: 10px;
+  }
+}
+
+/* Circular icons */
+/* Ensure icons stay at the left edge and are vertically centered */
+.logo-border {
+  width: 50px; /* Slightly increased for better fit */
+  height: 50px;
+  border: 3px solid white;
+  border-radius: 50%;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0; /* Prevent resizing */
+  position: absolute; /* Absolute positioning for better control */
+   /* Keep the icon at the left edge */
+  top: 50%; /* Moves icon to the vertical center */
+  transform: translateY(-50%); /* Ensures perfect vertical centering */
+left:10%;
+}
+
+/* Adjust image inside the icon */
+.logo-border img {
+  width: 80%;
+  height: auto;
+}
+
+/* Center the text vertically while keeping it next to the icon */
+.c-widget-text {
+  position: absolute;
+  bottom: 10px; /* Moves text lower inside the card */
+  left: 70px; /* Keeps it aligned properly beside the icon */
+}
+
+
+
+
+

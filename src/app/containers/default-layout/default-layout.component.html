@@ -1,0 +1,68 @@
+<!-- Sidebar -->
+<c-sidebar
+  #sidebar1="cSidebar"
+  fixed
+  id="sidebar1"
+  visible
+  [ngStyle]="{
+    'background-color': '#', 
+    'color': '#ffffff'
+  }"
+>
+  <c-sidebar-brand [routerLink]="[]">
+    <img src="assets/img/brand/logo.png" class="sidebar-brand-full" height="35" alt="My Logo">
+    <img src="assets/img/brand/logo.png" class="sidebar-brand-narrow" height="35" alt="My Logo Small">
+    <span class="sidebar-text fw-bold text-white">NcCode Vend Systems</span>
+    <c-sidebar-toggler
+      *ngIf="!sidebar1.narrow"
+      cSidebarToggle="sidebar1"
+      toggle="unfoldable"
+    ></c-sidebar-toggler>
+  </c-sidebar-brand>
+
+  <perfect-scrollbar [config]="perfectScrollbarConfig">
+    <c-sidebar-nav [navItems]="navItems"></c-sidebar-nav>
+  </perfect-scrollbar>
+</c-sidebar>
+
+<!-- Custom Hover Styles (Place at the bottom of the file) -->
+<style>
+  /* Force apply custom hover color */
+  c-sidebar .c-sidebar-nav-link:hover {
+    background-color: #ff5733 !important; /* Custom Hover Background */
+    color: white !important; /* Custom Hover Text */
+  }
+
+  /* Change Active Sidebar Link Color */
+  c-sidebar .c-sidebar-nav-link.c-active {
+    background-color: #000000 !important; /* Active Link Background */
+    color: white !important;
+  }
+</style>
+
+
+
+<!--main-->
+<div class="wrapper d-flex flex-column min-vh-100 bg-light bg-opacity-50 dark:bg-transparent">
+  <!--app-header-->
+  <app-default-header
+    class="mb-4 d-print-none header header-sticky bg-primary"
+    position="sticky"
+    sidebarId="sidebar1">
+  </app-default-header>
+  <!--app-body-->
+  <div class="body flex-grow-1 px-3">
+    <c-container breakpoint="lg" class="h-auto">
+      <c-row class="mb-4 d-print-none">
+        <div class="fs-2 fw-semibold">{{title}}</div>
+        <!-- <c-breadcrumb-router></c-breadcrumb-router> -->
+      </c-row>
+      <router-outlet></router-outlet>
+    </c-container>
+  </div>
+  <!--app footer-->
+  <app-default-footer></app-default-footer>
+</div>
+
+<!--aside-->
+<app-default-aside style="display: none;"></app-default-aside>

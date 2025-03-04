@@ -1,0 +1,129 @@
+
+<div class="filter-container">
+    <form>
+      <div class="row">
+        <div class="col">
+          <label>Zone:</label>
+          <div class="filter-box">
+            <button class="filter-btn green" (click)="selectAllZones(); $event.stopPropagation()">✅</button>
+            <input type="text" class="dropdown-input" (click)="toggleDropdown('zone')"
+                   [value]="selectedZones.length ? 'Selected (' + selectedZones.length + ')' : 'Select Zones'" readonly>
+            <div class="dropdown" *ngIf="dropdownOpen['zone']" (click)="$event.stopPropagation()">
+              <label *ngFor="let zone of zones">
+                <input type="checkbox" [checked]="selectedZones.includes(zone)" (change)="onZoneChange(zone)">
+                {{ zone }}
+              </label>
+            </div>
+            <button class="filter-btn red" (click)="clearSelection('zone'); $event.stopPropagation()">❌</button>
+          </div>
+        </div>
+  
+        <div class="col">
+          <label>Ward:</label>
+          <div class="filter-box">
+            <button class="filter-btn green" (click)="selectAllWards(); $event.stopPropagation()">✅</button>
+            <input type="text" class="dropdown-input" (click)="toggleDropdown('ward')"
+                   [value]="selectedWards.length ? 'Selected (' + selectedWards.length + ')' : 'Select Wards'" readonly>
+            <div class="dropdown" *ngIf="dropdownOpen['ward']" (click)="$event.stopPropagation()">
+              <label *ngFor="let ward of wards">
+                <input type="checkbox" [checked]="selectedWards.includes(ward)" (change)="onWardChange(ward)">
+                {{ ward }}
+              </label>
+            </div>
+            <button class="filter-btn red" (click)="clearSelection('ward'); $event.stopPropagation()">❌</button>
+          </div>
+        </div>
+  
+        <div class="col">
+          <label>Beat:</label>
+          <div class="filter-box">
+            <button class="filter-btn green" (click)="selectAllBeats(); $event.stopPropagation()">✅</button>
+            <input type="text" class="dropdown-input" (click)="toggleDropdown('beat')"
+                   [value]="selectedBeats.length ? 'Selected (' + selectedBeats.length + ')' : 'Select Beats'" readonly>
+            <div class="dropdown" *ngIf="dropdownOpen['beat']" (click)="$event.stopPropagation()">
+              <label *ngFor="let beat of beats">
+                <input type="checkbox" [checked]="selectedBeats.includes(beat)" (change)="onBeatChange(beat)">
+                {{ beat }}
+              </label>
+            </div>
+            <button class="filter-btn red" (click)="clearSelection('beat'); $event.stopPropagation()">❌</button>
+          </div>
+        </div>
+  
+        <div class="col">
+          <label>Machine ID:</label>
+          <select [(ngModel)]="selectedMachineId" (change)="onMachineChange(selectedMachineId)">
+            <option *ngFor="let machine of machineIds" [value]="machine">{{ machine }}</option>
+          </select>
+        </div>
+  
+        <div class="col">
+          <label>Start Date:</label>
+          <input type="date" [(ngModel)]="startDate" (change)="applyFilters()">
+        </div>
+  
+        <div class="col">
+          <label>End Date:</label>
+          <input type="date" [(ngModel)]="endDate" (change)="applyFilters()">
+        </div>
+  
+        <div class="col">
+          <label>Summary Type:</label>
+          <button class="summary-btn" (click)="toggleSummaryType()">
+            {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
+          </button>
+        </div>
+  
+        <div class="col text-right">
+          <button type="button" class="load-btn blue" (click)="loadReport()">Load Report</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <div *ngIf="isLoading" class="loading-spinner">Loading...</div>
+  
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Sr. No.</th>
+          <th>Machine ID</th>
+          <th>Machine Location</th>
+          <th>Address</th>
+          <th>Machine Type</th>
+          <th>Date</th>
+          <th>Qty</th>
+          <th>Cash</th>
+          <th>On Time</th>
+          <th>Burn Cycles</th>
+          <th>San Napkins Burnt</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="filteredData.length > 0; else noData">
+        <ng-container *ngFor="let item of filteredData; let i = index">
+          <tr *ngFor="let txn of item.transactions; let first = first">
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ i + 1 }}</td>
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.machineId }}</td>
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.machineLocation }}</td>
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.address }}</td>
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.machineType }}</td>
+            <td>{{ txn.date }}</td>
+            <td>{{ txn.qty }}</td>
+            <td>{{ txn.cash }}</td>
+            <td>{{ txn.onTime }}</td>
+            <td>{{ txn.burnCycles }}</td>
+            <td>{{ txn.sanNapkinsBurnt }}</td>
+          </tr>
+        </ng-container>
+      </tbody>
+  
+      <ng-template #noData>
+        <tr>
+          <td colspan="11" class="text-center">No data available</td>
+        </tr>
+      </ng-template>
+    </table>
+  </div>
+  

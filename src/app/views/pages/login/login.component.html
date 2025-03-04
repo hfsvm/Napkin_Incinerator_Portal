@@ -1,0 +1,103 @@
+<!-- <div class="login-container">
+  <div class="login-box">
+    <img src="assets/img/brand/logo.png" alt="Company Logo" class="logo" />
+    <h2>Merchant Login</h2>
+    
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="input-group">
+        <label for="merchantId">Merchant ID</label>
+        <input type="text" id="merchantId" formControlName="merchantId" placeholder="Enter Merchant ID" />
+      </div>
+
+      <div class="input-group">
+        <label for="userId">User ID</label>
+        <input type="text" id="userId" formControlName="userId" placeholder="Enter User ID" />
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" formControlName="password" placeholder="Enter Password" />
+      </div>
+
+      <button type="submit" class="btn-login">Login</button>
+
+   
+    </form>
+  </div>
+</div> -->
+<!-- 
+<div class="login-container" style="background: url('assets/img/brand/background13.jpg') no-repeat center center/cover;">
+  <div class="login-box">
+    <img src="assets/img/brand/logo.png" alt="Company Logo" class="logo" />
+    <h2> Digital Vending </h>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="input-group">
+        <i class="fas fa-user-tie"></i>
+        <label for="merchantId">Merchant ID</label>
+        <input type="text" id="merchantId" formControlName="merchantId" placeholder="Enter Merchant ID" />
+      </div>
+
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <label for="userId">User ID</label>
+        <input type="text" id="userId" formControlName="userId" placeholder="Enter User ID" />
+      </div>
+
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <label for="password">Password</label>
+        <input type="password" id="password" formControlName="password" placeholder="Enter Password" />
+      </div>
+
+      <button type="submit" class="btn-login">Login</button>
+    </form>
+  </div>
+</div> -->
+<div class="login-container" style="background: url('assets/img/brand/background13.jpg') no-repeat center center/cover;">
+  <div class="login-box">
+    <img src="assets/img/brand/logo.png" alt="Company Logo" class="logo" />
+    <h2> Digital Vending </h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+     
+
+      <!-- User ID -->
+      <div class="input-group">
+        <label for="userId">User ID</label>
+        <input type="text" id="userId" formControlName="userId" placeholder="Enter User ID" />
+        <div class="error-message" *ngIf="loginForm.get('userId')?.invalid && loginForm.get('userId')?.touched">
+          <span *ngIf="loginForm.get('userId')?.hasError('required')">User ID is required.</span>
+          <span *ngIf="loginForm.get('userId')?.hasError('pattern')">User ID wrong</span>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" formControlName="password" placeholder="Enter Password" />
+        <div class="error-message" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          <span *ngIf="loginForm.get('password')?.hasError('required')">Password is required.</span>
+          <!-- <span *ngIf="loginForm.get('password')?.hasError('maxlength')">Password cannot be more than 10 characters.</span>
+          <span *ngIf="loginForm.get('password')?.hasError('pattern')">Password wrong</span> -->
+        </div>
+      </div>
+       <!-- Merchant ID -->
+       <div class="input-group">
+        <label for="merchantId">Merchant ID</label>
+        <input type="text" id="merchantId" formControlName="merchantId" placeholder="Enter Merchant ID" />
+        <div class="error-message" *ngIf="loginForm.get('merchantId')?.invalid && loginForm.get('merchantId')?.touched">
+          <span *ngIf="loginForm.get('merchantId')?.hasError('required')">Merchant ID is required.</span>
+          <span *ngIf="loginForm.get('merchantId')?.hasError('pattern')">Merchant ID wrong.</span>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <!-- <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div> -->
+
+      <button type="submit" class="btn-login" [disabled]="loginForm.invalid">Login</button>
+    </form>
+  </div>
+</div>

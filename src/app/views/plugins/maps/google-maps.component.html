@@ -1,0 +1,81 @@
+ <div class="fade-in">
+  <c-card>
+   
+
+    <c-card-body>
+      <div *ngIf="googleMapsLoaderService.apiLoaded | async">
+    
+        <google-map [height]="'550px'" [options]="options" [width]="'100%'">
+          <map-marker 
+            #marker="mapMarker"
+            (mapClick)="openInfoWindow(marker, m)"
+            *ngFor="let m of markers"
+            [options]="{ icon: { url: m.color === 'green' ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' } }"
+            [position]="m.position"
+            [title]="m.title">
+          </map-marker>
+
+          <map-info-window>
+            <div class="info-window">
+              <h3 class="info-title">
+                <i class="material-icons icon-blue">location_on</i> 
+                {{ activeInfoWindow?.title }}
+              </h3>
+              <hr class="info-divider">
+              
+              <div class="info-row">
+                <i class="fas fa-id-badge icon-gray"></i>
+                <strong>Machine ID:</strong> {{ activeInfoWindow?.machineId }}
+              </div>
+
+              <div class="info-row">
+                <i class="fas fa-money-bill-wave icon-green"></i>
+                <strong>Collection:</strong> {{ activeInfoWindow?.collection }}
+              </div>
+
+              <div class="info-row">
+                <i class="fas fa-box icon-blue"></i>
+                <strong>Stock Status:</strong> {{ activeInfoWindow?.stockStatus }}
+              </div>
+
+              <div class="info-row">
+                <i class="fas fa-exclamation-circle icon-red"></i>
+                <strong>Stock Error:</strong> {{ activeInfoWindow?.stockError }}
+              </div>
+
+              <div class="info-row">
+                <i class="fas fa-fire icon-orange"></i>
+                <strong>Burning Cycles:</strong> {{ activeInfoWindow?.totalBurningCycles }}
+              </div>
+
+              <div class="info-row">
+                <i class="fas fa-toggle-on icon-yellow"></i>
+                <strong>Burning Enabled:</strong> {{ activeInfoWindow?.burningEnabled ? 'Yes' : 'No' }}
+              </div>
+
+              <div class="info-row">
+                <i class="fas fa-fire-extinguisher icon-purple"></i>
+                <strong>Burning Status:</strong> {{ activeInfoWindow?.burningStatus }}
+              </div>
+
+              <div class="info-row">
+                <i class="fas fa-plug icon-dark"></i>
+                <strong>Machine Status:</strong> 
+                <span [style.color]="activeInfoWindow?.color" class="status-text">
+                  <i class="fas" [ngClass]="{'fa-circle': activeInfoWindow?.machineStatus === 'Online', 'fa-times-circle': activeInfoWindow?.machineStatus === 'Offline'}"></i> 
+                  {{ activeInfoWindow?.machineStatus }}
+                </span>
+              </div>
+
+             
+              <a class="more-info-btn" href="{{activeInfoWindow?.www}}" target="_blank">
+                <i class="fas fa-external-link-alt"></i> More Info
+              </a>
+            </div>
+          </map-info-window>
+        </google-map>
+      </div>
+    </c-card-body>
+  </c-card>
+</div>
+

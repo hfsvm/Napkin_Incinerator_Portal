@@ -1,0 +1,252 @@
+<!-- 
+<div class="container-fluid">
+
+  <div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" (click)="refreshData()">🔄 Refresh Data</button>
+  </div>
+
+  
+  <div class="row">
+    <div class="col-md-3" *ngFor="let card of [
+      { title: 'Machines Installed', value: dashboardData.machinesInstalled, color: 'info', icon: '🖥️' },
+      { title: 'Machines Running', value: dashboardData.machinesRunning, color: 'success', icon: '✅' },
+      { title: 'Stock Empty', value: dashboardData.stockEmpty, color: 'danger', icon: '⚠️' },
+      { title: 'Stock Low', value: dashboardData.stockLow, color: 'warning', icon: '📉' },
+      { title: 'Burning Enabled', value: dashboardData.burningEnabled, color: 'primary', icon: '🔥' },
+      { title: 'Total Burning Cycles', value: dashboardData.totalBurningCycles, color: 'dark', icon: '♻️' },
+      { title: 'Total Collection', value: '₹ ' + dashboardData.totalCollection, color: 'info', icon: '💰' },
+      { title: 'Items Dispensed', value: dashboardData.itemsDispensed, color: 'info', icon: '🛒' }
+    ]">
+      <div class="card text-white bg-{{ card.color }} mb-3">
+        <div class="card-body d-flex align-items-center justify-content-center">
+          <h2 class="me-2">{{ card.icon }}</h2>
+          <div>
+            <h5 class="card-title">{{ card.title }}</h5>
+            <p class="card-text">{{ card.value }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3>Filters</h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-2" *ngFor="let filter of [
+          { name: 'Machine Status', key: 'machineStatuses', selected: selectedMachineStatuses, options: machineStatuses },
+          { name: 'Stock Status', key: 'stockStatuses', selected: selectedStockStatuses, options: stockStatuses },
+          { name: 'Burn Status', key: 'burnStatuses', selected: selectedBurnStatuses, options: burnStatuses },
+          { name: 'Zone', key: 'zones', selected: selectedZones, options: zones },
+          { name: 'Ward', key: 'wards', selected: selectedWards, options: wards },
+          { name: 'Beat', key: 'beats', selected: selectedBeats, options: beats }
+        ]">
+          <label>{{ filter.name }}</label>
+          <div class="dropdown">
+            <button class="btn btn-light dropdown-toggle w-100" type="button" (click)="toggleDropdown(filter.key)">
+              {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : 'Select ' + filter.name }}
+            </button>
+            <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]">
+              <label *ngFor="let option of filter.options" class="dropdown-item">
+                <input type="checkbox" 
+       [checked]="filter.selected.includes(option.key || option)" 
+       (change)="toggleSelection(filter.selected, option.key || option, filter.key)">
+
+                {{ option.value || option }}
+              </label>
+            </div>
+            
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-3">
+    <h3>Machine Report</h3>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Sr. No.</th>
+          <th>Machine ID</th>
+          <th>Status</th>
+          <th>Stock Status</th>
+          <th>Burning Status</th>
+          <th>Info</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let machine of filteredMachines; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ machine.machineId }}</td>
+          
+         
+          <td [ngClass]="{'text-success': machine.status === '1', 'text-danger': machine.status !== '1'}">
+            {{ machine.status === '1' ? 'Online ' : 'Offline ' }}
+          </td>
+
+          
+          <td [ngClass]="{
+  'text-danger': machine.stockStatus === 'Empty', 
+  'text-warning': machine.stockStatus === 'Low',
+  'text-success': machine.stockStatus === 'Full'
+}">
+  {{ machine.stockStatus }}
+</td>
+
+          
+      
+          
+
+       
+          <td [ngClass]="{'text-warning': machine.burningStatus === '2', 'text-black': machine.burningStatus !== '2'}">
+            {{ machine.burningStatus === '2' ? ' 🔥' : 'Idle ⏳' }}
+          </td>
+
+          <td>
+            <button class="btn btn-info btn-sm" (mouseenter)="showInfo(machine.machineId)" (mouseleave)="hideInfo()">View</button>
+            <div *ngIf="hoveredMachineId === machine.machineId" class="tooltip-info">
+              <strong>Stock Status:</strong> {{ machine.stockStatus }}<br>
+              <strong>Dispensed:</strong> {{ machine.itemsDispensed }}<br>
+              <strong>IMSI:</strong> {{ machine.imsi }}<br>
+              <strong>RSSI:</strong> {{ machine.rssi }}
+            </div>
+          </td>
+          
+          
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div> -->
+<!-- Dashboard Summary Cards -->
+
+<!-- Dashboard Summary Cards (4 per row) -->
+ 
+
+  <div class="row g-2">
+    <div class="col-lg-3 col-md-6 col-sm-12 d-flex" *ngFor="let card of [
+      { title: 'Machines Installed', value: dashboardData.machinesInstalled, color: '#6A5ACD', icon: 'fa-solid fa-desktop' },
+      { title: 'Machines Running', value: dashboardData.machinesRunning, color: '#4CAF50', icon: 'fa-solid fa-check-circle' },
+      { title: 'Stock Status', value: 'Empty: ' + dashboardData.stockEmpty + '<br>Full: ' + dashboardData.stockOk, color: '#FF5722', icon: 'fa-solid fa-boxes' },
+      { title: 'Stock Low', value: dashboardData.stockLow, color: '#FFC107', icon: 'fa-solid fa-arrow-down' },
+      { title: 'Burning Enabled', value: dashboardData.burningEnabled, color: '#673AB7', icon: 'fa-solid fa-fire' },
+      { title: 'Total Burning Cycles', value: dashboardData.totalBurningCycles, color: '#455A64', icon: 'fa-solid fa-sync-alt' },
+      { title: 'Total Collection', value: '₹ ' + dashboardData.totalCollection, color: '#3F51B5', icon: 'fa-solid fa-coins' },
+      { title: 'Items Dispensed', value: dashboardData.itemsDispensed, color: '#00838F', icon: 'fa-solid fa-shopping-cart' }
+    ]">
+      <div class="card shadow-sm p-2 fixed-card w-100 text-white" [ngStyle]="{'background-color': card.color}">
+        <div class="card-body d-flex align-items-center">
+          <div class="icon-circle">
+            <i class="{{ card.icon }} icon-style"></i>
+          </div>
+          <div class="ms-2">
+            <h6 class="card-title">{{ card.title }}</h6>
+            <p class="card-text" [innerHTML]="card.value"></p>  <!-- Use innerHTML to render <br> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+
+
+
+<div class="card mb-3 mt-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h3 class="mb-3">Filters</h3>
+   
+    <button class="btn btn-primary btn-sm" (click)="refreshData()">🔄 Refresh Data</button>
+  </div>
+  
+  <div class="card-body">
+
+    <div class="row filter container">
+      <div class="col-md-2 " *ngFor="let filter of [
+        { name: 'Machine Status', key: 'machineStatuses', selected: selectedMachineStatuses, options: machineStatuses },
+        { name: 'Stock Status', key: 'stockStatuses', selected: selectedStockStatuses, options: stockStatuses },
+        { name: 'Burn Status', key: 'burnStatuses', selected: selectedBurnStatuses, options: burnStatuses },
+        { name: 'Zone', key: 'zones', selected: selectedZones, options: zones },
+        { name: 'Ward', key: 'wards', selected: selectedWards, options: wards },
+        { name: 'Beat', key: 'beats', selected: selectedBeats, options: beats }
+      ]">
+        <label>{{ filter.name }}</label>
+        <div class="dropdown">
+          <button class="btn btn-light dropdown-toggle w-100" type="button" (click)="toggleDropdown(filter.key)">
+            {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : 'Select ' + filter.name }}
+          </button>
+          <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]">
+            <label *ngFor="let option of filter.options" class="dropdown-item">
+              <input type="checkbox" 
+      [checked]="filter.selected.includes(option.key || option)" 
+      (change)="toggleSelection(filter.selected, option.key || option, filter.key)">
+              {{ option.value || option }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Machine Report Table (Now Below Filters) -->
+<div class="card p-3">
+  <h3>Machine Report</h3>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Sr. No.</th>
+        <th>Machine ID</th>
+        <th>Status</th>
+        <th>Stock Status</th>
+        <th>Burning Status</th>
+        <th>Info</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let machine of filteredMachines; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ machine.machineId }}</td>
+        <td [ngClass]="{'text-success': machine.status === '1', 'text-danger': machine.status !== '1'}">
+          {{ machine.status === '1' ? 'Online ' : 'Offline ' }}
+        </td>
+        <td [ngClass]="{
+          'text-danger': machine.stockStatus === 'Empty', 
+          'text-warning': machine.stockStatus === 'Low',
+          'text-success': machine.stockStatus === 'Full'
+        }">
+          {{ machine.stockStatus }}
+        </td>
+        <td [ngClass]="{'text-warning': machine.burningStatus === '2', 'text-black': machine.burningStatus !== '2'}">
+          {{ machine.burningStatus === '2' ? '🔥' : 'Idle ⏳' }}
+        </td>
+        <td>
+          <div class="view-btn-container" style="position: relative; display: inline-block;">
+            <button class="btn btn-info btn-sm">View</button>
+            <div class="tooltip-info">
+              <strong>Stock Status:</strong> {{ machine.stockStatus }}<br>
+              <strong>items Dispensed:</strong> {{ machine.itemsDispensed }}<br>
+              <strong>Status:</strong> {{ machine.status === '1' ? 'Online ' : 'Offline ' }}<br>
+             
+               
+              
+              <strong>Collection:</strong> {{ machine.collection }}<br>
+              <strong>Items Burnt:</strong> {{ machine.itemsBurnt }}<br>
+              <strong>Burning Cycles:</strong> {{ machine.burningCycles }}<br>
+              <strong>IMSI:</strong> {{ machine.imsi }}<br>
+              <strong>RSSI:</strong> {{ machine.rssi }}
+            </div>
+          </div>
+        </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>

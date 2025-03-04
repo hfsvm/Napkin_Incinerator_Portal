@@ -1,0 +1,78 @@
+/* ✅ Styling for Header */
+.header-title {
+    display: flex;
+    align-items: center;
+    font-size: 22px;
+    font-weight: bold;
+  }
+  .icon-large {
+    margin-right: 10px;
+    font-size: 28px;
+  }
+  
+  /* ✅ Information Window Styling */
+  .info-window {
+    width: 360px;
+    padding: 18px;
+    font-family: 'Roboto', sans-serif;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  .info-title {
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .info-divider {
+    margin: 10px 0;
+    border: 0.5px solid #ddd;
+  }
+  
+  /* ✅ Rows for Machine Details */
+  .info-row {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .info-row strong {
+    flex: 1;
+    font-weight: bold;
+  }
+  
+  /* ✅ Icons in Info Window */
+  .icon-gray { width: 25px; color: #555; }
+  .icon-green { width: 25px; color: #28a745; }
+  .icon-blue { width: 25px; color: #007bff; }
+  .icon-red { width: 25px; color: #dc3545; }
+  .icon-orange { width: 25px; color: #ff5733; }
+  .icon-yellow { width: 25px; color: #ffc107; }
+  .icon-purple { width: 25px; color: #6610f2; }
+  .icon-dark { width: 25px; color: #6c757d; }
+  
+  /* ✅ Machine Status Styling */
+  .status-text {
+    font-weight: bold;
+    font-size: 15px;
+  }
+  
+  /* ✅ More Info Button */
+  .more-info-btn {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+  }
+  .more-info-btn:hover {
+    background: #0056b3;
+  }
+  

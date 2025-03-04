@@ -1,0 +1,162 @@
+/* ✅ Default Light Mode */
+body {
+  background-color: white;
+  color: black;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+/* ✅ Header Text Color */
+// .header-nav a {
+//     color: white !important; /* Make header text white */
+//   padding-right: 40%;
+//   }
+    
+.header-nav{
+   padding-left: 10px;
+
+}
+/* ✅ Dark Mode */
+.dark-light {
+  background-color: #181818 !important; 
+  color: #f1f1f1 !important;
+}
+
+.dark-light .header-nav a {
+  color: #f1f1f1 !important;
+}/* ✅ Center the logout popup */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+  }
+  
+  .modal-box {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 320px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .modal-text {
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* ✅ Modal Buttons */
+  .modal-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .modal-buttons .btn {
+    padding: 10px 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  
+  .btn-danger {
+    background-color: #dc3545; /* Red */
+    color: rgb(225, 28, 28);
+    border: none;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c82333; /* Darker Red */
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d; /* Gray */
+    color: white;
+    border: none;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268; /* Darker Gray */
+  }
+  
+  /* ✅ Dark Mode Support */
+  .dark-theme .modal-box {
+    background: #222;
+    color: white;
+  }
+  
+  .dark-theme .btn-danger {
+    background: #ff4444;
+    color: white;
+  }
+  
+  .dark-theme .btn-secondary {
+    background: #888;
+    color: white;
+  }
+  
+
+.dark-light .dropdown-menu {
+  background: #222 !important;
+  color: white !important;
+}
+
+.dark-light .dropdown-item:hover {
+  background-color: #444 !important;
+}
+
+/* ✅ Dark Mode Toggle */
+.light-icon {
+  cursor: pointer;
+  font-size: 24px;
+  margin-right: 15px;
+  color: #333;
+  transition: color 0.3s ease-in-out;
+}
+
+.dark-light .light-icon {
+  color: #ffcc00; /* Bright yellow for contrast */
+}
+/* ✅ Dark Mode Toggle Icon */
+.theme-icon {
+    cursor: pointer;
+    font-size: 24px;
+    margin-right: 15px;
+    color: white; /* Default color for Light Mode */
+    transition: color 0.3s ease-in-out;
+  }
+  
+  /* ✅ Change Moon Icon Color in Dark Mode */
+  .dark-theme .theme-icon {
+    color: #ffcc00; /* Bright Yellow for better visibility */
+  }
+  .custom-dropdown {
+    background-color: #007bff; /* Blue background */
+    color: white !important; /* White text */
+    position: absolute !important; /* Ensures dropdown is placed relative to the button */
+    left: auto !important;  /* Resets default left positioning */
+    right: 100% !important; /* Moves the dropdown to the left */
+    top: 100% !important; /* Places dropdown directly below the button */
+    z-index: 1000; /* Ensures it stays above other elements */
+    min-width: 150px; /* Adjust width if needed */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+  }
+  
+  .custom-dropdown .dropdown-item {
+    color: white !important; /* White text */
+  }
+  
+  .custom-dropdown .dropdown-item:hover {
+    background-color: #0056b3 !important; /* Darker blue on hover */
+  }
+  

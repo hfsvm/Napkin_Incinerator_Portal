@@ -1,0 +1,93 @@
+<c-row>
+  <c-col md="3" sm="6">
+    <c-widget-stat-c class="mb-4" [ngStyle]="{'background-color': '#1565C0', 'color': '#FFFFFF','padding':'8px', 'height':'120px', 'display':'flex', 'align-items':'center', 'justify-content': 'flex-start', 'border-radius': '12px', 'box-shadow': '0px 8px 16px rgba(0, 0, 0, 0.2)'}">
+      <ng-template cTemplateId="widgetIconTemplate">
+        <div style="display: flex; align-items: center; width: 100%; padding-left: 10px; gap: 15px;">
+          <div class="logo-border">
+            <img width="40" height="40" src="https://img.icons8.com/ios/50/FFFFFF/vending-machine.png" alt="vending-machine" />
+          </div>
+          <div style="display: flex; flex-direction: column; text-align: left; margin-top: 25px;">
+            <span style="font-size: 16px; font-weight: bold; padding: top 10px;color: #ffffff;">Total Machines</span>
+            <span style="font-size: 24px;padding: top 100px; font-weight: bold; margin-top: 10px;color:#FFFFFF">{{ totalMachines }}</span>
+          </div>
+          
+        </div>
+      </ng-template>
+    </c-widget-stat-c>
+  </c-col>
+
+  <c-col md="3" sm="6">
+    <c-widget-stat-c class="mb-4" [ngStyle]="{'background-color': '#2E7D32', 'color': '#FFFFFF','padding':'8px', 'height':'120px', 'display':'flex', 'align-items':'center', 'justify-content': 'flex-start', 'border-radius': '12px', 'box-shadow': '0px 8px 16px rgba(0, 0, 0, 0.2)'}">
+      <ng-template cTemplateId="widgetIconTemplate">
+        <div style="display: flex; align-items: center; width: 100%; padding-left: 10px; gap: 15px;">
+          <div class="logo-border">
+            <img width="40" height="40" src="https://img.icons8.com/ios/50/FFFFFF/gears.png" alt="active-machines" />
+          </div>
+          <div style="display: flex; flex-direction: column; text-align: left; margin-top: 25px;">
+            <span style="font-size: 16px; font-weight: bold; color: #fff9f9;">Active Machines</span>
+            <span style="font-size: 24px;padding: top 100px; font-weight: bold; margin-top: 10px; color:#FFFFFF">{{ activeMachines }}</span>
+          </div>
+        </div>
+      </ng-template>
+    </c-widget-stat-c>
+  </c-col>
+  <c-col md="3" sm="6">
+    <c-widget-stat-c class="mb-4" [ngStyle]="{'background-color': '#F57C00', 'color': '#FFFFFF' ,'padding':'8px', 'height':'120px', 'display':'flex', 'align-items':'center', 'justify-content': 'flex-start', 'border-radius': '12px', 'box-shadow': '0px 8px 16px rgba(0, 0, 0, 0.2)'}">
+      <ng-template cTemplateId="widgetIconTemplate">
+        <div style="display: flex; align-items: center; width: 100%; padding-left: 10px; gap: 15px;">
+          <div class="logo-border">
+            <img width="40" height="40" src="https://img.icons8.com/ios/50/FFFFFF/toilet-paper.png" alt="napkin-dispenser"/>
+          </div>
+          <div style="display: flex; flex-direction: column; text-align: left; margin-top: 25px;">
+            <span style="font-size: 16px; font-weight: bold; color: #ffffff;">Napkins Dispensed</span>
+            <span style="font-size: 24px; padding: top 100px; font-weight: bold; margin-top: 10px; color:#FFFFFF">{{ napkinsDispensed }}</span>
+          </div>
+        </div>
+      </ng-template>
+    </c-widget-stat-c>
+  </c-col>
+
+  <c-col md="3" sm="6">
+    <c-widget-stat-c class="mb-4" [ngStyle]="{'background-color': '#D32F2F', 'color': '#FFFFFF' ,'padding':'8px', 'height':'120px', 'display':'flex', 'align-items':'center', 'justify-content': 'flex-start', 'border-radius': '12px', 'box-shadow': '0px 8px 16px rgba(0, 0, 0, 0.2)'}">
+      <ng-template cTemplateId="widgetIconTemplate">
+        <div style="display: flex; align-items: center; width: 100%; padding-left: 10px; gap: 15px;">
+          <div class="logo-border">
+            <img width="40" height="40" src="https://img.icons8.com/ios/50/FFFFFF/shutdown.png" alt="inactive-machines" />
+          </div>
+          <div style="display: flex; flex-direction: column; text-align: left; margin-top: 25px;">
+            <span style="font-size: 16px; font-weight: bold; color: #fffcfc;">Inactive Machines</span>
+            <span style="font-size: 24px; padding: top 100px; font-weight: bold; margin-top: 10px;color:#FFFFFF">{{ inactiveMachines }}</span>
+          </div>
+        </div>
+      </ng-template>
+    </c-widget-stat-c>
+  </c-col>
+</c-row>
+
+
+
+<!-- Status Reports with Canvas-based Charts (Unchanged) -->
+<c-row>
+  <c-row class="mt-4">
+    <c-col xs="12" md="6" class="d-flex justify-content-center">
+      <c-card style="width:700px; height:450px; margin:10px;">
+        <c-card-header>
+          <h2 style="padding:10px;">Machine Status</h2>
+        </c-card-header>
+        <c-card-body style="display:flex; justify-content:center; align-items:center;">
+          <canvas id="canvasDoughnut" style="width:438px; height:289px; display:block;"></canvas>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col xs="12" md="6" class="d-flex justify-content-center">
+      <c-card style="width:700px; height:450px; margin:10px;">
+        <c-card-header>
+          <h2 style="padding:10px;">Stock Status</h2>
+        </c-card-header>
+        <c-card-body style="display:flex; justify-content:center; align-items:center;">
+          <canvas id="canvasStock" style="width:438px; height:289px; display:block;"></canvas>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+</c-row>

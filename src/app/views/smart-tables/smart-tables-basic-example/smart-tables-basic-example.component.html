@@ -1,0 +1,1022 @@
+<!-- <c-smart-table
+  [activePage]="3"
+  [columnSorter]="true"
+  [columns]="columns"
+  [columnFilter]="true"
+  [itemsPerPageSelect]="true"
+  [itemsPerPage]="5"
+  [items]="usersData"
+  [sorterValue]="{ column: 'name', state: 'asc' }"
+  [tableFilter]="true"
+  [tableProps]="{ hover: true, striped: true, responsive: true }"
+  [tableBodyProps]="{ align: 'middle' }"
+  cleaner
+  clickableRows
+  footer
+  header
+  pagination
+>
+  <ng-template cTemplateId="tableDetails" let-item="item">
+    <div>
+      <div [visible]="this.details_visible[item._id]===true" cCollapse class="card-body">
+        <h5>{{item['name']}}</h5>
+        <p class="text-muted">User since: {{item['registered']}}</p>
+        <button cButton color="info" size="sm">
+          User Settings
+        </button>
+        <button cButton class="ms-1" color="danger" size="sm">
+          Delete
+        </button>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template cTemplateId="tableData" let-columnName="columnName" let-item="item" let-tdContent="tdContent">
+    <td>
+      <ng-container [ngSwitch]="columnName">
+        <ng-container *ngSwitchCase="'status'">
+          <c-badge [color]="getBadge(tdContent)">
+            {{(item[columnName])}}
+          </c-badge>
+        </ng-container>
+        <ng-container *ngSwitchCase="'show'" class="py-2">
+          <button (click)="toggleDetails(item._id)" cButton color="primary" size="sm" variant="outline">
+            Show
+          </button>
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+          {{tdContent}}
+        </ng-container>
+      </ng-container>
+    </td>
+  </ng-template>
+</c-smart-table> -->
+
+<!-- above is template  -->
+
+<!-- below is working -->
+
+<!-- 
+<div class="filter-container">
+  <form>
+    <div class="row">
+      <div class="col">
+        <label>Zone:</label>
+        <div class="filter-box">
+          <button class="filter-btn green" (click)="selectAllZones(); $event.stopPropagation()">✅</button>
+          <input type="text" class="dropdown-input" (click)="toggleDropdown('zone')"
+                 [value]="selectedZones.length ? 'Selected (' + selectedZones.length + ')' : 'Select Zones'" readonly>
+          <div class="dropdown" *ngIf="dropdownOpen['zone']" (click)="$event.stopPropagation()">
+            <label *ngFor="let zone of zones">
+              <input type="checkbox" [checked]="selectedZones.includes(zone)" (change)="onZoneChange(zone)">
+              {{ zone }}
+            </label>
+          </div>
+          <button class="filter-btn red" (click)="clearSelection('zone'); $event.stopPropagation()">❌</button>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Ward:</label>
+        <div class="filter-box">
+          <button class="filter-btn green" (click)="selectAllWards(); $event.stopPropagation()">✅</button>
+          <input type="text" class="dropdown-input" (click)="toggleDropdown('ward')"
+                 [value]="selectedWards.length ? 'Selected (' + selectedWards.length + ')' : 'Select Wards'" readonly>
+          <div class="dropdown" *ngIf="dropdownOpen['ward']" (click)="$event.stopPropagation()">
+            <label *ngFor="let ward of wards">
+              <input type="checkbox" [checked]="selectedWards.includes(ward)" (change)="onWardChange(ward)">
+              {{ ward }}
+            </label>
+          </div>
+          <button class="filter-btn red" (click)="clearSelection('ward'); $event.stopPropagation()">❌</button>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Beat:</label>
+        <div class="filter-box">
+          <button class="filter-btn green" (click)="selectAllBeats(); $event.stopPropagation()">✅</button>
+          <input type="text" class="dropdown-input" (click)="toggleDropdown('beat')"
+                 [value]="selectedBeats.length ? 'Selected (' + selectedBeats.length + ')' : 'Select Beats'" readonly>
+          <div class="dropdown" *ngIf="dropdownOpen['beat']" (click)="$event.stopPropagation()">
+            <label *ngFor="let beat of beats">
+              <input type="checkbox" [checked]="selectedBeats.includes(beat)" (change)="onBeatChange(beat)">
+              {{ beat }}
+            </label>
+          </div>
+          <button class="filter-btn red" (click)="clearSelection('beat'); $event.stopPropagation()">❌</button>
+        </div>
+      </div>
+      ...
+    </div>
+  </form>
+</div>
+
+
+      <div class="col">
+        <label>Machine ID:</label>
+        <select [(ngModel)]="selectedMachineId" (change)="onMachineChange(selectedMachineId)">
+          <option *ngFor="let machine of machineIds" [value]="machine">{{ machine }}</option>
+        </select>
+      </div>
+
+  
+      <div class="col">
+        <label>Start Date:</label>
+        <input type="date" [(ngModel)]="startDate" (change)="applyFilters()">
+      </div>
+
+
+      <div class="col">
+        <label>End Date:</label>
+        <input type="date" [(ngModel)]="endDate" (change)="applyFilters()">
+      </div>
+
+      
+      <div class="col">
+        <label>Summary Type:</label>
+        <button class="summary-btn" (click)="toggleSummaryType()">
+          {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
+        </button>
+      </div>
+
+     
+      <div class="col text-right">
+        <button type="button" class="load-btn blue" (click)="loadReport()">Load Report</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+
+<div *ngIf="isLoading" class="loading-spinner">Loading...</div>
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Sr. No.</th>
+        <th>Machine ID</th>
+        <th>Machine Location</th>
+        <th>Address</th>
+        <th>Machine Type</th>
+        <th>Date</th>
+        <th>Qty</th>
+        <th>Cash</th>
+        <th>On Time</th>
+        <th>Burn Cycles</th>
+        <th>San Napkins Burnt</th>
+      </tr>
+    </thead>
+    <tbody *ngIf="filteredData.length > 0; else noData">
+      <ng-container *ngFor="let item of filteredData; let i = index">
+        <tr *ngFor="let txn of item.transactions; let first = first">
+          <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ i + 1 }}</td>
+          <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.machineId }}</td>
+          <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.machineLocation }}</td>
+          <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.address }}</td>
+          <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.machineType }}</td>
+          <td>{{ txn.date }}</td>
+          <td>{{ txn.qty }}</td>
+          <td>{{ txn.cash }}</td>
+          <td>{{ txn.onTime }}</td>
+          <td>{{ txn.burnCycles }}</td>
+          <td>{{ txn.sanNapkinsBurnt }}</td>
+        </tr>
+      </ng-container>
+    </tbody>
+
+
+    <ng-template #noData>
+      <tr>
+        <td colspan="11" class="text-center">No data available</td>
+      </tr>
+    </ng-template>
+  </table>
+</div> -->
+
+
+<!-- 
+<div class="filter-container">
+  <form>
+    <div class="row">
+   
+      <div class="col">
+        <label>Zone:</label>
+        <div class="filter-box">
+          <button class="filter-btn green" (click)="selectAllZones(); $event.stopPropagation()">✅</button>
+          <input type="text" class="dropdown-input" (click)="toggleDropdown('zone')"
+                 [value]="selectedZones.length ? 'Selected (' + selectedZones.length + ')' : 'Select Zones'" readonly name="zone">
+          <div class="dropdown" *ngIf="dropdownOpen['zone']" (click)="$event.stopPropagation()">
+            <label *ngFor="let zone of zones">
+              <input type="checkbox" [checked]="selectedZones.includes(zone)" (change)="onZoneChange(zone, $event)" name="zone">
+              {{ zone }}
+            </label>
+          </div>
+          <button class="filter-btn red" (click)="clearSelection('zone'); $event.stopPropagation()">❌</button>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Ward:</label>
+        <div class="filter-box">
+          <button class="filter-btn green" (click)="selectAllWards(); $event.stopPropagation()">✅</button>
+          <input type="text" class="dropdown-input" (click)="toggleDropdown('ward')"
+                 [value]="selectedWards.length ? 'Selected (' + selectedWards.length + ')' : 'Select Wards'" readonly name="ward">
+          <div class="dropdown" *ngIf="dropdownOpen['ward']" (click)="$event.stopPropagation()">
+            <label *ngFor="let ward of wards">
+              <input type="checkbox" [checked]="selectedWards.includes(ward)" (change)="onWardChange(ward, $event)" name="ward">
+              {{ ward }}
+            </label>
+          </div>
+          <button class="filter-btn red" (click)="clearSelection('ward'); $event.stopPropagation()">❌</button>
+        </div>
+      </div>
+
+    
+      <div class="col">
+        <label>Beat:</label>
+        <div class="filter-box">
+          <button class="filter-btn green" (click)="selectAllBeats(); $event.stopPropagation()">✅</button>
+          <input type="text" class="dropdown-input" (click)="toggleDropdown('beat')"
+                 [value]="selectedBeats.length ? 'Selected (' + selectedBeats.length + ')' : 'Select Beats'" readonly name="beat">
+          <div class="dropdown" *ngIf="dropdownOpen['beat']" (click)="$event.stopPropagation()">
+            <label *ngFor="let beat of beats">
+              <input type="checkbox" [checked]="selectedBeats.includes(beat)" (change)="onBeatChange(beat, $event)" name="beat">
+              {{ beat }}
+            </label>
+          </div>
+          <button class="filter-btn red" (click)="clearSelection('beat'); $event.stopPropagation()">❌</button>
+        </div>
+      </div>
+
+
+      <div class="col">
+        <label>Machine ID:</label>
+        <select [(ngModel)]="selectedMachineId" name="machineId" (change)="onMachineChange(selectedMachineId)">
+          <option *ngFor="let machine of machineIds" [value]="machine">{{ machine }}</option>
+        </select>
+      </div>
+
+     
+      <div class="col">
+        <label>Start Date:</label>
+        <input type="date" [(ngModel)]="startDate" name="startDate">
+      </div>
+
+      <div class="col">
+        <label>End Date:</label>
+        <input type="date" [(ngModel)]="endDate" name="endDate">
+      </div>
+
+      <div class="col">
+        <label>Summary Type:</label>
+        <button class="summary-btn" (click)="toggleSummaryType()">
+          {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
+        </button>
+      </div>
+
+      <div class="col text-right">
+        <button type="button" class="load-btn blue" (click)="loadReport()">Load Report</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<div *ngIf="isLoading" class="loading-spinner">Loading...</div>
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Sr. No.</th>
+        <th>Machine ID</th>
+        <th>Machine Location</th>
+        <th>Address</th>
+        <th>Machine Type</th>
+        <th *ngIf="summaryType === 'Daily'" colspan="3" class="text-center">Vending</th>
+        <th *ngIf="summaryType === 'Daily'" colspan="3" class="text-center">Incinerator</th>
+        <th *ngIf="summaryType === 'Totals'" colspan="2" class="text-center">Totals</th>
+      </tr>
+      <tr *ngIf="summaryType === 'Daily'">
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>Date</th>
+        <th>Qty</th>
+        <th>Cash</th>
+        <th>On Time</th>
+        <th>Burn Cycles</th>
+        <th>San Napkins Burnt</th>
+      </tr>
+      <tr *ngIf="summaryType === 'Totals'">
+        <th colspan="5"></th>
+        <th>Total Qty</th>
+        <th>Total Cash</th>
+        <th>Total Burn Cycles</th>
+        <th>Total San Napkins Burnt</th>
+      </tr>
+    </thead>
+    <tbody *ngIf="filteredData.length > 0; else noData">
+      <ng-container *ngIf="summaryType === 'Daily'">
+        <ng-container *ngFor="let item of filteredData; let i = index">
+          <tr *ngFor="let txn of item.transactions; let first = first">
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ i + 1 }}</td>
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.machineId }}</td>
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">
+              {{ item.machineLocation }}
+            </td>
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.address }}</td>
+            <td *ngIf="first" rowspan="{{ item.transactions.length }}">{{ item.machineType }}</td> 
+            <td>{{ txn.date }}</td>
+            <td>{{ txn.qty }}</td>
+            <td>{{ txn.cash }}</td>
+            <td>{{ txn.onTime }}</td>
+            <td>{{ txn.burnCycles }}</td>
+            <td>{{ txn.sanNapkinsBurnt }}</td>
+          </tr>
+        </ng-container>
+      </ng-container>
+
+      <tr *ngIf="summaryType === 'Totals'">
+        <td colspan="5"></td>
+        <td>{{ getTotalQty() }}</td>
+        <td>{{ getTotalCash() }}</td>
+        <td>{{ getTotalBurnCycles() }}</td>
+        <td>{{ getTotalSanNapkinsBurnt() }}</td>
+      </tr>
+    </tbody>
+
+    <ng-template #noData>
+      <tr>
+        <td colspan="11" class="text-center">No data available</td>
+      </tr>
+    </ng-template>
+  </table>
+</div> 
+
+-->
+<!-- 
+<div class="filter-container">
+  <form>
+    <div class="row">
+      <div class="col">
+        <label>Zone:</label>
+        <div class="filter-box">
+          <input type="text" class="dropdown-input" (click)="toggleDropdown('zone')"
+                 [value]="selectedZones.length ? 'Selected (' + selectedZones.length + ')' : 'Select Zones'" readonly name="zone">
+          <div class="dropdown" *ngIf="dropdownOpen['zone']" (click)="$event.stopPropagation()">
+            <label *ngFor="let zone of zones">
+              <input type="checkbox" [checked]="selectedZones.includes(zone)" (change)="onZoneChange(zone, $event)" name="zone">
+              {{ zone }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Ward:</label>
+        <div class="filter-box">
+          <input type="text" class="dropdown-input" (click)="toggleDropdown('ward')"
+                 [value]="selectedWards.length ? 'Selected (' + selectedWards.length + ')' : 'Select Wards'" readonly name="ward">
+          <div class="dropdown" *ngIf="dropdownOpen['ward']" (click)="$event.stopPropagation()">
+            <label *ngFor="let ward of wards">
+              <input type="checkbox" [checked]="selectedWards.includes(ward)" (change)="onWardChange(ward, $event)" name="ward">
+              {{ ward }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Beat:</label>
+        <div class="filter-box">
+          <input type="text" class="dropdown-input" (click)="toggleDropdown('beat')"
+                 [value]="selectedBeats.length ? 'Selected (' + selectedBeats.length + ')' : 'Select Beats'" readonly name="beat">
+          <div class="dropdown" *ngIf="dropdownOpen['beat']" (click)="$event.stopPropagation()">
+            <label *ngFor="let beat of beats">
+              <input type="checkbox" [checked]="selectedBeats.includes(beat)" (change)="onBeatChange(beat, $event)" name="beat">
+              {{ beat }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Machine ID:</label>
+        <select [(ngModel)]="selectedMachineId" name="machineId" (change)="onMachineChange(selectedMachineId)">
+          <option *ngFor="let machine of machineIds" [value]="machine">{{ machine }}</option>
+        </select>
+      </div>
+
+      <div class="col">
+        <label>Start Date:</label>
+        <input type="date" [(ngModel)]="startDate" name="startDate">
+      </div>
+
+      <div class="col">
+        <label>End Date:</label>
+        <input type="date" [(ngModel)]="endDate" name="endDate">
+      </div>
+
+      <div class="col">
+        <label>Summary Type:</label>
+        <button class="summary-btn" (click)="toggleSummaryType()">
+          {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
+        </button>
+      </div>
+
+      <div class="col text-right">
+        <button type="button" class="load-btn blue" (click)="loadReport()">Load Report</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<div *ngIf="isLoading" class="loading-spinner">Loading...</div>
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Sr. No.</th>
+        <th>Machine ID</th>
+        <th>Machine Location</th>
+        <th>Address</th>
+        <th>Machine Type</th>
+        <th colspan="3" class="text-center">Vending</th>
+        <th colspan="3" class="text-center">Incinerator</th>
+      </tr>
+      <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>Date</th>
+        <th>Qty</th>
+        <th>Cash</th>
+        <th>On Time</th>
+        <th>Burn Cycles</th>
+        <th>San Napkins Burnt</th>
+      </tr>
+    </thead>
+
+    <tbody *ngIf="filteredData.length > 0; else noData">
+      <ng-container *ngFor="let item of filteredData; let i = index">
+        
+        <tr>
+          <td rowspan="{{ item.transactions.length * 2 }}">{{ i + 1 }}</td>
+          <td rowspan="{{ item.transactions.length * 2 }}">{{ item.machineId }}</td>
+          <td rowspan="{{ item.transactions.length * 2 }}">{{ item.machineLocation }}</td>
+          <td rowspan="{{ item.transactions.length * 2 }}">{{ item.address }}</td>
+          <td rowspan="{{ item.transactions.length * 2 }}">{{ item.machineType || 'N/A' }}</td>
+        </tr>
+
+        <ng-container *ngFor="let txn of item.transactions">
+          <tr>
+            <td>{{ txn.date }}</td>
+            <td>{{ txn.qty }}</td>
+            <td>{{ txn.cash }}</td>
+            <td>{{ txn.onTime }}</td>
+            <td>{{ txn.burnCycles }}</td>
+            <td>{{ txn.sanNapkinsBurnt }}</td>
+          </tr>
+          <tr>
+            <td><strong>Total</strong></td> 
+            <td>{{ txn.qty }}</td>
+            <td>{{ txn.cash }}</td>
+            <td>{{ txn.onTime }}</td>
+            <td>{{ txn.burnCycles }}</td>
+            <td>{{ txn.sanNapkinsBurnt }}</td>
+          </tr>
+        </ng-container>
+      </ng-container>
+    </tbody>
+
+    <ng-template #noData>
+      <tr>
+        <td colspan="11" class="text-center">No data available</td>
+      </tr>
+    </ng-template>
+  </table>
+</div> -->
+<!-- ✅ Filter Section -->
+
+<!-- 
+<div class="filter-container">
+  <form>
+    <div class="row">
+      <div class="col">
+        <label>Zone:</label>
+        <input type="text" class="dropdown-input" (click)="toggleDropdown('zone')"
+               [value]="selectedZones.length ? 'Selected (' + selectedZones.length + ')' : 'Select Zones'" readonly>
+      </div>
+
+      <div class="col">
+        <label>Ward:</label>
+        <input type="text" class="dropdown-input" (click)="toggleDropdown('ward')"
+               [value]="selectedWards.length ? 'Selected (' + selectedWards.length + ')' : 'Select Wards'" readonly>
+      </div>
+
+      <div class="col">
+        <label>Beat:</label>
+        <input type="text" class="dropdown-input" (click)="toggleDropdown('beat')"
+               [value]="selectedBeats.length ? 'Selected (' + selectedBeats.length + ')' : 'Select Beats'" readonly>
+      </div>
+
+      <div class="filter-box">
+        <input type="text" class="dropdown-input" (click)="toggleDropdown('machine')"
+               [value]="selectedMachineIds.length ? 'Selected (' + selectedMachineIds.length + ')' : 'Select Machines'" readonly>
+      
+        <div class="dropdown" *ngIf="dropdownOpen['machine']" (click)="$event.stopPropagation()">
+          <label *ngFor="let machine of machineIds">
+            <input type="checkbox" [checked]="selectedMachineIds.includes(machine)" 
+                   (change)="onMachineChange(machine, $event)">
+            {{ machine }}
+          </label>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Start Date:</label>
+        <input type="date" [(ngModel)]="startDate" name="startDate">
+      </div>
+
+      <div class="col">
+        <label>End Date:</label>
+        <input type="date" [(ngModel)]="endDate" name="endDate">
+      </div>
+
+      <div class="col">
+        <label>Summary Type:</label>
+        <button type="button" class="summary-btn" (click)="toggleSummaryType()">
+          {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
+        </button>
+      </div>
+
+      <div class="col text-right">
+        <button type="button" class="load-btn blue" (click)="loadReport()">Load Report</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<div *ngIf="isLoading" class="loading-spinner">Loading...</div>
+
+
+<table class="report-summary">
+  <tr>
+    <td><b>PROJECT</b></td>
+    <td></td>
+    <td><b>NO. OF MACHINES</b></td>
+    <td>203</td>
+  </tr>
+  <tr>
+    <td><b>REPORT TYPE</b></td>
+    <td>GROUP</td>
+    <td><b>MACHINE LOCATION / ID</b></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><b>ZONE</b></td>
+    <td>All</td>
+    <td><b>NO. OF MACHINES</b></td>
+    <td>203</td>
+  </tr>
+  <tr>
+    <td><b>WARD</b></td>
+    <td>All</td>
+    <td><b>NO. OF MACHINES</b></td>
+    <td>203</td>
+  </tr>
+  <tr>
+    <td><b>BEAT</b></td>
+    <td>All</td>
+    <td><b>NO. OF MACHINES</b></td>
+    <td>203</td>
+  </tr>
+  <tr>
+    <td><b>REPORT GENERATED</b></td>
+    <td>28-Feb-2025</td>
+    <td><b>TIME</b></td>
+    <td>10:46 am</td>
+  </tr>
+  <tr>
+    <td><b>REPORT PERIOD</b></td>
+    <td>26-Feb-2025</td>
+    <td><b>TO</b></td>
+    <td>28-Feb-2025</td>
+  </tr>
+</table>
+
+
+<table class="report-table">
+  <thead>
+    <tr>
+      <th rowspan="2">SR. NO.</th>
+      <th rowspan="2">MACHINE ID</th>
+      <th rowspan="2">MACHINE LOCATION</th>
+      <th rowspan="2">ADDRESS</th>
+      <th rowspan="2">MACHINE TYPE</th>
+      <th colspan="3">VENDING</th>
+      <th colspan="3">INCINERATOR</th>
+    </tr>
+    <tr>
+      <th>DATE</th> 
+      <th>QTY</th> 
+      <th>CASH</th> 
+      <th>ON TIME</th> 
+      <th>BURN CYCLES</th> 
+      <th>SAN NAPKINS BURNT</th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngFor="let machine of filteredData">
+      <tr>
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.srNo }}</td>
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.machineId }}</td>
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.machineLocation }}</td>
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.address }}</td>
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.machineType }}</td>
+      </tr>
+      
+      <ng-container *ngIf="summaryType === 'Daily'">
+        <ng-container *ngFor="let txn of machine.transactions">
+          <tr>
+            <td>{{ txn.date }}</td>
+            <td>{{ txn.qty }}</td>
+            <td>{{ txn.cash }}</td>
+            <td>{{ txn.onTime }}</td>
+            <td>{{ txn.burnCycles }}</td>
+            <td>{{ txn.sanNapkinsBurnt }}</td>
+          </tr>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngIf="summaryType === 'Totals'">
+        <tr>
+          <td>{{ machine.transactions[0].date }}</td>
+          <td>{{ machine.transactions[0].qty }}</td>
+          <td>{{ machine.transactions[0].cash }}</td>
+          <td>{{ machine.transactions[0].onTime }}</td>
+          <td>{{ machine.transactions[0].burnCycles }}</td>
+          <td>{{ machine.transactions[0].sanNapkinsBurnt }}</td>
+        </tr>
+      </ng-container>
+
+      <tr class="total-row" *ngIf="summaryType === 'Daily'">
+        <td><b>Total</b></td>
+        <td><b>{{ getTotalQty(machine.transactions) }}</b></td>
+        <td><b>{{ getTotalCash(machine.transactions) }}</b></td>
+        <td><b>0m</b></td>
+        <td><b>{{ getTotalBurnCycles(machine.transactions) }}</b></td>
+        <td><b>{{ getTotalSanNapkinsBurnt(machine.transactions) }}</b></td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table> -->
+
+<!-- 
+<div class="filter-container">
+  <form>
+    <div class="row">
+      <div class="col">
+        <label>Zone:</label>
+        <input type="text" class="dropdown-input" (click)="toggleDropdown('zone')"
+               [value]="selectedZones.length ? 'Selected (' + selectedZones.length + ')' : 'Select Zones'" readonly>
+      </div>
+
+      <div class="col">
+        <label>Ward:</label>
+        <input type="text" class="dropdown-input" (click)="toggleDropdown('ward')"
+               [value]="selectedWards.length ? 'Selected (' + selectedWards.length + ')' : 'Select Wards'" readonly>
+      </div>
+
+      <div class="col">
+        <label>Beat:</label>
+        <input type="text" class="dropdown-input" (click)="toggleDropdown('beat')"
+               [value]="selectedBeats.length ? 'Selected (' + selectedBeats.length + ')' : 'Select Beats'" readonly>
+      </div>
+
+      <div class="filter-box">
+        <input type="text" class="dropdown-input" (click)="toggleDropdown('machine')"
+               [value]="selectedMachineIds.length ? 'Selected (' + selectedMachineIds.length + ')' : 'Select Machines'" readonly>
+      
+        <div class="dropdown" *ngIf="dropdownOpen['machine']" (click)="$event.stopPropagation()">
+          <label *ngFor="let machine of machineIds">
+            <input type="checkbox" [checked]="selectedMachineIds.includes(machine)" 
+                   (change)="onMachineChange(machine, $event)">
+            {{ machine }}
+          </label>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Start Date:</label>
+        <input type="date" [(ngModel)]="startDate" name="startDate">
+      </div>
+
+      <div class="col">
+        <label>End Date:</label>
+        <input type="date" [(ngModel)]="endDate" name="endDate">
+      </div>
+
+      <div class="col">
+        <label>Summary Type:</label>
+        <button type="button" class="summary-btn" (click)="toggleSummaryType()">
+          {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
+        </button>
+      </div>
+
+      <div class="col text-right">
+        <button type="button" class="load-btn blue" (click)="loadReport()">Load Report</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<div *ngIf="isLoading" class="loading-spinner">Loading...</div>
+
+
+<table class="report-summary full-width">
+  <tr>
+    <td><b>PROJECT</b></td>
+    <td></td>
+    <td><b>NO. OF MACHINES</b></td>
+    <td>203</td>
+  </tr>
+  <tr>
+    <td><b>REPORT TYPE</b></td>
+    <td>GROUP</td>
+    <td><b>MACHINE LOCATION / ID</b></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><b>REPORT GENERATED</b></td>
+    <td>{{ reportGenerated }}</td>
+    <td><b>TIME</b></td>
+    <td>{{ reportGenerated | date: 'shortTime' }}</td>
+  </tr>
+  <tr>
+    <td><b>REPORT PERIOD</b></td>
+    <td>{{ reportFromPeriod | date: 'dd-MMM-yyyy' }}</td>
+    <td><b>TO</b></td>
+    <td>{{ reportToPeriod | date: 'dd-MMM-yyyy' }}</td>
+  </tr>
+</table>
+
+
+<table class="report-table full-width">
+  <thead>
+    <tr>
+      <th rowspan="2">SR. NO.</th>
+      <th rowspan="2">MACHINE ID</th>
+      <th rowspan="2">MACHINE LOCATION</th>
+      <th rowspan="2">ADDRESS</th>
+      <th rowspan="2">MACHINE TYPE</th>
+      <th colspan="3">VENDING</th>
+      <th colspan="3">INCINERATOR</th>
+    </tr>
+    <tr>
+      <th>DATE</th> 
+      <th>QTY</th> 
+      <th>CASH</th> 
+      <th>ON TIME</th> 
+      <th>BURN CYCLES</th> 
+      <th>SAN NAPKINS BURNT</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <ng-container *ngIf="filteredData.length > 0; else noDataTemplate">
+      <tr *ngFor="let machine of filteredData">
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.srNo }}</td>
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.machineId }}</td>
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.machineLocation }}</td>
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.address }}</td>
+        <td rowspan="{{ machine.transactions.length + 1 }}">{{ machine.machineType }}</td>
+
+
+        <ng-container *ngFor="let txn of machine.transactions">
+          <tr>
+            <td>{{ txn.date }}</td>
+            <td>{{ txn.qty }}</td>
+            <td>{{ txn.cash }}</td> 
+            <td>{{ txn.onTime }}</td>
+            <td>{{ txn.burnCycles }}</td>
+            <td>{{ txn.sanNapkinsBurnt }}</td>
+          </tr>
+        </ng-container>
+      </tr>
+    </ng-container>
+
+
+    <ng-template #noDataTemplate>
+      <tr>
+        <td colspan="11" class="text-center"><b>No Data Available</b></td>
+      </tr>
+    </ng-template>
+
+    <tr *ngIf="summaryType === 'Totals'">
+      <td>{{ filteredData[0]?.srNo }}</td>
+      <td>{{ filteredData[0]?.machineId }}</td>
+      <td>{{ filteredData[0]?.machineLocation }}</td>
+      <td>{{ filteredData[0]?.address }}</td>
+      <td>{{ filteredData[0]?.machineType }}</td>
+      <td>{{ filteredData[0]?.transactions[0]?.date }}</td>
+      <td>{{ filteredData[0]?.transactions[0]?.qty }}</td>
+      <td>{{ filteredData[0]?.transactions[0]?.cash }}</td>
+      <td>{{ filteredData[0]?.transactions[0]?.onTime }}</td>
+      <td>{{ filteredData[0]?.transactions[0]?.burnCycles }}</td>
+      <td>{{ filteredData[0]?.transactions[0]?.sanNapkinsBurnt }}</td>
+    </tr>
+  </tbody>
+</table> -->
+<!-- Report Summary Table -->
+
+  <div class="filter-container">
+    <form>
+      <div class="row align-items-center">
+        <!-- Filters -->
+        <div class="col" *ngFor="let filter of [
+          { name: 'Zone', key: 'zones', selected: selectedZones, options: zones },
+          { name: 'Ward', key: 'wards', selected: selectedWards, options: wards },
+          { name: 'Beat', key: 'beats', selected: selectedBeats, options: beats },
+          { name: 'Machines', key: 'machineIds', selected: selectedMachineIds, options: machineIds }
+        ]">
+          <label>{{ filter.name }}:</label>
+          <div class="dropdown">
+            <button class="btn btn-light dropdown-toggle w-100" type="button" (click)="toggleDropdown(filter.key)">
+              {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : 'Select ' + filter.name }}
+            </button>
+            <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]">
+              <label *ngFor="let option of filter.options" class="dropdown-item">
+                <input type="checkbox" 
+                      [checked]="filter.selected.includes(option.key || option)" 
+                      (change)="toggleSelection(filter.selected, option.key || option, filter.key)">
+                {{ option.value || option }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Start Date -->
+        <div class="col">
+          <label>Start Date:</label>
+          <input type="date" [(ngModel)]="startDate" name="startDate" class="form-control">
+        </div>
+
+        <!-- End Date -->
+        <div class="col">
+          <label>End Date:</label>
+          <input type="date" [(ngModel)]="endDate" name="endDate" class="form-control">
+        </div>
+
+        <!-- Buttons Row -->
+        <div class="col-12 d-flex justify-content-between mt-2">
+          <!-- Switch Type Button (Left) -->
+          <button type="button" class="btn btn-sm btn-primary" (click)="toggleSummaryType()">
+            {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
+          </button>
+
+
+          <!-- Load Report Button (Right) -->
+          <button type="button" class="btn btn-sm btn-primary" (click)="loadReport()">Load Report</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+
+
+
+  <!-- ✅ Error & Loading Messages -->
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <div *ngIf="isLoading" class="loading-spinner">Loading...</div>
+  <table class="report-summary">
+    <tr>
+      <td><b>PROJECT</b></td>
+      <td></td>
+      <td><b>NO. OF MACHINES</b></td>
+      <td>{{ reportsData.length }}</td>
+    </tr>
+    <tr>
+      <td><b>REPORT TYPE</b></td>
+      <td>{{ reportsData[0]?.machineType }}</td>
+      <td><b>MACHINE LOCATION / ID</b></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><b>ZONE</b></td>
+      <td>All</td>
+      <td><b>NO. OF MACHINES</b></td>
+      <td>{{ reportsData.length }}</td>
+    </tr>
+    <tr>
+      <td><b>WARD</b></td>
+      <td>All</td>
+      <td><b>NO. OF MACHINES</b></td>
+      <td>{{ reportsData.length }}</td>
+    </tr>
+    <tr>
+      <td><b>BEAT</b></td>
+      <td>All</td>
+      <td><b>NO. OF MACHINES</b></td>
+      <td>{{ reportsData.length }}</td>
+    </tr>
+    <tr>
+      <td><b>REPORT GENERATED</b></td>
+      <td>{{ reportGenerated | date: 'dd-MMM-yyyy' }}</td>
+      <td><b>TIME</b></td>
+      <td>{{ reportGenerated | date: 'h:mm a' }}</td>
+    </tr>
+    <tr>
+      <td><b>REPORT PERIOD</b></td>
+      <td>{{ reportFromPeriod | date: 'dd-MMM-yyyy' }}</td>
+      <td><b>TO</b></td>
+      <td>{{ reportToPeriod | date: 'dd-MMM-yyyy' }}</td>
+    </tr>
+  </table>
+
+
+  <table class="report-table full-width" border="1">
+    <thead class="headers">
+      <tr>
+        <th>SR. NO.</th>
+        <th>MACHINE ID</th>
+        <th>MACHINE LOCATION</th>
+        <th>ADDRESS</th>
+        <th>MACHINE TYPE</th>
+        <th>DATE</th>
+        <th>QTY</th>
+        <th>CASH</th>
+        <th>ON TIME</th>
+        <th>BURN CYCLES</th>
+        <th>SAN NAPKINS BURNT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let machine of paginatedData">
+        <ng-container *ngIf="summaryType === 'Daily'">
+          <ng-container *ngFor="let txn of machine.transactions">
+            <tr>
+              <td>{{ txn.srNo }}</td> <!-- ✅ Fixed Serial Number -->
+              <td>{{ machine.machineId }}</td>
+              <td>{{ machine.machineLocation || machine.address }}</td>
+              <td>{{ machine.address || '' }}</td>
+              <td>{{ machine.machineType || 'N/A' }}</td>
+              <td>{{ txn.date || '-' }}</td>
+              <td>{{ txn.qty ?? 0 }}</td>
+              <td>{{ txn.cash ?? '₹ 0' }}</td>
+              <td>{{ txn.onTime || '-' }}</td>
+              <td>{{ txn.burnCycles ?? 0 }}</td>
+              <td>{{ txn.sanNapkinsBurnt ?? 0 }}</td>
+            </tr>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="summaryType === 'Totals'">
+          <tr>
+            <td>{{ machine.transactions[0]?.srNo }}</td> <!-- ✅ Fixed Serial Number -->
+            <td>{{ machine.machineId }}</td>
+            <td>{{ machine.machineLocation || machine.address }}</td>
+            <td>{{ machine.address || '' }}</td>
+            <td>{{ machine.machineType || 'N/A' }}</td>
+            <td><b>Total</b></td>
+            <td><b>{{ machine.total.quantity }}</b></td>
+            <td><b>{{ machine.total.cashCollected }}</b></td>
+            <td><b>{{ machine.total.onTime }}</b></td>
+            <td><b>{{ machine.total.burnCycles }}</b></td>
+            <td><b>{{ machine.total.sanitaryNapkinsBurnt }}</b></td>
+          </tr>
+        </ng-container>
+      </ng-container>
+
+      <tr class="grand-total-row">
+        <td colspan="5"><b>Grand Total</b></td>
+        <td><b>Total</b></td>
+        <td><b>{{ grandTotal.quantity }}</b></td>
+        <td><b>{{ grandTotal.cash }}</b></td>
+        <td>-</td>
+        <td><b>{{ grandTotal.burnCycles }}</b></td>
+        <td><b>{{ grandTotal.sanNapkinsBurnt }}</b></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ✅ Pagination Controls (Without Math.ceil) -->
+  <div class="pagination-controls">
+    <button [disabled]="currentPage === 1" (click)="pageChanged(currentPage - 1)">Prev</button>
+    <span>Page {{ currentPage }} of {{ totalPages }}</span>
+    <button [disabled]="currentPage >= totalPages" (click)="pageChanged(currentPage + 1)">Next</button>
+  </div>

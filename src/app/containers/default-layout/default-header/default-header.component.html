@@ -1,0 +1,53 @@
+<ng-container>
+  <c-container [fluid]="true" class="d-flex justify-content-between align-items-center">
+    
+    <!-- ✅ Navigation Links -->
+    <nav class="header-nav">
+      <a routerLink="/widgets" routerLinkActive="active-link" class="nav-link">Dashboard</a>
+      <a routerLink="/machinedata" routerLinkActive="active-link" class="nav-link">Machine Data</a>
+      <a routerLink="plugins/google-maps" routerLinkActive="active-link" class="nav-link">Maps</a>
+    </nav>
+
+    <!-- ✅ Dark Mode Toggle (Moon/Sun Icon) -->
+    <span class="theme-icon" (click)="toggleTheme()">
+      <i class="fas" [ngClass]="isDarkMode ? 'fa-sun' : 'fa-moon'"></i>
+    </span>
+
+    <!-- ✅ User Avatar with Dropdown -->
+    <c-header-nav class="ms-auto me-sm-4 position-relative">
+      <div class="dropdown">
+        <c-avatar
+          cTextColor="primary"
+          shape="rounded-0" 
+          size="xl"
+          src="./assets/img/avatars/6.jpg"
+          class="p-0"
+          style="width: 48px; height: 48px; border-radius: 8px; cursor: pointer;"
+          (click)="toggleDropdown()"
+        >
+          <span class="ms-2 fw-bold text-light">User Name</span> 
+        </c-avatar>
+
+        <!-- 🔽 Dropdown Menu -->
+       <!-- 🔽 Dropdown Menu -->
+<!-- 🔽 Dropdown Menu -->
+<div class="dropdown-menu show custom-dropdown" [class.show]="dropdownOpen">
+  <a class="dropdown-item text-white" (click)="confirmLogout()">Logout</a>
+</div>
+
+
+      </div>
+    </c-header-nav>
+  </c-container>
+
+  <!-- ✅ Logout Confirmation Modal -->
+  <div *ngIf="showLogoutModal" class="modal-overlay">
+    <div class="modal-box">
+      <p class="modal-text">Are you sure you want to logout?</p>
+      <div class="modal-buttons">
+        <button class="btn btn-danger me-2" (click)="logout()">Yes</button>
+        <button class="btn btn-secondary" (click)="closeModal()">No</button>
+      </div>
+    </div>
+  </div>
+</ng-container>
