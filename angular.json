@@ -44,6 +44,7 @@
               "./node_modules/@fullcalendar/daygrid/main.css",
               "./node_modules/@fullcalendar/timegrid/main.css",
               "./node_modules/@fullcalendar/list/main.css"
+             
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
