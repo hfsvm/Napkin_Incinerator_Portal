@@ -9,10 +9,21 @@
     'color': '#ffffff'
   }"
 >
-  <c-sidebar-brand [routerLink]="[]">
+  <!-- <c-sidebar-brand [routerLink]="[]">
     <img src="assets/img/brand/logo.png" class="sidebar-brand-full" height="35" alt="My Logo">
     <img src="assets/img/brand/logo.png" class="sidebar-brand-narrow" height="35" alt="My Logo Small">
     <span class="sidebar-text fw-bold text-white">NcCode Vend Systems</span>
+    <c-sidebar-toggler
+      *ngIf="!sidebar1.narrow"
+      cSidebarToggle="sidebar1"
+      toggle="unfoldable"
+    ></c-sidebar-toggler>
+  </c-sidebar-brand>//before fixing nccode  -->
+  <c-sidebar-brand [routerLink]="[]">
+    <img src="assets/img/brand/logo.png" class="sidebar-brand-full" height="35" alt="My Logo">
+    <img src="assets/img/brand/logo.png" class="sidebar-brand-narrow" height="35" alt="My Logo Small">
+    <!-- Use CSS classes for visibility instead of ngIf -->
+    <span class="sidebar-brand-full sidebar-text fw-bold text-white">NcCode Vend Systems</span>
     <c-sidebar-toggler
       *ngIf="!sidebar1.narrow"
       cSidebarToggle="sidebar1"

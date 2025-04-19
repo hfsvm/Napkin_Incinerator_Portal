@@ -1,192 +1,441 @@
-import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { MapInfoWindow, MapMarker } from '@angular/google-maps';
-import { GoogleMapsLoaderService } from './google-maps-loader.service';
 
-/// <reference types="googlemaps" />
-
-// Marker interface for type safety
-interface Marker {
-  position: google.maps.LatLngLiteral;
-  label?: string;
-  title: string;
-  www: string;
-  machineId: string;
-  collection: string;
-  stockStatus: string;
-  stockError: string;
-  totalBurningCycles: number;
-  burningEnabled: boolean;
-  burningStatus: string;
-  machineStatus: string;
-  color: string;
-}
+ 
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { DataService } from '../../../service/data.service';
+import { CommonDataService } from '../../../Common/common-data.service';
+import * as maplibregl from 'maplibre-gl';
 
 @Component({
-  selector: 'app-google-maps-integration',
-  templateUrl: 'google-maps.component.html',
-  styleUrls: ['google-maps.component.scss'],
-  providers: [GoogleMapsLoaderService]
+  selector: 'app-google-maps',
+  templateUrl: './google-maps.component.html',
+  styleUrls: ['./google-maps.component.scss']
 })
-export class GoogleMapsComponent implements OnInit, OnDestroy {
-  title: string = '';
-  activeInfoWindow!: Marker;
-
-  options: google.maps.MapOptions = {
-    center: {
-      lat: 20.5937, // Centered in India
-      lng: 78.9629
-    },
-    zoom: 5
-  };
-
-  markerOptions: google.maps.MarkerOptions = { draggable: false };
-  markerPositions: google.maps.LatLngLiteral[] = [];
-
-  markers: Marker[] = [
-    { position: { lat: 28.7041, lng: 77.1025 }, label: 'D', title: 'Delhi', www: 'https://delhi.gov.in/', machineId: 'M001', collection: '₹54.2K', stockStatus: 'Okay', stockError: 'None', totalBurningCycles: 2193, burningEnabled: true, burningStatus: 'Idle', machineStatus: 'Online', color: 'green' },
-    { position: { lat: 19.0760, lng: 72.8777 }, label: 'M', title: 'Mumbai', www: 'https://mumbaicity.gov.in/', machineId: 'M002', collection: '₹48.5K', stockStatus: 'Low', stockError: 'None', totalBurningCycles: 1890, burningEnabled: false, burningStatus: 'Error', machineStatus: 'Offline', color: 'red' },
-    { position: { lat: 12.9716, lng: 77.5946 }, label: 'B', title: 'Bangalore', www: 'https://bbmp.gov.in/', machineId: 'M003', collection: '₹60.1K', stockStatus: 'Okay', stockError: 'None', totalBurningCycles: 2500, burningEnabled: true, burningStatus: 'Idle', machineStatus: 'Online', color: 'green' },
-    { position: { lat: 13.0827, lng: 80.2707 }, label: 'C', title: 'Chennai', www: 'https://chennaicorporation.gov.in/', machineId: 'M004', collection: '₹45.3K', stockStatus: 'Empty', stockError: 'Yes', totalBurningCycles: 1700, burningEnabled: false, burningStatus: 'Error', machineStatus: 'Offline', color: 'red' },
-    { position: { lat: 22.5726, lng: 88.3639 }, label: 'K', title: 'Kolkata', www: 'https://www.kmcgov.in/', machineId: 'M005', collection: '₹52.7K', stockStatus: 'Okay', stockError: 'None', totalBurningCycles: 2000, burningEnabled: true, burningStatus: 'Enabled', machineStatus: 'Online', color: 'green' },
-    { position: { lat: 26.9124, lng: 75.7873 }, label: 'J', title: 'Jaipur', www: 'https://jaipurmc.org/', machineId: 'M006', collection: '₹30.9K', stockStatus: 'Low', stockError: 'Yes', totalBurningCycles: 1200, burningEnabled: false, burningStatus: 'Error', machineStatus: 'Offline', color: 'red' },
-    { position: { lat: 17.3850, lng: 78.4867 }, label: 'H', title: 'Hyderabad', www: 'https://www.ghmc.gov.in/', machineId: 'M007', collection: '₹40.2K', stockStatus: 'Okay', stockError: 'None', totalBurningCycles: 1600, burningEnabled: true, burningStatus: 'Idle', machineStatus: 'Online', color: 'green' },
-    { position: { lat: 23.0225, lng: 72.5714 }, label: 'A', title: 'Ahmedabad', www: 'https://ahmedabadcity.gov.in/', machineId: 'M008', collection: '₹38.6K', stockStatus: 'Okay', stockError: 'None', totalBurningCycles: 1450, burningEnabled: false, burningStatus: 'Enabled', machineStatus: 'Offline', color: 'red' },
-    { position: { lat: 21.1458, lng: 79.0882 }, label: 'N', title: 'Nagpur', www: 'https://www.nmcnagpur.gov.in/', machineId: 'M009', collection: '₹55.4K', stockStatus: 'Empty', stockError: 'Yes', totalBurningCycles: 2150, burningEnabled: true, burningStatus: 'Idle', machineStatus: 'Online', color: 'green' },
-    { position: { lat: 15.2993, lng: 74.1240 }, label: 'G', title: 'Goa', www: 'https://www.goa.gov.in/', machineId: 'M010', collection: '₹28.1K', stockStatus: 'Low', stockError: 'None', totalBurningCycles: 1100, burningEnabled: false, burningStatus: 'Error', machineStatus: 'Offline', color: 'red' }
+export class GoogleMapsComponent implements OnInit, AfterViewInit {
+  private map!: maplibregl.Map;
+  private markers: maplibregl.Marker[] = [];
+  isLoading = false;
+  errorMessage = '';
+  filterPanelOpen = true;
+  dropdownOpen: { [key: string]: boolean } = {};
+  machineSearchTerm: string = '';
+  districtSearchTerm: string = '';
+  stateSearchTerm: string = '';
+  stockOptions = [
+    { label: 'Empty', value: 0 },
+    { label: 'Low', value: 1 },
+    { label: 'Full', value: 2 }
   ];
+ 
+ 
+  // Filters
+  stockStatusFilter = new FormControl<string[]>([]);
+  buttonStatusFilter = new FormControl<string[]>([]);
+  machineStatusFilter = new FormControl<string[]>([]);
+  stateFilter = new FormControl<string[]>([]);
+  districtFilter = new FormControl<string[]>([]);
+  machineFilter = new FormControl<string[]>([]);
+ 
+  machines: any[] = [];
+  states: string[] = [];
+  districts: string[] = [];
+  merchantId: string = '';
 
-  @ViewChild(MapInfoWindow) infoWindow!: MapInfoWindow;
+  stateDistrictMap: { [state: string]: string[] } = {};
 
+ 
   constructor(
-    public googleMapsLoaderService: GoogleMapsLoaderService,
-    @Inject(DOCUMENT) private document: any
-  ) { }
+    private dataService: DataService,
+    private commonDataService: CommonDataService,
+    private cdr: ChangeDetectorRef
+  ) {}
+ 
+  ngOnInit(): void {
+    this.merchantId = this.commonDataService.merchantId ?? '';
+ 
+    // Simulate a page reload
+    if (!sessionStorage.getItem('reloaded')) {
+      sessionStorage.setItem('reloaded', 'true');
+      window.location.reload();
+    } else {
+      sessionStorage.removeItem('reloaded');
+      this.loadMachineData();
+    }
+ 
+    document.addEventListener('click', this.handleClickOutside.bind(this));
 
-  ngOnInit() {
-    this.setPositions();
+      // Subscribe to state filter changes to dynamically update districts
+  this.stateFilter.valueChanges.subscribe((selectedStates: string[] | null) => {
+    if (selectedStates) {
+      const districtsSet = new Set<string>();
+      selectedStates.forEach(state => {
+        (this.stateDistrictMap[state] || []).forEach(d => districtsSet.add(d));
+      });
+      this.districts = Array.from(districtsSet);
+      this.districtFilter.setValue([]); // Clear district selection when state changes
+    }
+  });
+
   }
-
-  ngOnDestroy() {}
-
-  setPositions() {
-    this.markers.forEach((marker) => {
-      const { lat, lng } = { ...marker.position };
-      this.markerPositions.push({ lat, lng });
+  stateSearchText: string = ''; // Bind this to the input field
+ 
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.initializeMap(); // Call the new initializeMap method
+    }, 500);
+  }
+ 
+  // New method to initialize the map
+  initializeMap(): void {
+    this.map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Ldz7Kz6Xwxrw9kq0aYn3',
+      center: [78.9629, 20.5937],
+      zoom: 5
     });
+ 
+    this.map.on('load', () => {
+      this.map.resize();
+      this.updateMap();
+      console.log('Map bounds:', this.map.getBounds());
+    });
+ 
+    this.map.on('moveend', () => this.updateMap());
+    this.map.on('zoomend', () => this.updateMap());
   }
 
-  openInfoWindow(marker: MapMarker, item: Marker) {
-    this.activeInfoWindow = item;
-    this.infoWindow.open(marker);
+
+    // 🔧 These are the missing methods
+zoomIn(): void {
+  if (this.map) {
+    this.map.zoomIn();
+  }
+}
+
+zoomOut(): void {
+  if (this.map) {
+    this.map.zoomOut();
   }
 }
 
 
-// import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-// import { DOCUMENT } from '@angular/common';
-// import { MapInfoWindow, MapMarker } from '@angular/google-maps';
-// import { GoogleMapsLoaderService } from './google-maps-loader.service';
+searchTexts: { [key: string]: string } = {};
+  toggleFilterPanel(): void {
+    this.filterPanelOpen = !this.filterPanelOpen;
+  }
+ 
+  loadMachineData(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+ 
+    const userDetails = this.commonDataService.userDetails;
+    const machineIds = userDetails?.machineId ?? [];
+    const clientId = userDetails?.clientId ?? '';  // Extract clientId from userDetails
+ 
+    const queryParams: any = {
+      merchantId: this.merchantId,
+      machineId: this.machineFilter.value?.length ? this.machineFilter.value : machineIds,
+      machineStatus: this.machineStatusFilter.value?.length ? this.machineStatusFilter.value : ['1', '2'],
+      stockStatus: this.stockStatusFilter.value?.length ? this.stockStatusFilter.value : [],
+      burnStatus: this.buttonStatusFilter.value?.length ? this.buttonStatusFilter.value : [],
+      level1: this.stateFilter.value?.length ? this.stateFilter.value : userDetails?.state || [],
+      level2: this.districtFilter.value?.length ? this.districtFilter.value : userDetails?.district || [],
+      level3: clientId ? [clientId] : []  // Pass clientId into level3 if it's available
+    };
+ 
+    console.log('📡 API Call Params:', queryParams);
+ 
+    this.dataService.getMachineDashboardSummary(queryParams).subscribe(
+      (response: any) => {
+        console.log('✅ API Response:', response);
+ 
+        if (response?.code === 200 && response.data) {
+          this.machines = response.data.machines.map((machine: any) => ({
+            ...machine,
+            stockStatus: this.mapStockStatus(machine.stockStatus),
+            burnStatus: this.mapBurnStatus(machine.burningStatus),
+            state: machine.level1 ?? 'Unknown',
+            district: machine.level2 ?? 'Unknown',
+            burningCycles: machine.burningCycles ?? 0,
+            totalBurningCycles: machine.totalBurningCycles ?? 0,
+            totalBurningCount: machine.totalburningCount ?? 0,
+            itemsBurnt: machine.itemsBurnt ?? 0,
+            itemsDispensed: machine.itemsDispensed ?? 0,
+            collection: machine.collection ?? 0,
+            imsi: machine.imsi ?? 'N/A',
+            rssi: machine.rssi ?? 'N/A',
+            location: machine.latitude && machine.longitude
+              ? [parseFloat(machine.longitude), parseFloat(machine.latitude)]
+              : null
+          }));
+ 
+
+          this.states = [...new Set(this.machines.map(m => m.state).filter(Boolean))];
+
+this.stateDistrictMap = {};
+this.machines.forEach(machine => {
+  const state = machine.state;
+  const district = machine.district;
+  if (state && district) {
+    if (!this.stateDistrictMap[state]) {
+      this.stateDistrictMap[state] = [];
+    }
+    if (!this.stateDistrictMap[state].includes(district)) {
+      this.stateDistrictMap[state].push(district);
+    }
+  }
+});
+
+ 
+          this.updateMap();
+        } else {
+          console.warn('⚠️ No valid data received.');
+        }
+ 
+        this.isLoading = false;
+      },
+      (error) => {
+        console.error('❌ API Call Failed:', error);
+        this.isLoading = false;
+      }
+    );
+  }
+ 
+  mapBurnStatus(burnStatus: string | null): number {
+    return burnStatus?.toLowerCase() === 'burning' ? 2 : 1;
+  }
+ 
+  mapStockStatus(stockStatusArray: any[]): number {
+    if (!Array.isArray(stockStatusArray) || stockStatusArray.length === 0) return -1;
+ 
+    const stockStatus = stockStatusArray[0]?.SpringStatus; // Extract first element
+    console.log("Extracted Stock Status:", stockStatus);
+ 
+    switch (stockStatus) {
+      case 'Ok': return 2;
+      case 'Low Stock': return 1;
+      case 'No Stock': return 0;
+      default: return -1;
+    }
+  }
+ 
+     
+updateMap(): void {
+console.log("🔄 updateMap() called!");
+
+// Clear old markers
+this.markers.forEach(marker => marker.remove());
+this.markers = [];
+
+// Get selected filters
+const selectedStates = this.stateFilter.value || [];
+const selectedDistricts = this.districtFilter.value || [];
+const selectedMachines = this.machineFilter.value || [];
+const selectedStockStatuses = this.stockStatusFilter.value || [];
+const selectedMachineStatuses = this.machineStatusFilter.value || [];
+const selectedBurnStatusesRaw = this.buttonStatusFilter.value || [];  // Convert to string
 
 
-// import { ChangeDetectorRef } from '@angular/core';
-// import { DataService } from '../../../service/data.service';
+console.log("🔥 Raw Burn Status Filter Value:", selectedBurnStatusesRaw);
+  // 🔹 Map burn status labels (e.g., "Burning", "Idle") to numeric values (1, 0)
+  const burnStatusMapping: Record<string, number> = {
+    "Burning": 2,
+    "Idle": 1
+};
 
-// /// <reference types="googlemaps" />
+const selectedBurnStatuses = selectedBurnStatusesRaw.map((status: string) => burnStatusMapping[status]).filter(v => v !== undefined);
 
-// // Marker interface
-// interface Marker {
-//   position: google.maps.LatLngLiteral;
-//   title: string;
-//   machineId: string;
-//   collection: string;
-//   stockStatus: string;
-//   stockError: string;
-//   totalBurningCycles: number;
-//   burningEnabled: boolean;
-//   burningStatus: string;
-//   machineStatus: string;
-//   color: string;
-// }
-
-// @Component({
-//   selector: 'app-google-maps-integration',
-//   templateUrl: 'google-maps.component.html',
-//   styleUrls: ['google-maps.component.scss'],
-//   providers: [GoogleMapsLoaderService]
-// })
-// export class GoogleMapsComponent implements OnInit, OnDestroy {
-//   title: string = '';
-//   activeInfoWindow!: Marker;
-//   markers: Marker[] = [];
-//   markerPositions: google.maps.LatLngLiteral[] = [];
-
-//   options: google.maps.MapOptions = {
-//     center: { lat: 20.5937, lng: 78.9629 }, // Default center (India)
-//     zoom: 5
-//   };
-
-//   @ViewChild(MapInfoWindow) infoWindow!: MapInfoWindow;
-
-//   constructor(
-//     public googleMapsLoaderService: GoogleMapsLoaderService,
-//     private dataService: DataService, // ✅ Inject API service
-//     private cdr: ChangeDetectorRef, // ✅ Ensures UI updates
+console.log("🔥 Selected Burn Statuses (Mapped):", selectedBurnStatuses);
+console.log("🔥 Burn Status in Machines:", this.machines.map(m => `${m.machineId}: ${m.burnStatus}`));
 
 
-//     @Inject(DOCUMENT) private document: any
-//   ) {}
+console.log("🗺️ Selected Filters:", {
+  selectedStates,
+  selectedDistricts,
+  selectedMachines,
+  selectedStockStatuses,
+  selectedMachineStatuses,
+  selectedBurnStatuses
+});
 
-//   ngOnInit() {
-//     this.loadMachineData(); // ✅ Fetch data when component loads
-//   }
 
-//   ngOnDestroy() {}
+    // ✅ Log Burn Status in Machines
+    console.log("🔥 Checking burnStatus values in machines:");
+    this.machines.forEach(machine => console.log(`Machine ID: ${machine.machineId}, Burn Status: ${machine.burnStatus}`));
 
-//   // ✅ Fetch machine locations from API and update markers
-//   loadMachineData() {
-//     const merchantId = sessionStorage.getItem('merchantId');
 
-//     if (!merchantId) {
-//       console.warn('⚠️ No Merchant ID found in session');
-//       return;
-//     }
+// ✅ Apply filtering with consistent value types
+const filteredMachines = this.machines.filter(machine =>
+  (selectedStates.length === 0 || selectedStates.includes(machine.level1)) &&
+  (selectedDistricts.length === 0 || selectedDistricts.includes(machine.level2)) &&
+  (selectedMachines.length === 0 || selectedMachines.includes(machine.machineId)) &&
+  (selectedStockStatuses.length === 0 || selectedStockStatuses.includes(machine.stockStatus)) &&
+  (selectedMachineStatuses.length === 0 || selectedMachineStatuses.includes(machine.status)) &&
+  (selectedBurnStatuses.length === 0 || selectedBurnStatuses.includes(machine.burnStatus)) // Ensure comparison is consistent
+);
 
-//     this.dataService.getMachineLocations(merchantId).subscribe({
-//       next: (machines: any[]) => {
-//         console.log('🚀 API Response:', machines);
+console.log("🔍 Filtered Machines:", filteredMachines);
 
-//         this.markers = machines.map((m: any) => ({
-//           position: { lat: m.latitude, lng: m.longitude },
-//           title: m.name,
-//           machineId: m.machineId,
-//           collection: m.collection || 'N/A',
-//           stockStatus: m.stockStatus || 'N/A',
-//           stockError: m.stockError || 'None',
-//           totalBurningCycles: m.totalBurningCycles || 0,
-//           burningEnabled: m.burningEnabled || false,
-//           burningStatus: m.burningStatus || 'Unknown',
-//           machineStatus: m.status,
-//           color: m.status === 'Active' ? 'green' : 'red'
-//         }));
+if (filteredMachines.length === 0) {
+  console.warn("⚠️ No matching machines found based on filters.");
+}
 
-//         console.log('✅ Updated Markers:', this.markers);
-//         this.markerPositions = this.markers.map(marker => marker.position);
+// Handle overlapping markers
+const locationMap = new Map<string, number>();
 
-//         if (this.markerPositions.length > 0) {
-//           this.options.center = this.markerPositions[0]; // Center map on first machine
-//         }
+filteredMachines.forEach(machine => {
+  if (!machine.location) return;
 
-//         this.cdr.detectChanges(); // ✅ Force UI update
-//       },
-//       error: (error: any) => {
-//         console.error('❌ API Call Failed:', error);
-//       }
-//     });
-//   }
+  const [lng, lat] = machine.location;
+  const key = `${lng},${lat}`;
 
-//   openInfoWindow(marker: MapMarker, item: Marker) {
-//     this.activeInfoWindow = item;
-//     this.infoWindow.open(marker);
-//   }
-// }
+  if (locationMap.has(key)) {
+    const count = locationMap.get(key)! + 1;
+    locationMap.set(key, count);
+
+    const angle = (count * 45) * (Math.PI / 180);
+    const radius = 0.000001 * count;
+    machine.location = [
+      lng + radius * Math.cos(angle),
+      lat + radius * Math.sin(angle)
+    ];
+  } else {
+    locationMap.set(key, 1);
+  }
+
+  // Set marker icon dynamically based on stock status
+  const iconUrl = this.getStockStatusIcon(machine.stockStatus);
+
+  const markerElement = document.createElement('div');
+  markerElement.className = 'custom-marker';
+  markerElement.style.backgroundImage = `url(${iconUrl})`;
+  markerElement.style.width = '40px';
+  markerElement.style.height = '40px';
+  markerElement.style.backgroundSize = 'contain';
+  markerElement.style.backgroundRepeat = 'no-repeat';
+
+  // Create marker
+  const newMarker = new maplibregl.Marker({ element: markerElement })
+    .setLngLat(machine.location)
+    .setPopup(new maplibregl.Popup().setHTML(this.generatePopupHTML(machine)))
+    .addTo(this.map);
+
+  this.markers.push(newMarker);
+});
+
+console.log("✅ Markers updated. Current count:", this.markers.length);
+}
+ 
+  getStockStatusIcon(status: number): string {
+    switch (status) {
+      case 2: return './assets/img/icon/green2.png';
+      case 1: return './assets/img/icon/yellow2.png';
+      case 0: return './assets/img/icon/red2.png';
+      default: return './assets/img/icon/pad1.png';
+    }
+  }
+ 
+  get machineIds(): string[] {
+    return this.machines.map(machine => machine.machineId);
+  }
+ 
+ 
+  generatePopupHTML(machine: any): string {
+    // Convert stock status number to text
+let stockStatusText = 'Unknown';
+switch (machine.stockStatus) {
+case 0: stockStatusText = 'Empty'; break;
+case 1: stockStatusText = 'Low'; break;
+case 2: stockStatusText = 'Full'; break;
+}
+
+// Convert burning status number to text
+let burningStatusText = 'Unknown';
+switch (machine.burnStatus) {
+case 1: burningStatusText = 'Idle'; break;
+case 2: burningStatusText = 'Burning'; break;
+}
+
+  return `<div><h3>📍 Vending Machine</h3>
+    <p><strong>Machine ID:</strong> ${machine.machineId}</p>
+    <p><strong>State:</strong> ${machine.state}</p>
+    <p><strong>District:</strong> ${machine.district}</p>
+    <p><strong>Status:</strong> ${machine.status}</p>
+    <p><strong>Stock Status:</strong> ${stockStatusText}</p>
+    <p><strong>Burning Status:</strong> ${burningStatusText}</p>
+    <p><strong>Total Collection:</strong> ₹${machine.collection}</p>
+    <p><strong>Items Dispensed:</strong> ${machine.itemsDispensed}</p>
+    <p><strong>Address:</strong> ${machine.address}</p></div>`;
+}
+
+    // toggleDropdown(filterKey: string): void {
+    //   this.dropdownOpen[filterKey] = !this.dropdownOpen[filterKey];
+    //   this.cdr.detectChanges();
+    // }before adding the dropdwon fix
+    toggleDropdown(filterKey: string): void {
+      const isCurrentlyOpen = this.dropdownOpen[filterKey];
+   
+ 
+      Object.keys(this.dropdownOpen).forEach(key => {
+        this.dropdownOpen[key] = false;
+      });
+   
+ 
+      this.dropdownOpen[filterKey] = !isCurrentlyOpen;
+   
+      this.cdr.detectChanges();
+    }
+    toggleSelectAll(filterControl: FormControl, items: string[]): void {
+      const allSelected = filterControl.value.length === items.length;
+      filterControl.setValue(allSelected ? [] : [...items]); // Toggle selection
+      console.log(`🔹 Updated ${filterControl} Selection: ${filterControl.value}`);
+
+      this.updateMap();
+    }
+         
+    toggleSelection(filterControl: FormControl, value: number): void {
+      let selectedValues = filterControl.value || [];
+   
+      if (selectedValues.includes(value)) {
+        selectedValues = selectedValues.filter((v : string | number) => v !== value);
+        console.log("updated selectedValues", selectedValues);
+      } else {
+        selectedValues.push(value);
+      }
+   
+      filterControl.setValue(selectedValues);
+      console.log(`🔹 Updated Filter Selection: ${selectedValues}`);
+
+      this.updateMap();
+    }
+         
+    refreshFilters(): void {
+      console.log('🔄 Refreshing Filters and clearing selections...');
+   
+      // Reset all filter FormControls to empty arrays
+      this.stateFilter.setValue([]);
+      this.districtFilter.setValue([]);
+      this.machineFilter.setValue([]);
+      this.stockStatusFilter.setValue([]);
+      this.buttonStatusFilter.setValue([]);
+      this.machineStatusFilter.setValue([]);
+   
+      // Optionally reset dropdown states
+      this.dropdownOpen = {};
+   
+      // Trigger data reload
+      this.loadMachineData();
+    }
+             
+    handleClickOutside(event: MouseEvent): void {
+      if (!event.target) return;
+      const target = event.target as HTMLElement;
+      if (target.closest('.dropdown-toggle') || target.closest('.dropdown-menu')) return;
+ 
+      Object.keys(this.dropdownOpen).forEach(key => {
+        this.dropdownOpen[key] = false;
+      });
+ 
+      this.cdr.detectChanges();
+    }
+  }

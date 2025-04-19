@@ -14,7 +14,7 @@ import {
   GridModule,
   NavModule,
   ProgressModule,
-  SharedModule,
+
   TableModule,
   TabsModule,
   UtilitiesModule
@@ -27,10 +27,16 @@ import { MachinedataComponent } from './machinedata.component';
 
 import { WidgetsModule } from '../widgets/widgets.module';
 import { DataService } from '../../service/data.service';
+import { FilterDropdownPipe } from '../../filter-dropdown.pipe';
+import { ShareModule } from '../../share/share.module';
+
+
+
 
 @NgModule({
   imports: [
     MachinedataRoutingModule,
+   
     CardModule,
     NavModule,
     IconModule,
@@ -53,14 +59,16 @@ import { DataService } from '../../service/data.service';
         TableModule,
         UtilitiesModule,
         BadgeModule,
-        SharedModule,
+        
         ButtonModule,
         AlertModule,
         FormsModule,
+        ShareModule
+        
      
    
   ],
-  declarations: [MachinedataComponent]
+  declarations: [MachinedataComponent,  ]
 })
 export class MachinedataModule {
 }

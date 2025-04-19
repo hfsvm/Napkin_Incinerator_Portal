@@ -381,17 +381,20 @@
 //   background-color: #138496;
 // }
 
-
 .fixed-card {
-  min-height: 120px; /* Ensuring all cards have equal height */
+  min-height: 120px;
+  max-height: 120px; /* ✅ Prevents first-row cards from expanding */
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center; /* ✅ Ensures text is vertically centered */
   width: 100%;
   border-radius: 10px;
   transition: transform 0.2s ease-in-out;
   padding: 15px;
+  overflow: hidden; /* ✅ Prevents extra content from affecting height */
 }
+
 
 .fixed-card:hover {
   transform: scale(1.03);
@@ -415,18 +418,20 @@
 }
 
 .card-title {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 16px;
+  
   text-align: left;
   white-space: nowrap; /* Prevents wrapping */
+  color: black;
 }
 
 .card-text {
   font-size: 16px;
-  font-weight: bold;
-  text-align: left;
-  word-wrap: break-word;
+  text-align: center;  /* ✅ Ensures text is always centered */
+  width: 100%;
+  margin-top: 5px;  /* ✅ Adds slight spacing below title */
 }
+
 
 /* Ensure all cards take the same height */
 .row .col-lg-3 {
@@ -492,4 +497,229 @@ h4.text-center {
 
 .view-btn:hover {
   background-color: #138496;
+}
+.icon-img {
+  width: 30px;  /* ✅ Adjust Icon Size */
+  height: 30px;
+  object-fit: contain;
+}
+/* ✅ Uniform Badge Size */
+.badge-fixed {
+  display: inline-block;
+  min-width: 100px; /* Ensures all badges are at least this wide */
+  text-align: center; /* Centers text */
+  padding: 6px 12px; /* Equal padding for all badges */
+  font-size: 12px; /* Consistent text size */
+  font-weight: bold; /* Ensures readability */
+  border-radius: 5px; /* Rounded edges */
+}
+/* Alternating Row Background Color for Table */
+.table tbody tr:nth-child(even) {
+  background-color: #f4f0f094; /* Light color for even rows */
+}
+
+.table tbody tr:nth-child(odd) {
+  background-color: #ffffffe1; /* White color for odd rows */
+}
+/* ✅ Table Styles - Consistent Font & Text Color */
+.table th, .table td {
+  font-family: 'Arial', sans-serif; /* Clean, readable font */
+  font-size: 14px; /* Uniform size */
+  color: #000000 !important; /* Force black text */
+}
+
+/* ✅ Fix Card Text Color */
+.card-title,
+.card-text {
+  color: black !important;
+}
+
+/* ✅ Badge Styles - Ensure Black Text */
+.badge-fixed {
+  font-weight: bold;
+  color: #000000 !important;
+}
+
+/* ✅ Burning, Idle, and N/A Status - Black Text */
+.badge-fixed.bg-warning { /* 🔥 Burning */
+  background-color: #ffc107 !important;
+  color: #000000 !important;
+}
+
+.badge-fixed.bg-secondary { /* ⏳ Idle */
+  background-color: #c9cbce !important;
+  color: #000000 !important;
+}
+
+.badge-fixed.bg-light { /* ❔ N/A */
+  background-color: #c9cbce !important;
+  color: #000000 !important;
+}
+
+/* ✅ Machine Status */
+.badge-fixed.online {
+  background-color: #0be300 !important; /* 🟢 Online */
+  color: #000000 !important;
+}
+
+.badge-fixed.offline {
+  background-color: #fcba4e !important; /* 🟠 Offline */
+  color: #000000 !important;
+}
+
+/* ✅ Stock Status */
+.badge-fixed.stock-empty {
+  background-color: #E57373 !important; /* 🟠 Empty */
+  color: #000000 !important;
+}
+
+.badge-fixed.stock-low {
+  background-color: #FFA500 !important; /* 🟠 Low */
+  color: #000000 !important;
+}
+
+.badge-fixed.stock-full {
+  background-color: #0be300 !important; /* 🟢 Full */
+  color: #000000 !important;
+}
+
+/* ✅ Adjust Icon Styling */
+.icon-img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+/* ✅ Tooltip Styling */
+.tooltip-info {
+  display: none;
+  position: absolute;
+  background: rgba(14, 14, 14, 0.8);
+  color: white;
+  padding: 8px;
+  border-radius: 5px;
+  font-size: 14px;
+  z-index: 100;
+  width: max-content;
+  max-width: 250px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  left: 50%;
+  top: 10%;
+  transform: translateX(-130%);
+}
+
+/* ✅ Show tooltip when hovering over the button */
+.view-btn-container:hover .tooltip-info {
+  display: block;
+}
+
+/* ✅ View Button Styling */
+.view-btn {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  font-size: 14px;  
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.view-btn:hover {
+  background-color: #138496;
+}
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px;
+  
+}
+
+.pagination-controls button {
+  padding: 6px 12px;
+  border: none;
+  background-color: #64B5F6;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: #64B5F6;
+}
+
+.pagination-controls button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls span {
+ 
+  color: #333;
+}
+/* styles.css or component.css */
+.dropdown-menu.show {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.col-custom {
+  flex: 0 0 13%; /* around 7 filters in one row */
+  max-width: 13%;
+}
+/* Bigger, clearer dropdown */
+.custom-select {
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 2px solid #555;
+  background-color: #fff;
+  color: #000;
+  appearance: none;
+  position: relative;
+}
+
+/* Add dropdown icon */
+.position-relative {
+  position: relative;
+}
+
+.dropdown-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #000;
+  font-size: 1rem;
+}
+
+/* Pagination buttons */
+.pagination-btn {
+  background-color: #64B5F6;
+  color: #fff;
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #64B5F6;
+}
+
+.pagination-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  color: #666;
 }

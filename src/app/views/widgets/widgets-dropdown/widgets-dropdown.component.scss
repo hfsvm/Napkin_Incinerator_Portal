@@ -1,0 +1,92 @@
+/* 1) Kill any horizontal overflow */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden !important;
+  }
+  
+  /* 2) Remove CoreUI’s extra spacer row at the top */
+  c-row.mb-4.d-print-none.row {
+    display: none !important;
+  }
+  
+  /* 3) Zero‑out top/bottom gutters on your widget rows */
+  c-row.row:first-of-type,
+  c-row.mt-4.row {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  /* 4) Make chart cards fluid & cap their max‑height */
+  c-row.mt-4.row c-card {
+    width: 100% !important;
+    max-width: 700px;               /* keep your max width */
+    height: auto !important;        /* drop the 450px fixed height */
+    margin: 10px 0 !important;      /* small top/bottom gap */
+    max-height: 40vh !important;    /* never exceed 40% of viewport height */
+    overflow: hidden !important;    /* hide any inner overflow */
+    box-sizing: border-box;
+  }
+  
+  /* 5) Force canvases to scale down */
+  c-card-body canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
+    display: block;
+  }
+  
+  /* 6) Tweak container padding so nothing else pushes down */
+  .body.flex-grow-1.px-3,
+  c-container.container-lg {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .row1{
+    margin-top: -200px;
+  }
+  /* 1) Shrink the chart cards in the second row */
+c-row.mt-4.row c-card {
+    max-height: 300px !important;     /* cap card height */
+    margin: 5px 0 !important;         /* smaller top/bottom gap */
+    overflow: hidden !important;      
+  }
+  
+  /* 2) Shrink the canvas inside those cards */
+  c-row.mt-4.row c-card-body canvas,
+  c-row.mt-4.row c-card-body c-chart {
+    max-height: 220px !important;     /* chart height */
+    height: 220px !important;         
+    width: auto !important;           
+  }
+  
+  /* 3) If you still see overflow, drop it further: */
+  /*
+  c-row.mt-4.row c-card {
+    max-height: 250px !important;
+  }
+  c-row.mt-4.row c-card-body canvas {
+    max-height: 180px !important;
+  }
+  */
+/* Reduce vertical padding/margins on all container types */
+.container,
+.container-fluid,
+.container-xxl,
+.container-xl,
+.container-lg,
+.container-md,
+.container-sm {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* If you still see a bit of extra top space in your CoreUI wrapper */
+.body.flex-grow-1.px-3 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}

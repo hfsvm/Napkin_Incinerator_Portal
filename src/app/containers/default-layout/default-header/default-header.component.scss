@@ -1,162 +1,274 @@
 /* ✅ Default Light Mode */
 body {
-  background-color: white;
-  color: black;
-  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
-}
-
-/* ✅ Header Text Color */
-// .header-nav a {
-//     color: white !important; /* Make header text white */
-//   padding-right: 40%;
-//   }
+    background-color: white;
+    color: black;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+  
+  /* ✅ Header Text Color */
+  // .header-nav a {
+  //     color: white !important; /* Make header text white */
+  //   padding-right: 40%;
+  //   }
+  app-default-header {
+    height: 50px !important;  /* Reduce the header height */
+    padding: 5px 10px !important;  /* Adjust padding for better spacing */
+    font-size: 14px !important;  /* Decrease text size if needed */
+  }
+  
+  .header-nav{
+     padding-left: 10px;
+  
+  }
+  /* ✅ Dark Mode */
+  .dark-light {
+    background-color: #181818 !important; 
+    color: #f1f1f1 !important;
+  }
+  
+  .dark-light .header-nav a {
+    color: #f1f1f1 !important;
+  }/* ✅ Center the logout popup */
+  .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1050;
+    }
     
-.header-nav{
-   padding-left: 10px;
-
-}
-/* ✅ Dark Mode */
-.dark-light {
-  background-color: #181818 !important; 
-  color: #f1f1f1 !important;
-}
-
-.dark-light .header-nav a {
-  color: #f1f1f1 !important;
-}/* ✅ Center the logout popup */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Dark overlay */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1050;
+    .modal-box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 320px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .modal-text {
+      margin-bottom: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    /* ✅ Modal Buttons */
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    
+    .modal-buttons .btn {
+      padding: 10px 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    
+    .btn-danger {
+      background-color: #6c757d; /* Gray */
+      color: white;
+      border: none;
+    }
+    
+    .btn-danger:hover {
+      background-color: #fb061e; /* Darker Red */
+    }
+    
+    .btn-secondary {
+      background-color: #6c757d; /* Gray */
+      color: white;
+      border: none;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #8eff72; /* Darker Gray */
+    }
+    
+    /* ✅ Dark Mode Support */
+    .dark-theme .modal-box {
+      background: #000000;
+      color: white;
+    }
+    
+    .dark-theme .btn-danger {
+      background: #ff4444;
+      color: white;
+    }
+    
+    .dark-theme .btn-secondary {
+      background: #888;
+      color: white;
+    }
+    
+  
+  .dark-light .dropdown-menu {
+    background: #000000 !important;
+    color: rgb(39, 21, 21) !important;
   }
   
-  .modal-box {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    width: 320px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.3s ease-in-out;
+  .dark-light .dropdown-item:hover {
+    background-color: #000000 !important;
   }
   
-  .modal-text {
-    margin-bottom: 15px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  /* ✅ Modal Buttons */
-  .modal-buttons {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-  }
-  
-  .modal-buttons .btn {
-    padding: 10px 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-weight: bold;
-  }
-  
-  .btn-danger {
-    background-color: #dc3545; /* Red */
-    color: rgb(225, 28, 28);
-    border: none;
-  }
-  
-  .btn-danger:hover {
-    background-color: #c82333; /* Darker Red */
-  }
-  
-  .btn-secondary {
-    background-color: #6c757d; /* Gray */
-    color: white;
-    border: none;
-  }
-  
-  .btn-secondary:hover {
-    background-color: #5a6268; /* Darker Gray */
-  }
-  
-  /* ✅ Dark Mode Support */
-  .dark-theme .modal-box {
-    background: #222;
-    color: white;
-  }
-  
-  .dark-theme .btn-danger {
-    background: #ff4444;
-    color: white;
-  }
-  
-  .dark-theme .btn-secondary {
-    background: #888;
-    color: white;
-  }
-  
-
-.dark-light .dropdown-menu {
-  background: #222 !important;
-  color: white !important;
-}
-
-.dark-light .dropdown-item:hover {
-  background-color: #444 !important;
-}
-
-/* ✅ Dark Mode Toggle */
-.light-icon {
-  cursor: pointer;
-  font-size: 24px;
-  margin-right: 15px;
-  color: #333;
-  transition: color 0.3s ease-in-out;
-}
-
-.dark-light .light-icon {
-  color: #ffcc00; /* Bright yellow for contrast */
-}
-/* ✅ Dark Mode Toggle Icon */
-.theme-icon {
+  /* ✅ Dark Mode Toggle */
+  .light-icon {
     cursor: pointer;
     font-size: 24px;
     margin-right: 15px;
-    color: white; /* Default color for Light Mode */
+    color: #333;
     transition: color 0.3s ease-in-out;
   }
   
-  /* ✅ Change Moon Icon Color in Dark Mode */
-  .dark-theme .theme-icon {
-    color: #ffcc00; /* Bright Yellow for better visibility */
+  .dark-light .light-icon {
+    color: #ffcc00; /* Bright yellow for contrast */
   }
-  .custom-dropdown {
-    background-color: #007bff; /* Blue background */
-    color: white !important; /* White text */
-    position: absolute !important; /* Ensures dropdown is placed relative to the button */
-    left: auto !important;  /* Resets default left positioning */
-    right: 100% !important; /* Moves the dropdown to the left */
-    top: 100% !important; /* Places dropdown directly below the button */
-    z-index: 1000; /* Ensures it stays above other elements */
-    min-width: 150px; /* Adjust width if needed */
-    border-radius: 5px; /* Rounded corners */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+  /* ✅ Dark Mode Toggle Icon */
+  .theme-icon {
+      cursor: pointer;
+      font-size: 24px;
+      margin-right: 15px;
+      color: white; /* Default color for Light Mode */
+      transition: color 0.3s ease-in-out;
+      padding-left: 35px;
+    }
+    
+    /* ✅ Change Moon Icon Color in Dark Mode */
+    .dark-theme .theme-icon {
+      color: #ffcc00; /* Bright Yellow for better visibility */
+    }
+    .custom-dropdown {
+      background-color: #007bff; /* Blue background */
+      color: white !important; /* White text */
+      position: absolute !important; /* Ensures dropdown is placed relative to the button */
+      left: auto !important;  
+      right: 100% !important; /* Moves the dropdown to the left */
+      top: 100% !important; /* Places dropdown directly below the button */
+      z-index: 1050; /* Ensures it stays above other elements */
+      min-width: 180px; /* Slightly wider for better usability */
+      border-radius: 8px; /* Smooth rounded corners */
+      box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3); /* Stronger shadow effect */
+      padding: 8px 0; /* Adds spacing inside the dropdown */
+      transform: translateY(10px); /* Subtle starting position */
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; /* Smooth animation */
+  }
+  
+  /* Dropdown appears smoothly */
+  .custom-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
   }
   
   .custom-dropdown .dropdown-item {
-    color: white !important; /* White text */
+      color: white !important; /* White text */
+      padding: 10px 15px; /* Comfortable padding */
+      font-size: 14px; /* Better readability */
+      transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
+      display: flex;
+      align-items: center;
+      gap: 10px; /* Spacing for potential icons */
   }
   
+  /* Hover effect with smooth transition */
   .custom-dropdown .dropdown-item:hover {
-    background-color: #0056b3 !important; /* Darker blue on hover */
+      background-color: #0056b3 !important; /* Darker blue */
+      transform: scale(1.02); /* Slight scaling effect */
+      border-radius: 6px; /* Smooth hover effect */
+  }
+  
+  /* Optional: Add subtle divider between items */
+  .custom-dropdown .dropdown-divider {
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.2);
+      margin: 5px 0;
+  }
+  
+    .current-time {
+      font-size: 0.75rem;  // ✅ Make the text very small
+      font-weight: 400;   // ✅ Lighter font weight
+      color: rgba(255, 255, 255, 0.7);  // ✅ Subtle color (adjust for visibility)
+      align-items: center;
+      padding-left: 250px;
+    }
+    .logout-icon {
+      font-size: 20px;
+      color: #fff;  /* White for contrast */
+      cursor: pointer;
+      transition: color 0.3s ease-in-out, transform 0.2s ease-in-out;
+      padding-top: 20px;
+  }
+  
+  .logout-icon:hover {
+      color: #ff4d4d;  /* Turns red on hover */
+      transform: scale(1.1);
+  }
+  
+  
+  .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  }
+  
+  .modal-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modal-buttons button {
+      padding: 8px 15px;
+      font-size: 14px;
+  }
+  .sidebar-brand-full, 
+  .sidebar-brand-narrow {
+    height: 28px !important;  /* Reduce logo size */
+  }
+  
+  .sidebar-text {
+    font-size: 14px !important;  /* Reduce sidebar brand text size */
+  }
+  .logout-container {
+    position: relative;
+    display: inline-block;
+  
+    .logout-icon {
+      font-size: 20px;
+      cursor: pointer;
+    }
+  
+    .tooltip-text {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 1;
+      transition: opacity 0.2s;
+    }
   }
   

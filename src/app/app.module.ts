@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+
 import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -44,6 +45,7 @@ import {
   SidebarModule,
   TabsModule,
   UtilitiesModule,
+ 
   
 } from '@coreui/angular-pro';
 
@@ -54,6 +56,12 @@ import { GoogleMapsModule } from '@angular/google-maps';
 import { PagesModule } from './views/pages/pages.module';
 import { SmartTablesModule } from './views/smart-tables/smart-tables.module';
 import { VideosComponent } from './views/videos/videos.component';
+import { UserManagementComponent } from './views/settings/user-management/user-management.component';
+import { MachineManagementComponent } from './views/settings/machine-management/machine-management.component';
+import { AdvancedManagementComponent } from './views/settings/advanced-management/advanced-management.component';
+import { ConfirmDialogComponent } from './views/confirm-dialog/confirm-dialog.component';
+import { MachinereportComponent } from './views/machinereport/machinereport.component';
+import { ShareModule } from './share/share.module';
 
 
 
@@ -72,9 +80,10 @@ const APP_CONTAINERS = [
 ];
 
 @NgModule({
-  declarations: [AppComponent, ...APP_CONTAINERS,  ],
+  declarations: [AppComponent, ...APP_CONTAINERS, UserManagementComponent, MachineManagementComponent, AdvancedManagementComponent, ConfirmDialogComponent, MachinereportComponent ],
   imports: [
     BrowserModule,
+    ShareModule,
     BrowserAnimationsModule,
     AppRoutingModule,
     AvatarModule,
@@ -101,7 +110,7 @@ const APP_CONTAINERS = [
     ListGroupModule,
     CardModule,
     BrowserModule, HttpClientModule,  GoogleMapsModule,FormsModule, FormsModule,  
-    ReactiveFormsModule,PagesModule,  SmartTablesModule
+    ReactiveFormsModule,PagesModule,  
 
   ],
   providers: [

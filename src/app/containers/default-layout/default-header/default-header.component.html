@@ -12,9 +12,10 @@
     <span class="theme-icon" (click)="toggleTheme()">
       <i class="fas" [ngClass]="isDarkMode ? 'fa-sun' : 'fa-moon'"></i>
     </span>
+    <small class="current-time ms-2">{{ currentTime }}</small>  <!-- ✅ Small Time Text -->
 
-    <!-- ✅ User Avatar with Dropdown -->
-    <c-header-nav class="ms-auto me-sm-4 position-relative">
+    <!-- ✅ User Avatar (No Logout on Click) -->
+    <c-header-nav class="ms-auto me-sm-4 position-relative text-center">
       <div class="dropdown">
         <c-avatar
           cTextColor="primary"
@@ -23,19 +24,21 @@
           src="./assets/img/avatars/6.jpg"
           class="p-0"
           style="width: 48px; height: 48px; border-radius: 8px; cursor: pointer;"
-          (click)="toggleDropdown()"
         >
-          <span class="ms-2 fw-bold text-light">User Name</span> 
         </c-avatar>
 
-        <!-- 🔽 Dropdown Menu -->
-       <!-- 🔽 Dropdown Menu -->
-<!-- 🔽 Dropdown Menu -->
-<div class="dropdown-menu show custom-dropdown" [class.show]="dropdownOpen">
-  <a class="dropdown-item text-white" (click)="confirmLogout()">Logout</a>
-</div>
+        <!-- ✅ UserID below Avatar -->
+        <div class="user-id text-light fw-bold mt-1">
+          {{ userName  }}
+        </div>
+      </div>
 
+      <!-- ✅ Logout Icon with Hover Tooltip -->
+      <div class="logout-container position-relative">
+        <i class="fas fa-sign-out-alt logout-icon ms-3" (click)="confirmLogout()" (mouseover)="showLogoutTooltip = true" (mouseleave)="showLogoutTooltip = false"></i>
 
+        <!-- 🔹 Tooltip (Visible on Hover) -->
+        <span class="tooltip-text" *ngIf="showLogoutTooltip">Logout</span>
       </div>
     </c-header-nav>
   </c-container>

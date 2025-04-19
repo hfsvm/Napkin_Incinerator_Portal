@@ -1,81 +1,388 @@
- <div class="fade-in">
-  <c-card>
+<!-- 
+  
+  <div class="container-fluid ultra-advanced-map-ui">
+    <div *ngIf="errorMessage" class="alert alert-danger text-center">
+      {{ errorMessage }}
+    </div>
    
-
-    <c-card-body>
-      <div *ngIf="googleMapsLoaderService.apiLoaded | async">
-    
-        <google-map [height]="'550px'" [options]="options" [width]="'100%'">
-          <map-marker 
-            #marker="mapMarker"
-            (mapClick)="openInfoWindow(marker, m)"
-            *ngFor="let m of markers"
-            [options]="{ icon: { url: m.color === 'green' ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' } }"
-            [position]="m.position"
-            [title]="m.title">
-          </map-marker>
-
-          <map-info-window>
-            <div class="info-window">
-              <h3 class="info-title">
-                <i class="material-icons icon-blue">location_on</i> 
-                {{ activeInfoWindow?.title }}
-              </h3>
-              <hr class="info-divider">
-              
-              <div class="info-row">
-                <i class="fas fa-id-badge icon-gray"></i>
-                <strong>Machine ID:</strong> {{ activeInfoWindow?.machineId }}
-              </div>
-
-              <div class="info-row">
-                <i class="fas fa-money-bill-wave icon-green"></i>
-                <strong>Collection:</strong> {{ activeInfoWindow?.collection }}
-              </div>
-
-              <div class="info-row">
-                <i class="fas fa-box icon-blue"></i>
-                <strong>Stock Status:</strong> {{ activeInfoWindow?.stockStatus }}
-              </div>
-
-              <div class="info-row">
-                <i class="fas fa-exclamation-circle icon-red"></i>
-                <strong>Stock Error:</strong> {{ activeInfoWindow?.stockError }}
-              </div>
-
-              <div class="info-row">
-                <i class="fas fa-fire icon-orange"></i>
-                <strong>Burning Cycles:</strong> {{ activeInfoWindow?.totalBurningCycles }}
-              </div>
-
-              <div class="info-row">
-                <i class="fas fa-toggle-on icon-yellow"></i>
-                <strong>Burning Enabled:</strong> {{ activeInfoWindow?.burningEnabled ? 'Yes' : 'No' }}
-              </div>
-
-              <div class="info-row">
-                <i class="fas fa-fire-extinguisher icon-purple"></i>
-                <strong>Burning Status:</strong> {{ activeInfoWindow?.burningStatus }}
-              </div>
-
-              <div class="info-row">
-                <i class="fas fa-plug icon-dark"></i>
-                <strong>Machine Status:</strong> 
-                <span [style.color]="activeInfoWindow?.color" class="status-text">
-                  <i class="fas" [ngClass]="{'fa-circle': activeInfoWindow?.machineStatus === 'Online', 'fa-times-circle': activeInfoWindow?.machineStatus === 'Offline'}"></i> 
-                  {{ activeInfoWindow?.machineStatus }}
-                </span>
-              </div>
-
+    <div class="row">
+      <div class="col-lg-3 col-md-4 col-sm-12 filter-column">
+        <div class="filter-container p-3 shadow-lg rounded bg-white">
+          <h4 class="text-center">
+            <i class="fas fa-filter"></i> Smart Filters
+            <button class="btn btn-sm btn-light float-right" (click)="toggleFilterPanel()">
+              <i class="fas" [ngClass]="{'fa-chevron-down': !filterPanelOpen, 'fa-chevron-up': filterPanelOpen}"></i>
+            </button>
+          </h4>
+   
+          <div *ngIf="filterPanelOpen">
+            <form>
+              <div class="row">
+       
+                <div class="col-12">
+                  <label class="filter-label">Stock Status:</label>
+                  <div class="dropdown">
+                    <button class="btn   dropdown-toggle w-100"
+                            type="button"
+                            (click)="toggleDropdown('stock')">
+                      {{ stockStatusFilter.value.length ? 'Selected (' + stockStatusFilter.value.length + ')' : 'Select Stock Status' }}
+                    </button>
+                    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['stock']">
+                      <label *ngFor="let status of stockOptions" class="dropdown-item">
+                        <input type="checkbox"
+                               [checked]="stockStatusFilter.value.includes(status.value)"
+                               (change)="toggleSelection(stockStatusFilter, status.value)">
+                        {{ status.label }}
+                      </label>
+                                  </div>
+                  </div>
+                </div>
+   
              
-              <a class="more-info-btn" href="{{activeInfoWindow?.www}}" target="_blank">
-                <i class="fas fa-external-link-alt"></i> More Info
-              </a>
-            </div>
-          </map-info-window>
-        </google-map>
+                <div class="col-12">
+                  <label class="filter-label">Burn Status:</label>
+                  <div class="dropdown">
+                    <button class="btn   dropdown-toggle w-100"
+                            type="button"
+                            (click)="toggleDropdown('burnStatus')">
+                      {{ buttonStatusFilter.value.length ? 'Selected (' + buttonStatusFilter.value.length + ')' : 'Select Burn Status' }}
+                    </button>
+                    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['burnStatus']">
+                      <label *ngFor="let status of ['Idle', 'Burning']" class="dropdown-item">
+                        <input type="checkbox"
+                               [checked]="buttonStatusFilter.value.includes(status)"
+                               (change)="toggleSelection(buttonStatusFilter, status)">
+                        {{ status }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+   
+                <div class="col-12">
+                  <label class="filter-label">Machine Status:</label>
+                  <div class="dropdown">
+                    <button class="btn   dropdown-toggle w-100"
+                            type="button"
+                            (click)="toggleDropdown('machine')">
+                      {{ machineStatusFilter.value.length ? 'Selected (' + machineStatusFilter.value.length + ')' : 'Select Machine Status' }}
+                    </button>
+                    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['machine']">
+                      <label *ngFor="let status of ['Online', 'Offline']" class="dropdown-item">
+                        <input type="checkbox"
+                               [checked]="machineStatusFilter.value.includes(status)"
+                               (change)="toggleSelection(machineStatusFilter, status)">
+                        {{ status }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label class="filter-label">State:</label>
+                  <div class="dropdown">
+                    <button class="btn   dropdown-toggle w-100"
+                            type="button"
+                            (click)="toggleDropdown('state')">
+                      {{ stateFilter.value.length ? 'Selected (' + stateFilter.value.length + ')' : 'Select State' }}
+                    </button>
+                    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['state']">
+                      <label class="dropdown-item">
+                        <input type="checkbox"
+                               [checked]="stateFilter.value.length === states.length"
+                               (change)="toggleSelectAll(stateFilter, states)">
+                        Select All
+                      </label>
+                     
+                      <label *ngFor="let state of states" class="dropdown-item">
+                        <input type="checkbox"
+                               [checked]="stateFilter.value.includes(state)"
+                               (change)="toggleSelection(stateFilter, state)">
+                        {{ state }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+   
+                <div class="col-12">
+                  <label class="filter-label">District:</label>
+                  <div class="dropdown">
+                    <button class="btn   dropdown-toggle w-100"
+                            type="button"
+                            (click)="toggleDropdown('district')">
+                      {{ districtFilter.value.length ? 'Selected (' + districtFilter.value.length + ')' : 'Select District' }}
+                    </button>
+                    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['district']">
+                      <label class="dropdown-item">
+                        <input type="checkbox"
+                               [checked]="districtFilter.value.length === districts.length"
+                               (change)="toggleSelectAll(districtFilter, districts)">
+                        Select All
+                      </label>
+                   
+                      <label *ngFor="let district of districts" class="dropdown-item">
+                        <input type="checkbox"
+                               [checked]="districtFilter.value.includes(district)"
+                               (change)="toggleSelection(districtFilter, district)">
+                        {{ district }}
+                      </label>
+                    </div>
+                                    </div>
+                </div>
+               
+   
+               
+                <div class="col-12">
+                  <label class="filter-label">Machines:</label>
+                  <div class="dropdown">
+                    <button class="btn   dropdown-toggle w-100"
+                            type="button"
+                            (click)="toggleDropdown('machineId')">
+                      {{ machineFilter.value.length ? 'Selected (' + machineFilter.value.length + ')' : 'Select Machine ID' }}
+                    </button>
+                    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['machineId']">
+        <label class="dropdown-item">
+          <input type="checkbox"
+                 [checked]="machineFilter.value.length === machines.length"
+                 (change)="toggleSelectAll(machineFilter, machineIds)">
+          Select All
+        </label>
+   
+                      <label *ngFor="let machine of machines" class="dropdown-item">
+                        <input type="checkbox"
+                               [checked]="machineFilter.value.includes(machine.machineId)"
+                               (change)="toggleSelection(machineFilter, machine.machineId)">
+                        {{ machine.machineId }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+   
+                <div class="col-12 text-center mt-3">
+                  <button class="btn btn-danger w-100" (click)="refreshFilters()">
+                    🔄 Refresh
+                  </button>
+                </div>
+   
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
-    </c-card-body>
-  </c-card>
-</div>
+   
+      <div class="col-lg-9 col-md-8 col-sm-12 map-column">
+        <div class="map-container shadow-lg rounded">
+          <div id="map" style="width: 100%; height: 650px;"></div>
+   
+    <div class="zoom-controls">
+      <button (click)="zoomIn()">＋</button>
+      <button (click)="zoomOut()">－</button>
+   
+        </div>
+      </div>
+    </div>
+  </div>
+    -->
 
+
+       
+<div class="container-fluid ultra-advanced-map-ui">
+  <div *ngIf="errorMessage" class="alert alert-danger text-center">
+    {{ errorMessage }}
+  </div>
+  
+  <div class="row">
+    <div class="col-lg-3 col-md-4 col-sm-12 filter-column">
+      <div class="filter-container p-3 shadow-lg rounded bg-white">
+        <h4 class="text-center">
+          <i class="fas fa-filter"></i> Smart Filters
+          <button class="btn btn-sm btn-light float-right" (click)="toggleFilterPanel()">
+            <i class="fas" [ngClass]="{'fa-chevron-down': !filterPanelOpen, 'fa-chevron-up': filterPanelOpen}"></i>
+          </button>
+        </h4>
+  
+        <div *ngIf="filterPanelOpen">
+          <form>
+            <div class="row">
+     
+              <div class="col-12">
+                <label class="filter-label">Stock Status:</label>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle w-100"
+                          type="button"
+                          (click)="toggleDropdown('stock')">
+                    {{ stockStatusFilter.value.length ? 'Selected (' + stockStatusFilter.value.length + ')' : 'Select Stock Status' }}
+                  </button>
+                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['stock']">
+                    <label *ngFor="let status of stockOptions" class="dropdown-item">
+                      <input type="checkbox"
+                             [checked]="stockStatusFilter.value.includes(status.value)"
+                             (change)="toggleSelection(stockStatusFilter, status.value)">
+                      {{ status.label }}
+                    </label>
+                                </div>
+                </div>
+              </div>
+  
+           
+              <div class="col-12">
+                <label class="filter-label">Burn Status:</label>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle w-100"
+                          type="button"
+                          (click)="toggleDropdown('burnStatus')">
+                    {{ buttonStatusFilter.value.length ? 'Selected (' + buttonStatusFilter.value.length + ')' : 'Select Burn Status' }}
+                  </button>
+                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['burnStatus']">
+                    <label *ngFor="let status of ['Idle', 'Burning']" class="dropdown-item">
+                      <input type="checkbox"
+                             [checked]="buttonStatusFilter.value.includes(status)"
+                             (change)="toggleSelection(buttonStatusFilter, status)">
+                      {{ status }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+  
+              <div class="col-12">
+                <label class="filter-label">Machine Status:</label>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle w-100"
+                          type="button"
+                          (click)="toggleDropdown('machine')">
+                    {{ machineStatusFilter.value.length ? 'Selected (' + machineStatusFilter.value.length + ')' : 'Select Machine Status' }}
+                  </button>
+                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['machine']">
+                    <label *ngFor="let status of ['Online', 'Offline']" class="dropdown-item">
+                      <input type="checkbox"
+                             [checked]="machineStatusFilter.value.includes(status)"
+                             (change)="toggleSelection(machineStatusFilter, status)">
+                      {{ status }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+           
+           
+              <div class="col-12">
+                <label class="filter-label">State:</label>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle w-100"
+                          type="button"
+                          (click)="toggleDropdown('state')">
+                    {{ stateFilter.value.length ? 'Selected (' + stateFilter.value.length + ')' : 'Select State' }}
+                  </button>
+                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['state']">
+                 
+                    <label class="dropdown-item">
+                      <input type="checkbox"
+                             [checked]="stateFilter.value.length === states.length"
+                             (change)="toggleSelectAll(stateFilter, states)">
+                      Select All
+                    </label>
+                   
+                    <label *ngFor="let state of states" class="dropdown-item">
+                      <input type="checkbox"
+                             [checked]="stateFilter.value.includes(state)"
+                             (change)="toggleSelection(stateFilter, state)">
+                      {{ state }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+  
+           
+              <div class="col-12">
+                <label class="filter-label">District:</label>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle w-100"
+                          type="button"
+                          (click)="toggleDropdown('district')">
+                    {{ districtFilter.value.length ? 'Selected (' + districtFilter.value.length + ')' : 'Select District' }}
+                  </button>
+                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['district']">
+                 
+                    <label class="dropdown-item">
+                      <input type="checkbox"
+                             [checked]="districtFilter.value.length === districts.length"
+                             (change)="toggleSelectAll(districtFilter, districts)">
+                      Select All
+                    </label>
+                 
+                    <label *ngFor="let district of districts" class="dropdown-item">
+                      <input type="checkbox"
+                             [checked]="districtFilter.value.includes(district)"
+                             (change)="toggleSelection(districtFilter, district)">
+                      {{ district }}
+                    </label>
+                  </div>
+                                  </div>
+              </div>
+             
+              <div class="col-12">
+                <label class="filter-label">Machines:</label>
+                <div class="dropdown">
+                  <button class="btn btn-primary dropdown-toggle w-100"
+                          type="button"
+                          (click)="toggleDropdown('machineId')">
+                    {{ machineFilter.value.length ? 'Selected (' + machineFilter.value.length + ')' : 'Select Machine ID' }}
+                  </button>
+              
+                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['machineId']" style="max-height: 300px; overflow-y: auto;">
+                    <!-- 🔍 Search Box -->
+                    <div class="px-2 pb-2">
+                      <input 
+                      type="text" 
+                      [(ngModel)]="machineSearchTerm"
+                      [ngModelOptions]="{standalone: true}" 
+                      class="form-control" 
+                      placeholder="Search Machine ID"
+                    >
+                    </div>
+              
+                    <!-- ✅ Select All Option -->
+                    <label class="dropdown-item">
+                      <input type="checkbox"
+                             [checked]="machineFilter.value.length === machines.length"
+                             (change)="toggleSelectAll(machineFilter, machineIds)">
+                      Select All
+                    </label>
+              
+                    <!-- ✅ Filtered Machines List -->
+                    <label *ngFor="let machine of machines | filterDropdown: machineSearchTerm" class="dropdown-item">
+                      <input type="checkbox"
+                             [checked]="machineFilter.value.includes(machine.machineId)"
+                             (change)="toggleSelection(machineFilter, machine.machineId)">
+                      {{ machine.machineId }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+              
+  
+              <div class="col-12 text-center mt-3">
+                <button class="btn btn-danger w-100" (click)="refreshFilters()">
+                  🔄 Refresh
+                </button>
+              </div>
+  
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  
+    <div class="col-lg-9 col-md-8 col-sm-12 map-column">
+      <div class="map-container shadow-lg rounded">
+        <div id="map" style="width: 100%; height: 650px;"></div>
+  
+         
+  <div class="zoom-controls">
+    <button (click)="zoomIn()">＋</button>
+    <button (click)="zoomOut()">－</button>
+  
+      </div>
+    </div>
+  </div>
+  </div>
+  
+  
+  

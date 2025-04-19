@@ -1,1033 +1,8 @@
-// import { Component } from '@angular/core';
-
-// import usersData from '../_data';
-
-// @Component({
-//   selector: 'app-smart-tables-basic-example',
-//   templateUrl: './smart-tables-basic-example.component.html',
-//   styleUrls: ['./smart-tables-basic-example.component.scss']
-// })
-// export class SmartTablesBasicExampleComponent {
-
-//   usersData = usersData;
-
-//   columns = [
-//     {
-//       key: 'name',
-//       _style: { width: '40%' }
-//     },
-//     'registered',
-//     { key: 'role', _style: { width: '20%' } },
-//     { key: 'status', _style: { width: '15%' } },
-//     {
-//       key: 'show',
-//       label: '',
-//       _style: { width: '5%' },
-//       filter: false,
-//       sorter: false
-//     }
-//   ];
-
-//   getBadge(status: string) {
-//     switch (status) {
-//       case 'Active':
-//         return 'success';
-//       case 'Inactive':
-//         return 'secondary';
-//       case 'Pending':
-//         return 'warning';
-//       case 'Banned':
-//         return 'danger';
-//       default:
-//         return 'primary';
-//     }
-//   }
-
-//   details_visible = Object.create({});
-
-//   toggleDetails(item: any) {
-//     this.details_visible[item] = !this.details_visible[item];
-//   }
-// }
-
-// import { Component } from '@angular/core';
-// import * as XLSX from 'xlsx';
-// import { saveAs } from 'file-saver';
-
-// @Component({
-//   selector: 'app-smart-tables-basic-example',
-//   templateUrl: './smart-tables-basic-example.component.html',
-//   styleUrls: ['./smart-tables-basic-example.component.scss']
-// })
-// export class SmartTablesBasicExampleComponent {
-//   isLoading = false;
-
-//   // Dummy Data for Filters
-//   zones = ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6'];
-//   wards = ['A', 'D', 'E', 'F', 'N', 'G', 'H', 'W'];
-//   beats = ['100', '101', '123', '125', '127', '128', '133'];
-//   machines = ['AX225B015', 'AX226B005', 'AX226B006', 'AX226B009'];
-
-//   selectedZones: string[] = [];
-//   selectedWards: string[] = [];
-//   selectedBeats: string[] = [];
-//   selectedMachines: string[] = [];
-//   startDate: string = new Date().toISOString().split('T')[0];
-//   endDate: string = new Date().toISOString().split('T')[0];
-
-//   dropdownOpen: Record<'zone' | 'ward' | 'beat' | 'machine', boolean> = {
-//     zone: false,
-//     ward: false,
-//     beat: false,
-//     machine: false
-//   };
-//   reportsData = [
-//     { machineId: 'KE079B089', machineLocation: 'Community Toilet', address: 'Andheri East', machineType: 'Community Toilet', vending: 0, incinerator: 0, date: '2025-02-21', cash: '₹ 0' },
-//     { machineId: 'PS050B038', machineLocation: 'Community Toilet', address: 'Goregaon West', machineType: 'Community Toilet', vending: 0, incinerator: 0, date: '2025-02-21', cash: '₹ 0' },
-//     { machineId: 'KE083B114', machineLocation: 'Community Toilet', address: 'Vile Parle', machineType: 'Community Toilet', vending: 0, incinerator: 0, date: '2025-02-21', cash: '₹ 0' }
-//   ];
-
-//   filteredData = this.reportsData;
-//   toggleDropdown(filter: keyof typeof this.dropdownOpen) {
-//     this.dropdownOpen[filter] = !this.dropdownOpen[filter];
-//   }
-
-//   toggleSelection(value: string, list: string[]) {
-//     const index = list.indexOf(value);
-//     if (index > -1) {
-//       list.splice(index, 1);
-//     } else {
-//       list.push(value);
-//     }
-//   }
-
-//   loadReport() {
-//     this.isLoading = true;
-//     setTimeout(() => {
-//       this.filteredData = this.reportsData.filter(item =>
-//         (this.selectedZones.length === 0 || this.selectedZones.includes(item.machineLocation)) &&
-//         (this.selectedWards.length === 0 || this.selectedWards.includes(item.address)) &&
-//         (this.selectedBeats.length === 0 || this.selectedBeats.includes(item.machineId)) &&
-//         (this.selectedMachines.length === 0 || this.selectedMachines.includes(item.machineId))
-//       );
-//       this.isLoading = false;
-//     }, 2000);
-//   }
-
-//   exportToExcel() {
-//     const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.filteredData);
-//     const wb: XLSX.WorkBook = XLSX.utils.book_new();
-//     XLSX.utils.book_append_sheet(wb, ws, 'Report');
-//     const excelBuffer: any = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-//     const data: Blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-//     saveAs(data, 'Report.xlsx');
-//   }
-// }
-// above is template table
-// below is working component
-// commented cz using
-
-// import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-// import { DataService } from '../../../service/data.service';
-
-// interface Transaction {
-//   date: string;
-//   qty: number;
-//   cash: string;
-//   onTime: string;
-//   burnCycles: number;
-//   sanNapkinsBurnt: number;
-// }
-
-// interface ReportItem {
-//   srNo: number;
-//   machineId: string;
-//   machineLocation: string;
-//   address: string;
-//   transactions: Transaction[];
-// }
-
-// @Component({
-//   selector: 'app-smart-tables-basic-example',
-//   templateUrl: './smart-tables-basic-example.component.html',
-//   styleUrls: ['./smart-tables-basic-example.component.scss']
-// })
-// export class SmartTablesBasicExampleComponent implements OnInit {
-//   isLoading = false;
-//   summaryType: 'Daily' | 'Totals' = 'Daily';  // Default to 'Daily'
-//   errorMessage: string = '';
-
-//   // Dropdown arrays for filters
-//   zones: string[] = [];
-//   wards: string[] = [];
-//   beats: string[] = [];
-//   machineIds: string[] = [''];  // Default Machine ID
-//   selectedMachineId: string = '';
-
-//   // Selected filter values (for checklists)
-//   selectedZones: string[] = [];
-//   selectedWards: string[] = [];
-//   selectedBeats: string[] = [];
-
-//   // Date range filters
-//   startDate: string = '';
-//   endDate: string = '';
-
-//   // For dropdown toggling
-//   dropdownOpen: Record<string, boolean> = { zone: false, ward: false, beat: false };
-
-//   // Report data arrays
-//   reportsData: ReportItem[] = [];
-//   filteredData: ReportItem[] = [];
-
-//   constructor(private dataService: DataService, private cdr: ChangeDetectorRef) {}
-
-//   ngOnInit() {
-//     this.setDefaultDates();
-//     this.loadReport(); // Initial API call with default filters
-//   }
-
-//   // Set default dates (current date and 1-year span)
-//   setDefaultDates() {
-//     const today = new Date();
-//     const lastYear = new Date();
-//     lastYear.setFullYear(today.getFullYear() - 1);
-//     this.startDate = this.formatDate(lastYear);
-//     this.endDate = this.formatDate(today);
-//   }
-
-//   // Format the date to "dd-MM-yyyy"
-//   formatDate(date: Date): string {
-//     return date.toLocaleDateString('en-GB').split('/').reverse().join('-');
-//   }
-
-//   // Load report data from API using current filter selections
-//   loadReport() {
-//     this.isLoading = true;
-//     this.errorMessage = '';
-  
-//     this.dataService.getMachineAndIncineratorTransaction(
-//       this.startDate,
-//       this.endDate,
-//       'ABC1234567', // Example merchantId
-//       this.selectedMachineId,  // ✅ Pass selected machines
-//       this.selectedZones.length ? this.selectedZones.join(',') : '',
-//       this.selectedWards.length ? this.selectedWards.join(',') : '',
-//       this.selectedBeats.length ? this.selectedBeats.join(',') : ''
-//     ).subscribe(
-//       (response: any) => {
-//         if (response.status === 200 && response.data.machineDetails.length > 0) {
-//           // ✅ Populate Zones, Wards, Beats dynamically
-//           this.zones = response.data.level1 ? [response.data.level1] : [];
-//           this.wards = response.data.level2 ? [response.data.level2] : [];
-//           this.beats = response.data.level3 ? [response.data.level3] : [];
-//           this.selectedZones = [...this.zones];
-//           this.selectedWards = [...this.wards];
-//           this.selectedBeats = [...this.beats];
-  
-//           // ✅ Process Report Data
-//           this.reportsData = response.data.machineDetails.map((machine: any, index: number) => ({
-//             srNo: index + 1,
-//             machineId: machine.machineId,
-//             machineLocation: machine.machineLocation || `${machine.level1} / ${machine.level2} / ${machine.level3}`,
-//             address: machine.address || `${machine.level1}, ${machine.level2}, ${machine.level3}`,
-//             machineType: machine.machineType || 'Unknown',
-//             transactions: machine.vending.map((txn: any) => ({
-//               date: txn.date,
-//               qty: txn.quantity,
-//               cash: `₹ ${txn.cashCollected}`,
-//               onTime: machine.incinerator[0]?.onTime || '0m',
-//               burnCycles: machine.incinerator[0]?.burnCycles || 0,
-//               sanNapkinsBurnt: machine.incinerator[0]?.sanitaryNapkinsBurnt || 0
-//             }))
-//           }));
-  
-//           this.filteredData = [...this.reportsData];
-//         } else {
-//           this.filteredData = [];
-//           this.errorMessage = "No data available for the selected filters.";
-//         }
-//         this.isLoading = false;
-//       },
-//       (error) => {
-//         this.errorMessage = "Error fetching data. Please try again.";
-//         this.isLoading = false;
-//       }
-//     );
-//   }
-  
-//   // Toggle summary type between Daily and Totals
-//   toggleSummaryType() {
-//     this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
-//     this.filteredData = this.reportsData.map(machine => ({
-//       ...machine,
-//       transactions: this.summaryType === 'Daily' ? machine.transactions : [{
-//         date: 'Total',
-//         qty: machine.transactions.reduce((sum, txn) => sum + txn.qty, 0),
-//         cash: `₹ ${machine.transactions.reduce((sum, txn) => sum + parseFloat(txn.cash.replace('₹', '')), 0).toFixed(2)}`,
-//         onTime: '0m',
-//         burnCycles: machine.transactions.reduce((sum, txn) => sum + txn.burnCycles, 0),
-//         sanNapkinsBurnt: machine.transactions.reduce((sum, txn) => sum + txn.sanNapkinsBurnt, 0)
-//       }]
-//     }));
-//   }
-  
-
-//   // --- Filter Methods (these update internal state only; no API call) ---
-//   selectAllZones() {
-//     this.selectedZones = [...this.zones];
-//     this.selectedWards = [];
-//     this.selectedBeats = [];
-//   }
-  
-//   unselectAllZones() {
-//     this.selectedZones = [];
-//     this.selectedWards = [];
-//     this.selectedBeats = [];
-//   }
-  
-//   selectAllWards() {
-//     this.selectedWards = [...this.wards];
-//     this.selectedBeats = [];
-//   }
-  
-//   unselectAllWards() {
-//     this.selectedWards = [];
-//     this.selectedBeats = [];
-//   }
-  
-//   selectAllBeats() {
-//     this.selectedBeats = [...this.beats];
-//   }
-  
-//   unselectAllBeats() {
-//     this.selectedBeats = [];
-//   }
-  
-//   toggleDropdown(filter: 'zone' | 'ward' | 'beat') {
-//     this.dropdownOpen[filter] = !this.dropdownOpen[filter];
-//   }
-
-//   clearSelection(filter: 'zone' | 'ward' | 'beat') {
-//     if (filter === 'zone') {
-//       this.selectedZones = [];
-//       this.selectedWards = [];
-//       this.selectedBeats = [];
-//     } else if (filter === 'ward') {
-//       this.selectedWards = [];
-//       this.selectedBeats = [];
-//     } else if (filter === 'beat') {
-//       this.selectedBeats = [];
-//     }
-//   }
-
-//   onZoneChange(zone: string, event: any) {
-//     if (event.target.checked) {
-//       if (!this.selectedZones.includes(zone)) {
-//         this.selectedZones.push(zone);
-//       }
-//     } else {
-//       this.selectedZones = this.selectedZones.filter(z => z !== zone);
-//       // Clear dependent filters
-//       this.selectedWards = [];
-//       this.selectedBeats = [];
-//     }
-//   }
-
-//   onWardChange(ward: string, event: any) {
-//     if (event.target.checked) {
-//       if (!this.selectedWards.includes(ward)) {
-//         this.selectedWards.push(ward);
-//       }
-//     } else {
-//       this.selectedWards = this.selectedWards.filter(w => w !== ward);
-//       // Clear dependent beats
-//       this.selectedBeats = [];
-//     }
-//   }
-
-//   onBeatChange(beat: string, event: any) {
-//     if (event.target.checked) {
-//       if (!this.selectedBeats.includes(beat)) {
-//         this.selectedBeats.push(beat);
-//       }
-//     } else {
-//       this.selectedBeats = this.selectedBeats.filter(b => b !== beat);
-//     }
-//   }
-
-//   onMachineChange(machineId: string) {
-//     this.selectedMachineId = machineId;
-//   }
-
-//   // --- Totals Calculation Methods ---
-
-//   getTotalQty() {
-//     return this.filteredData.reduce((total, item) => total + item.transactions.reduce((sum, txn) => sum + txn.qty, 0), 0);
-//   }
-
-//   getTotalCash() {
-//     return this.filteredData.reduce((total, item) => total + item.transactions.reduce((sum, txn) => sum + parseFloat(txn.cash.replace('₹', '').replace(',', '')), 0), 0).toFixed(2);
-//   }
-
-//   getTotalBurnCycles() {
-//     return this.filteredData.reduce((total, item) => total + item.transactions.reduce((sum, txn) => sum + txn.burnCycles, 0), 0);
-//   }
-
-//   getTotalSanNapkinsBurnt() {
-//     return this.filteredData.reduce((total, item) => total + item.transactions.reduce((sum, txn) => sum + txn.sanNapkinsBurnt, 0), 0);
-//   }
-
-//   // applyFilters() is left empty so that changes in filters update state only.
-//   applyFilters() {
-//     // Do nothing here; the API call is triggered only by clicking "Load Report".
-//   }
-
-//   resetFilters() {
-//     this.selectedZones = [...this.zones];
-//     this.selectedWards = [...this.wards];
-//     this.selectedBeats = [...this.beats];
-//     this.selectedMachineId = '';
-//     this.loadReport();
-//   }
-// }
-//above before worked below testing with dummy
-
-// import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-// import { DataService } from '../../../service/data.service';
-// import { CommonDataService } from '../../../Common/common-data.service';
-
-// interface Transaction {
-//   date: string;
-//   qty: number;
-//   cash: string;
-//   onTime: string;
-//   burnCycles: number;
-//   sanNapkinsBurnt: number;
-// }
-
-// interface ReportItem {
-//   srNo: number;
-//   machineId: string;
-//   machineLocation: string;
-//   address: string;
-//   transactions: Transaction[];
-// }
-
-// @Component({
-//   selector: 'app-smart-tables-basic-example',
-//   templateUrl: './smart-tables-basic-example.component.html',
-//   styleUrls: ['./smart-tables-basic-example.component.scss']
-// })
-// export class SmartTablesBasicExampleComponent implements OnInit {
-//   isLoading = false;
-//   summaryType: 'Daily' | 'Totals' = 'Daily';
-//   errorMessage: string = '';
-
-//   zones: string[] = [];
-//   wards: string[] = [];
-//   beats: string[] = [];
-
-//   merchantId: string = ''; // ✅ Dynamic from login session
-//   machineIds: string[] = ['MACH01', 'HFBM01', 'GSM001', 'GSM002', 'NASC00']; // ✅ Dummy machines for dropdown
-//   selectedMachineId: string = this.machineIds[0]; // ✅ Default selected machine
-
-//   selectedZones: string[] = [];
-//   selectedWards: string[] = [];
-//   selectedBeats: string[] = [];
-
-//   startDate: string = '';
-//   endDate: string = '';
-
-//   dropdownOpen: Record<string, boolean> = { zone: false, ward: false, beat: false };
-//   reportsData: ReportItem[] = [];
-//   filteredData: ReportItem[] = [];
-
-//   constructor(
-//     private dataService: DataService,
-//     private commonDataService: CommonDataService,
-//     private cdr: ChangeDetectorRef
-//   ) {}
-
-//   ngOnInit() {
-//     this.merchantId = this.commonDataService.merchantId ?? ''; // ✅ Get merchant ID from login session
-//     this.setDefaultDates();
-//     this.loadReport();
-//   }
-
-//   setDefaultDates() {
-//     const today = new Date();
-//     const lastYear = new Date();
-//     lastYear.setFullYear(today.getFullYear() - 1);
-//     this.startDate = this.formatDate(lastYear);
-//     this.endDate = this.formatDate(today);
-//   }
-
-//   formatDate(date: Date): string {
-//     return date.toISOString().split('T')[0];
-//   }
-
-//   loadReport() {
-//     this.isLoading = true;
-//     this.errorMessage = '';
-
-//     this.dataService.getMachineAndIncineratorTransaction(
-//       this.startDate,
-//       this.endDate,
-//       this.merchantId,
-//       this.selectedMachineId, // ✅ Pass selected machine ID
-//       this.selectedZones.join(','),
-//       this.selectedWards.join(','),
-//       this.selectedBeats.join(',')
-//     ).subscribe(
-//       (response: any) => {
-//         if (response.status === 200 && response.data.machineDetails.length > 0) {
-//           this.processResponseData(response.data.machineDetails);
-//         } else {
-//           this.filteredData = [];
-//           this.errorMessage = "No data available for the selected filters.";
-//         }
-//         this.isLoading = false;
-//       },
-//       (error) => {
-//         this.errorMessage = "Error fetching data. Please try again.";
-//         this.isLoading = false;
-//       }
-//     );
-//   }
-
-//   processResponseData(machineDetails: any[]) {
-//     this.reportsData = machineDetails.map((machine, index) => ({
-//       srNo: index + 1,
-//       machineId: machine.machineId,
-//       machineLocation: machine.machineLocation || `${machine.level1} / ${machine.level2} / ${machine.level3}`,
-//       address: machine.address || `${machine.level1}, ${machine.level2}, ${machine.level3}`,
-//       transactions: machine.vending.map((txn: any) => ({
-//         date: txn.date,
-//         qty: txn.quantity,
-//         cash: `₹ ${txn.cashCollected}`,
-//         onTime: machine.incinerator[0]?.onTime || '0m',
-//         burnCycles: machine.incinerator[0]?.burnCycles || 0,
-//         sanNapkinsBurnt: machine.incinerator[0]?.sanitaryNapkinsBurnt || 0
-//       }))
-//     }));
-
-//     this.filteredData = [...this.reportsData];
-//   }
-
-//   toggleSummaryType() {
-//     this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
-//     this.filteredData = this.reportsData.map(machine => ({
-//       ...machine,
-//       transactions: this.summaryType === 'Daily' ? machine.transactions : [{
-//         date: 'Total',
-//         qty: machine.transactions.reduce((sum, txn) => sum + txn.qty, 0),
-//         cash: `₹ ${machine.transactions.reduce((sum, txn) => sum + parseFloat(txn.cash.replace('₹', '')), 0).toFixed(2)}`,
-//         onTime: '0m',
-//         burnCycles: machine.transactions.reduce((sum, txn) => sum + txn.burnCycles, 0),
-//         sanNapkinsBurnt: machine.transactions.reduce((sum, txn) => sum + txn.sanNapkinsBurnt, 0)
-//       }]
-//     }));
-//   }
-
-//   // ✅ Select all zones
-// selectAllZones() {
-//   this.selectedZones = [...this.zones];
-//   this.selectedWards = [];
-//   this.selectedBeats = [];
-// }
-
-// // ✅ Clear zones (and reset wards & beats)
-// clearSelection(type: 'zone' | 'ward' | 'beat') {
-//   if (type === 'zone') {
-//     this.selectedZones = [];
-//     this.selectedWards = [];
-//     this.selectedBeats = [];
-//   } else if (type === 'ward') {
-//     this.selectedWards = [];
-//     this.selectedBeats = [];
-//   } else if (type === 'beat') {
-//     this.selectedBeats = [];
-//   }
-// }
-
-// // ✅ Select all wards
-// selectAllWards() {
-//   this.selectedWards = [...this.wards];
-//   this.selectedBeats = [];
-// }
-
-// // ✅ Select all beats
-// selectAllBeats() {
-//   this.selectedBeats = [...this.beats];
-// }
-
-//   // --- Machine Selection Logic ---
-//   onMachineChange(machineId: string) {
-//     this.selectedMachineId = machineId;
-//   }
-
-//   // --- Filters Logic ---
-//   toggleDropdown(filter: 'zone' | 'ward' | 'beat') {
-//     this.dropdownOpen[filter] = !this.dropdownOpen[filter];
-//   }
-
-//   getTotalQty() {
-//     return this.filteredData.reduce((total, item) => total + item.transactions.reduce((sum, txn) => sum + txn.qty, 0), 0);
-//   }
-
-//   getTotalCash() {
-//     return this.filteredData.reduce((total, item) => total + item.transactions.reduce((sum, txn) => sum + parseFloat(txn.cash.replace('₹', '').replace(',', '')), 0), 0).toFixed(2);
-//   }
-
-//   getTotalBurnCycles() {
-//     return this.filteredData.reduce((total, item) => total + item.transactions.reduce((sum, txn) => sum + txn.burnCycles, 0), 0);
-//   }
-
-//   getTotalSanNapkinsBurnt() {
-//     return this.filteredData.reduce((total, item) => total + item.transactions.reduce((sum, txn) => sum + txn.sanNapkinsBurnt, 0), 0);
-//   }
-// }
-
-// import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-// import { DataService } from '../../../service/data.service';
-
-// interface Transaction {
-//   date: string;
-//   qty: number;
-//   cash: string;
-//   onTime: string;
-//   burnCycles: number;
-//   sanNapkinsBurnt: number;
-// }
-
-// interface ReportItem {
-//   srNo: number;
-//   machineId: string;
-//   machineLocation: string;
-//   address: string;
-//   machineType: string;
-//   transactions: Transaction[];
-// }
-// interface Machine {
-//   machineId: string;
-//   machineLocation: string;
-//   address: string;
-//   machineType: string;
-//   vending: any[];  // Adjust based on actual structure
-//   incinerator: any[];
-// }
-
-
-// @Component({
-//   selector: 'app-smart-tables-basic-example',
-//   templateUrl: './smart-tables-basic-example.component.html',
-//   styleUrls: ['./smart-tables-basic-example.component.scss']
-// })
-// export class SmartTablesBasicExampleComponent implements OnInit {
-//   isLoading = false;
-//   summaryType: 'Daily' | 'Totals' = 'Daily';
-//   errorMessage: string = '';
-  
-//   zones: string[] = [];
-//   wards: string[] = [];
-//   beats: string[] = [];
-//   selectedMachineIds: string[] = [];
-//   selectedZones: string[] = [];
-//   selectedWards: string[] = [];
-//   selectedBeats: string[] = [];
-  
-//   startDate: string = '';
-//   endDate: string = '';
-  
-//   dropdownOpen: Record<string, boolean> = { zone: false, ward: false, beat: false };
-//   reportsData: ReportItem[] = [];
-//   filteredData: ReportItem[] = [];
-  
-//   merchantId: string = 'ABC1234567'; // Get this from login session
-//   machineId: string = 'MACH07,MACH06'; // Set default machine IDs
-
-//   constructor(private dataService: DataService, private cdr: ChangeDetectorRef) {}
-
-//   ngOnInit() {
-//     this.setDefaultDates();
-//     this.loadReport();
-//   }
-
-//   setDefaultDates() {
-//     const today = new Date();
-//     const lastYear = new Date();
-//     lastYear.setFullYear(today.getFullYear() - 1);
-//     this.startDate = this.formatDate(lastYear);
-//     this.endDate = this.formatDate(today);
-//   }
-
-//   formatDate(date: Date): string {
-//     return date.toISOString().slice(0, 19).replace('T', ' ');
-//   }
-
-//   loadReport() {
-//     this.isLoading = true;
-//     this.errorMessage = '';
-
-//     this.dataService.getMachineAndIncineratorTransaction(
-//       this.startDate,
-//       this.endDate,
-//       this.merchantId,
-//       this.selectedMachineIds.length ? this.selectedMachineIds.join(',') : this.machineId,
-//       this.selectedZones.length ? this.selectedZones.join(',') : '',
-//       this.selectedWards.length ? this.selectedWards.join(',') : '',
-//       this.selectedBeats.length ? this.selectedBeats.join(',') : ''
-//     ).subscribe(
-//       (response: any) => {
-//         if (response.status === 200 && response.data.machineDetails.length > 0) {
-//           this.processResponseData(response.data.machineDetails);
-//         } else {
-//           this.filteredData = [];
-//           this.errorMessage = "No data available for the selected filters.";
-//         }
-//         this.isLoading = false;
-//       },
-//       (error) => {
-//         this.errorMessage = "Error fetching data. Please try again.";
-//         this.isLoading = false;
-//       }
-//     );
-//   }
-
-//   processResponseData(machineDetails: any[]) {
-//     this.reportsData = machineDetails.map((machine, index) => ({
-//       srNo: index + 1,
-//       machineId: machine.machineId,
-//       machineLocation: machine.machineLocation || `${machine.level1} / ${machine.level2} / ${machine.level3}`,
-//       address: machine.address || `${machine.level1}, ${machine.level2}, ${machine.level3}`,
-//       machineType: machine.machineType || 'Unknown',
-//       transactions: machine.vending.map((txn: any) => ({
-//         date: txn.date,
-//         qty: txn.quantity,
-//         cash: `₹ ${txn.cashCollected}`,
-//         onTime: machine.incinerator[0]?.onTime || '0m',
-//         burnCycles: machine.incinerator[0]?.burnCycles || 0,
-//         sanNapkinsBurnt: machine.incinerator[0]?.sanitaryNapkinsBurnt || 0
-//       }))
-//     }));
-
-//     this.filteredData = [...this.reportsData];
-//   }
-
-//   toggleSummaryType() {
-//     this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
-//     this.filteredData = this.reportsData.map(machine => ({
-//       ...machine,
-//       transactions: this.summaryType === 'Daily' ? machine.transactions : [{
-//         date: 'Total',
-//         qty: machine.transactions.reduce((sum, txn) => sum + txn.qty, 0),
-//         cash: `₹ ${machine.transactions.reduce((sum, txn) => sum + parseFloat(txn.cash.replace('₹', '')), 0).toFixed(2)}`,
-//         onTime: '0m',
-//         burnCycles: machine.transactions.reduce((sum, txn) => sum + txn.burnCycles, 0),
-//         sanNapkinsBurnt: machine.transactions.reduce((sum, txn) => sum + txn.sanNapkinsBurnt, 0)
-//       }]
-//     }));
-//   }
-// }
-
-///working but changed because alignments uncomment respnse then it will work
-// import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-// import { DataService } from '../../../service/data.service';
-// import { CommonDataService } from '../../../Common/common-data.service';
-
-// interface Transaction {
-//   date: string;
-//   qty: number;
-//   cash: string;
-//   onTime: string;
-//   burnCycles: number;
-//   sanNapkinsBurnt: number;
-// }
-
-// interface ReportItem {
-//   machineType: string;
-//   srNo: number;
-//   machineId: string;
-//   machineLocation: string;
-//   address: string;
-//   transactions: Transaction[];
-// }
-
-// @Component({
-//   selector: 'app-smart-tables-basic-example',
-//   templateUrl: './smart-tables-basic-example.component.html',
-//   styleUrls: ['./smart-tables-basic-example.component.scss']
-// })
-// export class SmartTablesBasicExampleComponent implements OnInit {
-//   isLoading = false;
-//   summaryType: 'Daily' | 'Totals' = 'Daily';
-//   errorMessage: string = '';
-
-//   zones: string[] = [];
-//   wards: string[] = [];
-//   beats: string[] = [];
-
-//   merchantId: string = ''; 
-//   machineIds: string[] = ['GSM001', 'GSM002'];
-//   selectedMachineIds: string[] = [...this.machineIds];  // ✅ Default: Select all
-
-//   selectedZones: string[] = [];
-//   selectedWards: string[] = [];
-//   selectedBeats: string[] = [];
-
-//   startDate: string = '';
-//   endDate: string = '';
-
-//   dropdownOpen: Record<string, boolean> = { zone: false, ward: false, beat: false, machine: false };
-//   reportsData: ReportItem[] = [];
-//   filteredData: ReportItem[] = [];
-
-//   constructor(
-//     private dataService: DataService,
-//     private commonDataService: CommonDataService,
-//     private cdr: ChangeDetectorRef
-//   ) {}
-//   ngOnInit() {
-//     this.merchantId = this.commonDataService.merchantId ?? '';
-//     this.setDefaultDates();
-//     this.loadReport();  // ✅ Load data on page load
-//   }
-
-//   setDefaultDates() {
-//     const today = new Date();
-//     const lastWeek = new Date();
-//     lastWeek.setDate(today.getDate() - 7); // ✅ Last 7 days by default
-  
-//     this.startDate = this.formatDate(lastWeek);
-//     this.endDate = this.formatDate(today);
-//   }
-
-//   formatDate(date: Date): string {
-//     return date.toISOString().split('T')[0];
-//   }
-
-//   loadReport() {
-//     this.isLoading = true;
-//     this.errorMessage = '';
-
-//     // ✅ Pass selected machines (default: all)
-//     const selectedMachines = this.selectedMachineIds.length > 0 ? this.selectedMachineIds : this.machineIds;
-
-//     this.dataService.getMachineAndIncineratorTransaction(
-//       this.startDate,  
-//       this.endDate,    
-//       this.merchantId,
-//       selectedMachines,  
-//       this.selectedZones,
-//       this.selectedWards,
-//       this.selectedBeats
-//     ).subscribe(
-//       (response: any) => {
-//         if (response.status === 200 && response.data.machineDetails.length > 0) {
-//           this.processResponseData(response.data.machineDetails);
-//         } else {
-//           this.filteredData = [];
-//           this.errorMessage = "No data available for the selected filters.";
-//         }
-//         this.isLoading = false;
-//       },
-//       (error) => {
-//         this.errorMessage = "Error fetching data. Please try again.";
-//         this.isLoading = false;
-//       }
-//     );
-//   }
-
-// //  processResponseData(machineDetails: any[]) {
-// //   this.reportsData = machineDetails.map((machine, index) => {
-// //     const vendingTransactions = machine.vending.map((txn: any) => ({
-// //       date: txn.date,
-// //       qty: txn.quantity,
-// //       cash: `₹ ${txn.cashCollected}`,
-// //       onTime: null,
-// //       burnCycles: null,
-// //       sanNapkinsBurnt: null
-// //     }));
-
-// //     const incineratorTransactions = machine.incinerator.map((inc: any) => ({
-// //       date: inc.onTime,
-// //       qty: null,  
-// //       cash: null,  
-// //       onTime: inc.onTime || '0m',
-// //       burnCycles: inc.burnCycles || 0,
-// //       sanNapkinsBurnt: inc.sanitaryNapkinsBurnt || 0
-// //     }));
-
-// //     // ✅ Define Explicit Types in `reduce()` to Fix Errors
-// //     const totalRow = {
-// //       date: 'Total',
-// //       qty: vendingTransactions.reduce((sum: number, txn: { qty: number }) => sum + (txn.qty || 0), 0),
-// //       cash: `₹ ${vendingTransactions.reduce((sum: number, txn: { cash: string }) => 
-// //         sum + parseFloat(txn.cash.replace('₹', '')), 0).toFixed(2)}`,
-// //       onTime: '0m / day',
-// //       burnCycles: incineratorTransactions.reduce((sum: number, txn: { burnCycles: number }) => 
-// //         sum + (txn.burnCycles || 0), 0),
-// //       sanNapkinsBurnt: incineratorTransactions.reduce((sum: number, txn: { sanNapkinsBurnt: number }) => 
-// //         sum + (txn.sanNapkinsBurnt || 0), 0)
-// //     };
-
-// //     return {
-// //       srNo: index + 1,
-// //       machineId: machine.machineId,
-// //       machineLocation: machine.machineLocation?.trim() ? machine.machineLocation : machine.address,
-// //       address: machine.address || `${machine.level1 || ''}, ${machine.level2 || ''}, ${machine.level3 || ''}`.trim(),
-// //       machineType: machine.machineType || 'N/A',
-// //       transactions: [...vendingTransactions, ...incineratorTransactions, totalRow]
-// //     };
-// //   });
-
-// //   this.filteredData = this.reportsData.length > 0 ? [...this.reportsData] : [];
-// //   if (this.filteredData.length === 0) {
-// //     this.errorMessage = "No data available for the selected filters.";
-// //   }
-// // }
-
-// processResponseData(machineDetails: any[]) {
-//   this.reportsData = machineDetails.map((machine, index) => {
-//     const vendingTransactions = machine.vending?.map((txn: any) => ({
-//       date: txn.date || '-',
-//       qty: txn.quantity ?? '',
-//       cash: txn.cashCollected !== undefined ? `₹ ${txn.cashCollected}` : '',
-//       onTime: '',
-//       burnCycles: '',
-//       sanNapkinsBurnt: ''
-//     })) || [];  // ✅ Default to empty array if vending is missing
-
-//     const incineratorTransactions = machine.incinerator?.map((inc: any) => ({
-//       date: inc.onTime || '-',
-//       qty: '',
-//       cash: '',
-//       onTime: inc.onTime ?? '',
-//       burnCycles: inc.burnCycles ?? '',
-//       sanNapkinsBurnt: inc.sanitaryNapkinsBurnt ?? ''
-//     })) || [];  // ✅ Default to empty array if incinerator is missing
-
-//     // ✅ No `.reduce()` errors! If empty, it shows `''`
-//     const totalRow = {
-//       date: 'Total',
-//       qty: vendingTransactions.length ? vendingTransactions.reduce((sum: number, txn) => sum + (txn.qty || 0), 0) : '',
-//       cash: vendingTransactions.length ? `₹ ${vendingTransactions.reduce((sum: number, txn) => sum + parseFloat(txn.cash.replace('₹', '') || '0'), 0).toFixed(2)}` : '',
-//       onTime: incineratorTransactions.length ? `${incineratorTransactions.reduce((sum: number, txn) => sum + (parseFloat(txn.onTime) || 0), 0)}m` : '',
-//       burnCycles: incineratorTransactions.length ? incineratorTransactions.reduce((sum: number, txn) => sum + (txn.burnCycles || 0), 0) : '',
-//       sanNapkinsBurnt: incineratorTransactions.length ? incineratorTransactions.reduce((sum: number, txn) => sum + (txn.sanNapkinsBurnt || 0), 0) : ''
-//     };
-
-//     return {
-//       srNo: index + 1,
-//       machineId: machine.machineId,
-//       machineLocation: machine.machineLocation?.trim() ? machine.machineLocation : machine.address,
-//       address: machine.address || `${machine.level1 || ''}, ${machine.level2 || ''}, ${machine.level3 || ''}`.trim(),
-//       machineType: machine.machineType || 'N/A',
-//       transactions: [...vendingTransactions, ...incineratorTransactions, totalRow]
-//     };
-//   });
-
-//   this.filteredData = [...this.reportsData];
-//   if (this.filteredData.length === 0) {
-//     this.errorMessage = "No data available for the selected filters.";
-//   }
-// }
-
-
-//   toggleDropdown(filter: 'zone' | 'ward' | 'beat' | 'machine') {
-//     this.dropdownOpen[filter] = !this.dropdownOpen[filter];
-//   }
-
-//   onMachineChange(machine: string, event: any) {
-//     if (event.target.checked) {
-//       this.selectedMachineIds.push(machine);  // ✅ Add to selection
-//     } else {
-//       this.selectedMachineIds = this.selectedMachineIds.filter(id => id !== machine);  // ✅ Remove from selection
-//     }
-//   }
-
-//   toggleSummaryType() {
-//     this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
-  
-//     if (this.summaryType === 'Totals') {
-//       this.filteredData = this.reportsData.map(machine => ({
-//         srNo: machine.srNo,
-//         machineId: machine.machineId,
-//         machineLocation: machine.machineLocation,
-//         address: machine.address,
-//         machineType: machine.machineType || 'N/A',
-//         transactions: [{
-//           date: 'Total',
-//           qty: machine.transactions.reduce((sum: number, txn: any) => sum + (txn.qty || 0), 0),  // ✅ Always a number
-//           cash: `₹ ${machine.transactions.reduce((sum: number, txn: any) => sum + parseFloat((txn.cash || '₹ 0').replace('₹', '')), 0).toFixed(2)}`,
-//           onTime: machine.transactions.reduce((sum: number, txn: any) => sum + (parseFloat(txn.onTime) || 0), 0) ? 
-//                    `${machine.transactions.reduce((sum: number, txn: any) => sum + (parseFloat(txn.onTime) || 0), 0)}m` : '-',
-//           burnCycles: machine.transactions.reduce((sum: number, txn: any) => sum + (txn.burnCycles || 0), 0),  // ✅ Always a number
-//           sanNapkinsBurnt: machine.transactions.reduce((sum: number, txn: any) => sum + (txn.sanNapkinsBurnt || 0), 0)  // ✅ Always a number
-//         }]
-//       }));
-//     } else {
-//       this.filteredData = [...this.reportsData];  // ✅ Revert to Daily View
-//     }
-//   }
-  
-  
-
-//   selectAllZones() {
-//     this.selectedZones = [...this.zones];
-//     this.selectedWards = [];
-//     this.selectedBeats = [];
-//   }
-
-//   clearSelection(type: 'zone' | 'ward' | 'beat') {
-//     if (type === 'zone') {
-//       this.selectedZones = [];
-//       this.selectedWards = [];
-//       this.selectedBeats = [];
-//     } else if (type === 'ward') {
-//       this.selectedWards = [];
-//       this.selectedBeats = [];
-//     } else if (type === 'beat') {
-//       this.selectedBeats = [];
-//     }
-//   }
-
-//   selectAllWards() {
-//     this.selectedWards = [...this.wards];
-//     this.selectedBeats = [];
-//     this.loadReport();
-//   }
-
-//   selectAllBeats() {
-//     this.selectedBeats = [...this.beats];
-//     this.loadReport();
-//   }
-
-//   getTotalQty(transactions: any[]): number {
-//     return transactions.reduce((sum, txn) => sum + (txn.qty || 0), 0);
-//   }
-
-//   getTotalCash(transactions: any[]): string {
-//     return "₹ " + transactions
-//       .reduce((sum, txn) => sum + parseFloat((txn.cash || "0").replace('₹', '')), 0)
-//       .toFixed(2);
-//   }
-
-//   getTotalBurnCycles(transactions: any[]): number {
-//     return transactions.reduce((sum, txn) => sum + (txn.burnCycles || 0), 0);
-//   }
-
-//   getTotalSanNapkinsBurnt(transactions: any[]): number {
-//     return transactions.reduce((sum, txn) => sum + (txn.sanNapkinsBurnt || 0), 0);
-//   }
-// }
-
 
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
-
+import * as XLSX from 'xlsx';
 interface Transaction {
   date: string;
   qty: number;
@@ -1036,105 +11,351 @@ interface Transaction {
   burnCycles: number;
   sanNapkinsBurnt: number;
 }
-
+ 
 interface ReportItem {
+  reportType: string;
   machineType: string;
   srNo: number;
   machineId: string;
   machineLocation: string;
   address: string;
   transactions: Transaction[];
+  vending?: { date: string; quantity: number; cashCollected: number }[];
+  incinerator?: { onTime: string; burnCycles: number; sanitaryNapkinsBurnt: number }[];
+ 
 }
-
+ 
 @Component({
   selector: 'app-smart-tables-basic-example',
   templateUrl: './smart-tables-basic-example.component.html',
   styleUrls: ['./smart-tables-basic-example.component.scss']
 })
 export class SmartTablesBasicExampleComponent implements OnInit {
+  searchQuery: string = '';  // ✅ This is the search input value
+ 
   isLoading = false;
   summaryType: 'Daily' | 'Totals' = 'Daily';
   errorMessage = '';
-
+ 
   zones: string[] = [];
   wards: string[] = [];
   beats: string[] = [];
-
-  merchantId = ''; 
-  machineIds: string[] = ['GSM001', 'GSM002','MACH01','NASC00','HFBM01','MACH07','MACH06'];
-  selectedMachineIds: string[] = [...this.machineIds];
-
+ 
+  projectList: any[] = [];
+  selectedProjectId: number | null = null;
+ 
+projectNames: string[] = []; // New property for project names
+selectedProjectNames: string[] = []; // New property for selected project names
+ 
+  merchantId = '';
+  machineIds: string[] = []; // ✅ Now Dynamic
+  selectedMachineIds: string[] = [];
+ 
   selectedZones: string[] = [];
   selectedWards: string[] = [];
   selectedBeats: string[] = [];
-
+ 
   startDate = '';
   endDate = '';
-
+ 
   dropdownOpen: Record<string, boolean> = { zone: false, ward: false, beat: false, machine: false };
   reportsData: ReportItem[] = [];
   filteredData: ReportItem[] = [];
-  
+ 
   reportGenerated = '';
   reportFromPeriod = '';
   reportToPeriod = '';
-
+ 
   grandTotal = {
     quantity: 0,
     cash: '₹ 0',
     burnCycles: 0,
     sanNapkinsBurnt: 0
   };
-
+ 
   // ✅ Pagination
   paginatedData: ReportItem[] = [];
   currentPage = 1;
   itemsPerPage = 10;
-
+  reportType: any;
+ 
   constructor(
     private dataService: DataService,
     private commonDataService: CommonDataService,
     private cdr: ChangeDetectorRef
   ) {}
-
+ 
   ngOnInit() {
-    this.merchantId = this.commonDataService.merchantId ?? '';
-    this.setDefaultDates();
     this.loadReport();
-  }
 
+    this.merchantId = this.commonDataService.merchantId ?? '';
+   
+ 
+    if (!this.merchantId) {
+      this.errorMessage = "User details not found. Please log in again.";
+      return;
+    }
+ 
+ 
+    this.setDefaultDates();
+    this.fetchUserDetails(); // ✅ Fetch User Details First
+    this.loadCommonData();
+ 
+    document.addEventListener('click', this.closeDropdownOnClickOutside.bind(this));
+    this.cdr.detectChanges();
+}
+ 
+ 
+// loadCommonData() {
+//   this.commonDataService.userDetails().subscribe((res: any) => {
+//     console.log('CommonDataService Loaded: ', res);
+//     this.projectList = res.userDetails.projectName || [];
+//     this.projectNames = this.projectList.map((p: any) => p.projectname);
+//     console.log('Project List:', this.projectList);
+//     console.log('Project Names:', this.projectNames);
+//   });
+// }
+ 
+loadCommonData() {
+  // Access userDetails as a property, not a function
+  const userDetails = this.commonDataService.userDetails;
+  console.log('CommonDataService User Details:', userDetails);
+ 
+  if (userDetails && userDetails.projectName) {
+    // Store the full project information
+    this.projectList = Array.isArray(userDetails.projectName)
+      ? userDetails.projectName
+      : [userDetails.projectName];
+   
+    // Extract just the names for display
+    this.projectNames = this.projectList.map((p: any) =>
+      typeof p === 'object' ? p.projectname : p
+    );
+   
+    console.log('Project List:', this.projectList);
+    console.log('Project Names:', this.projectNames);
+   
+    // Auto-select all projects
+    this.selectedProjectNames = [...this.projectNames];
+  }
+}
+ 
+ 
+onProjectChange() {
+  console.log('Selected ProjectId:', this.selectedProjectId);
+  this.loadReport();
+}
+ngOnDestroy() {
+    // ✅ Remove listener to avoid memory leaks
+    document.removeEventListener('click', this.closeDropdownOnClickOutside.bind(this));
+}
+closeDropdownOnClickOutside(event: Event) {
+  const clickedInsideDropdown = Object.keys(this.dropdownOpen).some(
+    key => this.dropdownOpen[key] && event.target instanceof HTMLElement && event.target.closest('.dropdown')
+  );
+ 
+  if (!clickedInsideDropdown) {
+    this.dropdownOpen = { zone: false, ward: false, beat: false, machine: false };
+    this.cdr.detectChanges();
+  }
+}
+ 
+ 
+fetchUserDetails() {
+  this.isLoading = true;
+ 
+  const userDetails = this.commonDataService.userDetails;
+  console.log("📌 Raw API User Details:", userDetails);
+ 
+  if (!userDetails || !userDetails.machineId || !userDetails.state || !userDetails.district || !userDetails.projectName) {
+      console.error("❌ User details missing or empty!", userDetails);
+      this.errorMessage = "User details not found. Please log in again.";
+      this.isLoading = false;
+      return;
+  }
+ 
+  // ✅ Assign values
+  this.machineIds = [...userDetails.machineId];
+  this.zones = [...userDetails.state];  
+  this.wards = [...userDetails.district];
+ 
+  // ✅ Auto-select all options
+  this.selectedMachineIds = [...this.machineIds];
+  this.selectedZones = [...this.zones];
+  this.selectedWards = [...this.wards];
+  this.projectNames = Array.isArray(userDetails.projectName) ? userDetails.projectName : [userDetails.projectName]; // Populate project names
+  this.selectedProjectNames = [...this.projectNames]; // Auto-select all project names
+ 
+  // ✅ Handle companyName as array of objects
+  this.beats = Array.isArray(userDetails.projectName)
+  ? userDetails.projectName.map((name: string, index: number) => ({
+      ClientId: (index + 1).toString(), // or use another unique identifier if needed
+      projectName: name
+    }))
+  : [{
+      ClientId: '1',
+      projectName: userDetails.projectName
+    }];
+ 
+ 
+  console.log("Beats Data:", this.beats);
+ 
+  console.log("📌 Filters Populated & Selected:", {
+      machineIds: this.machineIds,
+      selectedMachineIds: this.selectedMachineIds,
+      zones: this.zones,
+      selectedZones: this.selectedZones,
+      wards: this.wards,
+      selectedWards: this.selectedWards,
+      beats: this.beats,
+      selectedBeats: this.selectedBeats
+  });
+ 
+  this.updateFilters();
+  this.isLoading = false;
+  this.cdr.detectChanges();  // ✅ Ensure UI updates
+}
+ 
+ 
+// updateFilters() {
+//   this.zones = Array.from(new Set(this.zones)).filter(Boolean);
+//   this.wards = Array.from(new Set(this.wards)).filter(Boolean);
+//   this.beats = Array.from(new Set(this.beats)).filter(Boolean);
+//   this.machineIds = Array.from(new Set(this.machineIds)).filter(Boolean);
+//   this.projectNames = Array.from(new Set(this.projectNames)).filter(Boolean); // Update project names
+//   if (this.projectNames.length === 1) this.selectedProjectNames = [this.projectNames[0]]; // Auto-select single project name
+ 
+//   // ✅ Auto-select single values
+//   if (this.zones.length === 1) this.selectedZones = [this.zones[0]];
+//   if (this.wards.length === 1) this.selectedWards = [this.wards[0]];
+//   if (this.beats.length === 1) this.selectedBeats = [this.beats[0]];
+//   if (this.machineIds.length === 1) this.selectedMachineIds = [this.machineIds[0]];
+// }
+ 
+ 
+ 
+updateFilters() {
+  this.zones = Array.from(new Set(this.zones)).filter(Boolean);
+  this.wards = Array.from(new Set(this.wards)).filter(Boolean);
+  this.beats = Array.from(new Set(this.beats)).filter(Boolean);
+  this.machineIds = Array.from(new Set(this.machineIds)).filter(Boolean);
+ 
+  // Handle project names properly
+  this.projectNames = Array.from(new Set(this.projectNames)).filter(Boolean);
+ 
+  // Auto-select single values
+  if (this.zones.length === 1) this.selectedZones = [this.zones[0]];
+  if (this.wards.length === 1) this.selectedWards = [this.wards[0]];
+  if (this.beats.length === 1) this.selectedBeats = [this.beats[0]];
+  if (this.machineIds.length === 1) this.selectedMachineIds = [this.machineIds[0]];
+  if (this.projectNames.length === 1) this.selectedProjectNames = [this.projectNames[0]];
+ 
+  // Ensure we update the project IDs when filters are updated
+  if (this.selectedProjectNames.length > 0) {
+    const projectIds = this.getProjectIds(this.selectedProjectNames);
+    console.log("Initial selected project IDs:", projectIds);
+  }
+}
+ 
+ 
   setDefaultDates() {
     const today = new Date();
     const lastWeek = new Date();
-    lastWeek.setDate(today.getDate() - 7);
+    lastWeek.setDate(today.getDate() - 6);
     this.startDate = this.formatDate(lastWeek);
     this.endDate = this.formatDate(today);
   }
-
+ 
   formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+    return `${year}-${month}-${day}`;
   }
-
+ 
+ 
+  /** ✅ Fetch Machine IDs Dynamically */
+  fetchMachineIds() {
+    this.isLoading = true;
+ 
+    this.dataService.getMachineIds(this.merchantId).subscribe(
+      (machineIds) => {
+        this.machineIds = machineIds;
+        this.selectedMachineIds = [...machineIds]; // Default select all machines
+        this.loadReport();  // Load report after fetching machines
+      },
+      (error) => {
+        console.error("❌ Error fetching machines:", error);
+        this.errorMessage = "Error fetching machines.";
+        this.isLoading = false;
+      }
+    );
+  }
+  getSerialNumber(machine: ReportItem): number {
+    return this.paginatedData.findIndex(m => m.machineId === machine.machineId) + 1 + ((this.currentPage - 1) * this.itemsPerPage);
+  }
+ 
+ 
+ 
   loadReport() {
     this.isLoading = true;
     this.errorMessage = '';
-
-    const selectedMachines = this.selectedMachineIds.length > 0 ? this.selectedMachineIds : this.machineIds;
-
+ 
+    const selectedMachines = this.selectedMachineIds.length ? this.selectedMachineIds : [...this.machineIds];
+    const selectedZones = this.selectedZones.length ? this.selectedZones : [...this.zones];
+    const selectedWards = this.selectedWards.length ? this.selectedWards : [...this.wards];
+   
+    // Get project IDs based on selected project names
+    const selectedProjects = this.selectedProjectNames.length ? this.selectedProjectNames : [...this.projectNames];
+   
+    // Get project IDs from the project list
+    const selectedProjectIds = selectedProjects.map(projectName => {
+      // Find the project in the project list
+      const project = this.projectList.find(p =>
+        p.projectname === projectName || p === projectName
+      );
+     
+      // Return the ProjectId if found (note: case sensitive - ProjectId with capital P)
+      return project && project.ProjectId ? project.ProjectId.toString() : '';
+    }).filter(id => id); // Remove empty IDs
+   
+    console.log("📡 Calling API with:", {
+      startDate: this.startDate,
+      endDate: this.endDate,
+      merchantId: this.merchantId,
+      selectedMachines,
+      selectedZones,
+      selectedWards,
+      selectedProjects,
+      selectedProjectIds
+    });
+ 
+    // Call the API with the project IDs as an array
     this.dataService.getMachineAndIncineratorTransaction(
-      this.startDate,  
-      this.endDate,    
+      this.startDate,
+      this.endDate,
       this.merchantId,
-      selectedMachines,  
-      this.selectedZones,
-      this.selectedWards,
-      this.selectedBeats
+      selectedMachines,
+      selectedZones,
+      selectedWards,
+      [], // level3 (empty or your beat IDs if needed)
+      selectedProjectIds // level4 - Pass as array of strings
     ).subscribe(
       (response: any) => {
-        if (response.status === 200 && response.data.machineDetails.length > 0) {
-          this.reportGenerated = response.data.reportGenerated;
-          this.reportFromPeriod = response.data.reportFromPeriod;
-          this.reportToPeriod = response.data.reportToPeriod;
+        console.log("✅ API Response Received:", response);
+        if (response.code === 200 && response.data?.machineDetails) {
+          this.reportGenerated = new Date().toISOString();
+          this.reportFromPeriod = response.data.reportFromPeriod || '-';
+          this.reportToPeriod = response.data.reportToPeriod || '-';
+          this.reportType = response.data.reportType || '-';
+ 
+          console.log("📌 Report Metadata Set:", {
+            reportGenerated: this.reportGenerated,
+            reportFromPeriod: this.reportFromPeriod,
+            reportToPeriod: this.reportToPeriod,
+            reportType: this.reportType
+          });
+ 
           this.processResponseData(response.data.machineDetails);
         } else {
           this.filteredData = [];
@@ -1147,98 +368,300 @@ export class SmartTablesBasicExampleComponent implements OnInit {
         this.isLoading = false;
       }
     );
+  }    
+ 
+ 
+  // // Add this new method to your component
+  // getProjectIds(projectNames: string[]): string[] {
+  //   return projectNames.map(name => {
+  //     const project = this.projectList.find(p => p.projectname === name || p === name);
+  //     return project && project.ClientId ? project.ClientId.toString() : '';
+  //   }).filter(id => id); // Filter out empty IDs
+  // }
+ 
+ 
+ 
+// // Improved getProjectIds method to handle different project object formats
+// getProjectIds(projectNames: string[]): string[] {
+//   const projectIds: string[] = [];
+ 
+//   projectNames.forEach(name => {
+//     // Find the project in the projectList by name
+//     const project = this.projectList.find(p => {
+//       // Handle both cases: when p is an object with projectname or when p is the name itself
+//       return (p.projectname && p.projectname === name) || p === name;
+//     });
+   
+//     // If found and it has a ClientId, add it to projectIds
+//     if (project) {
+//       const clientId = project.ClientId || project.clientId;
+//       if (clientId) {
+//         projectIds.push(clientId.toString());
+//       }
+//     }
+//   });
+ 
+//   console.log("Project Names mapped to IDs:", {
+//     names: projectNames,
+//     ids: projectIds
+//   });
+ 
+//   return projectIds;
+// }
+ 
+ 
+getProjectIds(projectNames: string[]): string[] {
+  // If user details has direct clientId, use it as a fallback
+  if (projectNames.length > 0 &&
+      this.commonDataService.userDetails &&
+      this.commonDataService.userDetails.clientId) {
+    return [this.commonDataService.userDetails.clientId.toString()];
   }
-  processResponseData(machineDetails: any[]) {
-    let grandTotalQty = 0;
-    let grandTotalCash = 0;
-    let grandTotalBurnCycles = 0;
-    let grandTotalSanNapkins = 0;
-    
-    let globalIndex = 0; // ✅ Global Counter for SR. NO.
-  
-    this.reportsData = machineDetails.map((machine, index) => {
-      const vendingTotal = machine.vending?.find((txn: any) => txn.date?.trim() === 'Total') || {};
-      const incineratorTotal = machine.incinerator?.find((txn: any) => txn.onTime?.trim() === 'Total') || {};
-  
-      const machineTotalQty = vendingTotal.quantity ?? 0;
-      const machineTotalCash = vendingTotal.cashCollected !== undefined ? parseFloat(vendingTotal.cashCollected) : 0;
-      const machineTotalBurnCycles = incineratorTotal.burnCycles ?? 0;
-      const machineTotalSanNapkins = incineratorTotal.sanitaryNapkinsBurnt ?? 0;
-  
+ 
+  // Otherwise try to map project names to IDs
+  const projectIds: string[] = [];
+ 
+  // Log current state for debugging
+  console.log("Project names:", projectNames);
+  console.log("Project list:", this.projectList);
+ 
+  // If we have a clientId directly in user details, use it
+  if (this.commonDataService.userDetails && this.commonDataService.userDetails.clientId) {
+    return [this.commonDataService.userDetails.clientId.toString()];
+  }
+ 
+  return projectIds;
+}
+ 
+ 
+onStartDateChange() {
+  if (this.startDate > this.endDate) {
+    this.endDate = this.startDate;
+  }
+}
+ 
+onEndDateChange() {
+  if (this.endDate < this.startDate) {
+    this.startDate = this.endDate;
+  }
+}
+ 
+ 
+processResponseData(machineDetails: any[]) {
+  let grandTotalQty = 0;
+  let grandTotalCash = 0;
+  let grandTotalBurnCycles = 0;
+  let grandTotalSanNapkins = 0;
+ 
+  // this.reportsData = machineDetails.map((machine, index): ReportItem => {//before i did
+    this.reportsData = machineDetails
+    .filter(machine => (machine.vending && machine.vending.length) || (machine.incinerator && machine.incinerator.length))
+    .map((machine, index): ReportItem => {
+ 
+      let transactionsMap = new Map<string, Transaction>();
+ 
+      // ✅ Initialize Machine Totals
+      let machineTotalQty = 0;
+      let machineTotalCash = 0;
+      let machineTotalBurnCycles = 0;
+      let machineTotalSanNapkins = 0;
+ 
+      // ✅ Handle Vending Transactions (Check for null)
+      (machine.vending || []).forEach((txn: any) => {
+          if (txn.date !== 'Total') {
+              machineTotalQty += txn.quantity ?? 0;
+              machineTotalCash += txn.cashCollected ?? 0;
+          }
+          transactionsMap.set(txn.date, {
+              date: txn.date,
+              qty: txn.quantity ?? 0,
+              cash: `₹ ${txn.cashCollected?.toFixed(2) ?? '0'}`,
+              onTime: '-',
+              burnCycles: 0,
+              sanNapkinsBurnt: 0
+          });
+      });
+ 
+      // ✅ Handle Incinerator Transactions (Check for null)
+      (machine.incinerator || []).forEach((txn: any) => {
+          if (txn.onTime !== 'Total') {
+              machineTotalBurnCycles += txn.burnCycles ?? 0;
+              machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+          }
+ 
+          if (transactionsMap.has(txn.onTime)) {
+              let existingTxn = transactionsMap.get(txn.onTime)!;
+              existingTxn.onTime = txn.onTime ?? '-';
+              existingTxn.burnCycles = txn.burnCycles ?? 0;
+              existingTxn.sanNapkinsBurnt = txn.sanitaryNapkinsBurnt ?? 0;
+          } else {
+              transactionsMap.set(txn.onTime, {
+                  date: txn.onTime,
+                  qty: 0,
+                  cash: '₹ 0',
+                  onTime: txn.onTime ?? '-',
+                  burnCycles: txn.burnCycles ?? 0,
+                  sanNapkinsBurnt: txn.sanitaryNapkinsBurnt ?? 0
+              });
+          }
+      });
+ 
+      // ✅ Add Machine's Total Row
+      transactionsMap.set('Total', {
+          date: 'Total',
+          qty: machineTotalQty,
+          cash: `₹ ${machineTotalCash.toFixed(2)}`,
+          onTime: '-',
+          burnCycles: machineTotalBurnCycles,
+          sanNapkinsBurnt: machineTotalSanNapkins
+      });
+ 
+      // ✅ Update Grand Total (Sum of Each Machine's Totals)
       grandTotalQty += machineTotalQty;
       grandTotalCash += machineTotalCash;
       grandTotalBurnCycles += machineTotalBurnCycles;
       grandTotalSanNapkins += machineTotalSanNapkins;
-  
-      const transactions = [
-        ...machine.vending.map((txn: any) => ({
-          srNo: ++globalIndex, // ✅ Keep Incrementing
-          date: txn.date || '-',
-          qty: txn.quantity ?? 0,
-          cash: `₹ ${txn.cashCollected !== undefined ? txn.cashCollected.toFixed(2) : '0'}`,
-          onTime: '-',
-          burnCycles: 0,
-          sanNapkinsBurnt: 0                                                                  
-        })),
-        ...machine.incinerator.map((txn: any) => ({
-          srNo: ++globalIndex, // ✅ Keep Incrementing
-          date: txn.onTime || '-',
-          qty: 0,
-          cash: '-',
-          onTime: txn.onTime ?? '-',
-          burnCycles: txn.burnCycles ?? 0,
-          sanNapkinsBurnt: txn.sanitaryNapkinsBurnt ?? 0
-        }))
-      ];
-  
+ 
       return {
-        srNo: index + 1,
-        machineId: machine.machineId,
-        machineLocation: machine.machineLocation?.trim() ? machine.machineLocation : machine.address,
-        address: machine.address || '',
-        machineType: machine.machineType || 'N/A',
-        transactions, // ✅ Already Precomputed SR. NO.
-        total: {
-          date: 'Total',
-          quantity: machineTotalQty,
-          cashCollected: `₹ ${machineTotalCash.toFixed(2)}`,
-          onTime: '-',
-          burnCycles: machineTotalBurnCycles,
-          sanitaryNapkinsBurnt: machineTotalSanNapkins
-        }
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation ? machine.machineLocation.trim() : machine.address,
+          address: machine.address || '',
+          machineType: machine.machineType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: Array.from(transactionsMap.values())
       };
-    });
-  
-    this.grandTotal = {
-      quantity: grandTotalQty || 0,
-      cash: `₹ ${grandTotalCash.toFixed(2)}` || '₹ 0',
-      burnCycles: grandTotalBurnCycles || 0,
-      sanNapkinsBurnt: grandTotalSanNapkins || 0
-    };
-  
-    this.filteredData = [...this.reportsData];
-    this.updatePagination();
+  });
+ 
+  // ✅ Update Grand Total Correctly
+  this.grandTotal = {
+      quantity: grandTotalQty,
+      cash: `₹ ${grandTotalCash.toFixed(2)}`,
+      burnCycles: grandTotalBurnCycles,
+      sanNapkinsBurnt: grandTotalSanNapkins
+  };
+ 
+  this.filteredData = [...this.reportsData];
+  this.updatePagination();
+}
+ 
+ 
+/** ✅ Function to Format Address & Machine Location */
+formatText(text: string | null): string {
+  if (!text) return '';
+ 
+  return text
+      .toLowerCase() // Convert entire text to lowercase first
+      .split(' ') // Split by spaces
+      .map(word => {
+          // Check if word starts with a number (like "03visakhapatnam")
+          if (/^\d/.test(word)) {
+              return word; // Keep numbers unchanged
+          }
+          // Capitalize first letter of each word
+          return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' '); // Join words back into a sentence
+}
+ 
+ 
+private dropdownTimeouts: { [key: string]: any } = {};
+ 
+toggleDropdown(filterType: string, event: Event) {
+  event.stopPropagation();
+ 
+  // 🔄 Close all other dropdowns
+  Object.keys(this.dropdownOpen).forEach(key => {
+    if (key !== filterType) {
+      this.dropdownOpen[key] = false;
+      clearTimeout(this.dropdownTimeouts[key]);
+    }
+  });
+ 
+  // ✅ Toggle current dropdown
+  this.dropdownOpen[filterType] = !this.dropdownOpen[filterType];
+ 
+  // ⏱️ Set a timeout to auto-close after 10 seconds
+  if (this.dropdownOpen[filterType]) {
+    clearTimeout(this.dropdownTimeouts[filterType]); // Clear any existing timeout
+    this.dropdownTimeouts[filterType] = setTimeout(() => {
+      this.dropdownOpen[filterType] = false;
+      this.cdr.detectChanges();
+    }, 10000); // 10 seconds
+  } else {
+    clearTimeout(this.dropdownTimeouts[filterType]);
   }
-  
-
-  toggleDropdown(filter: 'zone' | 'ward' | 'beat' | 'machine') {
-    this.dropdownOpen[filter] = !this.dropdownOpen[filter];
-  }
-
+ 
+  console.log("📌 Dropdown State Updated:", this.dropdownOpen);
+  this.cdr.detectChanges(); // ✅ Make Angular aware of changes
+}
+ 
+ 
+ 
+ 
   pageChanged(page: number) {
     this.currentPage = page;
     this.updatePagination();
   }
-  
+ 
+  // updatePagination() {
+  //   const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+  //   this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.itemsPerPage);
+  // }
   updatePagination() {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.itemsPerPage);
+ 
+    // ✅ Apply Search Filter Before Pagination
+    let filteredResults: ReportItem[] = this.reportsData;
+ 
+    if (this.searchQuery.trim()) {
+      const query = this.searchQuery.toLowerCase();
+ 
+      filteredResults = this.reportsData
+        .map(machine => {
+          // ✅ Ensure All Machine-Level Fields Are Strings Before Searching
+          const machineMatches = [
+            machine.machineId?.toString().toLowerCase() ?? '',
+            machine.machineLocation?.toString().toLowerCase() ?? '',
+            machine.address?.toString().toLowerCase() ?? '',
+            machine.machineType?.toString().toLowerCase() ?? ''
+          ].some(value => value.includes(query)); // ✅ Check if query is found in any machine field
+ 
+          // ✅ Ensure All Transaction Fields Are Strings Before Searching
+          const filteredTransactions = machine.transactions?.filter(txn =>
+            Object.values(txn || {}).some(value =>
+              value !== null && value !== undefined &&
+              value.toString().toLowerCase().includes(query)
+            )
+          ) || [];
+         
+         
+ 
+          // ✅ Keep the machine if it matches OR any transaction matches
+          if (machineMatches || filteredTransactions.length > 0) {
+            return { ...machine, transactions: filteredTransactions.length > 0 ? filteredTransactions : machine.transactions };
+          }
+          return undefined;
+        })
+        .filter((machine): machine is ReportItem => machine !== undefined); // ✅ Remove `undefined` values
+    }
+ 
+    // ✅ Paginate the Filtered Data
+    this.paginatedData = filteredResults.slice(startIndex, startIndex + this.itemsPerPage);
   }
-  
+ 
+  setSearchQuery(value: string) {
+    this.searchQuery = value;
+    this.updatePagination(); // ✅ Apply search when user types
+  }
+  clearSearch() {
+    this.searchQuery = '';
+  }
+ 
   get totalPages(): number {
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
   }
-  
+ 
   onMachineChange(machine: string, event: any) {
     if (event.target.checked) {
       this.selectedMachineIds.push(machine);
@@ -1246,26 +669,211 @@ export class SmartTablesBasicExampleComponent implements OnInit {
       this.selectedMachineIds = this.selectedMachineIds.filter(id => id !== machine);
     }
   }
-
-  toggleSelection(selectedArray: string[], option: string) {
-    const index = selectedArray.indexOf(option);
-    index > -1 ? selectedArray.splice(index, 1) : selectedArray.push(option);
+ 
+ 
+  toggleSelection(selectedArray: any[], option: any) {
+    console.log("Toggle selection called with:", { array: selectedArray, option });
+   
+    // For objects, check by matching a property
+    if (typeof option === 'object' && option !== null) {
+      const exists = selectedArray.some(item =>
+        typeof item === 'object' ? item.id === option.id : item === option
+      );
+     
+      if (exists) {
+        const index = selectedArray.findIndex(item =>
+          typeof item === 'object' ? item.id === option.id : item === option
+        );
+        selectedArray.splice(index, 1);
+      } else {
+        selectedArray.push(option);
+      }
+    } else {
+      // For simple values like strings
+      const exists = selectedArray.includes(option);
+      if (exists) {
+        selectedArray.splice(selectedArray.indexOf(option), 1);
+      } else {
+        selectedArray.push(option);
+      }
+    }
+   
+    console.log("After toggle, selected array:", selectedArray);
+    this.cdr.detectChanges();
   }
-
-  toggleSummaryType() {
-    this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
-    this.filteredData = this.summaryType === 'Totals'
-      ? this.reportsData.map(machine => ({
-          ...machine,
+ 
+ 
+  toggleSelectAll(selectedArray: string[], fullList: string[], event: any) {
+    if (event.target.checked) {
+      selectedArray.length = 0;
+      fullList.forEach(item => selectedArray.push(item));
+    } else {
+      selectedArray.length = 0;
+    }
+  }
+ 
+  getLastTwoParts(address: string | null): string {
+    if (!address) return ''; // Handle empty or null case
+ 
+    // Split by commas and remove extra spaces
+    const parts = address.split(',').map(part => part.trim());
+ 
+    // Get the last two meaningful parts
+    const lastTwoParts = parts.slice(-2).join(', ');
+ 
+    console.log('Original Address:', address, '| Extracted:', lastTwoParts); // Debugging
+ 
+    return lastTwoParts;
+  }
+ 
+ 
+ 
+exportToExcel() {
+  const table = document.querySelector('.report-table') as HTMLTableElement;
+  if (!table) {
+    console.error("Table not found!");
+    return;
+  }
+ 
+  const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(table);
+  const wb: XLSX.WorkBook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Machine Report");
+ 
+  XLSX.writeFile(wb, 'Machine_Report.xlsx');
+}
+ 
+// toggleProjectSelection(project: string) {
+//   console.log("Toggling project selection:", project);
+ 
+//   const index = this.selectedProjectNames.indexOf(project);
+//   if (index === -1) {
+//     this.selectedProjectNames.push(project);
+//   } else {
+//     this.selectedProjectNames.splice(index, 1);
+//   }
+ 
+//   console.log("Selected projects after toggle:", this.selectedProjectNames);
+//   this.cdr.detectChanges();
+ 
+//   // Reload the report whenever project selection changes
+//   this.loadReport();
+// }
+ 
+ 
+toggleProjectSelection(project: string) {
+  console.log("Toggling project selection:", project);
+ 
+  const index = this.selectedProjectNames.indexOf(project);
+  if (index === -1) {
+    this.selectedProjectNames.push(project);
+  } else {
+    this.selectedProjectNames.splice(index, 1);
+  }
+ 
+  console.log("Selected projects after toggle:", this.selectedProjectNames);
+ 
+  // Get the project IDs based on the selected names
+  const selectedProjectIds = this.getProjectIds(this.selectedProjectNames);
+  console.log("Selected project IDs:", selectedProjectIds);
+ 
+  this.cdr.detectChanges();
+ 
+  // Reload the report whenever project selection changes
+  this.loadReport();
+}
+ 
+toggleSummaryType() {
+  this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
+ 
+  if (this.summaryType === 'Totals') {
+    this.filteredData = []; // ✅ Clear previous totals
+ 
+    const uniqueMachineIds = new Set(); // ✅ Track unique machines to prevent duplication
+    let grandTotalQty = 0, grandTotalCash = 0, grandTotalBurnCycles = 0, grandTotalSanNapkins = 0;
+ 
+    this.reportsData.forEach((machine, index) => {
+      if (!uniqueMachineIds.has(machine.machineId)) { // ✅ Prevent duplicate machines
+        uniqueMachineIds.add(machine.machineId);
+ 
+        // ✅ Extract only the last "Total" row for each machine from API
+        const vendingTotal = machine.transactions.find(txn => txn.date === 'Total') || { qty: 0, cash: '₹ 0.00' };
+        const incineratorTotal = machine.transactions.find(txn => txn.onTime === 'Total') || { burnCycles: 0, sanNapkinsBurnt: 0 };
+ 
+        const totalQty = vendingTotal.qty ?? 0;
+        const totalCash = parseFloat((vendingTotal.cash ?? '₹ 0.00').replace(/[₹,]/g, '')) || 0;
+        const totalBurnCycles = incineratorTotal.burnCycles ?? 0;
+        const totalSanNapkins = incineratorTotal.sanNapkinsBurnt ?? 0;
+ 
+        // ✅ Update grand totals
+        grandTotalQty += totalQty;
+        grandTotalCash += totalCash;
+        grandTotalBurnCycles += totalBurnCycles;
+        grandTotalSanNapkins += totalSanNapkins;
+ 
+        this.filteredData.push({
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation || '-',
+          address: machine.address || '-',
+          machineType: machine.machineType || 'N/A',
+          reportType:machine.reportType || 'N/A',
           transactions: [{
             date: 'Total',
-            qty: machine.transactions.reduce((sum, txn) => sum + txn.qty, 0),
-            cash: `₹ ${machine.transactions.reduce((sum, txn) => sum + parseFloat(txn.cash.replace('₹', '')), 0).toFixed(2)}`,
+            qty: totalQty,
+            cash: `₹ ${totalCash.toFixed(2)}`,
             onTime: '-',
-            burnCycles: machine.transactions.reduce((sum, txn) => sum + txn.burnCycles, 0),
-            sanNapkinsBurnt: machine.transactions.reduce((sum, txn) => sum + txn.sanNapkinsBurnt, 0)
+            burnCycles: totalBurnCycles,
+            sanNapkinsBurnt: totalSanNapkins
           }]
-        }))
-      : [...this.reportsData];
+        });
+      }
+    });
+ 
+    // ✅ Add a final "Grand Total" row
+ 
+ 
+  } else {
+    this.filteredData = [...this.reportsData]; // ✅ Restore "Daily" view
   }
+ 
+  this.currentPage = 1; // ✅ Reset pagination
+  this.updatePagination();
+}
+searchTexts: { [key: string]: string } = {};
+
+// Inside your component.ts
+extractLastTwoWords(address: string): string {
+  if (address) {
+    // Split the address by commas
+    const parts = address.split(',').map(part => part.trim());
+ 
+    // Get the last part (which should contain the last words)
+    const lastPart = parts[parts.length - 1];
+ 
+    // Split the last part by spaces and get the last two words
+    const words = lastPart.split(/\s+/);
+ 
+    // Return the last two words joined by a space
+    return words.slice(-2).join(' ');
+  }
+  return ''; // Return empty string if address is not provided
+}
+/** ✅ Check if "Select All" should be checked */
+/** ✅ Toggle individual selection */
+ 
+ 
+/** ✅ Check if "Select All" should be checked */
+isAllSelected(selectedArray: string[], fullList: string[]): boolean {
+  return selectedArray.length === fullList.length && fullList.length > 0;
+}
+ 
+/** ✅ Toggle "Select All" Checkbox */
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 }

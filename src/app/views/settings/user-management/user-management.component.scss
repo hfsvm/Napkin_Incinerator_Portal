@@ -1,0 +1,126 @@
+.card {
+    max-width: 500px;
+    margin: auto;
+  }
+  .btn {
+    min-width: 150px;
+    background-color:#4A90E2;
+    color: white;
+  }
+ 
+ 
+ 
+  .new-client-card {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    z-index: 1050;
+    width: 400px;
+}
+ 
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+ 
+ 
+.card {
+  width: 90%; /* Increase width */
+  max-width: 1200px; /* Set max width */
+  margin: auto; /* Center */
+}
+ 
+ 
+.row {
+  margin-bottom: 15px; /* Adds spacing between rows */
+}
+.nav-tabs .nav-link.active {
+  background-color: #4A90E2; /* Bootstrap primary blue */
+  color: white !important;
+  border-color: #4A90E2 #4A90E2 #fff;
+}
+
+
+
+.tab-header {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  position: relative;
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: #333;
+  }
+
+  &.active {
+    color: #0066cc;
+    font-weight: bold;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #0066cc;
+    }
+  }
+}
+
+.tab-content {
+  min-height: 300px; /* Adjust as needed */
+}
+
+.tab-pane {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.custom-disabled:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  -webkit-text-fill-color: #6c757d; /* For Safari */
+  opacity: 1; /* Remove default opacity */
+}
+
+
+
+.success-notification {
+  position: fixed;
+  top: 100px;
+  right: 300px;
+  background-color: #4CAF50;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,469 @@
+
+
+<div class="container p-4">
+  <!-- Tabs Navigation (Tabs for Pricing and Incineration) -->
+  <ul class="nav nav-pills mb-3" role="tablist" style="border-bottom: 1px solid #d3d8dc;">
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'pricing'"
+        (click)="onTabChange('pricing')"
+        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
+        Pricing
+      </button>
+      <!-- Blue underline only for active tab -->
+      <div *ngIf="activeTab === 'pricing'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'incineration'"
+        (click)="onTabChange('incineration')"
+        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
+        Incineration
+      </button>
+      <!-- Blue underline only for active tab -->
+      <div *ngIf="activeTab === 'incineration'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
+    </li>
+  </ul>
+ 
+  <div *ngIf="notification.message" [ngClass]="notification.type" class="custom-toast">
+    {{ notification.message }}
+  </div>
+ 
+<!-- Pricing Tab Content -->
+<div *ngIf="activeTab === 'pricing'">
+  <!-- Card Layout for Pricing -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      
+      <div class="row">
+        <!-- Project Dropdown -->
+        <div class="col-md-6 mb-3">
+          <label for="selectProject" class="form-label"> Client Name</label>
+          <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
+            <option [ngValue]="null" disabled>Client Name</option>
+
+            <option *ngFor="let project of projectList" [value]="project.ProjectId">
+              {{ project.projectname }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Machine Dropdown for Pricing Tab (Custom Dropdown with Search) -->
+        <div class="col-md-6 mb-3">
+          <label for="selectMachinePricing" class="form-label"> Machine</label>
+          <div class="position-relative">
+            <!-- Fake Select Box Button -->
+            <div
+              class="form-select"
+              style="cursor: pointer;"
+              (click)="dropdownOpenPricing = !dropdownOpenPricing">
+              {{ selectedMachineIdPricing || 'Machine Id' }}
+            </div>
+
+            <!-- Custom Dropdown Menu for Pricing Tab -->
+            <div
+              *ngIf="dropdownOpenPricing"
+              class="border rounded position-absolute bg-white w-100 mt-1 shadow-sm zindex-dropdown"
+              style="max-height: 220px; overflow-y: auto;">
+             
+              <!-- Search Input Inside Dropdown -->
+              <input
+                type="text"
+                [(ngModel)]="machineSearchTermPricing"
+                class="form-control border-0 border-bottom rounded-0"
+                placeholder="Search..."
+                (click)="$event.stopPropagation()"
+              />
+             
+              <!-- Filtered Dropdown Options -->
+              <div
+                *ngFor="let id of machineIds | filterDropdown: machineSearchTermPricing"
+                (click)="selectMachinePricing(id)"
+                class="px-3 py-2 dropdown-item"
+                style="cursor: pointer;">
+                {{ id }}
+              </div>
+
+              <!-- No Results -->
+              <div class="text-muted px-3 py-2" *ngIf="(machineIds | filterDropdown: machineSearchTermPricing)?.length === 0">
+                No machines found
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+     
+      <!-- Configuration Table -->
+      <table class="table table-bordered table-hover">
+        <thead class="custom-header">
+          <tr>
+            <th class="text-center">Setting</th>
+            <th class="text-center">Current Value</th>
+            <th class="text-center">New Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Row for Item ID -->
+          <tr>
+            <td><strong>Item ID</strong></td>
+            <td class="text-center">{{ currentValues.iid }}</td>
+            <td>
+              <select
+                class="form-select"
+                [(ngModel)]="updatedValues.iid"
+                (change)="onIidChange()"
+              >
+                <option [ngValue]="null">-- Select Item ID --</option>
+                <option *ngFor="let item of itemList" [ngValue]="item.iid">
+                  {{ item.iid }}
+                </option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Row for Napkin Cost (auto-filled, readonly) -->
+          <tr>
+            <td><strong>Napkin Cost</strong></td>
+            <td class="text-center">{{ currentValues.itp }}</td>
+            <td>
+              <input
+                class="form-control"
+                [value]="updatedValues.itp"
+                type="number"
+                step="0.01"
+                max="999"
+                readonly
+              />
+            </td>
+          </tr>
+          <!-- Row for QR Bytes -->
+          <tr>
+            <td><strong>QR URL</strong></td>
+            <td class="text-center wrap-text">{{ currentValues.qrBytes }}</td>
+            <td>
+              <input class="form-control wrapped-input" [(ngModel)]="updatedValues.qrBytes" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Action Buttons -->
+      <div class="d-flex justify-content-center mt-4">
+        <button class="btn btn-sm me-2 custom-btn" (click)="submitUpdatedConfig()">Submit</button>
+        <button class="btn btn-sm custom-btn" (click)="clearEnteredValues()">Clear</button>
+      </div>
+
+      <!-- Custom Popup -->
+      <div *ngIf="showPopup" class="custom-popup-overlay">
+        <div class="custom-popup-container">
+          <div class="custom-popup-header">
+            <h5 class="mb-0">{{ popupTitle }}</h5>
+          </div>
+          <div class="custom-popup-body" [innerHTML]="popupMessage"></div>
+          <div class="custom-popup-footer">
+            <div class="d-flex justify-content-center w-100">
+              <button class="btn btn-sm me-3 custom-btn" (click)="confirmPopup()">OK</button>
+              <button class="btn btn-sm custom-btn" (click)="cancelPopup()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+ 
+  <!-- Incineration Tab Content -->
+  <div *ngIf="activeTab === 'incineration'">
+    <!-- Card Layout for Incineration -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+       
+        <!-- Machine Selection Form -->
+        <div class="row">
+          <!-- Project Dropdown -->
+          <div class="col-md-6 mb-3">
+            <label for="selectProject" class="form-label"> Client Name</label>
+            <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
+              <option [ngValue]="null" disabled> client Name</option>
+ 
+              <option *ngFor="let project of projectList" [value]="project.ProjectId">
+                {{ project.projectname }}
+              </option>
+            </select>
+          </div>
+       
+          <!-- Machine Dropdown -->
+          <div class="col-md-6 mb-3">
+            <label for="selectMachine" class="form-label"> Machine</label>
+         
+            <div class="position-relative">
+              <!-- Fake Select Box Button -->
+              <div
+                class="form-select"
+                style="cursor: pointer;"
+                (click)="dropdownOpen = !dropdownOpen">
+                {{ selectedMachineId || ' Machine Id' }}
+              </div>
+         
+              <!-- Custom Dropdown Menu -->
+              <div
+                *ngIf="dropdownOpen"
+                class="border rounded position-absolute bg-white w-100 mt-1 shadow-sm zindex-dropdown"
+                style="max-height: 220px; overflow-y: auto;">
+               
+                <!-- Search Input Inside Dropdown -->
+                <input
+                  type="text"
+                  [(ngModel)]="machineSearchTerm"
+                  class="form-control border-0 border-bottom rounded-0"
+                  placeholder="Search..."
+                  (click)="$event.stopPropagation()"
+                />
+               
+                <!-- Filtered Dropdown Options -->
+                <div
+                  *ngFor="let id of machineIds | filterDropdown: machineSearchTerm"
+                  (click)="selectMachine(id)"
+                  class="px-3 py-2 dropdown-item"
+                  style="cursor: pointer;">
+                  {{ id }}
+                </div>
+         
+                <!-- No Results -->
+                <div class="text-muted px-3 py-2" *ngIf="(machineIds | filterDropdown: machineSearchTerm)?.length === 0">
+                  No machines found
+                </div>
+              </div>
+            </div>
+          </div>
+         
+        <table class="table table-bordered table-hover">
+          <thead class="custom-header">
+            <tr>
+              <th class="text-center">Setting</th>
+              <th class="text-center">Current Value</th>
+              <th class="text-center">New Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Scheduler -->
+            <tr>
+              <td><strong>Scheduler (Auto Cleaning Time)</strong></td>
+              <td class="text-center">{{ getFormattedSchedulerTime() }}</td>
+           
+              <td>
+                <div class="d-flex gap-2">
+                  <!-- Hour Input -->
+                  <input
+                    type="number"
+                    class="form-control"
+                    min="0"
+                    max="23"
+                    placeholder="HH"
+                    maxlength="2"
+                    [(ngModel)]="schedulerHour"
+                    (input)="
+                      $event.target.value = $event.target.value.slice(0, 2);
+                      schedulerHour = $event.target.value > 23 ? 23 : +$event.target.value;
+                      updatedIncinerationValues.scheduler = (schedulerHour !== null && schedulerMinute !== null)
+                        ? (schedulerHour < 10 ? '0' + schedulerHour : schedulerHour) + ':' + (schedulerMinute < 10 ? '0' + schedulerMinute : schedulerMinute)
+                        : ''
+                    "
+                    [ngClass]="{
+                      'is-invalid': submitted && (schedulerHour === null || schedulerHour < 0 || schedulerHour > 23)
+                    }"
+                    name="schedulerHour"
+                  />
+           
+                  <!-- Minute Input -->
+                  <input
+                    type="number"
+                    class="form-control"
+                    min="0"
+                    max="59"
+                    placeholder="MM"
+                    maxlength="2"
+                    [(ngModel)]="schedulerMinute"
+                    (input)="
+                      $event.target.value = $event.target.value.slice(0, 2);
+                      schedulerMinute = $event.target.value > 59 ? 59 : +$event.target.value;
+                      updatedIncinerationValues.scheduler = (schedulerHour !== null && schedulerMinute !== null)
+                        ? (schedulerHour < 10 ? '0' + schedulerHour : schedulerHour) + ':' + (schedulerMinute < 10 ? '0' + schedulerMinute : schedulerMinute)
+                        : ''
+                    "
+                    [ngClass]="{
+                      'is-invalid': submitted && (schedulerMinute === null || schedulerMinute < 0 || schedulerMinute > 59)
+                    }"
+                    name="schedulerMinute"
+                  />
+                </div>
+           
+                <!-- Validation messages -->
+                <div *ngIf="submitted && (schedulerHour === null || schedulerHour < 0 || schedulerHour > 23)" class="invalid-feedback">
+                  Please enter a valid hour (00–23).
+                </div>
+                <div *ngIf="submitted && (schedulerMinute === null || schedulerMinute < 0 || schedulerMinute > 59)" class="invalid-feedback">
+                  Please enter valid minutes (00–59).
+                </div>
+              </td>
+            </tr>
+           
+           
+           
+            <tr>
+              <td><strong>Limit Switch (Burning Cycle Count)</strong></td>
+              <td class="text-center">{{ currentValues.limitSwitch }}</td>
+              <td>
+                <input
+                  class="form-control"
+                  type="number"
+                  name="limitSwitch"
+                  [(ngModel)]="updatedIncinerationValues.limitSwitch"
+                  required
+                  min="0"
+                  max="20"
+                  maxlength="2"
+                  [ngClass]="{'is-invalid': submitted && (!updatedIncinerationValues.limitSwitch && updatedIncinerationValues.limitSwitch !== 0)}"
+                  (input)="
+                    $event.target.value = $event.target.value.slice(0, 2);
+                    updatedIncinerationValues.limitSwitch = +$event.target.value > 20 ? 20 : +$event.target.value;
+                  "
+                />
+                <div *ngIf="submitted && (!updatedIncinerationValues.limitSwitch && updatedIncinerationValues.limitSwitch !== 0)" class="invalid-feedback">
+                  Limit Switch is required and must be between 0 and 20.
+                </div>
+              </td>
+            </tr>
+           
+           
+            <!-- Set Heater Temp A -->
+            <tr>
+              <td><strong>Heater A Cut Off Temperature</strong></td>
+              <td class="text-center">{{ currentValues.setHeaterTempA }}</td>
+              <td>
+                <input
+                  class="form-control"
+                  type="number"
+                  name="setHeaterTempA"
+                  [(ngModel)]="updatedIncinerationValues.setHeaterTempA"
+                  required
+                  min="0"
+                  max="1000"
+                  maxlength="3"
+                  [ngClass]="{
+                    'is-invalid': submitted && (updatedIncinerationValues.setHeaterTempA === null || updatedIncinerationValues.setHeaterTempA === undefined)
+                  }"
+                  (input)="
+                    $event.target.value = $event.target.value.slice(0, 3);
+                    updatedIncinerationValues.setHeaterTempA = +$event.target.value > 1000 ? 1000 : +$event.target.value;
+                  "
+                />
+                <div *ngIf="submitted && (updatedIncinerationValues.setHeaterTempA === null || updatedIncinerationValues.setHeaterTempA === undefined)" class="invalid-feedback">
+                  Set Heater Temp A is required.
+                </div>
+              </td>
+            </tr>
+           
+           
+     
+            <!-- Set Heater Temp B -->
+     <!-- Set Heater Temp B -->
+     <tr>
+      <td><strong>Heater B Cut Off Temperature</strong></td>
+      <td class="text-center">{{ currentValues.setHeaterTempB }}</td>
+      <td>
+        <input
+          class="form-control"
+          type="number"
+          name="setHeaterTempB"
+          [(ngModel)]="updatedIncinerationValues.setHeaterTempB"
+          required
+          min="0"
+          max="1000"
+          maxlength="3"
+          [ngClass]="{
+            'is-invalid': submitted && (updatedIncinerationValues.setHeaterTempB === null || updatedIncinerationValues.setHeaterTempB === undefined)
+          }"
+          (input)="
+            $event.target.value = $event.target.value.slice(0, 3);
+            updatedIncinerationValues.setHeaterTempB = +$event.target.value > 1000 ? 1000 : +$event.target.value;
+          "
+        />
+        <div *ngIf="submitted && (updatedIncinerationValues.setHeaterTempB === null || updatedIncinerationValues.setHeaterTempB === undefined)" class="invalid-feedback">
+          Heater B cut off temperature is required.
+        </div>
+      </td>
+    </tr>
+   
+ 
+<!-- Heater A Min Temp -->
+<tr>
+  <td><strong>Heater A Minimum Temperature</strong></td>
+  <td class="text-center">{{ currentValues.heaterAMinTemp }}</td>
+  <td>
+    <input
+      class="form-control"
+      type="number"
+      name="heaterAMinTemp"
+      [(ngModel)]="updatedIncinerationValues.heaterAMinTemp"
+      required
+      [ngClass]="{'is-invalid': submitted && !updatedIncinerationValues.heaterAMinTemp}"
+      (input)="onInputChangeHeaterAMinTemp($event)"  
+      min="0"
+      max="9999"
+    />
+    <div *ngIf="submitted && !updatedIncinerationValues.heaterAMinTemp" class="invalid-feedback">
+      Heater A minimum temperature is required.
+    </div>
+  </td>
+</tr>
+ 
+<!-- Heater B On Temp -->
+<tr>
+  <td><strong>Heater A Temperature to Start Heater B</strong></td>
+  <td class="text-center">{{ currentValues.heaterBOnTemp }}</td>
+  <td>
+    <input
+      class="form-control"
+      type="number"
+      name="heaterBOnTemp"
+      [(ngModel)]="updatedIncinerationValues.heaterBOnTemp"
+      required
+      [ngClass]="{'is-invalid': submitted && !updatedIncinerationValues.heaterBOnTemp}"
+      (input)="onInputChange($event)"
+      [attr.max]="9999"  
+      [attr.min]="0"    
+    />
+    <div *ngIf="submitted && !updatedIncinerationValues.heaterBOnTemp" class="invalid-feedback">
+      Heater A temperature to start Heater B is required.
+    </div>
+  </td>
+</tr>
+ 
+          </tbody>
+        </table>
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center mt-4">
+          <button
+            class="btn btn-sm me-2 custom-btn"
+            (click)="submitIncinerationConfig()"
+          >
+            Submit
+          </button>
+          <button
+            class="btn btn-sm custom-btn"
+            (click)="clearIncinerationValues()"
+          >
+            Clear
+          </button>
+        </div>
+       
+       
+      </div>
+    </div>
+  </div>
+</div>

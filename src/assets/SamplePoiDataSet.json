@@ -1,0 +1,26 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": { "type": "Point", "coordinates": [-73.985708, 40.75773] },
+        "properties": { "EntityType": "Gas Station" }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "Point", "coordinates": [-73.9825, 40.758] },
+        "properties": { "EntityType": "Grocery Store" }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "Point", "coordinates": [-73.981, 40.759] },
+        "properties": { "EntityType": "Restaurant" }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "Point", "coordinates": [-73.980, 40.760] },
+        "properties": { "EntityType": "School" }
+      }
+    ]
+  }
+  

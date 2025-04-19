@@ -1,0 +1,324 @@
+<!-- <div class="report-container">
+    <h2>🧾 Transaction Report</h2>
+  
+    <table class="transaction-table" *ngIf="transactions.length > 0; else noData">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Spring No</th>
+          <th>Item Name</th>
+          <th>Quantity</th>
+          <th>Status</th>
+          <th>Amount</th>
+          <th>Mode</th>
+          <th>Order ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let txn of transactions; index as i">
+          <td>{{ i + 1 }}</td>
+          <td>{{ txn.txnDate | date: 'short' }}</td>
+          <td>{{ txn.springNo }}</td>
+          <td>{{ txn.name }}</td>
+          <td>{{ txn.quantity }}</td>
+          <td>{{ txn.status }}</td>
+          <td>{{ txn.txnAmount }}</td>
+          <td>{{ txn.txnMode }}</td>
+          <td>{{ txn.orderId }}</td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <ng-template #noData>
+      <p>No transaction data available.</p>
+    </ng-template>
+  </div>
+   -->
+<!--   
+   <table>
+    <thead>
+      <tr>
+        <th>Txn ID</th>
+        <th>Date</th>
+        <th>Spring No</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let txn of transactions">
+        <td>{{ txn.txnid }}</td>
+        <td>{{ txn.txnDate }}</td>
+        <td>{{ txn.springNo }}</td>
+        <td>{{ txn.name }}</td>
+        <td>{{ txn.status }}</td>
+        <td>{{ txn.txnAmount }}</td>
+      </tr>
+    </tbody>
+  </table>
+   -->
+<!--   
+   <div class="report-container">
+    <h2>🧾 Transaction Report</h2>
+  
+    <div class="table-container" *ngIf="transactions.length > 0; else noData">
+      <table class="report-table">
+        <thead class="headers">
+          <tr>
+            <th>#</th>
+            <th>Txn ID</th>
+            <th>Date</th>
+            <th>Spring No</th>
+            <th>Item Name</th>
+            <th>Quantity</th>
+            <th>Sell Price</th>
+            <th>Cost Price</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Mode</th>
+            <th>Order ID</th>
+            <th>Login ID</th>
+            <th>Machine ID</th>
+            <th>Merchant ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let txn of transactions; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ txn.txnid }}</td>
+            <td>{{ txn.txnDate | date: 'short' }}</td>
+            <td>{{ txn.springNo }}</td>
+            <td>{{ txn.name }}</td>
+            <td>{{ txn.quantity }}</td>
+            <td>{{ txn.sellPrice }}</td>
+            <td>{{ txn.costPrice }}</td>
+            <td>{{ txn.txnAmount }}</td>
+            <td>{{ txn.status }}</td>
+            <td>{{ txn.txnMode }}</td>
+            <td>{{ txn.orderId }}</td>
+            <td>{{ txn.loginId }}</td>
+            <td>{{ txn.machineId }}</td>
+            <td>{{ txn.merchantId }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <ng-template #noData>
+      <p>No transaction data available.</p>
+    </ng-template>
+  </div>
+   -->
+<!--   
+   <div class="report-container">
+    <h2>Transaction Report</h2>
+  
+    <div class="table-container" *ngIf="transactions.length > 0; else noData">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Txn ID</th>
+            <th>Order ID</th>
+          
+            <th>Product Name</th>
+            <th>Quantity</th>
+         
+            <th>Amount</th>
+           
+            <th>Payment Mode</th>
+            <th>Status</th> 
+          
+         
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let txn of pagedTransactions; let i = index" [class.alt-row]="i % 2 !== 0">
+            <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+            <td>{{ getFormattedDate(txn.txnDate) }}</td>
+            <td>{{ getFormattedTime(txn.txnDate) }}</td>
+            <td>{{ txn.txnid }}</td>
+            <td>{{ txn.orderId }}</td>
+          
+            <td>{{ txn.name }}</td>
+            <td>{{ txn.quantity }}</td>
+           
+            <td>{{ txn.txnAmount }}</td>
+            
+            <td>{{ txn.txnMode }}</td>
+            <td>{{ txn.status }}</td>
+        
+          </tr>
+        </tbody>
+      </table>
+  
+   
+      <div class="pagination">
+        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">⬅ Prev</button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">Next ➡</button>
+      </div>
+    </div>
+  
+    <ng-template #noData>
+      <h2>No transaction data available.</h2>
+    </ng-template>
+  </div>
+   -->
+
+   
+   <div class="report-container">
+    <!-- <h2>Machine Report - {{ machineId }}</h2> -->
+    <div *ngIf="false" class="fs-2 fw-semibold">Title</div>
+
+    <div class="tabs">
+      <button [class.active]="activeTab === 'vending'" (click)="setTab('vending')">Vending</button>
+      <button [class.active]="activeTab === 'incineration'" (click)="setTab('incineration')">Incineration</button>
+      <label for="start">Start Date:</label>
+      <input
+        type="date"
+        id="start"
+        [(ngModel)]="startDate"
+        [max]="endDate"
+        (change)="onStartDateChange()" />
+      
+      <label for="end">End Date:</label>
+      <input
+        type="date"
+        id="end"
+        [(ngModel)]="endDate"
+        [min]="startDate"
+        (change)="onEndDateChange()" />
+      
+      <!-- Add to your HTML template -->
+    
+      <button (click)="goBack()" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Reports
+      </button>
+      
+      
+
+    </div>
+    
+  
+    <!-- Vending Report -->
+    <div *ngIf="activeTab === 'vending'" class="card">
+    
+      <div class="table-container">
+        <table class="report-table">
+          <thead>
+            <tr>
+              
+              <th>TXN ID</th>
+              <th>DATE AND TIME</th>
+              <th>ORDER ID</th>
+              <th>PRODUCT NAME</th>
+             
+              <th>QUANTITY</th>
+              <th>AMOUNT</th>
+              <th>PAYMENT MODE</th>
+              <th>STATUS</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr *ngFor="let txn of getPagedData(vendingTransactions, currentPageVending)">
+              <td>{{ txn.txnid }}</td>
+              <td>
+                {{ txn.txnDate ? (getFormattedDate(txn.txnDate) + ' ' + getFormattedTime(txn.txnDate)) : '—' }}
+              </td>
+              
+
+              <td>{{ txn. orderId}}</td>
+              <td>{{ txn. name}}</td>
+              <td>{{ txn. quantity}}</td>
+              <td>{{ txn.txnAmount }}</td>
+              
+              <td>{{ txn.txnMode }}</td>
+              <td>{{ txn. status}}</td>
+              
+             
+              
+
+              
+            </tr>
+            
+          </tbody>
+        </table>
+        <div><tr *ngIf="activeTab === 'vending' && getPagedData(vendingTransactions, currentPageVending).length === 0">
+          <td>No transactions found</td>
+        </tr></div>
+      </div>
+  
+      <div class="pagination">
+        <button (click)="decrementVendingPage()" [disabled]="currentPageVending === 1">Previous</button>
+        <span>Page {{ currentPageVending }} of {{ totalPagesVending }}</span>
+        <button (click)="incrementVendingPage()" [disabled]="currentPageVending >= totalPagesVending">Next</button>
+      </div>
+    </div>
+  
+    <!-- Incineration Report -->
+    <div *ngIf="activeTab === 'incineration'" class="card">
+      
+      <div class="table-container">
+        <table class="report-table">
+          <thead>
+            <tr>
+              
+              <th>BATCH ID</th>
+              <th>BURN START TIME</th>
+              <th>HEATER A TEMP</th>
+              <th>HEATER B TEMP</th>
+              <th>HEATER A STATUS </th>
+              <th>HEATER B STATUS </th>
+              <th>BURNING MODE</th>
+              <th>NAPKIN BURNT COUNT</th>
+              <th>BURN END TIME</th>
+              <th>BURNING STATUS</th>
+             
+              
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr *ngFor="let row of getPagedData(incinerationTransactions, currentPageIncineration)">
+              
+              <td>{{ row.batchId }}</td>
+              <td>
+                {{ row.burnStartTime ? (getFormattedDate(row.burnStartTime) + ' ' + getFormattedTime(row.burnStartTime)) : '—' }}
+              </td>
+              <td>{{ row.tempHeaterA }}</td>
+              <td>{{ row.tempHeaterB }}</td>
+              <td>{{ getHeaterStatus(row.heaterAStatus) }}</td>
+              <td>{{ getHeaterStatus(row.heaterBStatus) }}</td>
+              <td>{{ getBurningMode(row.burningMode) }}</td>
+              <td>{{row.burningcount}}</td>
+              <td>
+                {{ row.burnEndTime ? (getFormattedDate(row.burnEndTime) + ' ' + getFormattedTime(row.burnEndTime)) : '—' }}
+              </td>
+              <td>{{ getBurningStatus(row.burningStatus) }}</td>
+             
+             
+              
+                 </tr>
+          </tbody>
+          
+        </table>
+       <div class="error"><tr *ngIf="activeTab === 'incineration' && getPagedData(incinerationTransactions, currentPageIncineration).length === 0">
+          <td >No transactions found</td>
+        </tr></div>
+      </div>
+  
+      <div class="pagination">
+        <button (click)="decrementIncinerationPage()" [disabled]="currentPageIncineration === 1">Previous</button>
+        <span>Page {{ currentPageIncineration }} of {{ totalPagesIncineration }}</span>
+        <button (click)="incrementIncinerationPage()" [disabled]="currentPageIncineration >= totalPagesIncineration">Next</button>
+      </div>
+    </div>
+  </div>
+  

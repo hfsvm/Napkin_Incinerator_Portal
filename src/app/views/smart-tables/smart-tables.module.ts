@@ -14,7 +14,7 @@ import {
   UtilitiesModule
 } from '@coreui/angular-pro';
 
-import { DocsComponentsModule } from '@docs-components/docs-components.module';
+// import { DocsComponentsModule } from '@docs-components/docs-components.module';
 
 import { SmartTablesRoutingModule } from './smart-tables-routing.module';
 import { SmartTablesComponent } from './smart-tables.component';
@@ -23,6 +23,7 @@ import { SmartTablesBasicExampleComponent } from './smart-tables-basic-example/s
 
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ShareModule } from '../../share/share.module';
 
 
 @NgModule({
@@ -34,8 +35,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
    
   ],
   imports: [
+
+    ShareModule,
     CommonModule,
-    DocsComponentsModule,
+    // DocsComponentsModule,
     SmartTablesRoutingModule,
     GridModule,
     CardModule,
@@ -48,7 +51,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ButtonModule,
     AlertModule,
     FormsModule,
-  
+  SharedModule,
     NgxPaginationModule,
     ReactiveFormsModule,
   
