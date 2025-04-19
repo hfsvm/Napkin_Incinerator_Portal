@@ -163,9 +163,10 @@
     </div>
   </div>
 </div>
+
 <div class="card mb-3 mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
-    <div class="mb-3 d-flex align-items-center gap-2">Filters
+    <div class="mb-3 d-flex align-items-center gap-2">
       <!-- Search<input
       type="text"
       placeholder="Search ..."
@@ -174,6 +175,7 @@
     /> -->
     
       <!-- <small class="text-muted">Supports RegEx (e.g. `^A.*`, `Machine[0-9]+`)</small> -->
+      <button class="btn btn-primary btn-sm ms-2" (click)="clearFilters()"> Clear Filters</button>
     </div>
     
     <!-- <h3 class="mb-3">Filters</h3> -->
@@ -183,7 +185,7 @@
   <div class="card-body">
     <div class="row filter container">
       <div class="col" *ngFor="let filter of [
-      { name: 'Client', key: 'projects', selected: selectedProjects, options: projects },
+      { name: 'Client Name', key: 'projects', selected: selectedProjects, options: projects },
         { name: 'Machine Status', key: 'machineStatuses', selected: selectedMachineStatuses, options: machineStatuses },
         { name: 'Stock Status', key: 'stockStatuses', selected: selectedStockStatuses, options: stockStatuses },
         { name: 'Burn Status', key: 'burnStatuses', selected: selectedBurnStatuses, options: burnStatuses },
@@ -238,103 +240,206 @@
     </div>
   </div>
   
-
-
-<div class="card p-3">
-  <h3>Machine Report</h3>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Sr. No.</th>
-        <th>Machine ID</th>
-        <th>Machine Type</th>  
-        <th>Status</th>
-        <th>Stock Status</th>
-        <th>Burning Status</th>
-        <th>Info</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let machine of filteredMachines.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage); let i = index">
-
-        <td>{{ i + 1 }}</td>
-        <td>{{ machine.machineId }}</td>
-        <td>{{machine.machineType}}</td>  
-        <td>
-          <span class="badge badge-fixed px-3 py-2"
-          [ngStyle]="{
-            'background-color': machine.status === '1' ? '#7ED321' : '#fcba4e',
-            'color': '#000000'
-          }">
-      {{ machine.status === '1' ? 'Online' : 'Offline' }}
-    </span>
-    
-        </td>
-        <td>
-          <span class="badge badge-fixed px-3 py-2"
-          [ngStyle]="{
-            'background-color': machine.stockStatus === 'Empty' ? '#E57373' : 
-                                machine.stockStatus === 'Low' ? '#FFA500' : 
-                                machine.stockStatus === 'Full' ? '#7ED321' : 'transparent',
-            'color': '#000000'
-          }">
-      {{ machine.stockStatus }}
-    </span>
-        </td>
-        <!-- <td>
-          <span class="badge badge-fixed px-3 py-2"
-            [ngClass]="{
-              'bg-warning text-black': machine.burningStatus === '2',
-              'bg-secondary text-black': machine.burningStatus === '1',
-              'bg-light text-black': machine.burningStatus === 'N/A'
-            }">
-            {{ machine.burningStatus === '2' ? '🔥Burning' : (machine.burningStatus === '1' ? 'Idle' : 'N/A') }}
-          </span>
-        </td> -->
-        <td>
-          <span class="badge badge-fixed px-3 py-2"
-            [ngClass]="{
-              'bg-warning text-black': machine.burningStatus === '2',
-              'bg-secondary text-black': machine.burningStatus === '1',
-              'bg-light text-black': machine.burningStatus === 'N/A'
-            }">
-            
-            <ng-container *ngIf="machine.burningStatus === '2'">🔥Burning</ng-container>
-            <ng-container *ngIf="machine.burningStatus === '1'">
-              <img src="./assets/img/icon/hourglass.png" width="16" height="16" style="vertical-align: middle; margin-right: 4px;" />
-              Idle
-            </ng-container>
-            <ng-container *ngIf="machine.burningStatus !== '1' && machine.burningStatus !== '2'">N/A</ng-container>
-            
-          </span>
-        </td>
-        
-        
-        <td>
-          <div class="view-btn-container" style="position: relative; display: inline-block;">
-            <button class="btn btn-info btn-sm">View</button>
-            <div class="tooltip-info">
-              <strong>MachineId:</strong> {{ machine.machineId }}<br>
-              <strong>Stock Status:</strong> {{ machine.stockStatus }}<br>
-              <strong>Items Dispensed:</strong> {{ machine.itemsDispensed }}<br>
-              <strong>Status:</strong> {{ machine.status === '1' ? 'Online ' : 'Offline ' }}<br>
-              <strong>Collection:</strong> {{ machine.collection }}<br>
-              <strong>Items Burnt:</strong> {{ machine.itemsBurnt }}<br>
-              <strong>Burning Cycles:</strong> {{ machine.burningCycles }}<br>
+  <div class="card p-3">
+    <h3>Machine Report</h3>
+  
+    <!-- Filters -->
+ 
+  
+    <table class="table table-bordered">
+      <thead>
+        <!-- Column Headings -->
+        <tr>
+          <th>S.No</th>
+          <th (click)="sortData('machineId')" style="cursor: pointer;">Machine ID 🔽</th>
+          <th (click)="sortData('machineType')" style="cursor: pointer;">Machine Type 🔽</th>
+          <th (click)="sortData('status')" style="cursor: pointer;">Status 🔽</th>
+          <th (click)="sortData('stockStatus')" style="cursor: pointer;">Stock Status 🔽</th>
+          <th (click)="sortData('burningStatus')" style="cursor: pointer;">Burning Status 🔽</th>
+          <th>Info</th>
+        </tr>
+      
+        <!-- Search Filters Row -->
+        <tr>
+          <!-- Sr. No. filter (disabled input) -->
+          <th>
+            <!-- <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="Search"
+              disabled
+            /> -->
+          </th>
+      
+          <!-- Filter inputs for each searchable column -->
+          <th>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="machine id"
+              [(ngModel)]="columnFilters['Machine ID']"
+              (ngModelChange)="applyFiltersAndSort()"
+            />
+          </th>
+          <th>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="machine type"
+              [(ngModel)]="columnFilters['Machine Type']"
+              (ngModelChange)="applyFiltersAndSort()"
+            />
+          </th>
+          <th>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="machine status"
+              [(ngModel)]="columnFilters['Status']"
+              (ngModelChange)="applyFiltersAndSort()"
+            />
+          </th>
+          <th>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="stock status"
+              [(ngModel)]="columnFilters['Stock Status']"
+              (ngModelChange)="applyFiltersAndSort()"
+            />
+          </th>
+          <th>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="burning status"
+              [(ngModel)]="columnFilters['Burning Status']"
+              (ngModelChange)="applyFiltersAndSort()"
+            />
+          </th>
+      
+          <!-- Info filter (disabled input) -->
+          <th>
+            <!-- <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="Search"
+              disabled
+            /> -->
+          </th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        <tr *ngFor="let machine of filteredMachines.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage); let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>
+            <!-- Machine ID as clickable link -->
+            <a [routerLink]="['/machine-report', machine.machineId]" style="color: #007bff; text-decoration: underline; cursor: pointer;">
+              {{ machine.machineId }}
+            </a>
+          </td>
+          <td>{{ machine.machineType }}</td>
+          <td>
+            <span class="badge badge-fixed px-3 py-2"
+              [ngStyle]="{
+                'background-color': machine.status === '1' ? '#7ED321' : '#fcba4e',
+                'color': '#000000'
+              }">
+              {{ machine.status === '1' ? 'Online' : 'Offline' }}
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-fixed px-3 py-2"
+              [ngStyle]="{
+                'background-color': machine.stockStatus === 'Empty' ? '#E57373' : 
+                                    machine.stockStatus === 'Low' ? '#FFA500' : 
+                                    machine.stockStatus === 'Full' ? '#7ED321' : 'transparent',
+                'color': '#000000'
+              }">
+              {{ machine.stockStatus }}
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-fixed px-3 py-2"
+              [ngClass]="{
+                'bg-warning text-black': machine.burningStatus === '2',
+                'bg-secondary text-black': machine.burningStatus === '1',
+                'bg-light text-black': machine.burningStatus === 'N/A'
+              }">
+              <ng-container *ngIf="machine.burningStatus === '2'">🔥Burning</ng-container>
+              <ng-container *ngIf="machine.burningStatus === '1'">
+                <img src="./assets/img/icon/hourglass.png" width="16" height="16" style="vertical-align: middle; margin-right: 4px;" />
+                Idle
+              </ng-container>
+              <ng-container *ngIf="machine.burningStatus !== '1' && machine.burningStatus !== '2'">N/A</ng-container>
+            </span>
+          </td>
+          <td>
+            <div class="view-btn-container" style="position: relative; display: inline-block;">
+              <button class="btn btn-info btn-sm">View</button>
+              <div class="tooltip-info">
+                <strong>MachineId:</strong> {{ machine.machineId }}<br>
+                <strong>Stock Status:</strong> {{ machine.stockStatus }}<br>
+                <strong>Items Dispensed:</strong> {{ machine.itemsDispensed }}<br>
+                <strong>Status:</strong> {{ machine.status === '1' ? 'Online ' : 'Offline ' }}<br>
+                <strong>Collection:</strong> {{ machine.collection }}<br>
+                <strong>Items Burnt:</strong> {{ machine.itemsBurnt }}<br>
+                <strong>Burning Cycles:</strong> {{ machine.burningCycles }}<br>
+              </div>
             </div>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="pagination-controls">
-    <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
-    <span>Page {{ currentPage }}</span>
-    <button (click)="onPageChange(currentPage + 1)"
-      [disabled]="currentPage * itemsPerPage >= filteredMachines.length">
-      Next
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <!-- Pagination -->
+    <!-- <div class="pagination-controls">
+      <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+      <span>Page {{ currentPage }}</span>
+      <button (click)="onPageChange(currentPage + 1)" [disabled]="currentPage * itemsPerPage >= filteredMachines.length">Next</button>
+    </div> -->
+    <!-- Pagination -->
+<!-- Pagination -->
+<div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+
+  <!-- Items per page -->
+  <div class="d-flex align-items-center gap-2">
+    <label class="mb-0 fw-bold text-dark" style="font-size: 1rem;">Items per page:</label>
+    <div class="position-relative" style="min-width: 100px;">
+      <select class="form-select form-select-lg custom-select"
+              [(ngModel)]="itemsPerPage"
+              (change)="onPageChange(1)">
+        <option *ngFor="let option of [10, 20, 50, 100]" [value]="option">{{ option }}</option>
+      </select>
+      <span class="dropdown-icon"></span>
+    </div>
+  </div>
+
+  <!-- Pagination controls -->
+  <div class="d-flex align-items-center gap-2">
+
+    <button class="btn btn-lg pagination-btn"
+            (click)="onPageChange(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            title="Previous Page">
+      ‹
     </button>
+
+    <span class="fw-bold text-dark" style="font-size: 1.1rem;">
+      Page {{ currentPage }} of {{ totalPages }}
+    </span>
+
+    <button class="btn btn-lg pagination-btn"
+            (click)="onPageChange(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            title="Next Page">
+      ›
+    </button>
+
+  </div>
+</div>
+
+
   </div>
   
-  
-</div>

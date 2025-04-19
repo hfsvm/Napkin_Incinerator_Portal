@@ -221,6 +221,8 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataService } from '../../service/data.service';
 import { CommonDataService } from '../../Common/common-data.service';
+import { Pipe, PipeTransform } from '@angular/core';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-machinereport',
@@ -256,9 +258,13 @@ export class MachinereportComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private dataService: DataService,
-    private commonDataService: CommonDataService
+    private commonDataService: CommonDataService,
+    private location: Location
   ) {}
-
+  goBack(): void {
+    this.location.back();
+  }
+  
   ngOnInit(): void {
     this.merchantId = localStorage.getItem('merchantId') || '';
     this.machineId = this.route.snapshot.paramMap.get('machineId') || '';
