@@ -116,6 +116,65 @@ selectedProjectNames: string[] = []; // New property for selected project names
 //   });
 // }
  
+
+
+onPageChange(page: number): void {
+  if (page >= 1 && page <= this.totalPages) {
+    this.currentPage = page;
+    this.updatePagination();
+  }
+}
+
+
+updatePagination() {
+  const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+ 
+  // ✅ Apply Search Filter Before Pagination
+  let filteredResults: ReportItem[] = this.reportsData;
+ 
+  if (this.searchQuery.trim()) {
+    const query = this.searchQuery.toLowerCase();
+ 
+    filteredResults = this.reportsData
+      .map(machine => {
+        // ✅ Ensure All Machine-Level Fields Are Strings Before Searching
+        const machineMatches = [
+          machine.machineId?.toString().toLowerCase() ?? '',
+          machine.machineLocation?.toString().toLowerCase() ?? '',
+          machine.address?.toString().toLowerCase() ?? '',
+          machine.machineType?.toString().toLowerCase() ?? ''
+        ].some(value => value.includes(query)); // ✅ Check if query is found in any machine field
+ 
+        // ✅ Ensure All Transaction Fields Are Strings Before Searching
+        const filteredTransactions = machine.transactions?.filter(txn =>
+          Object.values(txn || {}).some(value =>
+            value !== null && value !== undefined &&
+            value.toString().toLowerCase().includes(query)
+          )
+        ) || [];
+        
+        // ✅ Keep the machine if it matches OR any transaction matches
+        if (machineMatches || filteredTransactions.length > 0) {
+          return { ...machine, transactions: filteredTransactions.length > 0 ? filteredTransactions : machine.transactions };
+        }
+        return undefined;
+      })
+      .filter((machine): machine is ReportItem => machine !== undefined); // ✅ Remove `undefined` values
+  }
+ 
+  // Store the filtered data for pagination calculations
+  this.filteredData = filteredResults;
+  
+  // ✅ Ensure current page is valid after changing items per page
+  const maxPage = Math.max(1, Math.ceil(this.filteredData.length / this.itemsPerPage));
+  if (this.currentPage > maxPage) {
+    this.currentPage = maxPage;
+  }
+ 
+  // ✅ Paginate the Filtered Data
+  this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.itemsPerPage);
+}
+
 loadCommonData() {
   // Access userDetails as a property, not a function
   const userDetails = this.commonDataService.userDetails;
@@ -608,47 +667,6 @@ toggleDropdown(filterType: string, event: Event) {
   //   const startIndex = (this.currentPage - 1) * this.itemsPerPage;
   //   this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.itemsPerPage);
   // }
-  updatePagination() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
- 
-    // ✅ Apply Search Filter Before Pagination
-    let filteredResults: ReportItem[] = this.reportsData;
- 
-    if (this.searchQuery.trim()) {
-      const query = this.searchQuery.toLowerCase();
- 
-      filteredResults = this.reportsData
-        .map(machine => {
-          // ✅ Ensure All Machine-Level Fields Are Strings Before Searching
-          const machineMatches = [
-            machine.machineId?.toString().toLowerCase() ?? '',
-            machine.machineLocation?.toString().toLowerCase() ?? '',
-            machine.address?.toString().toLowerCase() ?? '',
-            machine.machineType?.toString().toLowerCase() ?? ''
-          ].some(value => value.includes(query)); // ✅ Check if query is found in any machine field
- 
-          // ✅ Ensure All Transaction Fields Are Strings Before Searching
-          const filteredTransactions = machine.transactions?.filter(txn =>
-            Object.values(txn || {}).some(value =>
-              value !== null && value !== undefined &&
-              value.toString().toLowerCase().includes(query)
-            )
-          ) || [];
-         
-         
- 
-          // ✅ Keep the machine if it matches OR any transaction matches
-          if (machineMatches || filteredTransactions.length > 0) {
-            return { ...machine, transactions: filteredTransactions.length > 0 ? filteredTransactions : machine.transactions };
-          }
-          return undefined;
-        })
-        .filter((machine): machine is ReportItem => machine !== undefined); // ✅ Remove `undefined` values
-    }
- 
-    // ✅ Paginate the Filtered Data
-    this.paginatedData = filteredResults.slice(startIndex, startIndex + this.itemsPerPage);
-  }
  
   setSearchQuery(value: string) {
     this.searchQuery = value;
