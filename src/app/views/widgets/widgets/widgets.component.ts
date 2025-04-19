@@ -316,7 +316,10 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
   chartDoughnut!: Chart;
   chartStock!: Chart;
   merchantId: string | null = null;
-
+  refreshCountdown = 0;
+  private refreshInterval = 120; // refresh interval in seconds
+  private countdownInterval!: any;
+  
   private refreshSubscription!: Subscription;
 
   constructor(
@@ -330,21 +333,52 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     this.merchantId = this.commonDataService.merchantId;
     if (this.merchantId) {
       this.fetchDashboardData();
-
+  
+      // Start countdown timer
+      this.startRefreshCountdown();
+  
       this.refreshSubscription = this.dashboardRefreshService.refresh$.subscribe(() => {
         this.fetchDashboardData();
+        this.resetRefreshCountdown();
       });
-
+  
     } else {
       console.error('❌ No Merchant ID Found! Redirecting to login...');
     }
   }
+  
 
+
+  startRefreshCountdown(): void {
+    this.refreshCountdown = this.refreshInterval;
+    this.countdownInterval = setInterval(() => {
+      this.refreshCountdown--;
+      if (this.refreshCountdown <= 0) {
+        this.refreshCountdown = this.refreshInterval;
+      }
+    }, 1000);
+  }
+  get formattedRefreshTime(): string {
+    const minutes = Math.floor(this.refreshCountdown / 60).toString().padStart(1, '0');
+    const seconds = (this.refreshCountdown % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  }
+  
+  resetRefreshCountdown(): void {
+    this.refreshCountdown = this.refreshInterval;
+  }
+  
   ngOnDestroy(): void {
     if (this.refreshSubscription) {
       this.refreshSubscription.unsubscribe();
     }
+  
+    // Clear countdown interval
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
   }
+  
 
   fetchDashboardData(): void {
     if (!this.merchantId) return;

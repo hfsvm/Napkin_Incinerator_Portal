@@ -311,4 +311,35 @@ canvas {
   max-width: 600px; // 🔹 Prevents excessive stretching
   max-height: 400px;
 }
+.refresh-timer {
+  font-size: 14px;
+  color: #666;
+  margin: 10px 0;
+  text-align: right;
+}
+.refresh-circle {
+  position: absolute;
+  top: 70px;
+  right: 1px;
  
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(110deg, #4CAF50, #81C784);
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.refresh-circle .time {
+  text-align: center;
+}
+.refresh-timer {
+  text-align: right;
+ 
+}
