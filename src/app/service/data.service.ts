@@ -752,14 +752,24 @@ export class DataService {
 }
  
  
-  /** 🔹 Extract only Machine IDs from the getMachines method **/
+  // /** 🔹 Extract only Machine IDs from the getMachines method **/
+  // getMachineIds(merchantId: string, fromNo: number = 0, count: number = 50): Observable<string[]> {
+  //   return this.getMachines(merchantId, fromNo, count).pipe(
+  //     map((response: { rowMachines: { machines: any[] }[] }) =>
+  //       response.rowMachines[0].machines.map((m: any) => m.machineId)
+  //     )
+  //   );
+  // }
+
   getMachineIds(merchantId: string, fromNo: number = 0, count: number = 50): Observable<string[]> {
     return this.getMachines(merchantId, fromNo, count).pipe(
-      map((response: { rowMachines: { machines: any[] }[] }) =>
-        response.rowMachines[0].machines.map((m: any) => m.machineId)
-      )
+      map((response: { rowMachines: { machines: any[] }[] }) => {
+        const machinesArray = response?.rowMachines?.[0]?.machines || [];
+        return machinesArray.map((m: any) => m.machineId);
+      })
     );
   }
+  
  
   /** 🔹 Extract only machine locations from the getMachines method **/
   getMachineLocations(merchantId: string, fromNo: number = 0, count: number = 50): Observable<any[]> {

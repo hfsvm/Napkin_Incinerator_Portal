@@ -171,6 +171,9 @@
    -->
 
    
+
+
+
    <div class="report-container">
     <!-- <h2>Machine Report - {{ machineId }}</h2> -->
     <div *ngIf="false" class="fs-2 fw-semibold">Title</div>
@@ -178,6 +181,16 @@
     <div class="tabs">
       <button [class.active]="activeTab === 'vending'" (click)="setTab('vending')">Vending</button>
       <button [class.active]="activeTab === 'incineration'" (click)="setTab('incineration')">Incineration</button>
+
+          <!-- Add Machine Dropdown -->
+    <div class="machine-select">
+      <label for="machineSelect">Machine:</label>
+      <select id="machineSelect" [(ngModel)]="selectedMachineId" (change)="onMachineChange()">
+        <option value="">Select Machine</option>
+        <option *ngFor="let id of machineIds" [value]="id">{{ id }}</option>
+      </select>
+    </div>
+
       <label for="start">Start Date:</label>
       <input
         type="date"
@@ -204,6 +217,12 @@
   
     <!-- Vending Report -->
     <div *ngIf="activeTab === 'vending'" class="card">
+
+
+      <div *ngIf="selectedMachineId" class="selected-machine-label">
+        Machine ID: {{ selectedMachineId }}
+      </div>
+      
     
       <div class="table-container">
         <table class="report-table">
@@ -261,6 +280,10 @@
   
     <!-- Incineration Report -->
     <div *ngIf="activeTab === 'incineration'" class="card">
+      
+      <div *ngIf="selectedMachineId" class="selected-machine-label">
+        Selected Machine ID: {{ selectedMachineId }}
+      </div>
       
       <div class="table-container">
         <table class="report-table">
