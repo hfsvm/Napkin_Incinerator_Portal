@@ -1483,7 +1483,15 @@ export class MachinedataComponent implements OnInit {
  
   dropdownOpen: any = {};
   dashboardData: any = {};
- 
+  columnFilters: any = {
+    'Machine ID': '',
+    'Machine Type': '',
+    'Status': '',
+    'Stock Status': '',
+    'Burning Status': ''
+  };
+  sortKey: string = '';
+sortDirection: 'asc' | 'desc' = 'asc';
   // Initial arrays to store filter values
   initialZones: string[] = [];  
   initialWards: string[] = [];
@@ -1563,7 +1571,42 @@ export class MachinedataComponent implements OnInit {
       projects: this.selectedProjects
     });
   }
- 
+
+  
+  get totalPages(): number {
+    return Math.ceil(this.filteredMachines.length / this.itemsPerPage);
+  }
+  
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+  clearFilters() {
+    // Reset selected filters
+    this.selectedMachineStatuses = ['1', '2']; // Reset machine statuses to default (Online, Offline)
+    this.selectedStockStatuses = []; // Clear stock statuses
+    this.selectedBurnStatuses = []; // Clear burn statuses
+    this.selectedZones = []; // Clear selected zones (states)
+    this.selectedWards = []; // Clear selected wards (districts)
+    this.selectedBeats = []; // Clear selected beats (machines)
+    this.selectedProjects = []; // Clear selected projects
+  
+    // Reset the search query
+    this.searchQuery = '';
+    this.filteredMachines = [...this.machines]; // Reset the filtered machines list to the original list
+  
+    // Reset the pagination to the first page
+    this.currentPage = 1;
+  
+    // Call the method to load the data with the cleared filters
+    this.loadMachineData();
+  
+    // Optionally reset the columns in the dashboard data if needed
+    this.dashboardData = {};
+    console.log('✅ All filters cleared and data reloaded');
+  }
+  
   loadMachineData() {
     this.isLoading = true;
     this.errorMessage = '';
@@ -1665,16 +1708,16 @@ export class MachinedataComponent implements OnInit {
   }
  
   // Page navigation from second code
-  onPageChange(page: number) {
-    const totalPages = Math.ceil(this.filteredMachines.length / this.itemsPerPage);
-    console.log('Total Pages:', totalPages);
+  // onPageChange(page: number) {
+  //   const totalPages = Math.ceil(this.filteredMachines.length / this.itemsPerPage);
+  //   console.log('Total Pages:', totalPages);
  
-    if (page >= 1 && page <= totalPages) {
-      this.currentPage = page;
-      console.log('Current Page after change:', this.currentPage);
-      this.paginateMachines();
-    }
-  }
+  //   if (page >= 1 && page <= totalPages) {
+  //     this.currentPage = page;
+  //     console.log('Current Page after change:', this.currentPage);
+  //     this.paginateMachines();
+  //   }
+  // }
  
   // Search functionality from second code
   onSearch() {
@@ -1876,4 +1919,40 @@ export class MachinedataComponent implements OnInit {
     this.loadMachineData();
     
   }
+  applyFiltersAndSort() {
+    this.filteredMachines = this.machines.filter(machine => {
+      return (!this.columnFilters['Machine ID'] || machine.machineId.toLowerCase().includes(this.columnFilters['Machine ID'].toLowerCase())) &&
+             (!this.columnFilters['Machine Type'] || machine.machineType.toLowerCase().includes(this.columnFilters['Machine Type'].toLowerCase())) &&
+             (!this.columnFilters['Status'] || (machine.status === '1' ? 'Online' : 'Offline').toLowerCase().includes(this.columnFilters['Status'].toLowerCase())) &&
+             (!this.columnFilters['Stock Status'] || machine.stockStatus.toLowerCase().includes(this.columnFilters['Stock Status'].toLowerCase())) &&
+             (!this.columnFilters['Burning Status'] || this.getBurningStatusLabel(machine.burningStatus).toLowerCase().includes(this.columnFilters['Burning Status'].toLowerCase()));
+    });
+  
+    if (this.sortKey) {
+      this.filteredMachines.sort((a, b) => {
+        const valueA = a[this.sortKey]?.toString().toLowerCase();
+        const valueB = b[this.sortKey]?.toString().toLowerCase();
+        if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+  }
+  
+  sortData(key: string) {
+    if (this.sortKey === key) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortKey = key;
+      this.sortDirection = 'asc';
+    }
+    this.applyFiltersAndSort();
+  }
+  
+  getBurningStatusLabel(status: string): string {
+    if (status === '2') return 'Burning';
+    if (status === '1') return 'Idle';
+    return 'N/A';
+  }
+  
 }
