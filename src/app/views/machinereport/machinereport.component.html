@@ -209,9 +209,14 @@
       
       <!-- Add to your HTML template -->
     
-      <button (click)="goBack()" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Reports
-      </button>
+      <!-- <button (click)="goBack()" class="btn">
+        <i class="fas fa-arrow-left" style="color: white;"></i> Back
+      </button> -->
+      <div class="float-right">
+        <a class="btn" style="background-color: #4a90e2; border: none; color: #f6f6f6;" (click)="goBack()">
+          <i class="fas fa-arrow-left" style="color: rgb(246, 244, 249);"></i> Back
+        </a>
+      </div>
       
       
 
