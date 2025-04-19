@@ -204,3 +204,32 @@ c-sidebar {
 .table-container, .filter-container {
   width: 100%;
 }
+app-default-header {
+  height: 50px !important; /* Reduce height */
+  padding: 5px 10px !important; /* Adjust spacing */
+}
+
+
+c-header-nav .dropdown {
+  display: flex;
+  flex-direction: column; /* ✅ Forces elements to stack vertically */
+  align-items: center;
+  text-align: center;
+}
+
+c-avatar {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.user-id {
+  font-size: 12px !important;
+  margin-top: 4px !important; /* ✅ Adds spacing below avatar */
+  display: block;
+  text-align: center;
+}
+
+
+.logout-icon {
+  font-size: 14px !important; /* Reduce logout icon size */
+}

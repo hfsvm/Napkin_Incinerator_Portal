@@ -1,9 +1,11 @@
-//before dashboardsummary api 
 
 // import { Component, AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
-// import { Chart } from 'chart.js';
+// import {  ChartType, registerables } from 'chart.js';
 // import { DataService } from '../../../service/data.service';
-// import { AuthService } from '../../../services/auth.service';
+// import { CommonDataService } from '../../../Common/common-data.service';
+// import Chart from 'chart.js/auto';
+
+// Chart.register(...registerables);
 
 // @Component({
 //   selector: 'app-widgets',
@@ -13,145 +15,6 @@
 //   changeDetection: ChangeDetectionStrategy.Default
 // })
 // export class WidgetsComponent implements AfterContentInit {
-
-//   totalMachines = 0;
-//   activeMachines = 0;
-//   inactiveMachines = 0;
-//   napkinsDispensed = 0; // Updated to be dynamic
-
-//   okStock = 120;
-//   lowStock = 50;
-//   emptyStock = 20;
-//   unknownStock = 0;
-
-//   totalCollection = 0; // Updated to be dynamic
-
-//   merchantId: string | null = null;
-//   chartDoughnut: any;
-//   chartStock: any;
-
-//   constructor(
-//     private changeDetectorRef: ChangeDetectorRef,
-//     private dataService: DataService,
-//     private authService: AuthService
-//   ) {}
-
-//   ngAfterContentInit(): void {
-//     this.merchantId ;
-//     if (this.merchantId) {
-//       this.fetchMachineData();
-//       this.fetchTransactionData(); // Fetch transaction data
-//       this.updateStockChart();
-//     } else {
-//       console.error('❌ No Merchant ID Found! Redirecting to login...');
-//     }
-//   }
-
-//   fetchMachineData(): void {
-//     if (!this.merchantId) return;
-
-//     this.dataService.getMachines(this.merchantId).subscribe({
-//       next: (response) => {
-//         console.log('Machines Data:', response);
-//         if (response) {
-//           this.activeMachines = response.activeCount || 0;
-//           this.inactiveMachines = response.inActiveCount || 0;
-//           this.totalMachines = this.activeMachines + this.inactiveMachines;
-//           this.updateMachineChart();
-//           this.changeDetectorRef.detectChanges();
-//         }
-//       },
-//       error: (error) => console.error('Error fetching machine data:', error)
-//     });
-//   }
-
-//   fetchTransactionData(): void {
-//     if (!this.merchantId) return;
-
-//     this.dataService.getTransactions(this.merchantId).subscribe({
-//       next: (response) => {
-//         console.log('Transaction Data:', response);
-//         if (response.status === 200 && response.data) {
-//           const transactions = response.data;
-
-//           this.totalCollection = transactions.reduce((sum: any, txn: { txnAmount: any; }) => sum + (txn.txnAmount || 0), 0);
-//           this.napkinsDispensed = transactions.reduce((sum: any, txn: { quantity: any; }) => sum + (txn.quantity || 0), 0);
-
-//           this.changeDetectorRef.detectChanges();
-//         }
-//       },
-//       error: (error) => console.error('Error fetching transaction data:', error)
-//     });
-//   }
-
-//   updateMachineChart(): void {
-//     const machineChartData = {
-//       labels: ['Online', 'Offline'],
-//       datasets: [{
-//         data: [this.activeMachines, this.inactiveMachines],
-//         backgroundColor: ['#2ac123', '#dd1f1f']
-//       }]
-//     };
-//     this.initializeMachineChart(machineChartData);
-//   }
-
-//   updateStockChart(): void {
-//     const stockChartData = {
-//       labels: ['OK', 'LOW', 'EMPTY', 'UNKNOWN'],
-//       datasets: [{
-//         data: [this.okStock, this.lowStock, this.emptyStock, this.unknownStock],
-//         backgroundColor: ['#2ac123', '#f39c12', '#dd1f1f', 'grey']
-//       }]
-//     };
-//     this.initializeStockChart(stockChartData);
-//   }
-
-//   initializeMachineChart(chartData: any): void {
-//     setTimeout(() => {
-//       const doughnutCanvas = document.getElementById('canvasDoughnut') as HTMLCanvasElement;
-
-//       if (doughnutCanvas) {
-//         if (this.chartDoughnut) this.chartDoughnut.destroy();
-//         this.chartDoughnut = new Chart(doughnutCanvas, {
-//           type: 'doughnut',
-//           data: chartData,
-//           options: { responsive: false, maintainAspectRatio: false }
-//         });
-//       }
-//     }, 500);
-//   }
-
-//   initializeStockChart(chartData: any): void {
-//     setTimeout(() => {
-//       const stockCanvas = document.getElementById('canvasStock') as HTMLCanvasElement;
-
-//       if (stockCanvas) {
-//         if (this.chartStock) this.chartStock.destroy();
-//         this.chartStock = new Chart(stockCanvas, {
-//           type: 'pie',
-//           data: chartData,
-//           options: { responsive: false, maintainAspectRatio: false }
-//         });
-//       }
-//     }, 500);
-//   }
-// }
-
-//After summarydashboard api
-// import { Component, AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
-// import { Chart } from 'chart.js';
-// import { DataService } from '../../../service/data.service';
-// import { CommonDataService } from 'src/app/Common/common-data.service';
-
-// @Component({
-//   selector: 'app-widgets',
-//   templateUrl: './widgets.component.html',
-//   styleUrls: ['./widgets.component.scss'],
-//   encapsulation: ViewEncapsulation.None,
-//   changeDetection: ChangeDetectionStrategy.Default
-// })
-// export class WidgetsComponent implements AfterContentInit {
-
 //   totalMachines = 0;
 //   activeMachines = 0;
 //   inactiveMachines = 0;
@@ -162,9 +25,11 @@
 //   unknownStock = 0;
 //   totalCollection = 0;
 
+//   doughnutChart: any;
+//   stockChart: any;
 //   merchantId: string | null = null;
-//   chartDoughnut: any;
-//   chartStock: any;
+//   chartDoughnut!: Chart;
+//   chartStock!: Chart;
 
 //   constructor(
 //     private changeDetectorRef: ChangeDetectorRef,
@@ -172,59 +37,131 @@
 //     private commonDataService: CommonDataService
 //   ) {}
 
-//   ngAfterContentInit(): void {
-//     this.merchantId = this.commonDataService.merchantId;
-    
-//     if (this.merchantId) {
+//   // ngAfterContentInit(): void {
+//   //   this.merchantId = this.commonDataService.merchantId;
+//   //   if (this.merchantId) {
+//   //     this.fetchDashboardData();
+//   //   } else {
+//   //     console.error('❌ No Merchant ID Found! Redirecting to login...');
+//   //   }
+//   // }before set interval
+//   intervalId: any;
+
+// ngAfterContentInit(): void {
+//   this.merchantId = this.commonDataService.merchantId;
+//   if (this.merchantId) {
+//     this.fetchDashboardData();
+//     this.intervalId = setInterval(() => {
+//       console.log('🔁 Auto-refreshing dashboard data...');
 //       this.fetchDashboardData();
-//     } else {
-//       console.error('❌ No Merchant ID Found! Redirecting to login...');
-//     }
+//     }, 120000);
+//   } else {
+//     console.error('❌ No Merchant ID Found! Redirecting to login...');
 //   }
+// }
+
+// ngOnDestroy(): void {
+//   if (this.intervalId) {
+//     clearInterval(this.intervalId);
+//   }
+// }
+
+//   // fetchDashboardData(): void {
+//   //   if (!this.merchantId) return;
+  
+//   //   // ✅ Ensure userDetails exist before using them
+//   //   const userDetails = this.commonDataService.userDetails;
+//   //   console.log('🔍 Debugging userDetails:', userDetails);
+  
+//   //   if (!userDetails || !userDetails.machineId) {
+//   //     console.error('❌ No User Details Found! API request may be incomplete.');
+//   //     return;
+//   //   }
+  
+//   //   // ✅ Prepare API Query Params (Pass Client ID in level3)
+//   //   const queryParams: any = {
+//   //     merchantId: this.merchantId,
+//   //     machineStatus: ['1', '2'], // ✅ Default values
+//   //     stockStatus: ['0', '1', '2'], 
+//   //     burnStatus: ['1', '2'], 
+//   //     level1: userDetails.state && userDetails.state.length > 0 ? userDetails.state.join(',') : '', 
+//   //     level2: userDetails.district && userDetails.district.length > 0 ? userDetails.district.join(',') : '',
+//   //     level3: userDetails.companyName && userDetails.companyName.length > 0 ? userDetails.companyName[0].ClientId : '',  // ✅ Pass only 1 Client ID
+//   //     machineId: userDetails.machineId && userDetails.machineId.length > 0 ? userDetails.machineId.join(',') : '' 
+//   //   };
+  
+//   //   // ✅ Log formatted API URL before making the request
+//   //   const apiUrl = `${this.dataService.url1}/getMachineDashboardSummary?${new URLSearchParams(queryParams).toString()}`;
+//   //   console.log('📡 Final API URL:', apiUrl);
+  
+//   //   this.dataService.getMachineDashboardSummary(queryParams).subscribe({
+//   //     next: (response) => {
+//   //       console.log('✅ API Response:', response);
+  
+//   //       if (response.code === 200 && response.data) {
+//   //         const { machinesInstalled, totalCollection, itemsDispensed, machines, stockEmpty, stockLow, machinesRunning } = response.data;
+  
+//   //         this.totalMachines = machinesInstalled || 0;
+//   //         this.totalCollection = totalCollection || 0;
+//   //         this.napkinsDispensed = itemsDispensed || 0;
+//   //         this.activeMachines = machinesRunning ? machines.filter((m: any) => m.status === 'Online').length : 0;
+//   //         this.inactiveMachines = this.totalMachines - this.activeMachines;
+//   //         this.emptyStock = stockEmpty || 0;
+//   //         this.lowStock = stockLow || 0;
+//   //         this.okStock = this.totalMachines - (this.emptyStock + this.lowStock);
+  
+//   //         this.updateMachineChart();
+//   //         this.updateStockChart();
+//   //         this.changeDetectorRef.detectChanges();
+//   //       }
+//   //     },
+//   //     error: (error) => console.error('❌ Error fetching dashboard data:', error)
+//   //   });
+//   // }
 //   fetchDashboardData(): void {
 //     if (!this.merchantId) return;
   
-//     console.log('🔹 Fetching Dashboard Data for Merchant:', this.merchantId);
+//     const userDetails = this.commonDataService.userDetails;
+//     console.log('🔍 Debugging userDetails:', userDetails);
   
-//     this.dataService.getMachineDashboardSummary(this.merchantId, '1,2', '', '').subscribe({
+//     if (!userDetails) {
+//       console.error('❌ No User Details Found! API request may be incomplete.');
+//       return;
+//     }
+  
+//     const queryParams: any = {
+//       merchantId: this.merchantId,
+//       machineStatus: ['1', '2'],
+//       stockStatus: ['0', '1', '2'],
+//       burnStatus: ['1', '2'],
+//       level1: userDetails.state?.join(',') || '',
+//       level2: userDetails.district?.join(',') || '',
+//       level3: userDetails.companyName?.[0]?.ClientId || '',
+//       machineId: userDetails.machineId?.join(',') || ''
+//     };
+  
+//     const apiUrl = `${this.dataService.url1}/getMachineDashboardSummary?${new URLSearchParams(queryParams).toString()}`;
+//     console.log('📡 Final API URL:', apiUrl);
+  
+//     this.dataService.getMachineDashboardSummary(queryParams).subscribe({
 //       next: (response) => {
-//         console.log('✅ Dashboard Data:', response);
+//         console.log('✅ API Response:', response);
   
-//         if (response.status === 200 && response.data) {
-//           const { machinesInstalled, machinesRunning, totalCollection, itemsDispensed, machines } = response.data;
+//         if (response.code === 200 && response.data) {
+//           const { machinesInstalled = 0, machinesRunning = 0, totalCollection = 0, itemsDispensed = 0, stockEmpty = 0, stockLow = 0 } = response.data;
   
-//           // ✅ Assign General Data
-//           this.totalMachines = machinesInstalled || 0;
-//           this.activeMachines = machinesRunning || 0;
-//           this.inactiveMachines = this.totalMachines - this.activeMachines;
-//           this.totalCollection = totalCollection || 0;
-//           this.napkinsDispensed = itemsDispensed || 0;
+//           this.totalMachines = machinesInstalled;
+//           this.activeMachines = machinesRunning;
+//           this.inactiveMachines = machinesInstalled - machinesRunning;
+//           this.totalCollection = totalCollection;
+//           this.napkinsDispensed = itemsDispensed;
+//           this.emptyStock = stockEmpty;
+//           this.lowStock = stockLow;
+//           this.okStock = machinesInstalled - (stockEmpty + stockLow);
   
-//           // ✅ Stock Status Calculation - Optimized
-//           let emptyCount = 0, lowCount = 0, fullCount = 0;
-  
-//           machines.forEach((machine: any) => {
-//             if (!machine.stockStatus || machine.stockStatus.length === 0) return; // Skip invalid data
-  
-//             const statuses: string[] = machine.stockStatus.map((s: { springStatus: string }) => s.springStatus); // Explicitly type 's'
-  
-//             if (statuses.every(s => s === '2')) fullCount++;
-//             else if (statuses.every(s => s === '0')) emptyCount++;
-//             else lowCount++; // If mixed, consider it Low
-//           });
-  
-//           // ✅ Assign Stock Values
-//           this.okStock = fullCount;
-//           this.lowStock = lowCount;
-//           this.emptyStock = emptyCount;
-//           this.unknownStock = 0;
-  
-//           // ✅ Update Charts Only If Data Changed
 //           this.updateMachineChart();
 //           this.updateStockChart();
 //           this.changeDetectorRef.detectChanges();
-//         } else {
-//           console.warn('⚠️ No valid data received');
 //         }
 //       },
 //       error: (error) => console.error('❌ Error fetching dashboard data:', error)
@@ -232,61 +169,128 @@
 //   }
   
 //   updateMachineChart(): void {
-//     const machineChartData = {
-//       labels: ['Online', 'Offline'],
-//       datasets: [{
-//         data: [this.activeMachines, this.inactiveMachines],
-//         backgroundColor: ['#2ac123', '#dd1f1f']
-//       }]
-//     };
-//     this.initializeMachineChart(machineChartData);
+//     this.initializeChart('canvasDoughnut', 'doughnut', ['Online', 'Offline'], [this.activeMachines, this.inactiveMachines], ['#4CAF50', '#D32F2F'], 'chartDoughnut');
 //   }
-
 //   updateStockChart(): void {
-//     const stockChartData = {
-//       labels: ['OK', 'LOW', 'EMPTY', 'UNKNOWN'],
-//       datasets: [{
-//         data: [this.okStock, this.lowStock, this.emptyStock, this.unknownStock],
-//         backgroundColor: ['#2ac123', '#f39c12', '#dd1f1f', 'grey']
-//       }]
-//     };
-//     this.initializeStockChart(stockChartData);
+//     console.log('📊 Updating Stock Chart with:', this.okStock, this.lowStock, this.emptyStock);
+  
+//     this.initializeChart(
+//       'canvasStock', 
+//       'pie', 
+//       ['Full Stock', 'Low Stock', 'Empty Stock'], 
+//       [this.okStock, this.lowStock, this.emptyStock], 
+//       ['#4CAF50', '#FFC107', '#D32F2F'],
+//       'chartStock'
+      
+//     );
 //   }
+  
+  
+//   // initializeChart(canvasId: string, chartType: ChartType, labels: string[], data: number[], colors: string[], chartRef: 'chartDoughnut' | 'chartStock'): void {
+//   //   setTimeout(() => {
+//   //     const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+//   //     if (!canvas) {
+//   //       console.warn(`⚠️ Canvas ID '${canvasId}' not found! Skipping chart initialization.`);
+//   //       return;
+//   //     }
+  
+//   //     if (this[chartRef]) {
+//   //       this[chartRef].destroy(); // ✅ Destroy only if the chart exists
+//   //     }
+  
+//   //     this[chartRef] = new Chart(canvas, {
+//   //       type: chartType,
+//   //       data: {
+//   //         labels,
+//   //         datasets: [{
+//   //           data,
+//   //           backgroundColor: colors
+//   //         }]
+//   //       },
+//   //       options: {
+//   //         responsive: false,
+//   //         maintainAspectRatio: false,
+//   //         plugins: {
+//   //           legend: {
+//   //             display: true, // ✅ Ensure the legend is visible
+//   //             position: 'bottom', // ✅ Moves legend below the chart
+//   //             labels: {
+//   //               usePointStyle: true, // ✅ Use round icons instead of squares
+//   //               pointStyle: 'circle', // ✅ Makes the indicators round
+//   //               padding: 20, // ✅ Adds spacing for better appearance
+//   //             }
+//   //           }
+//   //         }
+//   //       }
+//   //     });
+//   //   }, 500);
+//   // }
+//   initializeChart(
 
-//   initializeMachineChart(chartData: any): void {
+
+//     canvasId: string,
+//     chartType: ChartType,
+//     labels: string[],
+//     data: number[],
+//     colors: string[],
+//     chartRef: 'chartDoughnut' | 'chartStock'
+//   ): void {
 //     setTimeout(() => {
-//       const doughnutCanvas = document.getElementById('canvasDoughnut') as HTMLCanvasElement;
-//       if (doughnutCanvas) {
-//         if (this.chartDoughnut) this.chartDoughnut.destroy();
-//         this.chartDoughnut = new Chart(doughnutCanvas, {
-//           type: 'doughnut',
-//           data: chartData,
-//           options: { responsive: false, maintainAspectRatio: false }
-//         });
+//       const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+  
+//       if (!canvas) {
+//         console.warn(`⚠️ Canvas ID '${canvasId}' not found! Skipping chart initialization.`);
+//         return;
 //       }
+  
+//       // Destroy previous chart if exists
+//       if (this[chartRef]) {
+//         this[chartRef].destroy();
+//       }
+  
+//       // Reset canvas dimensions manually if responsive is false
+//       canvas.width = canvas.offsetWidth;
+//       canvas.height = canvas.offsetHeight;
+  
+//       // Initialize new Chart
+//       this[chartRef] = new Chart(canvas, {
+//         type: chartType,
+//         data: {
+//           labels,
+//           datasets: [{
+//             data,
+//             backgroundColor: colors
+//           }]
+//         },
+//         options: {
+//           responsive: false,
+//           maintainAspectRatio: false,
+//           plugins: {
+//             legend: {
+//               display: true,
+//               position: 'bottom',
+//               labels: {
+//                 usePointStyle: true,
+//                 pointStyle: 'circle',
+//                 padding: 20
+//               }
+//             }
+//           }
+//         }
+//       });
 //     }, 500);
 //   }
+  
+// }  
+// src/app/pages/dashboard/widgets/widgets.component.ts
 
-//   initializeStockChart(chartData: any): void {
-//     setTimeout(() => {
-//       const stockCanvas = document.getElementById('canvasStock') as HTMLCanvasElement;
-//       if (stockCanvas) {
-//         if (this.chartStock) this.chartStock.destroy();
-//         this.chartStock = new Chart(stockCanvas, {
-//           type: 'pie',
-//           data: chartData,
-//           options: { responsive: false, maintainAspectRatio: false }
-//         });
-//       }
-//     }, 500);
-//   } 
-// }
-//After code optimization
-
-import { Component, AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
-import { Chart, ChartType, registerables } from 'chart.js';
+import { Component, AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
+import { DashboardRefreshService } from '../../../service/dashboard-refresh.service';
+import { ChartType, registerables } from 'chart.js';
+import Chart from 'chart.js/auto';
 
 Chart.register(...registerables);
 
@@ -297,7 +301,8 @@ Chart.register(...registerables);
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.Default
 })
-export class WidgetsComponent implements AfterContentInit {
+export class WidgetsComponent implements AfterContentInit, OnDestroy {
+  // All your existing variables...
   totalMachines = 0;
   activeMachines = 0;
   inactiveMachines = 0;
@@ -308,116 +313,104 @@ export class WidgetsComponent implements AfterContentInit {
   unknownStock = 0;
   totalCollection = 0;
 
-  merchantId: string | null = null;
   chartDoughnut!: Chart;
   chartStock!: Chart;
+  merchantId: string | null = null;
+
+  private refreshSubscription!: Subscription;
 
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
     private dataService: DataService,
-    private commonDataService: CommonDataService
+    private commonDataService: CommonDataService,
+    private dashboardRefreshService: DashboardRefreshService
   ) {}
 
   ngAfterContentInit(): void {
     this.merchantId = this.commonDataService.merchantId;
     if (this.merchantId) {
       this.fetchDashboardData();
+
+      this.refreshSubscription = this.dashboardRefreshService.refresh$.subscribe(() => {
+        this.fetchDashboardData();
+      });
+
     } else {
       console.error('❌ No Merchant ID Found! Redirecting to login...');
     }
   }
- 
-  
-  // fetchDashboardData(): void {
-  //   if (!this.merchantId) return;
-  
-  //   console.log('🔹 Fetching Dashboard Data for Merchant:', this.merchantId);
-  
-  //   this.dataService.getMachineDashboardSummary(this.merchantId, '1,2', '', '').subscribe({
-  //     next: (response) => {
-  //       console.log('✅ Dashboard Data:', response);
-  
-  //       if (response.status === 200 && response.data) {
-  //         const { machinesInstalled, machinesRunning, totalCollection, itemsDispensed, machines, stockEmpty, stockLow } = response.data;
-  
-  //         // ✅ Assign General Data
-  //         this.totalMachines = machinesInstalled || 0;
-  //         this.activeMachines = machinesRunning || 0;
-  //         this.inactiveMachines = this.totalMachines - this.activeMachines;
-  //         this.totalCollection = totalCollection || 0;
-  //         this.napkinsDispensed = itemsDispensed || 0;
-  
-  //         // ✅ Fix: Directly Use API Data for Stock Counts
-  //         this.emptyStock = stockEmpty || 0;
-  //         this.lowStock = stockLow || 0;
-  //         this.okStock = this.totalMachines - (this.emptyStock + this.lowStock); // Full stock count
-  
-  //         // ✅ Fix: Ensure Charts Update
-  //         this.updateMachineChart();
-  //         this.updateStockChart();
-  //         this.changeDetectorRef.detectChanges();
-  //       } else {
-  //         console.warn('⚠️ No valid data received');
-  //       }
-  //     },
-  //     error: (error) => console.error('❌ Error fetching dashboard data:', error)
-  //   });
-  // }
+
+  ngOnDestroy(): void {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+    }
+  }
+
   fetchDashboardData(): void {
     if (!this.merchantId) return;
-  
-    console.log('🔹 Fetching Dashboard Data for Merchant:', this.merchantId);
-  
-    this.dataService.getMachineDashboardSummary(this.merchantId, '1','').subscribe({
+
+    const userDetails = this.commonDataService.userDetails;
+    console.log('🔍 Debugging userDetails:', userDetails);
+
+    if (!userDetails) {
+      console.error('❌ No User Details Found! API request may be incomplete.');
+      return;
+    }
+
+    const queryParams: any = {
+      merchantId: this.merchantId,
+      machineStatus: ['1', '2'],
+      stockStatus: ['0', '1', '2'],
+      burnStatus: ['1', '2'],
+      level1: userDetails.state?.join(',') || '',
+      level2: userDetails.district?.join(',') || '',
+      level3: userDetails.companyName?.[0]?.ClientId || '',
+      machineId: userDetails.machineId?.join(',') || ''
+    };
+
+    const apiUrl = `${this.dataService.url1}/getMachineDashboardSummary?${new URLSearchParams(queryParams).toString()}`;
+    console.log('📡 Final API URL:', apiUrl);
+
+    this.dataService.getMachineDashboardSummary(queryParams).subscribe({
       next: (response) => {
-        console.log('✅ Dashboard Data:', response);
-  
-        if (response.status === 200 && response.data) {
-          const { machinesInstalled, totalCollection, itemsDispensed, machines, stockEmpty, stockLow,machinesRunning } = response.data;
-  
-          // ✅ Assign General Data from API
-          this.totalMachines = machinesInstalled || 0;
-          this.totalCollection = totalCollection || 0;
-          this.napkinsDispensed = itemsDispensed || 0;
-  
-          // ✅ Fix: Calculate Machines Running Dynamically
-          this.activeMachines = machinesRunning ? machines.filter((m: any) => m.status === 'Online').length : 0;
-          this.inactiveMachines = this.totalMachines - this.activeMachines;
-  
-          // ✅ Fix: Use API Data for Stock Counts
-          this.emptyStock = stockEmpty || 0;
-          this.lowStock = stockLow || 0;
-          this.okStock = this.totalMachines - (this.emptyStock + this.lowStock); // Full stock count
-  
-          // ✅ Update Charts Dynamically
+        console.log('✅ API Response:', response);
+
+        if (response.code === 200 && response.data) {
+          const { machinesInstalled = 0, machinesRunning = 0, totalCollection = 0, itemsDispensed = 0, stockEmpty = 0, stockLow = 0 } = response.data;
+
+          this.totalMachines = machinesInstalled;
+          this.activeMachines = machinesRunning;
+          this.inactiveMachines = machinesInstalled - machinesRunning;
+          this.totalCollection = totalCollection;
+          this.napkinsDispensed = itemsDispensed;
+          this.emptyStock = stockEmpty;
+          this.lowStock = stockLow;
+          this.okStock = machinesInstalled - (stockEmpty + stockLow);
+
           this.updateMachineChart();
           this.updateStockChart();
           this.changeDetectorRef.detectChanges();
-        } else {
-          console.warn('⚠️ No valid data received');
         }
       },
       error: (error) => console.error('❌ Error fetching dashboard data:', error)
     });
   }
-  
+
   updateMachineChart(): void {
-    this.initializeChart('canvasDoughnut', 'doughnut', ['Online', 'Offline'], [this.activeMachines, this.inactiveMachines], ['#2ac123', '#dd1f1f'], 'chartDoughnut');
+    this.initializeChart('canvasDoughnut', 'doughnut', ['Online', 'Offline'], [this.activeMachines, this.inactiveMachines], ['#4CAF50', '#D32F2F'], 'chartDoughnut');
   }
+
   updateStockChart(): void {
-    console.log('📊 Updating Stock Chart with:', this.okStock, this.lowStock, this.emptyStock);
-  
     this.initializeChart(
-      'canvasStock', 
-      'pie', 
-      ['Full Stock', 'Low Stock', 'Empty Stock'], 
-      [this.okStock, this.lowStock, this.emptyStock], 
-      ['#2ac123', '#f39c12', '#dd1f1f'],
+      'canvasStock',
+      'pie',
+      ['Full Stock', 'Low Stock', 'Empty Stock'],
+      [this.okStock, this.lowStock, this.emptyStock],
+      ['#4CAF50', '#FFC107', '#D32F2F'],
       'chartStock'
     );
   }
-  
-  
+
   initializeChart(canvasId: string, chartType: ChartType, labels: string[], data: number[], colors: string[], chartRef: 'chartDoughnut' | 'chartStock'): void {
     setTimeout(() => {
       const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
@@ -425,11 +418,14 @@ export class WidgetsComponent implements AfterContentInit {
         console.warn(`⚠️ Canvas ID '${canvasId}' not found! Skipping chart initialization.`);
         return;
       }
-  
+
       if (this[chartRef]) {
-        this[chartRef].destroy(); // ✅ Destroy only if the chart exists
+        this[chartRef].destroy();
       }
-  
+
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
       this[chartRef] = new Chart(canvas, {
         type: chartType,
         data: {
@@ -444,12 +440,12 @@ export class WidgetsComponent implements AfterContentInit {
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              display: true, // ✅ Ensure the legend is visible
-              position: 'bottom', // ✅ Moves legend below the chart
+              display: true,
+              position: 'bottom',
               labels: {
-                usePointStyle: true, // ✅ Use round icons instead of squares
-                pointStyle: 'circle', // ✅ Makes the indicators round
-                padding: 20, // ✅ Adds spacing for better appearance
+                usePointStyle: true,
+                pointStyle: 'circle',
+                padding: 20
               }
             }
           }
@@ -457,4 +453,4 @@ export class WidgetsComponent implements AfterContentInit {
       });
     }, 500);
   }
-}  
+}

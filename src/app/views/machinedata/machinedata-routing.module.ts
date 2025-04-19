@@ -8,7 +8,7 @@ const routes: Routes = [
     path: '',
     component: MachinedataComponent,
     data: {
-      title:`Machinedata`
+      title:`Machine Data`
     }
   }
 ];

@@ -1,0 +1,590 @@
+<!-- <div class="container">
+ 
+    <div class="tabs">
+        <button [class.active]="selectedTab === 'business'" (click)="setTab('business')">
+          <c-icon name="cil-settings"></c-icon> Business Configuration
+        </button>
+        <button [class.active]="selectedTab === 'technical'" (click)="setTab('technical')">
+          <c-icon name="cil-settings"></c-icon> Technical Configuration
+        </button>
+        <button [class.active]="selectedTab === 'incinerator'" (click)="setTab('incinerator')">
+          <c-icon name="cil-settings"></c-icon> Incinerator Configuration
+        </button>
+      </div>
+
+    <div *ngIf="selectedTab === 'business'" class="form-container">
+      <form [formGroup]="businessConfigForm" (ngSubmit)="submitForm()">
+      
+        <div class="row">
+          <div class="form-group">
+            <label>Machine ID:</label>
+            <input formControlName="mid" placeholder="Machine ID" />
+          </div>
+
+          <div class="form-group">
+            <label>Machine Enable/Disable:</label>
+            <input formControlName="men" placeholder="Machine enbale or disable" />
+          </div>
+  
+          <div class="form-group">
+            <label>Item max:</label>
+            <input formControlName="imx" placeholder="Item max" />
+          </div>
+  
+          <div class="form-group">
+            <label>Key:</label>
+            <input formControlName="key" placeholder="ABAB" />
+          </div>
+        </div>
+  
+     
+        <div class="row">
+         
+  
+          <div class="form-group">
+            <label>Qty max:</label>
+            <input formControlName="qmx" placeholder="Qty max" />
+          </div>
+  
+          <div class="form-group">
+            <label>QR Code :</label>
+            <input formControlName="qrbyte" placeholder="paste QR Code link" />
+          </div>
+        </div>
+  
+     
+        <h3>Item Configuration Details</h3>
+        <div class="row">
+       
+          <div class="form-group">
+            <label>Item Price:</label>
+            <input formControlName="itp" placeholder="ITP" />
+          </div>
+          <div class="form-group">
+            <label>Spring Number:</label>
+            <input formControlName="spn" placeholder="SPN" />
+          </div>
+        </div>
+  
+      
+        <div class="button-group">
+          <button type="submit" class="submit-btn" [disabled]="businessConfigForm.invalid">Submit</button>
+       
+          <button type="reset" class="clear-btn" (click)="businessConfigForm.reset()">Clear</button>
+        </div>
+      </form>
+  
+      <div *ngIf="jsonOutput" class="json-preview">
+     
+      </div>
+    </div>
+    <div *ngIf="selectedTab === 'technical'" class="form-container">
+        <form [formGroup]="techConfigForm" (ngSubmit)="submitForm()">
+    
+   
+          <div class="row">
+            <div class="form-group">
+              <label>Key:</label>
+              <input formControlName="key" placeholder="ABAB" />
+            </div>
+            <div class="form-group">
+              <label>Machine ID:</label>
+              <input formControlName="mid" placeholder="Enter Machine ID" />
+            </div>
+            <div class="form-group">
+              <label>BFF:</label>
+              <input formControlName="bff" placeholder="Enter BFF" />
+            </div>
+            <div class="form-group">
+              <label>No. of Spring Supported:</label>
+              <input formControlName="nss" placeholder="Enter No. of Spring Supported" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label>No. of Spring Enabled:</label>
+              <input formControlName="nse" placeholder="Enter No. of Spring Enabled" />
+            </div>
+            <div class="form-group">
+              <label>Spring Number:</label>
+              <input formControlName="spn" placeholder="Enter Spring Number" />
+            </div>
+            <div class="form-group">
+              <label>Spring Slot Count:</label>
+              <input formControlName="ssc" placeholder="Enter Spring Slot Count" />
+            </div>
+          </div>
+    
+  
+
+
+          <div class="row">
+            <div class="form-group">
+              <label>Motor Running Feedback:</label>
+              <input formControlName="mrf" placeholder="Enter Motor Running Feedback" />
+            </div>
+            <div class="form-group">
+              <label>Motor Current Measurement:</label>
+              <input formControlName="mcm" placeholder="Enter Motor Current Measurement" />
+            </div>
+            <div class="form-group">
+              <label>Motor Type:</label>
+              <input formControlName="mtp" placeholder="Enter Motor Type" />
+            </div>
+            <div class="form-group">
+              <label>Motor Low Current:</label>
+              <input formControlName="mlc" placeholder="Enter Motor Low Current" />
+            </div>
+          </div>
+    
+    
+          <div class="row">
+            <div class="form-group">
+              <label>Motor Rotations Per Pay:</label>
+              <input formControlName="mrp" placeholder="Enter Motor Rotations Per Pay" />
+            </div>
+            <div class="form-group">
+              <label>Alternate Spring Limit:</label>
+              <input formControlName="asl" placeholder="Enter Alternate Spring Limit" />
+            </div>
+          </div>
+   
+            <h3>Options</h3>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" formControlName="coinDevice" />
+                Coin Device
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" formControlName="gsm" />
+                GSM
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" formControlName="temperatureSensor" />
+                Temperature Sensor
+              </label>
+            </div>
+          
+          <div class="button-group">
+            <button type="submit" class="submit-btn" [disabled]="techConfigForm.invalid">Submit</button>
+            <button type="reset" class="clear-btn" (click)="techConfigForm.reset()">Clear</button>
+          </div>
+        </form>
+    
+  </div>
+  
+<div *ngIf="selectedTab === 'incinerator'" class="form-container">
+    <form [formGroup]="incineratorConfigForm" (ngSubmit)="submitForm()">
+  
+      <div class="row">
+        <div class="form-group">
+          <label>Incinerator status:</label>
+          <input formControlName="icc" placeholder="Enter ICC" />
+        </div>
+        <div class="form-group">
+          <label>Status Inventory Update:</label>
+          <input formControlName="sta" placeholder="Enter STA" />
+        </div>
+        <div class="form-group">
+          <label>STB:</label>
+          <input formControlName="stb" placeholder="Enter STB" />
+        </div>
+        <div class="form-group">
+          <label>HBO:</label>
+          <input formControlName="hbo" placeholder="Enter HBO" />
+        </div>
+      </div>
+  
+      <div class="row">
+        <div class="form-group">
+          <label>CTA:</label>
+          <input formControlName="cta" placeholder="Enter CTA" />
+        </div>
+        <div class="form-group">
+          <label>CTB:</label>
+          <input formControlName="ctb" placeholder="Enter CTB" />
+        </div>
+        <div class="form-group">
+          <label>BCT:</label>
+          <input formControlName="bct" placeholder="Enter BCT" />
+        </div>
+      </div>
+  
+      <h3>ACT Details</h3>
+      <div class="row">
+        <div class="form-group">
+          <label>Hours:</label>
+          <input formControlName="hur" placeholder="Enter Hours" />
+        </div>
+        <div class="form-group">
+          <label>Minutes:</label>
+          <input formControlName="min" placeholder="Enter Minutes" />
+        </div>
+      </div>
+  
+      <div class="button-group">
+        <button type="submit" class="submit-btn" [disabled]="incineratorConfigForm.invalid">Submit</button>
+        <button type="reset" class="clear-btn" (click)="incineratorConfigForm.reset()">Clear</button>
+      </div>
+    </form>
+  </div>
+  
+   -->
+  
+   <div class="container">
+    <div class="tab-header mb-3">
+      <button class="tab-button" [class.active]="selectedTab === 'advanced'" (click)="setTab('advanced')">
+        <c-icon name="cil-settings"></c-icon> Machines
+      </button>
+      <button class="tab-button" [class.active]="selectedTab === 'business'" (click)="setTab('business')">
+        <c-icon name="cil-settings"></c-icon> Business Configuration
+      </button>
+      <button class="tab-button" [class.active]="selectedTab === 'technical'" (click)="setTab('technical')">
+        <c-icon name="cil-settings"></c-icon> Technical Configuration
+      </button>
+      <button class="tab-button" [class.active]="selectedTab === 'incinerator'" (click)="setTab('incinerator')">
+        <c-icon name="cil-settings"></c-icon> Incinerator Configuration
+      </button>
+    </div>
+  
+    <!-- ✅ Business Configuration Form -->
+    <div *ngIf="selectedTab === 'business'" class="form-container">
+      <form [formGroup]="businessConfigForm" (ngSubmit)="submitForm()">
+        
+        <!-- ✅ First Row (4 Fields) -->
+        <div class="row">
+          <div class="form-group">
+            <label>Machine ID:</label>
+            <input formControlName="mid" placeholder="Machine ID" />
+          </div>
+  
+          <div class="form-group">
+            <label for="machineStatus">Machine Enable/Disable:</label>
+            <select formControlName="men" id="machineStatus" class="form-control">
+              <option [ngValue]="null" disabled selected>Select Status</option>
+              <option [ngValue]="1">Enable</option>
+              <option [ngValue]="2">Disable</option>
+            </select>
+          </div>
+          
+          
+  
+          <div class="form-group">
+            <label>Item max:</label>
+            <input formControlName="imx" placeholder="Item max" />
+          </div>
+  
+          <div class="form-group">
+            <label>Key:</label>
+            <input formControlName="key" placeholder="ABAB" />
+          </div>
+        </div>
+  
+        <!-- ✅ Second Row (2 Fields) -->
+        <div class="row">
+          <div class="form-group">
+            <label>Qty max:</label>
+            <input formControlName="qmx" placeholder="Qty max" />
+          </div>
+  
+          <div class="form-group">
+            <label>QR Code:</label>
+            <input formControlName="qrb" placeholder="Paste QR Code link" />
+          </div>
+        </div>
+  
+     <!-- ✅ Item Configuration Details -->
+<h3>Item Configuration Details</h3>
+<div formArrayName="ica">
+  <div
+    *ngFor="let item of businessConfigForm.get('ica')['controls']; let i = index"
+    [formGroupName]="i"
+    class="form-row"
+  >
+    <div class="form-group">
+      <label>Spring Number:</label>
+      <input formControlName="spn" placeholder="spn" />
+    </div>
+    <div class="form-group">
+      <label>Item Price:</label>
+      <input formControlName="itp" placeholder="item price" />
+    </div>
+    <div class="form-group">
+      <label>QR Byte:</label>
+      <input formControlName="qrb" placeholder="Enter QR" />
+    </div>
+  </div>
+</div>
+
+        
+
+        
+  
+        <!-- ✅ Buttons Section -->
+        <div class="button-group">
+          <button (click)="enableEdit('business')"class="edit-btn">Edit</button>
+          <button (click)="saveBusinessConfig() "class="save-btn">Save</button>
+          <button (click)=" submitBusinessConfig()" class="submit-btn">Submit</button>
+          <button type="reset" class="clear-btn" (click)="businessConfigForm.reset()">Clear</button>
+         
+
+        </div>
+      </form>
+    </div>
+  
+    <!-- ✅ Technical Configuration Form -->
+    <div *ngIf="selectedTab === 'technical'" class="form-container">
+      <form [formGroup]="techConfigForm" (ngSubmit)="submitForm()">
+      
+        <!-- ✅ First Row -->
+        <div class="row">
+          <div class="form-group">
+            <label>Key:</label>
+            <input formControlName="key" placeholder="ABAB" />
+          </div>
+          <div class="form-group">
+            <label>Machine ID:</label>
+            <input formControlName="mid" placeholder="Enter Machine ID" />
+          </div>
+          <div class="form-group">
+            <label>File Backup:</label>
+            <input formControlName="bff" placeholder="Enter BFF" />
+          </div>
+          <div class="form-group">
+            <label>No. of Spring Supported:</label>
+            <input formControlName="nss" placeholder="Enter No. of Spring Supported" />
+          </div>
+        </div>
+  
+        <!-- ✅ Second Row -->
+        <div class="row">
+          <div class="form-group">
+            <label>No. of Spring Enabled:</label>
+            <input formControlName="nse" placeholder="Enter No. of Spring Enabled" />
+          </div>
+          <div class="form-group">
+            <label>Spring Number:</label>
+            <input formControlName="spn" placeholder="Enter Spring Number" />
+          </div>
+          <!-- <div class="form-group">
+            <label>Spring Slot Count:</label>
+            <input formControlName="ssc" placeholder="Enter Spring Slot Count" />
+          </div> -->
+          <div class="form-group">
+            <label>Motor Type:</label>
+            <input formControlName="mtp" placeholder="Enter Motor Type" />
+          </div>
+          <div class="form-group">
+            <label>Motor Low Current:</label>
+            <input formControlName="mlc" placeholder="Enter Motor Low Current" />
+          </div>
+        </div>
+     
+  
+        <!-- ✅ Third Row -->
+        <div class="row">
+          <!-- <div class="form-group">
+            <label>Motor Running Feedback:</label>
+            <input formControlName="mrf" placeholder="Enter Motor Running Feedback" />
+          </div> -->
+          <!-- <div class="form-group">
+            <label>Motor Current Measurement:</label>
+            <input formControlName="mcm" placeholder="Enter Motor Current Measurement" />
+          </div> -->
+        
+         
+        </div>
+  
+        <!-- ✅ Fourth Row -->
+        <div class="row" formArrayName="spg">
+          <div
+            *ngFor="let spgItem of techConfigForm.get('spg').controls; let i = index"
+            [formGroupName]="i"
+            class="form-group"
+          >
+            <label for="mrp-{{ i }}">Motor Rotations Per Pay:</label>
+            <input
+              id="mrp-{{ i }}"
+              type="number"
+              formControlName="mrp"
+              placeholder="Enter Motor Rotations Per Pay"
+            />
+          </div>
+        
+          <!-- Add Alternate Spring Limit in the same row -->
+          <div class="form-group">
+            <label>Alternate Spring Limit:</label>
+            <input formControlName="asl" placeholder="Enter Alternate Spring Limit" />
+          </div>
+        </div>
+        
+  
+        <h3>Options</h3>
+        <div class="checkbox-group">
+          <!-- Coin Device Checkbox -->
+          <label class="checkbox-item">
+            <input type="checkbox" formControlName="cdf" [checked]="techConfigForm.get('cdf').value === 1" />
+            Coin Device
+          </label>
+        
+          <!-- GSM Checkbox -->
+          <label class="checkbox-item">
+            <input type="checkbox" formControlName="gsm" [checked]="techConfigForm.get('gsm').value === 1" />
+            GSM
+          </label>
+        
+          <!-- Temperature Sensor Checkbox -->
+          <label class="checkbox-item">
+            <input type="checkbox" formControlName="tsf" [checked]="techConfigForm.get('tsf').value === 1" />
+            Temperature Sensor
+          </label>
+        </div>
+        
+  
+        <!-- ✅ Buttons Section -->
+        <div class="button-group">
+          <button (click)="enableEdit('technical')"class="edit-btn">Edit</button>
+          <button (click)="saveTechnicalConfig()"class="save-btn">Save</button>
+          <button (click)="submitTechnicalConfig()"class="submit-btn">Submit</button>
+          <button type="reset" class="clear-btn" (click)="techConfigForm.reset()">Clear</button>
+         
+
+        </div>
+      </form>
+    </div>
+  <!-- ✅ Incinerator Configuration Form -->
+<div *ngIf="selectedTab === 'incinerator'" class="form-container">
+  <form [formGroup]="incineratorConfigForm" (ngSubmit)="submitForm()">
+    <!-- ✅ Nested icr group -->
+    <div formGroupName="icr">
+      <!-- ✅ Nested ira group -->
+      <div formGroupName="ira">
+        <!-- ✅ First Row (4 Fields) -->
+        <div class="row">
+          
+          <div class="form-group">
+            <label for="icc">Incinerator Enable/Disable:</label>
+            <select formControlName="icc" id="icc" class="form-control dropdown-select">
+              <option [ngValue]="" disabled selected>Select Status</option>
+              <option [ngValue]="1">Enable</option>
+              <option [ngValue]="0">Disable</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Set Temperature Heater A:</label>
+            <input formControlName="sta" placeholder="Enter STA" type="number" />
+          </div>
+          <div class="form-group">
+            <label>Set Temperature Heater B:</label>
+            <input formControlName="stb" placeholder="Enter STB" type="number" />
+          </div>
+          <div class="form-group">
+            <label>Heater B On Temperature:</label>
+            <input formControlName="hbo" placeholder="Enter STB" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="bmd">Burning Mode Enable:</label>
+            <select formControlName="bmd" id="bmd" class="form-control dropdown-select">
+              <option [ngValue]="null" disabled selected>Select Mode</option>
+              <option [ngValue]="1">Auto</option>
+              <option [ngValue]="2">Manual</option>
+              <option [ngValue]="3">Both</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Burning Cycle Time Out In Minutes:</label>
+            <input formControlName="bct" placeholder="Enter Minutes" type="number" />
+          </div>
+          <div class="form-group">
+            <label>Heater Minimum Temperature:</label>
+            <input formControlName="ham" placeholder="Enter temperature" type="number" />
+          </div>
+        </div>
+        
+
+        <!-- ✅ Second Row -->
+        <div class="row">
+          <div class="form-group">
+            <label>Heater A Temperature:</label>
+            <input formControlName="cta" placeholder="Enter CTA" type="number" />
+          </div>
+          <div class="form-group">
+            <label>Heater B Temperature:</label>
+            <input formControlName="ctb" placeholder="Enter CTB" type="number" />
+          </div>
+          <div class="form-group">
+            <label>Burning Cycle Time Out In Minutes:</label>
+            <input formControlName="bct" placeholder="Enter BCT" type="number" />
+          </div>
+        </div>
+
+        <!-- ✅ ACT Nested Fields -->
+        <h3>Automatic Cleaning Time</h3>
+        <div class="row" formGroupName="act">
+          <div class="form-group">
+            <label>Hours:</label>
+            <input formControlName="hur" placeholder="Enter Hours" type="number" />
+          </div>
+          <div class="form-group">
+            <label>Minutes:</label>
+            <input formControlName="min" placeholder="Enter Minutes" type="number" />
+          </div>
+        </div>
+      </div>
+    </div>
+        <!-- ✅ Buttons Section -->
+        <div class="button-group">
+          <button (click)="enableEdit('incinerator')"class="edit-btn">Edit</button>
+          <button (click)="submitIncineratorConfig()"class="submit-btn">Submit</button>
+          <button (click)="saveIncineratorConfig()"class="save-btn">Save</button>
+          <button type="reset" class="clear-btn" (click)="incineratorConfigForm.reset()">Clear</button>
+      
+
+        </div>
+      </form>
+    </div>
+  
+    <!-- <div class="tab-navigation">
+     
+      <button (click)="setTab('dropdown')">Dropdown</button>
+     
+    
+    </div> -->
+    
+    <!-- Tab Content -->
+    <div *ngIf="selectedTab === 'advanced'" class="mt-4">
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+          <div class="card">
+            <div class="card-body">
+              <h2 class="card-title text-center mb-3">Select Machine</h2>
+              <div class="form-group  position-relative">
+                <select
+                  class="form-control machine-select"
+                  [(ngModel)]="selectedMachineId"
+                  (change)="onMachineSelect()"
+                >
+                  <option [ngValue]="null"class="machine" disabled>please Select a machine</option>
+                  <option *ngFor="let machine of machines" [ngValue]="machine">
+                    {{ machine }}
+                  </option>
+                </select>
+                <!-- Dropdown arrow icon (positioned absolutely) -->
+                <span class="dropdown-arrow">
+                  <i class="fa fa-chevron-down"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+    
+    </div>
+    
+    
+    <!-- Other tab content will remain the same... -->
+    
+  </div>
+  

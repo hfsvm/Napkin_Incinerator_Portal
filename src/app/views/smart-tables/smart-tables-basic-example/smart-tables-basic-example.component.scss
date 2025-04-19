@@ -1,144 +1,195 @@
-/* Filter Container */
+/* ======================= */
+/* ✅ Filter Container */
+/* ======================= */
 .filter-container {
-    padding: 20px;
-    background: #f4f4f4;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Row Layout */
-  .row {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-  
-  /* Individual Column */
-  .col {
-    flex: 1;
-    min-width: 180px;
-  }
-  
-  /* Labels */
-  label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  /* Select and Inputs */
-  select, input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  /* Toggle Button */
-  .toggle-btn {
-    background-color: #007bff;
-    color: white;
-    padding: 10px;
-    width: 100%;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-  }
-  
-  .toggle-btn:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Error Message */
-  .error {
-    color: red;
-    font-size: 14px;
-    margin-top: 5px;
-  }
-  
-  /* Table Styling */
-  .table-container {
-    margin-top: 20px;
-    overflow-x: auto;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  table, th, td {
-    border: 1px solid #ddd;
-  }
-  
-  th, td {
-    padding: 10px;
-    text-align: center;
-  }
-  
-  th {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
-  .summary-btn {
-    background-color: #f0ad4e;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .summary-btn:hover {
-    background-color: #ec971f;
-  }
-  
-  .load-btn.blue {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    float: right;
-    border-radius: 5px;
-  }
-  
-  .load-btn.blue:hover {
-    background-color: #0056b3;
-  }
-  
-  .text-right {
-    text-align: right;
-  }
-  /* Ensures all dropdowns align properly */
+  padding: 15px;
+  background: #f4f4f4;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0px 4px 8px rgba(193, 185, 185, 0.1);
+}
+ 
+/* ✅ Row Layout */
+.row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.table-container {
+  max-width: 100%;
+  overflow-x: auto; /* Only allow scroll when content is actually wider */
+}
+ 
+.report-container {
+  overflow-x: hidden; /* Prevents extra width on back */
+}
+ 
+/* ✅ Individual Column */
+.col {
+  flex: 1;
+  min-width: 160px;
+}
+ 
+/* ✅ Labels */
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+ 
+/* ✅ Select and Inputs */
+select, input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+ 
+/* ✅ Toggle Button */
+.toggle-btn {
+  background-color: #4A90E2;
+  color: white;
+  padding: 8px;
+  width: 100%;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+ 
+.toggle-btn:hover {
+  background-color: #4A90E2;
+}
+ 
+/* ✅ Error Message */
+.error {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+}
+ 
+/* ======================= */
+/* ✅ Table Styling */
+/* ======================= */
+.table-container {
+  margin-top: 15px;
+  overflow-x: auto;
+}
+ 
+/* ✅ Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0px 2px 8px rgba(164, 158, 158, 0.1);
+}
+ 
+/* ✅ Table Borders */
+table, th, td {
+  border: 1px solid #ddd;
+}
+ 
+/* ✅ Reduce Header Font Size & Height */
+.headers th {
+  font-size: 12px !important; /* Smaller font size */
+  padding: 5px !important; /* Reduce padding */
+  height: 30px !important; /* Reduce header height */
+  background-color: #4A90E2 !important; /* Header color */
+  color: white !important;
+  text-align: center;
+}
+ 
+/* ✅ Reduce Row Font Size & Height */
+.report-table td {
+  word-wrap: break-word;  /* Allow long words to break and wrap into the next line */
+  white-space: normal;    /* Ensure content wraps when necessary */
+  max-width: 200px;  
+  text-align: center;
+  padding: 10px;    /* Optional: Set a maximum width for the columns */
+}
+ 
+.report-table .machine-location,
+.report-table .address {
+  word-wrap: break-word;  /* Force wrapping of long text inside these columns */
+  white-space: normal;    /* Allow content to wrap to the next line */
+  max-width: 200px;
+        /* Optional: Adjust max-width if needed */
+}
+ 
+ 
+/* ✅ Alternate Row Colors */
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+ 
+/* ✅ Grand Total Row Styling */
+.grand-total-row {
+  background-color: #d9edf7 !important;
+  font-weight: bold;
+}
+ 
+/* ======================= */
+/* ✅ Button Styling */
+/* ======================= */
+.btn-sm {
+  padding: 5px 8px !important;
+  font-size: 12px !important;
+  background-color: #4A90E2;
+  color: white;
+}
+ 
+/* ✅ Load Report & Summary Buttons */
+.load-btn.blue {
+  background-color: #4A90E2;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  cursor: pointer;
+  float: right;
+  border-radius: 5px;
+}
+ 
+.load-btn.blue:hover {
+  background-color: #4A90E2;
+}
+ 
+.summary-btn {
+  background-color: #f0ad4e;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+ 
+.summary-btn:hover {
+  background-color: #ec971f;
+}
+ 
+/* ======================= */
+/* ✅ Dropdown Styling */
+/* ======================= */
 .dropdown {
   position: relative;
   display: inline-block;
   width: 100%;
 }
-
-/* Keeps buttons the same size */
+ 
+/* ✅ Dropdown Button */
 .dropdown-toggle {
   width: 100%;
-  height: 36px;
+  height: 32px;
   text-align: left;
   padding: 6px 10px;
-  font-size: 14px;
+  font-size: 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
   background: #fff;
   cursor: pointer;
 }
-
-/* Adjusts dropdown layout */
+ 
+/* ✅ Dropdown Menu */
 .dropdown-menu {
   position: absolute;
   top: 100%;
@@ -150,66 +201,220 @@
   border: 1px solid #ccc;
   z-index: 1000;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 5px 0; /* Reduces extra spacing */
+  padding: 5px 0;
 }
-
-/* Fix dropdown item spacing */
+ 
+/* ✅ Dropdown Items */
 .dropdown-item {
   display: flex;
-  align-items: center; /* Ensures checkbox and text align */
-  padding: 5px 10px; /* Reduces spacing */
-  font-size: 14px;
+  align-items: center;
+  padding: 5px 10px;
+  font-size: 12px;
   border-bottom: 1px solid #ddd;
-  white-space: nowrap; /* Prevents text from breaking */
+  white-space: nowrap;
 }
-
-/* Fix checkbox alignment */
+ 
+/* ✅ Checkbox Alignment */
 .dropdown-item input[type="checkbox"] {
-  margin-right: 8px; /* Adds spacing between checkbox and text */
-  width: 16px;
-  height: 16px;
+  margin-right: 6px;
+  width: 14px;
+  height: 14px;
   vertical-align: middle;
 }
-
-/* Fixes hover issue */
+ 
+/* ✅ Hover Effect */
 .dropdown-item:hover {
   background: #f1f1f1;
 }
-
-/* Ensures filters have consistent width */
-.col {
-  min-width: 200px;
-  padding-right: 10px;
-}
-
-/* Ensures all filters have the same width */
-.col {
-  min-width: 180px;
-  padding-right: 10px;
-}
-/* Ensure filters and buttons are aligned properly */
-.row {
+ 
+/* ======================= */
+/* ✅ Search Bar Styling */
+/* ======================= */
+.search-wrapper {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-start;
+  margin: 15px 0;
 }
-
-/* Ensure both buttons are small and aligned */
-.btn-sm {
-  padding: 5px 10px;
+ 
+.search-label {
   font-size: 14px;
+  font-weight: bold;
+  margin-right: 10px;
 }
-
-/* Ensure the buttons are positioned correctly */
-.d-flex {
+ 
+.search-container {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 24px;
+  padding: 4px;
+  max-width: 250px;
   width: 100%;
+  background: white;
 }
-/* Change Table Header Color */
-.headers th {
-  background-color: #13183e !important; /* Change to your preferred color */
-  color: white !important;
+ 
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 24px;
+}
+ 
+.search-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+}
+ 
+.search-button i {
+  font-size: 14px;
+  color: #555;
+}
+.report-summary {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0px 2px 8px rgba(164, 158, 158, 0.1);
+  font-size: 14px;
+  background: white;
+}
+ 
+.report-summary td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: left;
+  white-space: nowrap; /* Keeps content in one line */
+}
+ 
+.report-summary tr:nth-child(even) {
+  background-color: #f9f9f9; /* Alternate row colors */
+}
+ 
+.report-summary b {
+  font-weight: bold;
+  color: #333;
+}
+ 
+// .report-summary td:first-child {
+//   background-color: #f0f0f0;
+//   font-weight: bold;
+// }
+ 
+.report-summary td:nth-child(odd),
+.report-summary td:nth-child(even) {
+  width: 25%;
+}
+/* ✅ Ensure Single-Value Button Matches Dropdown */
+.single-value-btn {
+  background-color: white !important;  /* Force white background */
+  color: black !important;  /* Ensure text color is visible */
+  border: 1px solid #ced4da;  /* Match normal dropdown border */
+  cursor: default;  /* Prevent hover styles */
+}
+ 
+/* ✅ Make it Responsive */
+@media (max-width: 768px) {
+  .report-summary td {
+    font-size: 12px;
+    padding: 5px;
+  }
+}
+ 
+/* ======================= */
+/* ✅ Responsive Styling */
+/* ======================= */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+ 
+  .col {
+    width: 100%;
+  }
+ 
+  .report-table {
+    font-size: 10px;
+  }
+ 
+  .headers th, .report-table td {
+    padding: 4px !important;
+    height: 25px !important;
+  }
+ 
+  .btn-sm {
+    font-size: 10px !important;
+    padding: 4px 6px !important;
+  }
+ 
+  .search-wrapper {
+    justify-content: center;
+  }
+ 
+  .search-container {
+    max-width: 200px;
+  }
+}
+/* ✅ Match spacing & alignment with date filters */
+.filter-container .col {
+  padding-bottom: 10px; /* Ensure equal spacing */
+}
+ 
+/* ✅ Ensure dropdown & inputs match */
+.form-label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+ 
+/* ✅ Match dropdown height with date inputs */
+.dropdown-toggle,
+.form-control {
+  height: 38px;
+  padding: 5px 10px;
+}
+ 
+/* ✅ Ensure single-value display is consistent */
+.single-value {
+  display: inline-block;
+  background-color: #fafdff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-weight: bold;
+  width: 100%; /* Ensure it matches the width of dropdowns */
   text-align: center;
-  padding: 10px;
+}
+/* Add this to your component CSS or styles.css */
+.styled-pagination button {
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  margin: 10px 5px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+ 
+.styled-pagination button:disabled {
+  background-color: #a0c4ec;
+  cursor: not-allowed;
+}
+ 
+.styled-pagination span {
+  font-weight: 500;
+  margin: 0 8px;
+}
+ 
+.dropdown-menu input[type="text"] {
+  width: 90%; /* Reduce the width to 90% of the dropdown */
+  padding: 0.375rem; /* Decrease padding */
+  margin-left: 0; /* Remove any left margin */
+  margin-right: 0; /* Remove right margin */
+  height: 2rem; /* Adjust height */
+  box-sizing: border-box; /* Ensure correct box-sizing */
 }

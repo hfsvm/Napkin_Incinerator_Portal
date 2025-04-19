@@ -9,6 +9,15 @@ import { MapsRoutingModule } from './maps-routing.module';
 import { BadgeModule, CardModule } from '@coreui/angular-pro';
 import { IconModule } from '@coreui/icons-angular';
 import { DocsComponentsModule } from '@docs-components/docs-components.module';
+import { DataService } from '../../../service/data.service';
+
+
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { ShareModule } from '../../../share/share.module';
+
+
 
 @NgModule({
   imports: [
@@ -23,9 +32,13 @@ import { DocsComponentsModule } from '@docs-components/docs-components.module';
     DocsComponentsModule,
     GoogleMapsModule,
     
+    MatSelectModule,
+    MatButtonModule,
+    FormsModule , // Required for [(ngModel)] to work
+ShareModule
     
   ],
-  providers: [],
+  providers: [DataService],
   declarations: [GoogleMapsComponent],
   exports: [GoogleMapsComponent],
   bootstrap: [GoogleMapsComponent]

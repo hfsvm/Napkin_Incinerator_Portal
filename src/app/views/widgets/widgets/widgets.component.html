@@ -1,46 +1,14 @@
 <c-row>
   <c-col md="3" sm="6">
-    <c-widget-stat-c class="mb-4" [ngStyle]="{'background-color': '#1565C0', 'color': '#FFFFFF','padding':'8px', 'height':'120px', 'display':'flex', 'align-items':'center', 'justify-content': 'flex-start', 'border-radius': '12px', 'box-shadow': '0px 8px 16px rgba(0, 0, 0, 0.2)'}">
+    <c-widget-stat-c class="card-container">
       <ng-template cTemplateId="widgetIconTemplate">
-        <div style="display: flex; align-items: center; width: 100%; padding-left: 10px; gap: 15px;">
-          <div class="logo-border">
-            <img width="40" height="40" src="https://img.icons8.com/ios/50/FFFFFF/vending-machine.png" alt="vending-machine" />
-          </div>
-          <div style="display: flex; flex-direction: column; text-align: left; margin-top: 25px;">
-            <span style="font-size: 16px; font-weight: bold; padding: top 10px;color: #ffffff;">Total Machines</span>
-            <span style="font-size: 24px;padding: top 100px; font-weight: bold; margin-top: 10px;color:#FFFFFF">{{ totalMachines }}</span>
-          </div>
-          
+        <div class="logo-border">
+          <img src="https://img.icons8.com/ios/50/FFFFFF/vending-machine.png" alt="vending-machine" />
         </div>
-      </ng-template>
-    </c-widget-stat-c>
-  </c-col>
-
-  <c-col md="3" sm="6">
-    <c-widget-stat-c class="mb-4" [ngStyle]="{'background-color': '#2E7D32', 'color': '#FFFFFF','padding':'8px', 'height':'120px', 'display':'flex', 'align-items':'center', 'justify-content': 'flex-start', 'border-radius': '12px', 'box-shadow': '0px 8px 16px rgba(0, 0, 0, 0.2)'}">
-      <ng-template cTemplateId="widgetIconTemplate">
-        <div style="display: flex; align-items: center; width: 100%; padding-left: 10px; gap: 15px;">
-          <div class="logo-border">
-            <img width="40" height="40" src="https://img.icons8.com/ios/50/FFFFFF/gears.png" alt="active-machines" />
-          </div>
-          <div style="display: flex; flex-direction: column; text-align: left; margin-top: 25px;">
-            <span style="font-size: 16px; font-weight: bold; color: #fff9f9;">Active Machines</span>
-            <span style="font-size: 24px;padding: top 100px; font-weight: bold; margin-top: 10px; color:#FFFFFF">{{ activeMachines }}</span>
-          </div>
-        </div>
-      </ng-template>
-    </c-widget-stat-c>
-  </c-col>
-  <c-col md="3" sm="6">
-    <c-widget-stat-c class="mb-4" [ngStyle]="{'background-color': '#F57C00', 'color': '#FFFFFF' ,'padding':'8px', 'height':'120px', 'display':'flex', 'align-items':'center', 'justify-content': 'flex-start', 'border-radius': '12px', 'box-shadow': '0px 8px 16px rgba(0, 0, 0, 0.2)'}">
-      <ng-template cTemplateId="widgetIconTemplate">
-        <div style="display: flex; align-items: center; width: 100%; padding-left: 10px; gap: 15px;">
-          <div class="logo-border">
-            <img width="40" height="40" src="https://img.icons8.com/ios/50/FFFFFF/toilet-paper.png" alt="napkin-dispenser"/>
-          </div>
-          <div style="display: flex; flex-direction: column; text-align: left; margin-top: 25px;">
-            <span style="font-size: 16px; font-weight: bold; color: #ffffff;">Napkins Dispensed</span>
-            <span style="font-size: 24px; padding: top 100px; font-weight: bold; margin-top: 10px; color:#FFFFFF">{{ napkinsDispensed }}</span>
+        <div class="card-content">
+          <div class="card-text">
+            <span class="card-title">Total Machines</span>
+            <span class="card-value">{{ totalMachines }}</span>
           </div>
         </div>
       </ng-template>
@@ -48,46 +16,103 @@
   </c-col>
 
   <c-col md="3" sm="6">
-    <c-widget-stat-c class="mb-4" [ngStyle]="{'background-color': '#D32F2F', 'color': '#FFFFFF' ,'padding':'8px', 'height':'120px', 'display':'flex', 'align-items':'center', 'justify-content': 'flex-start', 'border-radius': '12px', 'box-shadow': '0px 8px 16px rgba(0, 0, 0, 0.2)'}">
+    <c-widget-stat-c class="card-container active">
       <ng-template cTemplateId="widgetIconTemplate">
-        <div style="display: flex; align-items: center; width: 100%; padding-left: 10px; gap: 15px;">
-          <div class="logo-border">
-            <img width="40" height="40" src="https://img.icons8.com/ios/50/FFFFFF/shutdown.png" alt="inactive-machines" />
+        <div class="logo-border">
+          <img src="https://img.icons8.com/ios/50/FFFFFF/gears.png" alt="active-machines" />
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <span class="card-title">Active Machines</span>
+            <span class="card-value">{{ activeMachines }}</span>
           </div>
-          <div style="display: flex; flex-direction: column; text-align: left; margin-top: 25px;">
-            <span style="font-size: 16px; font-weight: bold; color: #fffcfc;">Inactive Machines</span>
-            <span style="font-size: 24px; padding: top 100px; font-weight: bold; margin-top: 10px;color:#FFFFFF">{{ inactiveMachines }}</span>
+        </div>
+      </ng-template>
+    </c-widget-stat-c>
+  </c-col>
+  
+  <c-col md="3" sm="6">
+    <c-widget-stat-c class="card-container inactive">
+      <ng-template cTemplateId="widgetIconTemplate">
+        <div class="logo-border">
+          <img src="https://img.icons8.com/ios/50/FFFFFF/shutdown.png" alt="inactive-machines" />
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <span class="card-title">Inactive Machines</span>
+            <span class="card-value">{{ inactiveMachines }}</span>
+          </div>
+        </div>
+      </ng-template>
+    </c-widget-stat-c>
+  </c-col>
+
+  <c-col md="3" sm="6">
+    <c-widget-stat-c class="card-container napkins">
+      <ng-template cTemplateId="widgetIconTemplate">
+        <div class="logo-border">
+          <img src="assets/img/icon/pad1.png" alt="napkin-dispenser"/>  <!-- Updated Icon -->
+        </div>
+        <div class="card-content">
+          <div class="card-text">
+            <span class="card-title">Napkins Dispensed</span>
+            <span class="card-value">{{ napkinsDispensed }}</span>
           </div>
         </div>
       </ng-template>
     </c-widget-stat-c>
   </c-col>
 </c-row>
-
-
-
-<!-- Status Reports with Canvas-based Charts (Unchanged) -->
-<c-row>
-  <c-row class="mt-4">
-    <c-col xs="12" md="6" class="d-flex justify-content-center">
-      <c-card style="width:700px; height:450px; margin:10px;">
-        <c-card-header>
-          <h2 style="padding:10px;">Machine Status</h2>
+<!-- 
+<c-row class="mt-2">  
+ 
+    <c-col xs="12" md="6" class="d-flex justify-content-center mb-3"> 
+      <c-card style="width:550px; height:400px; margin:10px;"> 
+        <c-card-header style="background-color:#e6f2f4; padding-left: 0; padding-right: 0;">
+          <h2 style="font-size:20px; margin-left: 0;">Machine Status</h2> 
         </c-card-header>
-        <c-card-body style="display:flex; justify-content:center; align-items:center;">
-          <canvas id="canvasDoughnut" style="width:438px; height:289px; display:block;"></canvas>
+        <c-card-body style="display:flex; justify-content:center; align-items:center; padding-left: 0; padding-right: 0;">
+          <canvas id="canvasDoughnut" style="width:350px; height:230px; display:block; margin-left: 0;"></canvas>
         </c-card-body>
       </c-card>
     </c-col>
-    <c-col xs="12" md="6" class="d-flex justify-content-center">
-      <c-card style="width:700px; height:450px; margin:10px;">
-        <c-card-header>
-          <h2 style="padding:10px;">Stock Status</h2>
-        </c-card-header>
-        <c-card-body style="display:flex; justify-content:center; align-items:center;">
-          <canvas id="canvasStock" style="width:438px; height:289px; display:block;"></canvas>
-        </c-card-body>
-      </c-card>
-    </c-col>
-  </c-row>
-</c-row>
+
+  
+
+  <c-col xs="12" md="6" class="d-flex justify-content-center mb-3"> 
+    <c-card style="width:550px; height:400px; margin:10px;"> 
+      <c-card-header style="background-color:#e6f2f4;">
+        <h2 style="padding:8px; font-size:20px;">Stock Status</h2>
+      </c-card-header>
+      <c-card-body style="display:flex; justify-content:center; align-items:center;">
+        <canvas id="canvasStock" style="width:350px; height:230px; display:block;"></canvas>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row> -->
+<!-- Status Reports with Canvas-based Charts (Updated) -->
+<div class="chart-row mt-2">
+  <div>
+  <c-card class="chart-card">  <!-- Reduced width, height, and margin -->
+      <c-card-header style="background-color:#e6f2f4;">
+        <h2 style="padding:8px; font-size:20px;">Machine Status</h2> <!-- Smaller font -->
+      </c-card-header>
+      <c-card-body style="display:flex; justify-content:center; align-items:center;">
+        <canvas id="canvasDoughnut" width="350" height="230" style="display:block;"></canvas>
+
+      </c-card-body>
+    </c-card>
+  </div>
+ 
+  <div>
+    <c-card class="chart-card">
+      <c-card-header style="background-color:#e6f2f4;">
+        <h2 style="padding:8px; font-size:20px;">Stock Status</h2>
+      </c-card-header>
+      <c-card-body style="display:flex; justify-content:center; align-items:center;">
+        <canvas id="canvasStock" width="350" height="230" style="display:block;"></canvas>
+
+      </c-card-body>
+    </c-card>
+  </div>
+</div>

@@ -1,0 +1,1229 @@
+ 
+// .container {
+//   max-width: 1100px; /* Use More Space */
+//   margin: auto;
+// }
+
+// .card {
+//   border-radius: 10px;
+//   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+ 
+// }
+
+
+// h2 {
+//   font-size: 28px; /* Bigger Title */
+
+// }
+
+// .form-label {
+//   font-size: 16px; /* Larger Labels */
+//   margin-bottom: 5px;
+// }
+
+// .form-control-lg {
+//   font-size: 18px; /* Bigger Inputs */
+//   padding: 12px;
+// }
+
+// .checkbox-lg {
+//   transform: scale(1.5); /* Bigger Checkboxes */
+// }
+// .buttons{
+// margin-top: 0px;
+// padding-bottom: 0px;
+// }
+// .form-check-label {
+//   font-size: 15px;
+// }
+
+// button {
+//   padding: 10px 27px;
+//   font-size: 18px;
+//   margin-right: 20px;
+//   margin-top: 10px;
+// }
+// .same-size {
+//   height: 45px !important; /* Ensures both fields are equal */
+//   min-height: 45px;
+// }
+// .card-header{
+//   background-color:#4A90E2;
+// }
+// .clear-btn {    
+//   background:#4A90E2;
+//   //  #E57373; /* Soft Red */
+//   color: white;
+//   box-shadow: 0px 3px 8px rgba(230, 115, 115, 0.3);
+// }
+
+// // .submit-btn:hover {
+// //   background: #367DC4;
+// // }
+
+// // .clear-btn:hover {
+// //   background: #C9302C;
+// // }
+// .save-btn{
+//   background:#4A90E2;
+//   //  #7ebb55;
+//   color: white;
+//   box-shadow: 0px 3px 8px rgba(74, 144, 226, 0.3);
+ 
+// }
+// .edit-btn{
+//   background:#4A90E2;
+//   //  #7ebb55; /* Soft Blue */
+//   color: white;
+//   box-shadow: 0px 3px 8px rgba(55, 104, 159, 0.3);
+// }
+// .save-btn,.clear-btn{
+
+// align-items: center;
+// gap: 8px;
+
+// margin-top: -10px;
+// margin-bottom: 10px;
+// border-radius: 6px;
+// transition: all 0.3s ease-in-out;
+// border: none;
+
+// }
+// /* For Webkit browsers (Chrome, Safari, Opera) */
+// .no-scrollbar::-webkit-scrollbar {
+//   display: none;
+// }
+
+// /* For IE, Edge */
+// .no-scrollbar {
+//   -ms-overflow-style: none;
+// }
+
+// /* For Firefox */
+// .no-scrollbar {
+//   scrollbar-width: none;
+// }
+// /* Reduce size of all inputs/selects using form-control-lg */
+// input.form-control-lg,
+// select.form-control-lg {
+// height: 32px !important;
+// font-size: 14px !important;
+// padding: 4px 8px !important;
+// }
+
+// /* Time input fields (HH/MM boxes) – make width smaller */
+// input[type="number"]::placeholder {
+// font-size: 12px;
+// }
+
+// input[type="number"].form-control-lg {
+// max-width: 70px; /* Adjust width of HH and MM boxes */
+// }
+
+// /* Optional: shrink checkbox size if needed */
+// .checkbox-lg {
+// transform: scale(1) !important; /* From 1.5 to 1 */
+// }
+// .tab-header {
+// display: flex;
+// border-bottom: 1px solid #ddd;
+// margin-bottom: 20px;
+// }
+
+// .tab-button {
+// padding: 10px 20px;
+// background: none;
+// border: none;
+// cursor: pointer;
+// font-size: 16px;
+// color: #666;
+// position: relative;
+// transition: all 0.3s ease;
+
+// &:hover {
+//   color: #333;
+// }
+
+// &.active {
+//   color: #4A90E2;
+//   font-weight: bold;
+
+//   &::after {
+//     content: '';
+//     position: absolute;
+//     bottom: -1px;
+//     left: 0;
+//     right: 0;
+//     height: 3px;
+//     background: #4A90E2;
+//   }
+// }
+// }
+
+// .tab-content {
+// min-height: 300px; /* Adjust as needed */
+// }
+
+// .tab-pane {
+// animation: fadeIn 0.3s ease;
+// }
+
+// @keyframes fadeIn {
+// from { opacity: 0; }
+// to { opacity: 1; }
+// }
+// .error{
+// color: red;
+// }
+// .success-notification {
+// position: fixed;
+// top: 100px;
+// right: 300px;
+// background-color: #4CAF50;
+// color: white;
+// padding: 15px 20px;
+// border-radius: 4px;
+// box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+// z-index: 1000;
+// animation: fadeIn 0.3s ease-out;
+// }
+
+// @keyframes fadeIn {
+// from { opacity: 0; transform: translateY(-20px); }
+// to { opacity: 1; transform: translateY(0); }
+// }
+// /* Optional: Adjust Table Styling */
+// .table {
+// width: 100%;
+// border-collapse: collapse;
+// }
+
+// .table-bordered {
+// border: 1px solid #ddd;
+// }
+
+// .table-bordered td, .table-bordered th {
+// padding: 10px;
+// vertical-align: middle;
+// }
+// .custom-toast {
+// position: fixed;
+// top: 80px;
+// left: 50%;
+// transform: translateX(-50%);
+// z-index: 9999;
+// padding: 12px 24px;
+// border-radius: 8px;
+// font-weight: 500;
+// color: white;
+// font-size: 16px;
+// text-align: center;
+// animation: fadeInOut 8s ease-in-out; /* Updated to 8s to match timeout */
+// }
+
+// .success {
+// background-color: #7ED321;
+// }
+
+// .error {
+// background-color: #E57373;
+// }
+
+// @keyframes fadeInOut {
+// 0%   { opacity: 0; top: 70px; }  /* Start slightly above */
+// 10%  { opacity: 1; top: 80px; }  /* Full visibility */
+// 90%  { opacity: 1; top: 80px; }
+// 100% { opacity: 0; top: 70px; }  /* Fade and lift up */
+// }
+
+// /* Target the custom-header specifically */
+// .custom-header {
+// background-color: #65a6e6!important;
+// color: rgb(247, 247, 247);
+// font-size: medium;
+// }
+
+
+// .custom-header tr {
+// background-color: transparent !important;
+
+// }
+// .custom-btn {
+// width: 120px;
+// font-size: 14px;
+// padding: 6px 12px;
+// color: white;
+// background-color: #65a6e6;
+// border: none;
+// border-radius: 4px;
+// transition: background-color 0.3s;
+// }
+// .custom-btn:hover {
+// background-color: #0056b3;
+// }
+// /* Add some styles to make the search input blend well with the dropdown */
+// .dropdown {
+// position: relative;
+// width: 100%;
+// }
+
+// .dropdown input {
+// width: 100%;
+// padding: 10px;
+// border: 1px solid #ccc;
+// border-radius: 4px;
+// margin-bottom: 5px;
+// }
+
+// .dropdown select {
+// width: 100%;
+// padding: 10px;
+// border: 1px solid #ccc;
+// border-radius: 4px;
+// }
+// /* Apply to the td element containing the current value */
+// .wrap-text {
+// word-wrap: break-word; /* Break long words to fit within the cell */
+// overflow-wrap: break-word; /* Ensure that text breaks and doesn't overflow */
+// max-width: 300px; /* Optional: set a max-width to prevent the cell from becoming too wide */
+// word-break: break-word; /* Force long words to break */
+// }
+
+// /* Optional: Style the input to have better handling of long text */
+// .wrapped-input {
+// word-wrap: break-word;
+// overflow-wrap: break-word;
+// }
+
+
+
+
+
+// /* Custom Popup Styles */
+// .custom-popup-overlay {
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   bottom: 0;
+//   background-color: rgba(0, 0, 0, 0.5);
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   z-index: 1050;
+// }
+
+// .custom-popup-container {
+//   background-color: white;
+//   border-radius: 4px;
+//   width: 500px;
+//   max-width: 95%;
+//   box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+// }
+
+// .custom-popup-header {
+//   padding: 12px 15px;
+//   border-bottom: 1px solid #dee2e6;
+//   background-color: #f8f9fa;
+//   font-size: 24px;
+//   font-weight: bold;
+// }
+
+// .custom-popup-body {
+//   padding: 15px;
+// }
+
+// .custom-popup-footer {
+//   padding: 10px 15px;
+//   border-top: 1px solid #dee2e6;
+//   display: flex;
+//   justify-content: center; /* Center the buttons container */
+// }
+// /* ✅ Main Container - Light, Airy Background */
+// .container {
+//     background: #F5F7FA; /* Light Grayish White */
+//     border-radius: 12px;
+//     padding: 25px;
+//     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.05);
+// }
+
+// /* ✅ Tabs Section */
+// .tabs {
+//     display: flex;
+//     gap: 10px;
+//     margin-bottom: 20px;
+// }
+
+// .tabs button {
+//     flex: 1;
+//     padding: 10px 16px;
+//     border: none;
+//     cursor: pointer;
+//     font-size: 14px;
+//     border-radius: 6px;
+//     transition: all 0.3s ease-in-out;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     gap: 8px;
+//     text-transform: uppercase;
+// }
+
+// .tabs button.active {
+//     background: #4A90E2; /* Soft Sky Blue */
+//     color: white;
+//     box-shadow: 0px 3px 6px rgba(74, 144, 226, 0.3);
+// }
+
+// /* ✅ Form Styling */
+// .form-container {
+//     padding: 20px;
+//     background: white;
+//     border-radius: 8px;
+//     box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.05);
+// }
+
+// /* ✅ Checkbox Group */
+// .checkbox-group {
+//     display: flex;
+//     flex-wrap: wrap;
+//     gap: 15px;
+//     padding-bottom: 20px;
+// }
+
+// .checkbox-item {
+//     display: flex;
+//     align-items: center;
+//     gap: 8px;
+//     font-size: 14px;
+//     cursor: pointer;
+// }
+
+// .checkbox-item input[type="checkbox"] {
+//     width: 18px;
+//     height: 18px;
+//     cursor: pointer;
+// }
+
+// /* ✅ Input Fields */
+// .row {
+//     display: flex;
+//     flex-wrap: wrap;
+//     gap: 15px;
+//     justify-content: start;
+// }
+
+// .form-group {
+//     display: flex;
+//     flex-direction: column;
+//     flex: 1;
+//     min-width: 220px;
+//     max-width: 250px;
+// }
+
+// .form-group label {
+//     font-size: 14px;
+//     margin-bottom: 5px;
+//     color: #3E4A59;
+// }
+
+// .form-group input {
+//     padding: 10px;
+//     border: 1.2px solid #CDE5D5;
+//     border-radius: 6px;
+//     font-size: 14px;
+//     background: white;
+//     transition: 0.3s;
+// }
+
+// .form-group input:focus {
+//     border-color: #4A90E2;
+//     box-shadow: 0px 2px 5px rgba(74, 144, 226, 0.2);
+//     outline: none;
+// }
+
+// /* ✅ Button Group */
+// .button-group {
+//     display: flex;
+//     justify-content: center;
+//     gap: 15px;
+//     margin-top: 20px;
+// }
+
+// .submit-btn, .clear-btn, .save-btn, .edit-btn {
+//     display: flex;
+//     align-items: center;
+//     gap: 8px;
+//     padding: 10px 18px;
+//     border-radius: 6px;
+//     transition: all 0.3s ease-in-out;
+//     border: none;
+// }
+
+// .submit-btn {
+//     background: #4A90E2; /* Soft Blue */
+//     color: white;
+//     box-shadow: 0px 3px 8px rgba(74, 144, 226, 0.3);
+// }
+
+// .clear-btn {
+//     background: #E57373; /* Soft Red */
+//     color: white;
+//     box-shadow: 0px 3px 8px rgba(230, 115, 115, 0.3);
+// }
+
+// .save-btn {
+//     background: #e28c4a; /* Soft Orange */
+//     color: white;
+//     box-shadow: 0px 3px 8px rgba(74, 144, 226, 0.3);
+// }
+
+// .edit-btn {
+//     background: #7ebb55; /* Soft Green */
+//     color: white;
+//     box-shadow: 0px 3px 8px rgba(55, 104, 159, 0.3);
+// }
+
+// /* ✅ JSON Preview Box */
+// /* ✅ Align checkbox and input field in a row */
+
+
+// /* ✅ Show input field beside checkbox */
+
+
+// .form-group label {
+//     min-width: 180px; /* Adjust based on label size */
+// }
+
+// .form-group input {
+//     flex-grow: 1;
+//     padding: 8px;
+//     border: 1px solid #CDE5D5;
+//     border-radius: 6px;
+//     font-size: 14px;
+//     background: white;
+//     transition: 0.3s;
+//     width: 100%;
+//     max-width: 200px; /* Set a reasonable max width */
+// }
+
+// /* ✅ Align buttons in center */
+// .button-group {
+//     display: flex;
+//     justify-content: center;
+//     gap: 10px;
+//     margin-top: 20px;
+// }
+// /* ✅ Ensures checkbox, label, and input appear in one row */
+// .checkbox-item {
+//     display: flex;
+//     align-items: center;
+//     gap: 10px;
+//     width: 100%;
+//     flex-wrap: wrap;
+// }
+
+// /* ✅ Input fields align properly when checked */
+// .checkbox-item input[type="checkbox"] {
+//     width: 18px;
+//     height: 18px;
+//     cursor: pointer;
+// }
+
+// .checkbox-item input[type="text"],
+// .checkbox-item input[type="number"] {
+//     padding: 8px;
+//     border: 1px solid #CDE5D5;
+//     border-radius: 6px;
+//     font-size: 14px;
+//     width: 200px;
+//     display: inline-block;
+// }
+// button:disabled {
+//     background-color: #ccc !important;  /* Gray out */
+//     cursor: not-allowed !important;  /* Show "not allowed" cursor */
+//     opacity: 0.6;  /* Reduce visibility */
+//   }
+//   /* Custom styling for Machine ID and Merchant ID to make them appear side by side */
+
+// .merchantid{
+//    width: 120px;
+//   border-radius:5px ;
+  
+
+// }
+// .machineid{
+//     width: 135px;
+//     height: 30px;
+//     border-radius: 5px;
+   
+// }
+
+.container {
+  max-width: 1100px; /* Use More Space */
+  margin: auto;
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  
+}
+
+
+h2 {
+  font-size: 28px; /* Bigger Title */
+
+}
+
+.form-label {
+  font-size: 16px; /* Larger Labels */
+  margin-bottom: 5px;
+}
+
+.form-control-lg {
+  font-size: 18px; /* Bigger Inputs */
+  padding: 12px;
+}
+
+.checkbox-lg {
+  transform: scale(1.5); /* Bigger Checkboxes */
+}
+.buttons{
+margin-top: 0px;
+padding-bottom: 0px;
+}
+.form-check-label {
+  font-size: 15px;
+}
+
+button {
+  padding: 10px 27px;
+  font-size: 18px;
+  margin-right: 20px;
+  margin-top: 10px;
+}
+.same-size {
+  height: 45px !important; /* Ensures both fields are equal */
+  min-height: 45px;
+}
+.card-header{
+  background-color:#4A90E2;
+}
+.clear-btn {    
+  background:#4A90E2;
+  //  #E57373; /* Soft Red */
+  color: white;
+  box-shadow: 0px 3px 8px rgba(230, 115, 115, 0.3);
+}
+
+// .submit-btn:hover {
+//   background: #367DC4;
+// }
+
+// .clear-btn:hover {
+//   background: #C9302C;
+// }
+.save-btn{
+  background:#4A90E2;
+  //  #7ebb55; 
+  color: white;
+  box-shadow: 0px 3px 8px rgba(74, 144, 226, 0.3);
+  
+}
+.edit-btn{
+  background:#4A90E2;
+  //  #7ebb55; /* Soft Blue */
+  color: white;
+  box-shadow: 0px 3px 8px rgba(55, 104, 159, 0.3);
+}
+.save-btn,.clear-btn{
+
+align-items: center;
+gap: 8px;
+
+margin-top: -10px;
+margin-bottom: 10px;
+border-radius: 6px;
+transition: all 0.3s ease-in-out;
+border: none;
+
+}
+/* For Webkit browsers (Chrome, Safari, Opera) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* For IE, Edge */
+.no-scrollbar {
+  -ms-overflow-style: none;
+}
+
+/* For Firefox */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+/* Reduce size of all inputs/selects using form-control-lg */
+input.form-control-lg,
+select.form-control-lg {
+height: 32px !important;
+font-size: 14px !important;
+padding: 4px 8px !important;
+}
+
+/* Time input fields (HH/MM boxes) – make width smaller */
+input[type="number"]::placeholder {
+font-size: 12px;
+}
+
+input[type="number"].form-control-lg {
+max-width: 70px; /* Adjust width of HH and MM boxes */
+}
+
+/* Optional: shrink checkbox size if needed */
+.checkbox-lg {
+transform: scale(1) !important; /* From 1.5 to 1 */
+}
+.tab-header {
+display: flex;
+border-bottom: 1px solid #ddd;
+margin-bottom: 20px;
+}
+
+.tab-button {
+padding: 10px 20px;
+background: none;
+border: none;
+cursor: pointer;
+font-size: 16px;
+color: #666;
+position: relative;
+transition: all 0.3s ease;
+
+&:hover {
+  color: #333;
+}
+
+&.active {
+  color: #4A90E2;
+  font-weight: bold;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #4A90E2;
+  }
+}
+}
+
+.tab-content {
+min-height: 300px; /* Adjust as needed */
+}
+
+.tab-pane {
+animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+.error{
+color: red;
+}
+.success-notification {
+position: fixed;
+top: 100px;
+right: 300px;
+background-color: #4CAF50;
+color: white;
+padding: 15px 20px;
+border-radius: 4px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+z-index: 1000;
+animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(-20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+/* Optional: Adjust Table Styling */
+.table {
+width: 100%;
+border-collapse: collapse;
+}
+
+.table-bordered {
+border: 1px solid #ddd;
+}
+
+.table-bordered td, .table-bordered th {
+padding: 10px;
+vertical-align: middle;
+}
+.custom-toast {
+position: fixed;
+top: 80px;
+left: 50%;
+transform: translateX(-50%);
+z-index: 9999;
+padding: 12px 24px;
+border-radius: 8px;
+font-weight: 500;
+color: white;
+font-size: 16px;
+text-align: center;
+animation: fadeInOut 8s ease-in-out; /* Updated to 8s to match timeout */
+}
+
+.success {
+background-color: #7ED321;
+}
+
+.error {
+background-color: #E57373;
+}
+
+@keyframes fadeInOut {
+0%   { opacity: 0; top: 70px; }  /* Start slightly above */
+10%  { opacity: 1; top: 80px; }  /* Full visibility */
+90%  { opacity: 1; top: 80px; }
+100% { opacity: 0; top: 70px; }  /* Fade and lift up */
+}
+
+/* Target the custom-header specifically */
+.custom-header {
+background-color: #65a6e6!important; 
+color: rgb(247, 247, 247);
+font-size: medium;
+}
+
+
+.custom-header tr {
+background-color: transparent !important;
+
+}
+.custom-btn {
+width: 120px; 
+font-size: 14px;
+padding: 6px 12px;
+color: white;
+background-color: #65a6e6;
+border: none;
+border-radius: 4px;
+transition: background-color 0.3s;
+}
+.custom-btn:hover {
+background-color: #0056b3;
+}
+/* Add some styles to make the search input blend well with the dropdown */
+.dropdown {
+position: relative;
+width: 100%;
+}
+
+.dropdown input {
+width: 100%;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 4px;
+margin-bottom: 5px;
+}
+
+.dropdown select {
+width: 100%;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 4px;
+}
+/* Apply to the td element containing the current value */
+.wrap-text {
+word-wrap: break-word; /* Break long words to fit within the cell */
+overflow-wrap: break-word; /* Ensure that text breaks and doesn't overflow */
+max-width: 300px; /* Optional: set a max-width to prevent the cell from becoming too wide */
+word-break: break-word; /* Force long words to break */
+}
+
+/* Optional: Style the input to have better handling of long text */
+.wrapped-input {
+word-wrap: break-word;
+overflow-wrap: break-word;
+}
+.custom-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+.wrap-text {
+  white-space: normal; /* Allows text to wrap within the cell */
+  word-wrap: break-word; /* Ensures long words are broken into new lines */
+  overflow-wrap: break-word; /* Breaks long words in a better way */
+  word-break: break-word; /* Ensures breaking of long words when necessary */
+}
+ 
+.container {
+  max-width: 1100px; /* Use More Space */
+  margin: auto;
+}
+ 
+.card {
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+ 
+}
+ 
+ 
+h2 {
+  font-size: 28px; /* Bigger Title */
+ 
+}
+ 
+.form-label {
+  font-size: 16px; /* Larger Labels */
+  margin-bottom: 5px;
+}
+ 
+.form-control-lg {
+  font-size: 18px; /* Bigger Inputs */
+  padding: 12px;
+}
+ 
+.checkbox-lg {
+  transform: scale(1.5); /* Bigger Checkboxes */
+}
+.buttons{
+margin-top: 0px;
+padding-bottom: 0px;
+}
+.form-check-label {
+  font-size: 15px;
+}
+ 
+button {
+  padding: 10px 27px;
+  font-size: 18px;
+  margin-right: 20px;
+  margin-top: 10px;
+}
+.same-size {
+  height: 45px !important; /* Ensures both fields are equal */
+  min-height: 45px;
+}
+.card-header{
+  background-color:#4A90E2;
+}
+.clear-btn {    
+  background:#4A90E2;
+  //  #E57373; /* Soft Red */
+  color: white;
+  box-shadow: 0px 3px 8px rgba(230, 115, 115, 0.3);
+}
+ 
+// .submit-btn:hover {
+//   background: #367DC4;
+// }
+ 
+// .clear-btn:hover {
+//   background: #C9302C;
+// }
+.save-btn{
+  background:#4A90E2;
+  //  #7ebb55;
+  color: white;
+  box-shadow: 0px 3px 8px rgba(74, 144, 226, 0.3);
+ 
+}
+.edit-btn{
+  background:#4A90E2;
+  //  #7ebb55; /* Soft Blue */
+  color: white;
+  box-shadow: 0px 3px 8px rgba(55, 104, 159, 0.3);
+}
+.save-btn,.clear-btn{
+ 
+align-items: center;
+gap: 8px;
+ 
+margin-top: -10px;
+margin-bottom: 10px;
+border-radius: 6px;
+transition: all 0.3s ease-in-out;
+border: none;
+ 
+}
+/* For Webkit browsers (Chrome, Safari, Opera) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+ 
+/* For IE, Edge */
+.no-scrollbar {
+  -ms-overflow-style: none;
+}
+ 
+/* For Firefox */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+/* Reduce size of all inputs/selects using form-control-lg */
+input.form-control-lg,
+select.form-control-lg {
+height: 32px !important;
+font-size: 14px !important;
+padding: 4px 8px !important;
+}
+ 
+/* Time input fields (HH/MM boxes) – make width smaller */
+input[type="number"]::placeholder {
+font-size: 12px;
+}
+ 
+input[type="number"].form-control-lg {
+max-width: 70px; /* Adjust width of HH and MM boxes */
+}
+ 
+/* Optional: shrink checkbox size if needed */
+.checkbox-lg {
+transform: scale(1) !important; /* From 1.5 to 1 */
+}
+.tab-header {
+display: flex;
+border-bottom: 1px solid #ddd;
+margin-bottom: 20px;
+}
+ 
+.tab-button {
+padding: 10px 20px;
+background: none;
+border: none;
+cursor: pointer;
+font-size: 16px;
+color: #666;
+position: relative;
+transition: all 0.3s ease;
+ 
+&:hover {
+  color: #333;
+}
+ 
+&.active {
+  color: #4A90E2;
+  font-weight: bold;
+ 
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #4A90E2;
+  }
+}
+}
+ 
+.tab-content {
+min-height: 300px; /* Adjust as needed */
+}
+ 
+.tab-pane {
+animation: fadeIn 0.3s ease;
+}
+ 
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+.error{
+color: red;
+}
+.success-notification {
+position: fixed;
+top: 100px;
+right: 300px;
+background-color: #4CAF50;
+color: white;
+padding: 15px 20px;
+border-radius: 4px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+z-index: 1000;
+animation: fadeIn 0.3s ease-out;
+}
+ 
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(-20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+/* Optional: Adjust Table Styling */
+.table {
+width: 100%;
+border-collapse: collapse;
+}
+ 
+.table-bordered {
+border: 1px solid #ddd;
+}
+ 
+.table-bordered td, .table-bordered th {
+padding: 10px;
+vertical-align: middle;
+}
+.custom-toast {
+position: fixed;
+top: 80px;
+left: 50%;
+transform: translateX(-50%);
+z-index: 9999;
+padding: 12px 24px;
+border-radius: 8px;
+font-weight: 500;
+color: white;
+font-size: 16px;
+text-align: center;
+animation: fadeInOut 8s ease-in-out; /* Updated to 8s to match timeout */
+}
+ 
+.success {
+background-color: #7ED321;
+}
+ 
+.error {
+background-color: #E57373;
+}
+ 
+@keyframes fadeInOut {
+0%   { opacity: 0; top: 70px; }  /* Start slightly above */
+10%  { opacity: 1; top: 80px; }  /* Full visibility */
+90%  { opacity: 1; top: 80px; }
+100% { opacity: 0; top: 70px; }  /* Fade and lift up */
+}
+ 
+/* Target the custom-header specifically */
+.custom-header {
+background-color: #65a6e6!important;
+color: rgb(247, 247, 247);
+font-size: medium;
+}
+ 
+ 
+.custom-header tr {
+background-color: transparent !important;
+ 
+}
+.custom-btn {
+width: 120px;
+font-size: 14px;
+padding: 6px 12px;
+color: white;
+background-color: #65a6e6;
+border: none;
+border-radius: 4px;
+transition: background-color 0.3s;
+}
+.custom-btn:hover {
+background-color: #0056b3;
+}
+/* Add some styles to make the search input blend well with the dropdown */
+.dropdown {
+position: relative;
+width: 100%;
+}
+ 
+.dropdown input {
+width: 100%;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 4px;
+margin-bottom: 5px;
+}
+ 
+.dropdown select {
+width: 100%;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 4px;
+}
+/* Apply to the td element containing the current value */
+.wrap-text {
+word-wrap: break-word; /* Break long words to fit within the cell */
+overflow-wrap: break-word; /* Ensure that text breaks and doesn't overflow */
+max-width: 300px; /* Optional: set a max-width to prevent the cell from becoming too wide */
+word-break: break-word; /* Force long words to break */
+}
+ 
+/* Optional: Style the input to have better handling of long text */
+.wrapped-input {
+word-wrap: break-word;
+overflow-wrap: break-word;
+}
+ 
+ 
+ 
+ 
+ 
+/* Custom Popup Styles */
+.custom-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+ 
+.custom-popup-container {
+  background-color: white;
+  border-radius: 4px;
+  width: 500px;
+  max-width: 95%;
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+}
+ 
+.custom-popup-header {
+  padding: 12px 15px;
+  border-bottom: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+  font-size: 24px;
+  font-weight: bold;
+}
+ 
+.custom-popup-body {
+  padding: 15px;
+}
+ 
+.custom-popup-footer {
+  padding: 10px 15px;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: center; /* Center the buttons container */
+}
+ 
+ 
+ 
+.wrap-text {
+ 
+  white-space: normal; /* Allows text to wrap within the cell */
+ 
+  word-wrap: break-word; /* Ensures long words are broken into new lines */
+ 
+  overflow-wrap: break-word; /* Breaks long words in a better way */
+ 
+  word-break: break-word; /* Ensures breaking of long words when necessary */
+ 
+}
