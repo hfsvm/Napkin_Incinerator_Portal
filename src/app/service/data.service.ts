@@ -1053,7 +1053,7 @@ getMachinesByProject(projectId: number): Observable<any> {
    
       return this.http.post(url, advnaceconfig, this.httpOptions).pipe(
         retry(1),  // ✅ Retry once on failure
-        tap(response => console.log('🔹 advance Config Response:', response)),
+        tap(response => console.log('🔹 advance Config Response for qr:', response)),
         catchError(this.handleError)  // ✅ Handle errors
       );
     }
@@ -1078,7 +1078,7 @@ getMachinesByProject(projectId: number): Observable<any> {
       const url = `${this.url1}/sendQRBusinessconfig/${flag}`;
       return this.http.post(url, payload, this.httpOptions).pipe(
         retry(1),
-        tap(response => console.log('🔹 advance Config Response:', response)),
+        tap(response => console.log('🔹 advance Config Response for qr:', response)),
         catchError(this.handleError)
       );
     }

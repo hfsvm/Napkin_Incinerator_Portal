@@ -17,6 +17,8 @@ export class DashboardRefreshService {
       this.intervalId = setInterval(() => {
         console.log('🔁 Global Auto-refresh triggered...');
         this.refreshSubject.next();
+
+        
       }, 120000); // 2 minutes
     } else {
       console.log('⚠️ Auto-refresh already started');

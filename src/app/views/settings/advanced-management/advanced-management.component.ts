@@ -10,6 +10,8 @@ import { CommonDataService } from '../../../Common/common-data.service';
 })
 
 export class AdvancedManagementComponent implements OnInit {
+  schedulerHour: number | null = null;
+  schedulerMinute: number | null = null;
   merchantId: string = '';
   machineIds: string[] = [];
   selectedMachineId: string = '';
@@ -86,7 +88,9 @@ popupConfirmAction: () => void = () => {};
   // }
   
   selectMachinePricing(id: string) {
+    debugger
     this.selectedMachineIdPricing = id;
+    this.selectedMachineId = id;
     this.dropdownOpenPricing = false;
     console.log('Machine selected:', id); // ✅ debug
   
@@ -209,7 +213,7 @@ cancelPopup() {
 onMachineChange(): void {
   // Reset the current values before fetching new data
   this.resetData();
- 
+ debugger
   if (!this.selectedMachineId) {
     this.showNotification("⚠️ Please select a machine first.", "error");
     return;
@@ -490,40 +494,97 @@ submitUpdatedConfig(): void {
     );
   }
  
-  validateHeaterInputs(): boolean {
-    // Destructure updated values from the form state
-    const { setHeaterTempA, setHeaterTempB, heaterAMinTemp, heaterBOnTemp } = this.updatedIncinerationValues;
+  // validateHeaterInputs(): boolean {
+  //   // Destructure updated values from the form state
+  //   const { setHeaterTempA, setHeaterTempB, heaterAMinTemp, heaterBOnTemp } = this.updatedIncinerationValues;
  
-    // Check if updated values for heater temps exist (ensure validation only happens when values are updated)
+  //   // Check if updated values for heater temps exist (ensure validation only happens when values are updated)
+  //   if (setHeaterTempA && setHeaterTempB) {
+  //     // Only perform the validation if both Set Heater Temp A and Set Heater Temp B are updated.
+  //     if (+setHeaterTempA <= +setHeaterTempB) {
+  //       this.showNotification('⚠️ Heater B cut off temperature must be less than Heater A cut off temperature .', 'error');
+  //       return false;
+  //     }
+  //   }
+ 
+  //   // Validate Heater A Minimum Temp (if updated)
+  //   if (heaterAMinTemp && +heaterAMinTemp >= +setHeaterTempA) {
+  //     console.log('Heater A Min Temp:', heaterAMinTemp, 'Heater A Cut Off Temp:', setHeaterTempA);
+
+  //     this.showNotification('⚠️ Heater A Min Temp should be less than  Heater A cut off temperature.', 'error');
+  //     return false;
+  //   }
+ 
+  //   // Validate Heater A Minimum Temp and Set Heater Temp B (if updated)
+  //   if (heaterAMinTemp && +heaterAMinTemp <= +setHeaterTempB) {
+  //     console.log('Heater A Min Temp:', heaterAMinTemp, 'Heater A Cut Off Temp:', setHeaterTempA);
+
+  //     this.showNotification('⚠️ Heater A Min Temp should be greater than Heater B cut off temperature.', 'error');
+  //     return false;
+  //   }
+ 
+  //   // Validate Heater B On Temp (if updated)
+  //   if (heaterBOnTemp && (+heaterBOnTemp >= +setHeaterTempA || +heaterBOnTemp >= +setHeaterTempB)) {
+  //     this.showNotification('⚠️ Heater A temperature to start Heater B should less than heater A cut off temperature.', 'error');
+  //     return false;
+  //   }
+ 
+  //   return true; // All validations passed
+  // }
+  validateHeaterInputs(): boolean {
+    const { setHeaterTempA, setHeaterTempB, heaterAMinTemp, heaterBOnTemp } = this.updatedIncinerationValues;
+  
+    // Check if Heater A and Heater B cut-off temperatures are updated
     if (setHeaterTempA && setHeaterTempB) {
-      // Only perform the validation if both Set Heater Temp A and Set Heater Temp B are updated.
+      // Validate: Heater A cut-off temp must be greater than Heater B cut-off
       if (+setHeaterTempA <= +setHeaterTempB) {
-        this.showNotification('⚠️ Heater B cut off temperature must be less than Heater A cut off temperature .', 'error');
+        this.showNotification(
+          '⚠️ Heater A cut-off temperature must be greater than Heater B cut-off temperature.',
+          'error'
+        );
         return false;
       }
     }
- 
-    // Validate Heater A Minimum Temp (if updated)
-    if (heaterAMinTemp && +heaterAMinTemp >= +setHeaterTempA) {
-      this.showNotification('⚠️ Heater A Min Temp should be less than  Heater A cut off temperature.', 'error');
-      return false;
+  
+    // Validate: Heater A Minimum Temperature should be less than Heater A Cut-off Temperature
+    if (heaterAMinTemp && setHeaterTempA) {
+      if (+heaterAMinTemp >= +setHeaterTempA) {
+        this.showNotification(
+          '⚠️ Heater A Minimum Temperature should be less than Heater A cut-off temperature.',
+          'error'
+        );
+        return false;
+      }
     }
- 
-    // Validate Heater A Minimum Temp and Set Heater Temp B (if updated)
-    if (heaterAMinTemp && +heaterAMinTemp <= +setHeaterTempB) {
-      this.showNotification('⚠️ Heater A Min Temp should be greater than Heater B cut off temperature.', 'error');
-      return false;
+  
+    // Validate: Heater A Min Temp should be greater than Heater B cut-off temperature
+    if (heaterAMinTemp && setHeaterTempB) {
+      if (+heaterAMinTemp <= +setHeaterTempB) {
+        this.showNotification(
+          '⚠️ Heater A Minimum Temperature should be greater than Heater B cut-off temperature.',
+          'error'
+        );
+        return false;
+      }
     }
- 
-    // Validate Heater B On Temp (if updated)
-    if (heaterBOnTemp && (+heaterBOnTemp >= +setHeaterTempA || +heaterBOnTemp >= +setHeaterTempB)) {
-      this.showNotification('⚠️ Heater A temperature to start Heater B should less than heater A cut off temperature.', 'error');
-      return false;
+  
+    // Validate: Heater B ON Temp should be less than both Heater A and B cut-off temperatures
+    if (heaterBOnTemp) {
+      if (
+        (setHeaterTempA && +heaterBOnTemp >= +setHeaterTempA) ||
+        (setHeaterTempB && +heaterBOnTemp >= +setHeaterTempB)
+      ) {
+        this.showNotification(
+          '⚠️ Heater B ON temperature must be less than both Heater A and B cut-off temperatures.',
+          'error'
+        );
+        return false;
+      }
     }
- 
-    return true; // All validations passed
+  
+    return true; // ✅ All validations passed
   }
- 
+  
   validateTimeInputs(): boolean {
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):([0-5]?[0-9])$/;
     if (this.updatedIncinerationValues.scheduler && !timeRegex.test(this.updatedIncinerationValues.scheduler)) {
@@ -608,6 +669,8 @@ submitUpdatedConfig(): void {
   }
  
   clearIncinerationValues(): void {
+    this.schedulerHour = null;
+    this.schedulerMinute = null;
     this.updatedIncinerationValues = { scheduler: '', limitSwitch: '', napkinCost: '', setHeaterTempA: '', setHeaterTempB: '', heaterAMinTemp: '', heaterBOnTemp: '' };
   }
   onTabChange(tab: string): void {
@@ -727,6 +790,7 @@ submitUpdatedConfig(): void {
   //     this.updatedValues.itp = selected.itp;
   //   }
   // }
+ 
   getFormattedSchedulerTime(): string {
     if (!this.incinerationCurrentValues.scheduler) return '';
  

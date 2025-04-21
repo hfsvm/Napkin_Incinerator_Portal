@@ -1782,6 +1782,7 @@ export class MachinedataComponent implements OnInit, OnDestroy {
             };
  
             this.updateFilters();
+            
           } else {
             console.warn('⚠️ No valid data received.');
             this.filteredMachines = [];
@@ -1795,7 +1796,53 @@ export class MachinedataComponent implements OnInit, OnDestroy {
         }
       );
   }
+ /** ✅ Function to Format Address & Machine Location */
+formatText(text: string | null): string {
+  if (!text) return '';
  
+  return text
+      .toLowerCase() // Convert entire text to lowercase first
+      .split(' ') // Split by spaces
+      .map(word => {
+          // Check if word starts with a number (like "03visakhapatnam")
+          if (/^\d/.test(word)) {
+              return word; // Keep numbers unchanged
+          }
+          // Capitalize first letter of each word
+          return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' '); // Join words back into a sentence
+}
+  getLastTwoParts(address: string | null): string {
+    if (!address) return ''; // Handle empty or null case
+ 
+    // Split by commas and remove extra spaces
+    const parts = address.split(',').map(part => part.trim());
+ 
+    // Get the last two meaningful parts
+    const lastTwoParts = parts.slice(-2).join(', ');
+ 
+    console.log('Original Address:', address, '| Extracted:', lastTwoParts); // Debugging
+ 
+    return lastTwoParts;
+  }
+  getLastPartAfterLastComma(address: string | null): string {
+    if (!address) return 'No Address'; // Handle empty or null case
+  
+    // Check if the address contains a comma
+    const lastCommaIndex = address.lastIndexOf(',');
+  
+    if (lastCommaIndex !== -1) {
+      // If there's a comma, return the part after the last comma
+      const partAfterLastComma = address.substring(lastCommaIndex + 1).trim();
+      return partAfterLastComma || 'No Address'; // Handle empty case after the comma
+    } else {
+      // If there's no comma, return the last two words
+      const words = address.trim().split(' '); // Split by spaces
+      const lastTwoWords = words.slice(-2).join(' '); // Get the last two words
+      return lastTwoWords || 'No Address'; // Handle case where there are less than two words
+    }
+  }
   
   paginateMachines() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -2014,6 +2061,7 @@ export class MachinedataComponent implements OnInit, OnDestroy {
              (!this.columnFilters['Machine Type'] || machine.machineType.toLowerCase().includes(this.columnFilters['Machine Type'].toLowerCase())) &&
              (!this.columnFilters['Status'] || (machine.status === '1' ? 'Online' : 'Offline').toLowerCase().includes(this.columnFilters['Status'].toLowerCase())) &&
              (!this.columnFilters['Stock Status'] || machine.stockStatus.toLowerCase().includes(this.columnFilters['Stock Status'].toLowerCase())) &&
+            
              (!this.columnFilters['Burning Status'] || this.getBurningStatusLabel(machine.burningStatus).toLowerCase().includes(this.columnFilters['Burning Status'].toLowerCase()));
     });
   

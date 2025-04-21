@@ -93,6 +93,7 @@ import { Subscription } from 'rxjs';
   
     ngOnInit() {
       // this.loadReport();
+      
 
       this.merchantId = this.commonDataService.merchantId ?? '';
     
@@ -794,7 +795,16 @@ toggleDropdown(filterType: string, event: Event) {
 }
  
  
- 
+get formattedRefreshTime(): string {
+  const minutes = Math.floor(this.refreshCountdown / 60).toString().padStart(1, '0');
+  const seconds = (this.refreshCountdown % 60).toString().padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
+resetRefreshCountdown(): void {
+  this.refreshCountdown = this.refreshInterval;
+}
+
  
   pageChanged(page: number) {
     this.currentPage = page;

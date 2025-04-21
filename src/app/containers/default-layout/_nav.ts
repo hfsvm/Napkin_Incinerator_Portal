@@ -34,7 +34,7 @@ export const navItems: INavData[] = [
 
   // },
   {
-    name: 'Google Map',
+    name: 'Machine Map',
     url: '/standalone-map',
     iconComponent: { name: 'cil-location-pin' },
     attributes: { target: '_blank' }  // Add target="_blank" to open in a new tab
