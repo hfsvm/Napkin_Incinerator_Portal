@@ -390,12 +390,16 @@ getGroupedIncinerationTransactions(): { [batchId: string]: any[] } {
 getUniqueBatchIds(): string[] {
   return Object.keys(this.getGroupedIncinerationTransactions());
 }
+pageSize = 10; // You can adjust this to how many batchIds you want per page
+allBatchIds: string[] = []; // Will hold all unique batch IDs
 
 // Paginate batchIds
 getPagedBatchIds(): string[] {
   const start = (this.currentPageIncineration - 1) * this.itemsPerPage;
   return this.getUniqueBatchIds().slice(start, start + this.itemsPerPage);
+  
 }
+
 
 // Toggle batch expand
 toggleBatchExpand(batchId: string): void {

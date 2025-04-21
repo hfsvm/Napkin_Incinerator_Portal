@@ -273,6 +273,7 @@
         <table class="report-table">
           <thead>
             <tr>
+              <th></th> <!-- New column for toggle icon -->
               <th>ORDER ID</th>
               <th>DATE AND TIME</th>
               <th>PRODUCT NAME</th>
@@ -288,16 +289,26 @@
               <!-- First visible row for each orderId -->
               <tr>
                 <td>
-                  <!-- Add the toggle button only if there are multiple transactions for the same orderId -->
-                  <button *ngIf="getGroupedTransactions()[orderId].length > 1" (click)="toggleExpand(orderId)" class="toggle-button">
-                    {{ expandedOrderIds[orderId] ? '-' : '+' }}
+                  <!-- Toggle icon column -->
+                  <button
+                    *ngIf="getGroupedTransactions()[orderId].length > 1"
+                    (click)="toggleExpand(orderId)"
+                    class="toggle-button"
+                  >
+                    {{ expandedOrderIds[orderId] ? '−' : '+' }}
                   </button>
+                </td>
+                <td>
                   {{ getGroupedTransactions()[orderId][0].orderId }}
                 </td>
                 <td>
-                  {{ getGroupedTransactions()[orderId][0].txnDate
-                    ? (getFormattedDate(getGroupedTransactions()[orderId][0].txnDate) + ' ' + getFormattedTime(getGroupedTransactions()[orderId][0].txnDate))
-                    : '—' }}
+                  {{
+                    getGroupedTransactions()[orderId][0].txnDate
+                      ? (getFormattedDate(getGroupedTransactions()[orderId][0].txnDate) +
+                        ' ' +
+                        getFormattedTime(getGroupedTransactions()[orderId][0].txnDate))
+                      : '—'
+                  }}
                 </td>
                 <td>{{ getGroupedTransactions()[orderId][0].name }}</td>
                 <td>{{ getGroupedTransactions()[orderId][0].quantity }}</td>
@@ -307,11 +318,18 @@
               </tr>
         
               <!-- Expanded rows for each orderId -->
-              <tr *ngFor="let txn of getGroupedTransactions()[orderId]; let i = index" [hidden]="i === 0 || !expandedOrderIds[orderId]">
-             
+              <tr
+                *ngFor="let txn of getGroupedTransactions()[orderId]; let i = index"
+                [hidden]="i === 0 || !expandedOrderIds[orderId]"
+              >
+                <td></td> <!-- Empty toggle column for alignment -->
                 <td>{{ txn.orderId }}</td>
                 <td>
-                  {{ txn.txnDate ? (getFormattedDate(txn.txnDate) + ' ' + getFormattedTime(txn.txnDate)) : '—' }}
+                  {{
+                    txn.txnDate
+                      ? getFormattedDate(txn.txnDate) + ' ' + getFormattedTime(txn.txnDate)
+                      : '—'
+                  }}
                 </td>
                 <td>{{ txn.name }}</td>
                 <td>{{ txn.quantity }}</td>
@@ -322,6 +340,7 @@
             </ng-container>
           </tbody>
         </table>
+        
         
     
         
@@ -351,60 +370,43 @@
         <table class="report-table">
           <thead>
             <tr>
-              
+              <th></th> <!-- Toggle column -->
               <th>BATCH ID</th>
               <th>BURN START TIME</th>
               <th>HEATER A TEMP</th>
               <th>HEATER B TEMP</th>
-              <th>HEATER A STATUS </th>
-              <th>HEATER B STATUS </th>
+              <th>HEATER A STATUS</th>
+              <th>HEATER B STATUS</th>
               <th>BURNING MODE</th>
               <th>NAPKIN BURNT COUNT</th>
               <th>BURN END TIME</th>
               <th>BURNING STATUS</th>
-             
-              
             </tr>
           </thead>
-          <!-- <tbody>
-            
-            <tr *ngFor="let row of getPagedData(incinerationTransactions, currentPageIncineration)">
-              
-              <td>{{ row.batchId }}</td>
-              <td>
-                {{ row.burnStartTime ? (getFormattedDate(row.burnStartTime) + ' ' + getFormattedTime(row.burnStartTime)) : '—' }}
-              </td>
-              <td>{{ row.tempHeaterA }}</td>
-              <td>{{ row.tempHeaterB }}</td>
-              <td>{{ getHeaterStatus(row.heaterAStatus) }}</td>
-              <td>{{ getHeaterStatus(row.heaterBStatus) }}</td>
-              <td>{{ getBurningMode(row.burningMode) }}</td>
-              <td>{{row.burningcount}}</td>
-              <td>
-                {{ row.burnEndTime ? (getFormattedDate(row.burnEndTime) + ' ' + getFormattedTime(row.burnEndTime)) : '—' }}
-              </td>
-              <td>{{ getBurningStatus(row.burningStatus) }}</td>
-             
-             
-              
-                 </tr>
-          </tbody>
-           -->
-           <tbody>
+        
+          <tbody>
             <ng-container *ngFor="let batchId of getPagedBatchIds()">
               <!-- First visible row -->
               <tr>
                 <td>
-                  <!-- Show toggle button only if there are multiple rows for the same batchId -->
-                  <button *ngIf="getGroupedIncinerationTransactions()[batchId].length > 1" (click)="toggleBatchExpand(batchId)">
-                    {{ expandedBatchIds[batchId] ? '-' : '+' }}
+                  <!-- Toggle button only if more than one record exists -->
+                  <button
+                    *ngIf="getGroupedIncinerationTransactions()[batchId].length > 1"
+                    (click)="toggleBatchExpand(batchId)"
+                    class="toggle-button"
+                  >
+                    {{ expandedBatchIds[batchId] ? '−' : '+' }}
                   </button>
-                  {{ getGroupedIncinerationTransactions()[batchId][0].batchId }}
                 </td>
+                <td>{{ getGroupedIncinerationTransactions()[batchId][0].batchId }}</td>
                 <td>
-                  {{ getGroupedIncinerationTransactions()[batchId][0].burnStartTime
-                    ? (getFormattedDate(getGroupedIncinerationTransactions()[batchId][0].burnStartTime) + ' ' + getFormattedTime(getGroupedIncinerationTransactions()[batchId][0].burnStartTime))
-                    : '—' }}
+                  {{
+                    getGroupedIncinerationTransactions()[batchId][0].burnStartTime
+                      ? (getFormattedDate(getGroupedIncinerationTransactions()[batchId][0].burnStartTime) +
+                        ' ' +
+                        getFormattedTime(getGroupedIncinerationTransactions()[batchId][0].burnStartTime))
+                      : '—'
+                  }}
                 </td>
                 <td>{{ getGroupedIncinerationTransactions()[batchId][0].tempHeaterA }}</td>
                 <td>{{ getGroupedIncinerationTransactions()[batchId][0].tempHeaterB }}</td>
@@ -413,21 +415,30 @@
                 <td>{{ getBurningMode(getGroupedIncinerationTransactions()[batchId][0].burningMode) }}</td>
                 <td>{{ getGroupedIncinerationTransactions()[batchId][0].burningcount }}</td>
                 <td>
-                  {{ getGroupedIncinerationTransactions()[batchId][0].burnEndTime
-                    ? (getFormattedDate(getGroupedIncinerationTransactions()[batchId][0].burnEndTime) + ' ' + getFormattedTime(getGroupedIncinerationTransactions()[batchId][0].burnEndTime))
-                    : '—' }}
+                  {{
+                    getGroupedIncinerationTransactions()[batchId][0].burnEndTime
+                      ? (getFormattedDate(getGroupedIncinerationTransactions()[batchId][0].burnEndTime) +
+                        ' ' +
+                        getFormattedTime(getGroupedIncinerationTransactions()[batchId][0].burnEndTime))
+                      : '—'
+                  }}
                 </td>
                 <td>{{ getBurningStatus(getGroupedIncinerationTransactions()[batchId][0].burningStatus) }}</td>
               </tr>
-          
+        
               <!-- Expanded hidden rows -->
               <tr
                 *ngFor="let row of getGroupedIncinerationTransactions()[batchId]; let i = index"
                 [hidden]="i === 0 || !expandedBatchIds[batchId]"
               >
+                <td></td> <!-- Empty cell for alignment -->
                 <td>{{ row.batchId }}</td>
                 <td>
-                  {{ row.burnStartTime ? (getFormattedDate(row.burnStartTime) + ' ' + getFormattedTime(row.burnStartTime)) : '—' }}
+                  {{
+                    row.burnStartTime
+                      ? getFormattedDate(row.burnStartTime) + ' ' + getFormattedTime(row.burnStartTime)
+                      : '—'
+                  }}
                 </td>
                 <td>{{ row.tempHeaterA }}</td>
                 <td>{{ row.tempHeaterB }}</td>
@@ -436,25 +447,34 @@
                 <td>{{ getBurningMode(row.burningMode) }}</td>
                 <td>{{ row.burningcount }}</td>
                 <td>
-                  {{ row.burnEndTime ? (getFormattedDate(row.burnEndTime) + ' ' + getFormattedTime(row.burnEndTime)) : '—' }}
+                  {{
+                    row.burnEndTime
+                      ? getFormattedDate(row.burnEndTime) + ' ' + getFormattedTime(row.burnEndTime)
+                      : '—'
+                  }}
                 </td>
                 <td>{{ getBurningStatus(row.burningStatus) }}</td>
               </tr>
             </ng-container>
           </tbody>
-          
-          
         </table>
+        
        <div class="error"><tr *ngIf="activeTab === 'incineration' && getPagedData(incinerationTransactions, currentPageIncineration).length === 0">
           <td >No transactions found</td>
         </tr></div>
       </div>
   
+      <!-- <div class="pagination">
+        <button (click)="decrementIncinerationPage()" [disabled]="currentPageIncineration === 1">Previous</button>
+        <span>Page {{ currentPageIncineration }} of {{ totalPagesIncineration }}</span>
+        <button (click)="incrementIncinerationPage()" [disabled]="currentPageIncineration >= totalPagesIncineration">Next</button>
+      </div> -->
       <div class="pagination">
         <button (click)="decrementIncinerationPage()" [disabled]="currentPageIncineration === 1">Previous</button>
         <span>Page {{ currentPageIncineration }} of {{ totalPagesIncineration }}</span>
         <button (click)="incrementIncinerationPage()" [disabled]="currentPageIncineration >= totalPagesIncineration">Next</button>
       </div>
+      
     </div>
   </div>
   
