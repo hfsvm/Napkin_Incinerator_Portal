@@ -175,14 +175,13 @@
 
 
    <div class="report-container">
-    <!-- <h2>Machine Report - {{ machineId }}</h2> -->
+    
     <div *ngIf="false" class="fs-2 fw-semibold">Title</div>
 
     <div class="tabs">
       <button [class.active]="activeTab === 'vending'" (click)="setTab('vending')">Vending</button>
       <button [class.active]="activeTab === 'incineration'" (click)="setTab('incineration')">Incineration</button>
 
-          <!-- Add Machine Dropdown -->
     <div class="machine-select">
       <label for="machineSelect">Machine:</label>
       <select id="machineSelect" [(ngModel)]="selectedMachineId" (change)="onMachineChange()">
@@ -207,11 +206,7 @@
         [min]="startDate"
         (change)="onEndDateChange()" />
       
-      <!-- Add to your HTML template -->
-    
-      <!-- <button (click)="goBack()" class="btn">
-        <i class="fas fa-arrow-left" style="color: white;"></i> Back
-      </button> -->
+   
       <div class="float-right">
         <a class="btn" style="background-color: #4a90e2; border: none; color: #f6f6f6;" (click)="goBack()">
           <i class="fas fa-arrow-left" style="color: rgb(246, 244, 249);"></i> Back
@@ -223,7 +218,6 @@
     </div>
     
   
-    <!-- Vending Report -->
     <div *ngIf="activeTab === 'vending'" class="card">
 
 
@@ -233,13 +227,13 @@
       
     
       <div class="table-container">
-        <table class="report-table">
+        <!-- <table class="report-table">
           <thead>
             <tr>
-              
-              <th>TXN ID</th>
-              <th>DATE AND TIME</th>
               <th>ORDER ID</th>
+          
+              <th>DATE AND TIME</th>
+           
               <th>PRODUCT NAME</th>
              
               <th>QUANTITY</th>
@@ -252,13 +246,14 @@
           <tbody>
             
             <tr *ngFor="let txn of getPagedData(vendingTransactions, currentPageVending)">
-              <td>{{ txn.txnid }}</td>
+            
+              <td>{{ txn. orderId}}</td>
               <td>
                 {{ txn.txnDate ? (getFormattedDate(txn.txnDate) + ' ' + getFormattedTime(txn.txnDate)) : '—' }}
               </td>
               
 
-              <td>{{ txn. orderId}}</td>
+             
               <td>{{ txn. name}}</td>
               <td>{{ txn. quantity}}</td>
               <td>{{ txn.txnAmount }}</td>
@@ -273,7 +268,67 @@
             </tr>
             
           </tbody>
+        </table> -->
+
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>ORDER ID</th>
+              <th>DATE AND TIME</th>
+              <th>PRODUCT NAME</th>
+              <th>QUANTITY</th>
+              <th>AMOUNT</th>
+              <th>PAYMENT MODE</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Loop over orderIds -->
+            <ng-container *ngFor="let orderId of getPagedOrderIds()">
+              <!-- First visible row for each orderId -->
+              <tr>
+                <td>
+                  <!-- Add the toggle button only if there are multiple transactions for the same orderId -->
+                  <button *ngIf="getGroupedTransactions()[orderId].length > 1" (click)="toggleExpand(orderId)" class="toggle-button">
+                    {{ expandedOrderIds[orderId] ? '-' : '+' }}
+                  </button>
+                  {{ getGroupedTransactions()[orderId][0].orderId }}
+                </td>
+                <td>
+                  {{ getGroupedTransactions()[orderId][0].txnDate
+                    ? (getFormattedDate(getGroupedTransactions()[orderId][0].txnDate) + ' ' + getFormattedTime(getGroupedTransactions()[orderId][0].txnDate))
+                    : '—' }}
+                </td>
+                <td>{{ getGroupedTransactions()[orderId][0].name }}</td>
+                <td>{{ getGroupedTransactions()[orderId][0].quantity }}</td>
+                <td>{{ getGroupedTransactions()[orderId][0].txnAmount }}</td>
+                <td>{{ getGroupedTransactions()[orderId][0].txnMode }}</td>
+                <td>{{ getGroupedTransactions()[orderId][0].status }}</td>
+              </tr>
+        
+              <!-- Expanded rows for each orderId -->
+              <tr *ngFor="let txn of getGroupedTransactions()[orderId]; let i = index" [hidden]="i === 0 || !expandedOrderIds[orderId]">
+             
+                <td>{{ txn.orderId }}</td>
+                <td>
+                  {{ txn.txnDate ? (getFormattedDate(txn.txnDate) + ' ' + getFormattedTime(txn.txnDate)) : '—' }}
+                </td>
+                <td>{{ txn.name }}</td>
+                <td>{{ txn.quantity }}</td>
+                <td>{{ txn.txnAmount }}</td>
+                <td>{{ txn.txnMode }}</td>
+                <td>{{ txn.status }}</td>
+              </tr>
+            </ng-container>
+          </tbody>
         </table>
+        
+    
+        
+        
+        
+        
+        
         <div><tr *ngIf="activeTab === 'vending' && getPagedData(vendingTransactions, currentPageVending).length === 0">
           <td>No transactions found</td>
         </tr></div>
@@ -286,7 +341,6 @@
       </div>
     </div>
   
-    <!-- Incineration Report -->
     <div *ngIf="activeTab === 'incineration'" class="card">
       
       <div *ngIf="selectedMachineId" class="selected-machine-label">
@@ -312,7 +366,7 @@
               
             </tr>
           </thead>
-          <tbody>
+          <!-- <tbody>
             
             <tr *ngFor="let row of getPagedData(incinerationTransactions, currentPageIncineration)">
               
@@ -335,6 +389,60 @@
               
                  </tr>
           </tbody>
+           -->
+           <tbody>
+            <ng-container *ngFor="let batchId of getPagedBatchIds()">
+              <!-- First visible row -->
+              <tr>
+                <td>
+                  <!-- Show toggle button only if there are multiple rows for the same batchId -->
+                  <button *ngIf="getGroupedIncinerationTransactions()[batchId].length > 1" (click)="toggleBatchExpand(batchId)">
+                    {{ expandedBatchIds[batchId] ? '-' : '+' }}
+                  </button>
+                  {{ getGroupedIncinerationTransactions()[batchId][0].batchId }}
+                </td>
+                <td>
+                  {{ getGroupedIncinerationTransactions()[batchId][0].burnStartTime
+                    ? (getFormattedDate(getGroupedIncinerationTransactions()[batchId][0].burnStartTime) + ' ' + getFormattedTime(getGroupedIncinerationTransactions()[batchId][0].burnStartTime))
+                    : '—' }}
+                </td>
+                <td>{{ getGroupedIncinerationTransactions()[batchId][0].tempHeaterA }}</td>
+                <td>{{ getGroupedIncinerationTransactions()[batchId][0].tempHeaterB }}</td>
+                <td>{{ getHeaterStatus(getGroupedIncinerationTransactions()[batchId][0].heaterAStatus) }}</td>
+                <td>{{ getHeaterStatus(getGroupedIncinerationTransactions()[batchId][0].heaterBStatus) }}</td>
+                <td>{{ getBurningMode(getGroupedIncinerationTransactions()[batchId][0].burningMode) }}</td>
+                <td>{{ getGroupedIncinerationTransactions()[batchId][0].burningcount }}</td>
+                <td>
+                  {{ getGroupedIncinerationTransactions()[batchId][0].burnEndTime
+                    ? (getFormattedDate(getGroupedIncinerationTransactions()[batchId][0].burnEndTime) + ' ' + getFormattedTime(getGroupedIncinerationTransactions()[batchId][0].burnEndTime))
+                    : '—' }}
+                </td>
+                <td>{{ getBurningStatus(getGroupedIncinerationTransactions()[batchId][0].burningStatus) }}</td>
+              </tr>
+          
+              <!-- Expanded hidden rows -->
+              <tr
+                *ngFor="let row of getGroupedIncinerationTransactions()[batchId]; let i = index"
+                [hidden]="i === 0 || !expandedBatchIds[batchId]"
+              >
+                <td>{{ row.batchId }}</td>
+                <td>
+                  {{ row.burnStartTime ? (getFormattedDate(row.burnStartTime) + ' ' + getFormattedTime(row.burnStartTime)) : '—' }}
+                </td>
+                <td>{{ row.tempHeaterA }}</td>
+                <td>{{ row.tempHeaterB }}</td>
+                <td>{{ getHeaterStatus(row.heaterAStatus) }}</td>
+                <td>{{ getHeaterStatus(row.heaterBStatus) }}</td>
+                <td>{{ getBurningMode(row.burningMode) }}</td>
+                <td>{{ row.burningcount }}</td>
+                <td>
+                  {{ row.burnEndTime ? (getFormattedDate(row.burnEndTime) + ' ' + getFormattedTime(row.burnEndTime)) : '—' }}
+                </td>
+                <td>{{ getBurningStatus(row.burningStatus) }}</td>
+              </tr>
+            </ng-container>
+          </tbody>
+          
           
         </table>
        <div class="error"><tr *ngIf="activeTab === 'incineration' && getPagedData(incinerationTransactions, currentPageIncineration).length === 0">

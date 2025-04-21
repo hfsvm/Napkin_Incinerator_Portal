@@ -8,6 +8,7 @@ import { CommonDataService } from '../../../Common/common-data.service';
   templateUrl: './advanced-management.component.html',
   styleUrls: ['./advanced-management.component.scss']
 })
+
 export class AdvancedManagementComponent implements OnInit {
   merchantId: string = '';
   machineIds: string[] = [];
@@ -396,8 +397,12 @@ submitUpdatedConfig(): void {
       console.log("🔹 API Response Received: ", response);
 
       if (response && response.code === 200) {
+
         console.log("✅ Config Submitted Successfully", response);
+
         this.showNotification("✅ Config Updated Successfully!", "success");
+        this.clearEnteredValues();
+        this.onMachineChange();
       } else if (response && response.code === 404 && response.error === "A machine with the given QR Code ID already exists") {
         // Handle the error case with custom popup and include the phrase from the response
         console.log("⚠️ QR Code already exists, triggering custom popup.");
@@ -543,6 +548,8 @@ submitUpdatedConfig(): void {
     return true;
   }
  
+  
+  
   submitIncinerationConfig(): void {
     // Check if machineId is selected
     if (!this.selectedMachineId) {
@@ -581,6 +588,8 @@ submitUpdatedConfig(): void {
         console.log("✅ Incineration Config Submitted:", response);
         if (response && response.code === 200) {
           this.showNotification("✅ Incineration Config Updated Successfully!", "success");
+          this.clearIncinerationValues();
+          this.onMachineChange();
         } else {
           this.showNotification(`⚠️ ${response.phrase || 'Unexpected response from server.'}`, "error");
         }
@@ -759,7 +768,32 @@ filterMachineIds(): void {
     id.toLowerCase().includes(searchTerm)
   );
 }
- 
+toggleDropdownPricing(event: MouseEvent): void {
+  this.dropdownOpenPricing = !this.dropdownOpenPricing;
+  event.stopPropagation(); // Prevent event propagation to document
+}
+
+// Handle selecting a machine
+
+
+// Close dropdown when clicking outside
+@HostListener('document:click', ['$event'])
+onClickOutside(event: MouseEvent): void {
+  const clickedInside = (event.target as HTMLElement).closest('.form-select');
+  if (!clickedInside && this.dropdownOpenPricing) {
+    this.dropdownOpenPricing = false;
+  }
+}
+toggleDropdown(event: MouseEvent): void {
+  this.dropdownOpen = !this.dropdownOpen;
+  event.stopPropagation(); // Prevent event propagation to document
+}
+
+// Handle selecting a machine
+
+
+// Close dropdown when clicking outside
+
  
 }
  

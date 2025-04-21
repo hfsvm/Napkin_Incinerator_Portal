@@ -1420,18 +1420,24 @@
 //     this.loadMachineData();
 //   }
 // }
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { DataService } from '../../service/data.service';
 import { CommonDataService } from '../../Common/common-data.service';
+import { DashboardRefreshService } from '../../service/dashboard-refresh.service';
+import { Subscription, interval } from 'rxjs';  // Import interval and Subscription
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
- 
+
 @Component({
   selector: 'app-machinedata',
   templateUrl: './machinedata.component.html',
   styleUrls: ['./machinedata.component.scss']
 })
-export class MachinedataComponent implements OnInit {
+export class MachinedataComponent implements OnInit, OnDestroy {
+  private refreshSubscription!: Subscription;  // Declare with '!' to avoid undefined error
+  private autoRefreshSubscription!: Subscription;  // Declare auto refresh subscription
+
   isLoading = false;
   errorMessage = '';
   machines: any[] = [];
@@ -1441,20 +1447,31 @@ export class MachinedataComponent implements OnInit {
   isStateUser: boolean = false;
   isDistrictUser: boolean = false;
   isEndUser: boolean = false;
- 
+  private refreshInterval = 120; // refresh interval in seconds
+  private countdownInterval!: any;
+  refreshCountdown = 0;
   // Projects (from second code)
   projects: { ProjectId: number, projectname: string }[] = [];
   selectedProjects: number[] = [];
- 
+
   // Pagination (from second code)
   currentPage: number = 1;
   itemsPerPage: number = 10;
   paginatedMachines: any[] = [];
- 
+
   // Search functionality (from second code)
   searchQuery: string = '';
-  searchText: { [key: string]: string } = {};
- 
+  // searchText: { [key: string]: string } = {};
+  searchText: { [key: string]: string } = {
+    projects: '',
+    machineStatuses: '',
+    stockStatuses: '',
+    burnStatuses: '',
+    zones: '',
+    wards: '',
+    beats: ''
+  };
+  
   // Filters
   machineStatuses = [
     { key: '1', value: 'Online' },
@@ -1469,18 +1486,18 @@ export class MachinedataComponent implements OnInit {
     { key: '1', value: 'Idle' },
     { key: '2', value: 'Burning' }
   ];
- 
+
   selectedMachineStatuses: string[] = ['1', '2'];
   selectedStockStatuses: string[] = [];
   selectedBurnStatuses: string[] = [];
   selectedZones: string[] = [];
   selectedWards: string[] = [];
   selectedBeats: string[] = [];
- 
+
   zones: string[] = [];
   wards: string[] = [];
   beats: string[] = [];
- 
+
   dropdownOpen: any = {};
   dashboardData: any = {};
   columnFilters: any = {
@@ -1491,34 +1508,113 @@ export class MachinedataComponent implements OnInit {
     'Burning Status': ''
   };
   sortKey: string = '';
-sortDirection: 'asc' | 'desc' = 'asc';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   // Initial arrays to store filter values
-  initialZones: string[] = [];  
+  initialZones: string[] = [];
   initialWards: string[] = [];
   initialBeats: string[] = [];
   initialProjects: { ProjectId: number, projectname: string }[] = [];
- 
+
   constructor(
     private dataService: DataService,
     private commonDataService: CommonDataService,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private dashboardRefreshService: DashboardRefreshService
   ) {}
- 
+
   ngOnInit() {
+    this.searchText = {
+      projects: '',
+      machineStatuses: '',
+      stockStatuses: '',
+      burnStatuses: '',
+      zones: '',
+      wards: '',
+      beats: ''
+    };
+    // Subscribe to dashboard refresh
+    this.refreshSubscription = this.dashboardRefreshService.refresh$.subscribe(() => {
+      this.refreshDashboard();
+    });
+  
+    // Start auto-refresh functionality
+    this.startAutoRefresh(); 
+  
+    // Start the countdown
+    this.startRefreshCountdown();  // <-- Start the countdown here
+  
+    // Load machine data and user roles
     this.loadMachineData();
     document.addEventListener('click', this.handleClickOutside.bind(this));
     this.loadUserRole();
- 
+  
     // Add Machines to Beats Without Disturbing Other Code
     this.beats = this.commonDataService.userDetails?.machineId ?? [];
     this.selectedBeats = [...this.beats];  // Pre-select all machines
-   
-    // Initialize projects from user details (from second code)
+  
+    // Initialize projects from user details
     this.projects = this.commonDataService.userDetails?.projectName ?? [];
     this.selectedProjects = this.projects.map(project => project.ProjectId);  // Pre-select all projects
     console.log('Projects Array:', this.projects);
   }
- 
+  
+
+  startAutoRefresh(): void {
+    // Refresh every 2 minutes (120,000 milliseconds)
+    this.autoRefreshSubscription = interval(120000).subscribe(() => {
+      console.log('🔄 Auto-refreshing machine data...');
+      this.loadMachineData();
+    });
+  }
+    
+
+
+  startRefreshCountdown(): void {
+    this.refreshCountdown = this.refreshInterval;
+    this.countdownInterval = setInterval(() => {
+      this.refreshCountdown--;
+      if (this.refreshCountdown <= 0) {
+        this.refreshCountdown = this.refreshInterval;
+      }
+    }, 1000);
+  }
+  get formattedRefreshTime(): string {
+    const minutes = Math.floor(this.refreshCountdown / 60).toString().padStart(1, '0');
+    const seconds = (this.refreshCountdown % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  }
+  
+  resetRefreshCountdown(): void {
+    this.refreshCountdown = this.refreshInterval;
+  }
+  
+
+
+  ngOnDestroy() {
+    // Unsubscribe from refresh subscription
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+    }
+
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+  // Unsubscribe from auto-refresh subscription
+    if (this.autoRefreshSubscription) {
+      this.autoRefreshSubscription.unsubscribe();
+    }
+  }
+
+  refreshDashboard() {
+    console.log('🔄 Dashboard Refresh Triggered...');
+    // Logic to refresh dashboard data
+    this.loadMachineData(); // Example, you can customize this
+  }
+
+
+
+
   loadUserRole() {
     const userDetails = this.commonDataService.userDetails;
  
@@ -1572,6 +1668,7 @@ sortDirection: 'asc' | 'desc' = 'asc';
     });
   }
 
+  
   
   get totalPages(): number {
     return Math.ceil(this.filteredMachines.length / this.itemsPerPage);
@@ -1699,27 +1796,14 @@ sortDirection: 'asc' | 'desc' = 'asc';
       );
   }
  
-  // Pagination method from second code
+  
   paginateMachines() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
     this.paginatedMachines = this.filteredMachines.slice(start, end);
     console.log('Paginated Machines:', this.paginatedMachines);
   }
- 
-  // Page navigation from second code
-  // onPageChange(page: number) {
-  //   const totalPages = Math.ceil(this.filteredMachines.length / this.itemsPerPage);
-  //   console.log('Total Pages:', totalPages);
- 
-  //   if (page >= 1 && page <= totalPages) {
-  //     this.currentPage = page;
-  //     console.log('Current Page after change:', this.currentPage);
-  //     this.paginateMachines();
-  //   }
-  // }
- 
-  // Search functionality from second code
+
   onSearch() {
     if (this.searchQuery.trim() === '') {
       this.filteredMachines = [...this.machines];
@@ -1749,50 +1833,55 @@ sortDirection: 'asc' | 'desc' = 'asc';
     this.paginateMachines();
   }
  
-  toggleSelectAll(selectedArray: any[], optionsArray: any[], filterKey?: string) {
-    // Handle project selection specially
-    if (filterKey === 'projects') {
-      const allKeys = optionsArray.map(option => option.ProjectId);
+  // toggleSelectAll(selectedArray: any[], optionsArray: any[], filterKey?: string) {
+  //   // Handle project selection specially
+  //   if (filterKey === 'projects') {
+  //     const allKeys = optionsArray.map(option => option.ProjectId);
      
-      if (selectedArray.length === allKeys.length) {
-        selectedArray.length = 0; // Clear array
-      } else {
-        selectedArray.splice(0, selectedArray.length, ...allKeys); // Fill array
-      }
+  //     if (selectedArray.length === allKeys.length) {
+  //       selectedArray.length = 0; // Clear array
+  //     } else {
+  //       selectedArray.splice(0, selectedArray.length, ...allKeys); // Fill array
+  //     }
+  //   } else {
+  //     // For other types (machine statuses, etc.)
+  //     const allKeys = optionsArray.map(option => option.key || option);
+     
+  //     const allSelected = allKeys.every(key => selectedArray.includes(key));
+     
+  //     if (allSelected) {
+  //       selectedArray.length = 0; // unselect all
+  //     } else {
+  //       selectedArray.length = 0;
+  //       selectedArray.push(...allKeys); // select all
+  //     }
+  //   }
+ 
+  //   this.loadMachineData();
+  // }
+  toggleSelectAll(selectedArray: any[], optionsArray: any[], filterKey: string) {
+    const allKeys = optionsArray.map(option => option.ProjectId || option.key || option);
+  
+    // If all items are selected, deselect all
+    if (selectedArray.length === allKeys.length) {
+      selectedArray.length = 0; // Clear selection
     } else {
-      // For other types (machine statuses, etc.)
-      const allKeys = optionsArray.map(option => option.key || option);
-     
-      const allSelected = allKeys.every(key => selectedArray.includes(key));
-     
-      if (allSelected) {
-        selectedArray.length = 0; // unselect all
-      } else {
-        selectedArray.length = 0;
-        selectedArray.push(...allKeys); // select all
-      }
+      selectedArray.length = 0; // Clear current selection
+      selectedArray.push(...allKeys); // Select all items
     }
- 
-    this.loadMachineData();
+  
+    this.loadMachineData(); // Re-fetch data after change
   }
- 
   toggleSelection(array: any[], value: string, filterKey: string) {
     if (array.includes(value)) {
-      array.splice(array.indexOf(value), 1);
+      array.splice(array.indexOf(value), 1); // Remove selection
     } else {
-      array.push(value);
+      array.push(value); // Add to selection
     }
- 
-    console.log('🔹 Updated Selection:', filterKey, array);
- 
-    // 👇 Recalculate district (ward) list if state (zone) changed
-    if (filterKey === 'zones') {
-      this.filterWardsBasedOnZones();
-    }
- 
-    this.loadMachineData(); // Re-fetch data
+  
+    this.loadMachineData(); // Re-fetch data after change
   }
- 
+  
   updateFilters() {
     if (this.initialZones.length === 0) {
       // Store all unique values from the API response for filters

@@ -124,7 +124,9 @@
   </div>
 </div> -->
 <!-- Dashboard Summary Cards -->
-
+<div class="refresh-circle">
+  <span class="time">{{ formattedRefreshTime }}</span>
+</div>
 <div class="row g-2">
   <div class="col-lg-3 col-md-6 col-sm-12 d-flex" *ngFor="let card of [
     { title: 'Machines Installed', value: dashboardData.machinesInstalled, color: '#B0C4DE', icon: 'https://img.icons8.com/ios-filled/50/FFFFFF/vending-machine.png' }, 
@@ -217,22 +219,23 @@
                   (click)="$event.stopPropagation()"
                 />
               </div>
-  
               <label class="dropdown-item d-flex align-items-center" style="gap: 6px;">
                 <input
                   type="checkbox"
                   [checked]="filter.selected.length === filter.options.length && filter.options.length > 0"
-                  (change)="toggleSelectAll(filter.selected, filter.options)">
+                  (change)="toggleSelectAll(filter.selected, filter.options, filter.key)">
                 <strong style="margin: 0;">Select All</strong>
               </label>
+              
   
               <label *ngFor="let option of filter.options | filterDropdown: searchText[filter.key]" class="dropdown-item">
                 <input
                   type="checkbox"
                   [checked]="filter.selected.includes(option.ProjectId || option.key || option)"
-                  (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option)">
+                  (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option, filter.key)">
                 {{ option.projectname || option.value || option }}
               </label>
+              
             </div>
           </div>
         </ng-template>
@@ -401,6 +404,7 @@
     </div> -->
     <!-- Pagination -->
 <!-- Pagination -->
+ 
 <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
 
   <!-- Items per page -->

@@ -418,3 +418,51 @@ tr:nth-child(even) {
   height: 2rem; /* Adjust height */
   box-sizing: border-box; /* Ensure correct box-sizing */
 }
+/* Remove hover background on dropdown items */
+.dropdown-item:hover,
+.dropdown-menu .dropdown-item:hover {
+  background-color: transparent !important;
+  color: inherit !important;
+  cursor: default !important;
+}
+
+/* Remove hover effect on the dropdown toggle button */
+.dropdown-toggle:hover,
+.btn-light.dropdown-toggle:hover {
+  background-color: inherit !important;
+  color: inherit !important;
+  box-shadow: none !important;
+}
+
+/* Optional: Remove hover pointer cursor on dropdowns if needed */
+.dropdown:hover {
+  cursor: default !important;
+}
+label,
+.dropdown-toggle {
+  opacity: 1 !important;
+  color: #000 !important;
+}
+/* Pagination buttons */
+.pagination-btn {
+  background-color: #64B5F6;
+  color: #fff;
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #64B5F6;
+}
+
+.pagination-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  color: #666;
+}

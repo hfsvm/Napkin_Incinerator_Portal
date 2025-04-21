@@ -238,14 +238,18 @@
         </ng-container>
         <tr *ngIf="summaryType === 'Totals'">
           <td>{{ machine.srNo }}</td>
-          <td>{{ machine.machineId }}</td>
-          <td> {{ extractLastTwoWords(machine.address) }}</td>
+          
+          <td>
+            <a [routerLink]="['/machine-report', machine.machineId]">
+              {{ machine.machineId }}
+            </a>
+          </td>
+        
+          <td>{{ extractLastTwoWords(machine.address) }}</td>
           <td>{{ machine.machineLocation }}</td>
-        
           <td>{{ machine.machineType }}</td>
-          <!-- <td><b>Total</b></td> --><td><b></b></td>
+          <td><b></b></td>
         
-
           <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.qty ?? 0 }}</b></td>
           <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.cash ?? '₹ 0' }}</b></td>
           <td>-</td>
@@ -272,8 +276,8 @@
       </tr>
     </tbody>
   </table>
-  
   <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+
     <!-- Items per page -->
     <div class="d-flex align-items-center gap-2">
       <label class="mb-0 fw-bold text-dark" style="font-size: 1rem;">Items per page:</label>
@@ -288,18 +292,27 @@
       </div>
     </div>
   
+    <!-- Pagination controls (Styled) -->
+    <div class="d-flex align-items-center gap-2">
   
-
+      <button class="btn btn-lg pagination-btn"
+              (click)="onPageChange(currentPage - 1)"
+              [disabled]="isLoading || currentPage === 1"
+              title="Previous Page">
+        ‹
+      </button>
   
-  <div class="pagination-controls styled-pagination">
-    <button 
-      [disabled]="isLoading || currentPage === 1" 
-      (click)="pageChanged(currentPage - 1)">Previous</button>
+      <span class="fw-bold text-dark" style="font-size: 1.1rem;">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
   
-    <span>Page {{ currentPage }} of {{ totalPages }}</span>
+      <button class="btn btn-lg pagination-btn"
+              (click)="onPageChange(currentPage + 1)"
+              [disabled]="isLoading || currentPage >= totalPages"
+              title="Next Page">
+        ›
+      </button>
   
-    <button 
-      [disabled]="isLoading || currentPage >= totalPages" 
-      (click)="pageChanged(currentPage + 1)">Next</button>
+    </div>
   </div>
   

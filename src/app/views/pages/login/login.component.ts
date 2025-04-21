@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
+
 export class LoginComponent implements OnInit {
 
   intervalSub!: Subscription;
@@ -161,6 +162,8 @@ onSubmit(): void {
     }
   );
 }
+
+
 startAutoRefresh(merchantId: string, userId: number): void {
   // Clear any previous interval to avoid duplicates
   if (this.intervalSub) {
@@ -171,11 +174,32 @@ startAutoRefresh(merchantId: string, userId: number): void {
   this.intervalSub = new Subscription();
 
   const refreshInterval = setInterval(() => {
-    console.log('🔁 Auto-refresh triggered at:', new Date().toLocaleTimeString());
+    console.log('🔁 Auto-refresh triggered from login service at:', new Date().toLocaleTimeString());
     
     this.dataService.getUserDetails(merchantId, userId).subscribe(
       (res: any) => {
-        console.log('🔄 Auto-refreshed user details:', res);
+        if (res.code === 200 && res.phrase === 'Success' && res.data) {
+          const userData = res.data;
+          
+          // Process the data like you do in getUserDetails
+          const projectName = Array.isArray(userData.projectName) ? userData.projectName : [];
+          const companyData = userData.companyName && userData.companyName.length > 0 ? userData.companyName[0] : null;
+          const companyName = companyData ? companyData.companyname : null;
+          const clientId = companyData ? companyData.ClientId : null;
+          
+          // Create the enriched user details
+          const enrichedUserDetails = {
+            ...userData,
+            projectName,
+            companyName,
+            clientId
+          };
+          
+          // Update CommonDataService
+          this.commonDataService.updateUserDetails(enrichedUserDetails);
+          
+          console.log('🔄 Auto-refreshed user details from login:', res);
+        }
       },
       (err) => {
         console.error('🚨 Error during auto-refresh:', err);
@@ -196,33 +220,7 @@ ngOnDestroy(): void {
   }
 }
 
- 
-  // setSpecificFieldError(message: string | undefined): void {
-  //   this.fieldErrors = {
-  //     email: '',
-  //     password: '',
-  //     merchantId: '',
-  //     captcha:'',
-  //   };
-  //   this.errorMessage = '';
- 
-  //   if (!message) {
-  //     this.errorMessage = '⚠️ An unexpected error occurred.';
-  //     return;
-  //   }
- 
-  //   const lowerMsg = message.toLowerCase();
- 
-  //   if (lowerMsg.includes('email') || lowerMsg.includes('user')) {
-  //     this.fieldErrors.email = message;
-  //   } else if (lowerMsg.includes('password')) {
-  //     this.fieldErrors.password = message;
-  //   } else if (lowerMsg.includes('merchant')) {
-  //     this.fieldErrors.merchantId = message;
-  //   } else {
-  //     this.errorMessage = message;
-  //   }
-  // }
+
  
   setSpecificFieldError(message: string | undefined): void {
     const resetFields = {
@@ -265,7 +263,7 @@ ngOnDestroy(): void {
  
     this.dataService.getUserDetails(merchantId, userId).subscribe(
       (response: any) => {
-        console.log('✅ getUserDetails API Response:', response);
+        console.log('✅ getUserDetails API Response from service:', response);
  
         if (response.code === 200 && response.phrase === 'Success' && response.data) {
           const userData = response.data;

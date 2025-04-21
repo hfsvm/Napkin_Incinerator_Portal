@@ -16,6 +16,7 @@ export class MachinereportComponent implements OnInit {
   merchantId: string = '';
   selectedMachineId: string = '';
   machineIds: string[] = [];
+  expandedOrders: Set<string> = new Set<string>();
 
   // Tabs
   activeTab: 'vending' | 'incineration' = 'vending';
@@ -32,6 +33,7 @@ export class MachinereportComponent implements OnInit {
   currentPageIncineration = 1;
   itemsPerPage = 10;
 
+
   // Loading state
   isLoading: boolean = false;
 
@@ -47,10 +49,11 @@ export class MachinereportComponent implements OnInit {
   }
   
   ngOnInit(): void {
+
     this.merchantId = localStorage.getItem('merchantId') || '';
     this.machineId = this.route.snapshot.paramMap.get('machineId') || '';
     this.selectedMachineId = this.machineId;
-    
+    this.groupTransactions();
     const today = new Date();
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(today.getDate() - 6); // Includes today (7 total)
@@ -61,7 +64,26 @@ export class MachinereportComponent implements OnInit {
     // Fetch list of machine IDs for the dropdown
     this.loadMachineIdsFromUserDetails();
   }
+  groupedVendingTransactions: { [orderId: string]: any[] } = {};
 
+  uniqueOrderIds: string[] = [];
+  
+  groupTransactions(): void {
+    const grouped: { [orderId: string]: any[] } = {};
+    this.vendingTransactions.forEach(txn => {
+      const orderId = txn.orderId;
+      if (!grouped[orderId]) {
+        grouped[orderId] = [];
+      }
+      grouped[orderId].push(txn);
+    });
+  
+    this.groupedVendingTransactions = grouped;
+    this.uniqueOrderIds = Object.keys(grouped);
+    // Reset expanded state
+   
+  }
+  
   loadMachineIdsFromUserDetails(): void {
     const userDetails = this.commonDataService.userDetails;
   
@@ -136,6 +158,7 @@ export class MachinereportComponent implements OnInit {
       next: (res) => {
         console.log('Vending transactions received:', res);
         this.vendingTransactions = res.data || [];
+        this.groupTransactions(); 
       },
       error: (err) => {
         console.error('Vending Error:', err);
@@ -298,4 +321,85 @@ export class MachinereportComponent implements OnInit {
       this.currentPageIncineration--;
     }
   }
+
+
+
+
+formatDateTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+}
+getUniqueOrders(): any[] {
+  const seen = new Set();
+  return this.vendingTransactions.filter(txn => {
+    if (!txn.orderId) return false;
+    if (seen.has(txn.orderId)) return false;
+    seen.add(txn.orderId);
+    return true;
+  });
+}
+getVendingTransactionsByOrderId(orderId: string): any[] {
+  return this.vendingTransactions.filter(txn => txn.orderId === orderId);
+}
+
+
+isExpanded(orderId: string): boolean {
+  return this.expandedOrders.has(orderId);
+}
+expandedOrderIds: { [orderId: string]: boolean } = {};
+
+
+
+// Group transactions by orderId
+getGroupedTransactions(): { [orderId: string]: any[] } {
+  return this.vendingTransactions.reduce((acc, txn) => {
+    acc[txn.orderId] = acc[txn.orderId] || [];
+    acc[txn.orderId].push(txn);
+    return acc;
+  }, {});
+}
+
+// Get unique orderIds for pagination
+getUniqueOrderIds(): string[] {
+  const grouped = this.getGroupedTransactions();
+  return Object.keys(grouped);
+}
+
+// Get paginated unique orderIds
+getPagedOrderIds(): string[] {
+  const start = (this.currentPageVending - 1) * this.itemsPerPage;
+  return this.getUniqueOrderIds().slice(start, start + this.itemsPerPage);
+}
+
+// Toggle row group
+toggleExpand(orderId: string): void {
+  this.expandedOrderIds[orderId] = !this.expandedOrderIds[orderId];
+}
+expandedBatchIds: { [batchId: string]: boolean } = {};
+
+// Group transactions by batchId
+getGroupedIncinerationTransactions(): { [batchId: string]: any[] } {
+  return this.incinerationTransactions.reduce((acc, row) => {
+    acc[row.batchId] = acc[row.batchId] || [];
+    acc[row.batchId].push(row);
+    return acc;
+  }, {});
+}
+
+// Unique batchIds for pagination
+getUniqueBatchIds(): string[] {
+  return Object.keys(this.getGroupedIncinerationTransactions());
+}
+
+// Paginate batchIds
+getPagedBatchIds(): string[] {
+  const start = (this.currentPageIncineration - 1) * this.itemsPerPage;
+  return this.getUniqueBatchIds().slice(start, start + this.itemsPerPage);
+}
+
+// Toggle batch expand
+toggleBatchExpand(batchId: string): void {
+  this.expandedBatchIds[batchId] = !this.expandedBatchIds[batchId];
+}
+
 }

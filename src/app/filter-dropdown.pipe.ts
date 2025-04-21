@@ -12,7 +12,8 @@ export class FilterDropdownPipe implements PipeTransform {
 
     return options.filter(option => {
       // If option is an object, check for a property like `name`, `machineId`, etc.
-      const optionValue = typeof option === 'object' ? option.name || option.machineId || option.value : option;
+      // const optionValue = typeof option === 'object' ? option.name || option.machineId || option.value : option;
+      const optionValue = typeof option === 'object' ? option.projectname || option.name || option.machineId || option.value : option;
 
       // Handle case where option is an object, and we safely convert it to string
       return optionValue && optionValue.toString().toLowerCase().includes(searchText);
