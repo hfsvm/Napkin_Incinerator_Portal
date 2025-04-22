@@ -5,6 +5,8 @@ import { FormControl } from '@angular/forms';
 import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
 import * as maplibregl from 'maplibre-gl';
+import { Subscription, interval } from 'rxjs';
+
 
 @Component({
   selector: 'app-google-maps',
@@ -43,6 +45,13 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
 
   stateDistrictMap: { [state: string]: string[] } = {};
 
+
+  private autoRefreshSubscription!: Subscription;
+private refreshInterval = 120; // refresh interval in seconds
+private countdownInterval!: any;
+refreshCountdown = 0;
+
+
  
   constructor(
     private dataService: DataService,
@@ -61,6 +70,13 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
       sessionStorage.removeItem('reloaded');
       this.loadMachineData();
     }
+
+      // Start auto-refresh functionality
+  this.startAutoRefresh();
+  
+  // Start the countdown
+  this.startRefreshCountdown();
+
  
     document.addEventListener('click', this.handleClickOutside.bind(this));
 
@@ -77,6 +93,21 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
   });
 
   }
+
+
+  ngOnDestroy() {
+    // Clean up subscriptions and intervals
+    if (this.autoRefreshSubscription) {
+      this.autoRefreshSubscription.unsubscribe();
+    }
+    
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+    
+  }
+
+  
   stateSearchText: string = ''; // Bind this to the input field
  
   ngAfterViewInit(): void {
@@ -84,6 +115,44 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
       this.initializeMap(); // Call the new initializeMap method
     }, 500);
   }
+
+
+  // Add these methods to implement the auto-refresh functionality
+startAutoRefresh(): void {
+  // Refresh every 2 minutes (120,000 milliseconds)
+  this.autoRefreshSubscription = interval(120000).subscribe(() => {
+    console.log('🔄 Auto-refreshing data...');
+    this.loadMachineData(); // Replace with your data fetching method name
+    this.resetRefreshCountdown();
+  });
+}
+
+startRefreshCountdown(): void {
+  this.refreshCountdown = this.refreshInterval;
+  this.countdownInterval = setInterval(() => {
+    this.refreshCountdown--;
+    if (this.refreshCountdown <= 0) {
+      this.refreshCountdown = this.refreshInterval;
+    }
+  }, 1000);
+}
+
+get formattedRefreshTime(): string {
+  const minutes = Math.floor(this.refreshCountdown / 60).toString().padStart(1, '0');
+  const seconds = (this.refreshCountdown % 60).toString().padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
+resetRefreshCountdown(): void {
+  this.refreshCountdown = this.refreshInterval;
+}
+
+// Manually trigger refresh (you can call this from a button if needed)
+manualRefresh(): void {
+  this.loadMachineData(); // Replace with your data fetching method name
+  this.resetRefreshCountdown();
+}
+
  
   // New method to initialize the map
   initializeMap(): void {

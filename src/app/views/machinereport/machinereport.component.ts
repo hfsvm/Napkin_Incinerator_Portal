@@ -1,9 +1,12 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation , OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataService } from '../../service/data.service';
 import { CommonDataService } from '../../Common/common-data.service';
 import { Pipe, PipeTransform } from '@angular/core';
 import { Location } from '@angular/common';
+import { Subscription, interval } from 'rxjs';  // Add these imports
+
+
 
 @Component({
   selector: 'app-machinereport',
@@ -11,7 +14,8 @@ import { Location } from '@angular/common';
   styleUrls: ['./machinereport.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class MachinereportComponent implements OnInit {
+
+export class MachinereportComponent implements OnInit, OnDestroy {
   machineId: string = '';
   merchantId: string = '';
   selectedMachineId: string = '';
@@ -33,6 +37,12 @@ export class MachinereportComponent implements OnInit {
   currentPageIncineration = 1;
   itemsPerPage = 10;
 
+
+  // Auto-refresh properties
+private autoRefreshSubscription!: Subscription;
+private refreshInterval = 120; // refresh interval in seconds
+private countdownInterval!: any;
+refreshCountdown = 0;
 
   // Loading state
   isLoading: boolean = false;
@@ -63,6 +73,13 @@ export class MachinereportComponent implements OnInit {
     
     // Fetch list of machine IDs for the dropdown
     this.loadMachineIdsFromUserDetails();
+
+      // Start auto-refresh functionality
+  this.startAutoRefresh();
+  
+  // Start the countdown
+  this.startRefreshCountdown();
+
   }
   groupedVendingTransactions: { [orderId: string]: any[] } = {};
 
@@ -83,6 +100,52 @@ export class MachinereportComponent implements OnInit {
     // Reset expanded state
    
   }
+
+
+
+  ngOnDestroy() {
+    // Clean up subscriptions and intervals
+    if (this.autoRefreshSubscription) {
+      this.autoRefreshSubscription.unsubscribe();
+    }
+    
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+  }
+
+
+  startAutoRefresh(): void {
+    // Refresh every 2 minutes (120,000 milliseconds)
+    this.autoRefreshSubscription = interval(120000).subscribe(() => {
+      console.log('🔄 Auto-refreshing data...');
+      this.fetchTransactions(); // Using your existing fetchTransactions method
+    });
+  }
+  
+  startRefreshCountdown(): void {
+    this.refreshCountdown = this.refreshInterval;
+    this.countdownInterval = setInterval(() => {
+      this.refreshCountdown--;
+      if (this.refreshCountdown <= 0) {
+        this.refreshCountdown = this.refreshInterval;
+      }
+    }, 1000);
+  }
+  
+  get formattedRefreshTime(): string {
+    const minutes = Math.floor(this.refreshCountdown / 60).toString().padStart(1, '0');
+    const seconds = (this.refreshCountdown % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  }
+  
+  resetRefreshCountdown(): void {
+    this.refreshCountdown = this.refreshInterval;
+  }
+
+
+
+
   
   loadMachineIdsFromUserDetails(): void {
     const userDetails = this.commonDataService.userDetails;

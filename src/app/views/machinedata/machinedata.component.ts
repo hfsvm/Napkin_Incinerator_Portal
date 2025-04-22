@@ -1502,6 +1502,10 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   dashboardData: any = {};
   columnFilters: any = {
     'Machine ID': '',
+    'Location Name': '',
+    'Location Address': '',
+    "UID": '',
+
     'Machine Type': '',
     'Status': '',
     'Stock Status': '',

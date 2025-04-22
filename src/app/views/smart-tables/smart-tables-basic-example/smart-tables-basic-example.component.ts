@@ -3,7 +3,7 @@
   import { DataService } from '../../../service/data.service';
   import { CommonDataService } from '../../../Common/common-data.service';
   import * as XLSX from 'xlsx';
-import { Subscription } from 'rxjs';
+  import { Subscription, interval } from 'rxjs';
   interface Transaction {
     date: string;
     qty: number;
@@ -110,7 +110,42 @@ import { Subscription } from 'rxjs';
   
       document.addEventListener('click', this.closeDropdownOnClickOutside.bind(this));
       this.cdr.detectChanges();
+    // Start auto-refresh functionality
+    this.startAutoRefresh();
+  
+    // Start the countdown
+    this.startRefreshCountdown();
   }
+  
+  startAutoRefresh(): void {
+    // Refresh every 2 minutes (120,000 milliseconds)
+    this.autoRefreshSubscription = interval(120000).subscribe(() => {
+      console.log('🔄 Auto-refreshing data...');
+      // Replace with your data loading method
+      this.loadReport();
+    });
+  }
+  
+  startRefreshCountdown(): void {
+    this.refreshCountdown = this.refreshInterval;
+    this.countdownInterval = setInterval(() => {
+      this.refreshCountdown--;
+      if (this.refreshCountdown <= 0) {
+        this.refreshCountdown = this.refreshInterval;
+      }
+    }, 1000);
+  }
+  
+  get formattedRefreshTime(): string {
+    const minutes = Math.floor(this.refreshCountdown / 60).toString().padStart(1, '0');
+    const seconds = (this.refreshCountdown % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  }
+  
+  resetRefreshCountdown(): void {
+    this.refreshCountdown = this.refreshInterval;
+  }
+  
   
   
   // loadCommonData() {
@@ -212,6 +247,17 @@ import { Subscription } from 'rxjs';
     this.loadReport();
   }
   ngOnDestroy() {
+
+
+      // Clean up subscriptions and intervals
+  if (this.autoRefreshSubscription) {
+    this.autoRefreshSubscription.unsubscribe();
+  }
+  
+  if (this.countdownInterval) {
+    clearInterval(this.countdownInterval);
+  }
+
       // ✅ Remove listener to avoid memory leaks
       document.removeEventListener('click', this.closeDropdownOnClickOutside.bind(this));
   }
@@ -490,6 +536,7 @@ getSerialNumber(machine: ReportItem): number {
 }
 
 loadReport() {
+  debugger;
   this.isLoading = true;
   this.errorMessage = '';
 
@@ -604,6 +651,7 @@ loadReport() {
  
 machineFilterTouched = false;
 onMachineSelectionChange(selected: string[]) {
+  debugger;
   this.selectedMachineIds = selected;
   this.machineFilterTouched = true;
 }
@@ -795,15 +843,6 @@ toggleDropdown(filterType: string, event: Event) {
 }
  
  
-get formattedRefreshTime(): string {
-  const minutes = Math.floor(this.refreshCountdown / 60).toString().padStart(1, '0');
-  const seconds = (this.refreshCountdown % 60).toString().padStart(2, '0');
-  return `${minutes}:${seconds}`;
-}
-
-resetRefreshCountdown(): void {
-  this.refreshCountdown = this.refreshInterval;
-}
 
  
   pageChanged(page: number) {
@@ -838,6 +877,7 @@ resetRefreshCountdown(): void {
  
  
   toggleSelection(selectedArray: any[], option: any) {
+    debugger;
     console.log("Toggle selection called with:", { array: selectedArray, option });
    
     // For objects, check by matching a property
