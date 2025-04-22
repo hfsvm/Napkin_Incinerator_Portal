@@ -54,15 +54,21 @@
         name="search-{{filter.key}}" />
 
       <!-- 🔘 Select All -->
-      <label class="dropdown-item">
+      <!-- <label class="dropdown-item">
         <input type="checkbox" 
               [checked]="isAllSelected(filter.selected, filter.options)" 
               (change)="toggleSelectAll(filter.selected, filter.options, $event)">
         <b>Select All</b>
+      </label> -->
+      <label class="dropdown-item">
+        <input type="checkbox" 
+              [checked]="isAllSelected(filter.selected, filter.options)" 
+              (change)="toggleSelectAll(filter.selected, filter.options, $event, filter.key)">
+        <b>Select All</b>
       </label>
 
       <!-- 📝 Options with or without filter -->
-      <label 
+      <!-- <label 
         *ngFor="let option of ['machineIds', 'zones', 'wards','projects'].includes(filter.key) 
                             ? (filter.options | filterDropdown:searchTexts[filter.key]) 
                             : filter.options" 
@@ -71,7 +77,17 @@
                [checked]="filter.selected.includes(option)" 
                (change)="toggleSelection(filter.selected, option)">
         {{ option }}
-      </label>
+      </label> -->
+      <label 
+  *ngFor="let option of ['machineIds', 'zones', 'wards','projects'].includes(filter.key) 
+                      ? (filter.options | filterDropdown:searchTexts[filter.key]) 
+                      : filter.options" 
+  class="dropdown-item">
+  <input type="checkbox" 
+         [checked]="filter.selected.includes(option)" 
+         (change)="toggleSelection(filter.selected, option, filter.key)">
+  {{ option }}
+</label>
 
     </div>
   </div>

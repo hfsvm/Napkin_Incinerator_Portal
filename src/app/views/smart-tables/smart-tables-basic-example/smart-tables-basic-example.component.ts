@@ -539,7 +539,9 @@ loadReport() {
   debugger;
   this.isLoading = true;
   this.errorMessage = '';
-
+  console.log("Machine filter touched:", this.machineFilterTouched);
+  console.log("Selected machine IDs:", this.selectedMachineIds);
+  console.log("All machine IDs:", this.machineIds);
   const selectedMachines = this.machineFilterTouched
     ? this.selectedMachineIds
     : [...this.machineIds];
@@ -876,16 +878,46 @@ toggleDropdown(filterType: string, event: Event) {
   }
  
  
-  toggleSelection(selectedArray: any[], option: any) {
-    debugger;
-    console.log("Toggle selection called with:", { array: selectedArray, option });
+  // toggleSelection(selectedArray: any[], option: any) {
+  //   debugger;
+  //   console.log("Toggle selection called with:", { array: selectedArray, option });
    
+  //   // For objects, check by matching a property
+  //   if (typeof option === 'object' && option !== null) {
+  //     const exists = selectedArray.some(item =>
+  //       typeof item === 'object' ? item.id === option.id : item === option
+  //     );
+     
+  //     if (exists) {
+  //       const index = selectedArray.findIndex(item =>
+  //         typeof item === 'object' ? item.id === option.id : item === option
+  //       );
+  //       selectedArray.splice(index, 1);
+  //     } else {
+  //       selectedArray.push(option);
+  //     }
+  //   } else {
+  //     // For simple values like strings
+  //     const exists = selectedArray.includes(option);
+  //     if (exists) {
+  //       selectedArray.splice(selectedArray.indexOf(option), 1);
+  //     } else {
+  //       selectedArray.push(option);
+  //     }
+  //   }
+   
+  //   console.log("After toggle, selected array:", selectedArray);
+  //   this.cdr.detectChanges();
+  // }
+  toggleSelection(selectedArray: any[], option: any, filterType?: string) {
+    console.log("Toggle selection called with:", { array: selectedArray, option, filterType });
+     
     // For objects, check by matching a property
     if (typeof option === 'object' && option !== null) {
       const exists = selectedArray.some(item =>
         typeof item === 'object' ? item.id === option.id : item === option
       );
-     
+       
       if (exists) {
         const index = selectedArray.findIndex(item =>
           typeof item === 'object' ? item.id === option.id : item === option
@@ -903,21 +935,37 @@ toggleDropdown(filterType: string, event: Event) {
         selectedArray.push(option);
       }
     }
-   
+     
+    // Set machineFilterTouched flag if this is a machine selection
+    if (filterType === 'machineIds') {
+      this.machineFilterTouched = true;
+    }
+     
     console.log("After toggle, selected array:", selectedArray);
     this.cdr.detectChanges();
   }
  
- 
-  toggleSelectAll(selectedArray: string[], fullList: string[], event: any) {
+  // toggleSelectAll(selectedArray: string[], fullList: string[], event: any) {
+  //   if (event.target.checked) {
+  //     selectedArray.length = 0;
+  //     fullList.forEach(item => selectedArray.push(item));
+  //   } else {
+  //     selectedArray.length = 0;
+  //   }
+  // }
+  toggleSelectAll(selectedArray: string[], fullList: string[], event: any, filterType?: string) {
     if (event.target.checked) {
       selectedArray.length = 0;
       fullList.forEach(item => selectedArray.push(item));
     } else {
       selectedArray.length = 0;
     }
+    
+    // Set the machine filter touched flag if this is a machine selection
+    if (filterType === 'machineIds') {
+      this.machineFilterTouched = true;
+    }
   }
- 
   getLastTwoParts(address: string | null): string {
     if (!address) return ''; // Handle empty or null case
  
