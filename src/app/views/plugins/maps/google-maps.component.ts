@@ -111,6 +111,9 @@ refreshCountdown = 0;
   stateSearchText: string = ''; // Bind this to the input field
  
   ngAfterViewInit(): void {
+
+      this.setupCustomPopupCloseHandler();
+
     setTimeout(() => {
       this.initializeMap(); // Call the new initializeMap method
     }, 500);
@@ -288,6 +291,62 @@ this.machines.forEach(machine => {
     }
   }
  
+
+  setupCustomPopupCloseHandler(): void {
+    document.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement;
+      
+      if (target && target.classList.contains('custom-close-btn')) {
+        console.log('Custom close button clicked');
+        
+        const machineId = target.getAttribute('data-machine-id');
+        const popupElement = target.closest('.maplibregl-popup');
+  
+        if (popupElement) {
+          this.closePopup(popupElement, machineId);
+        }
+      }
+    // Only close when clicking outside popup AND not on the map
+    else if (!target.closest('.maplibregl-popup') && 
+             !target.closest('.maplibregl-canvas-container') && 
+             !target.closest('.maplibregl-map')) {
+      
+      // User clicked outside any popup and not on the map - close all popups
+      const popups = document.querySelectorAll('.maplibregl-popup');
+      if (popups.length > 0) {
+        popups.forEach(popup => {
+          // Your existing code for closing popups...
+          // [...]
+        });
+      }
+    }
+  });
+}
+
+  
+
+  // Add a helper method to close popups
+closePopup(popupElement: Element, machineId: string | null): void {
+  // Try to find the marker associated with this popup
+  if (machineId) {
+    const marker = this.markers.find(m => {
+      const popup = m.getPopup();
+      return popup && popup._content.innerHTML.includes(`data-machine-id="${machineId}"`);
+    });
+    
+    // Close the popup through the marker if possible
+    if (marker) {
+      marker.getPopup().remove();
+      console.log(`Closed popup for machine: ${machineId} via marker`);
+      return;
+    }
+  }
+  
+  // Fallback: Remove popup from DOM directly
+  popupElement.remove();
+  console.log(`Closed popup via direct DOM removal`);
+}
+
      
 updateMap(): void {
 console.log("🔄 updateMap() called!");
@@ -383,16 +442,29 @@ filteredMachines.forEach(machine => {
   markerElement.style.backgroundSize = 'contain';
   markerElement.style.backgroundRepeat = 'no-repeat';
 
+
+// In your updateMap method, create the popup with closeButton: false
+const popup = new maplibregl.Popup({
+  closeButton: false,  // Disable default close button, we'll use our custom one
+  closeOnClick: true  // Disable closing when clicking map
+}).setHTML(this.generatePopupHTML(machine));
+
   // Create marker
   const newMarker = new maplibregl.Marker({ element: markerElement })
     .setLngLat(machine.location)
-    .setPopup(new maplibregl.Popup().setHTML(this.generatePopupHTML(machine)))
+    // .setPopup(new maplibregl.Popup().setHTML(this.generatePopupHTML(machine)))
+    .setPopup(popup)
     .addTo(this.map);
 
   this.markers.push(newMarker);
-});
+
+
+  
+}); 
 
 console.log("✅ Markers updated. Current count:", this.markers.length);
+
+
 }
  
   getStockStatusIcon(status: number): string {
@@ -425,8 +497,21 @@ case 1: burningStatusText = 'Idle'; break;
 case 2: burningStatusText = 'Burning'; break;
 }
 
-  return `<div><h3>📍 Vending Machine</h3>
-    <p><strong>Machine ID:</strong> ${machine.machineId}</p>
+  return `
+
+<div style="position: relative; padding: 5px; background: white;">
+  
+  <!-- Close Button -->
+  <button class="custom-close-btn" data-machine-id="${machine.machineId}" 
+          style="position: absolute; top: 0px; right: 0px; background: #fff; border: 1px solid #ccc; 
+                 width: 24px; height: 24px; border-radius: 10%; cursor: pointer; 
+                 display: flex; align-items: center; justify-content: center; font-size: 16px;">
+    ×
+  </button>
+
+  <!-- Card Content -->
+  <h3 style="margin: 0 0 8px 0;">📍 Vending Machine</h3>
+     <p><strong>Machine ID:</strong> ${machine.machineId}</p>
     <p><strong>State:</strong> ${machine.state}</p>
     <p><strong>District:</strong> ${machine.district}</p>
     <p><strong>Status:</strong> ${machine.status}</p>

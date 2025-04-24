@@ -189,12 +189,42 @@
       <button [class.active]="activeTab === 'vending'" (click)="setTab('vending')">Vending</button>
       <button [class.active]="activeTab === 'incineration'" (click)="setTab('incineration')">Incineration</button>
 
-    <div class="machine-select">
+    <!-- <div class="machine-select">
       <label for="machineSelect">Machine:</label>
       <select id="machineSelect" [(ngModel)]="selectedMachineId" (change)="onMachineChange()">
         <option value="">Select Machine</option>
         <option *ngFor="let id of machineIds" [value]="id">{{ id }}</option>
       </select>
+    </div> -->
+
+
+
+
+    <div class="machine-select">
+      <label for="machineSelect">Machine Id:</label>
+      <div class="dropdown machine-dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="machineDropdown" 
+                (click)="toggleDropdown()" aria-expanded="false">
+          {{ selectedMachineId || 'Select Machine' }}
+          <span class="caret"></span>
+        </button>
+        <div class="dropdown-menu" [class.show]="isDropdownOpen">
+          <div class="dropdown-search">
+            <input type="text" class="form-control" placeholder="Search..." 
+                   [(ngModel)]="machineSearchTerm" (input)="filterMachines()">
+          </div>
+          <div class="dropdown-items-container">
+            <a *ngFor="let id of filteredMachineIds" class="dropdown-item"
+               [class.active]="id === selectedMachineId"
+               (click)="selectMachine(id)">
+              {{ id }}
+            </a>
+            <div *ngIf="filteredMachineIds.length === 0" class="no-results">
+              No machines found
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
       <label for="start">Start Date:</label>
