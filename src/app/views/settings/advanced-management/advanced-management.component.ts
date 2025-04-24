@@ -10,12 +10,20 @@ import { CommonDataService } from '../../../Common/common-data.service';
 })
 
 export class AdvancedManagementComponent implements OnInit {
+  fotaTable: any[] = [];
+  fotaRows: any[] = [];
+selectedFotaRows: Set<string> = new Set(); // store selected machineids
+
+  selectedVersion: string = '';
+  selectedMachineInstalledId: string = '';
+installedStatus: string = ''; // Installed status (1 or 0)
+uid: string = ''; 
   schedulerHour: number | null = null;
   schedulerMinute: number | null = null;
   merchantId: string = '';
   machineIds: string[] = [];
   selectedMachineId: string = '';
-  activeTab: string = 'pricing'; // Active tab selector for pricing or incineration
+  activeTab: string = 'fotaa'; // Active tab selector for pricing or incineration
   incinerationConfig: any = null;
   projectList: any[] = [];
  selectedProjectId!: number | null;
@@ -25,6 +33,14 @@ export class AdvancedManagementComponent implements OnInit {
  selectedMachineIdPricing: string | null = null;
  dropdownOpenPricing: boolean = false;
  machineSearchTermPricing: string = '';
+
+ fotaConfigList: any[] = [];
+
+
+ selectedUpdatedVersion: string | null = null;
+
+ // UID input by user
+ 
 // Or correct your type
   // Pricing Config Values (current values and updated values)
   currentValues = {
@@ -38,11 +54,18 @@ export class AdvancedManagementComponent implements OnInit {
     itp: 0,
     qrBytes: ''
   };
- 
+  fotaData = {
+    machineid: '',
+    imenumber: '',
+    updatedVersion: [],  // Will come from API
+    selectedVersion: null
+  };
   notification = {
     message: '',
     type: ''  // 'success' or 'error'
   };
+  notificationMessage = '';
+notificationType = '';
   // Incineration Config Values (current values and updated values)
   incinerationCurrentValues = {
    
@@ -158,6 +181,7 @@ cancelPopup() {
 }
 
   ngOnInit(): void {
+    // this.getFotaVersionDetails();
     this.filteredMachineIds = this.machineIds; // Set initially
     this.merchantId = this.commonDataService.getMerchantId();
     this.machineIds = Array.isArray(this.commonDataService.userDetails?.machineId)
@@ -211,6 +235,7 @@ cancelPopup() {
   }
  
 onMachineChange(): void {
+  // this.getFotaVersionDetails();
   // Reset the current values before fetching new data
   this.resetData();
  debugger
@@ -260,6 +285,7 @@ onMachineChange(): void {
       }
     }
   );
+  
  
   // 🔥 Fetch Incineration Config
   this.dataService.getAdvancedConfig(this.merchantId, this.selectedMachineId).subscribe(
@@ -322,8 +348,95 @@ onMachineChange(): void {
     }
    
   );
+  
+    this.dataService.getFotaVersionDetails(this.merchantId, this.selectedMachineId).subscribe(
+      (res: any) => {
+        console.log('📥 FOTA Version Response:', res);
+  
+        if (res.code !== 200 || res.error) {
+          const msg = res.phrase || res.error || 'FOTA version fetch error.';
+          this.showNotification(`⚠️ ${msg}`, 'error');
+          return;
+        }
+  
+        const fotaData = res.data;
+  
+        if (fotaData) {
+          this.selectedMachineId = fotaData.machineid || '';
+          this.installedStatus = fotaData.currentVersion || 'Not Installed';
+          this.uid = fotaData.imenumber || '';
+          this.fotaRows = fotaData.updatedVersion || [];
+          this.selectedUpdatedVersion = null; // For dropdown selection
+        } else {
+          this.selectedMachineId = '';
+          this.installedStatus = 'Not Available';
+          this.uid = '';
+          this.fotaRows = [];
+        }
+  
+        this.changeDetectorRef.detectChanges();
+      },
+      error => {
+        console.error("❌ FOTA Config HTTP Error:", error);
+  
+        if (error.code === 404) {
+          this.showNotification("⚠️ No FOTA info found for the machine.", "error");
+        } else if (error.code === 0) {
+          this.showNotification("🔌 Network error. Please check your connection.", "error");
+        } else {
+          this.showNotification(`❌ Error ${error.status}: ${error.error?.message || 'Unknown error occurred'}`, "error");
+        }
+      }
+    );
+  
+  
+
+  
+  
 }
  
+// getFotaVersionDetails() {
+//   debugger
+//   this.dataService.getFotaVersionDetails(this.merchantId, this.selectedMachineId).subscribe(
+//     (res: any) => {
+//       console.log('📥 FOTA Version Response:', res);
+      
+//       if (res.code !== 200 || res.error) {
+//         const msg = res.phrase || res.error || 'FOTA version fetch error.';
+//         this.showNotification(`⚠️ ${msg}`, 'error');
+//         return;
+//       }
+
+//       const fotaData = res.data;
+//       if (fotaData) {
+//         this.selectedMachineId = fotaData.machineid || '';
+//         this.installedStatus = fotaData.currentVersion || 'Not Installed';
+//         this.uid = fotaData.imenumber || '';
+//         this.fotaRows = fotaData.updatedVersion || [];
+//         this.selectedUpdatedVersion = null; // For dropdown selection
+//       } else {
+//         this.selectedMachineId = '';
+//         this.installedStatus = 'Not Available';
+//         this.uid = '';
+//         this.fotaRows = [];
+//       }
+
+//       this.changeDetectorRef.detectChanges();
+//     },
+//     error => {
+//       console.error("❌ FOTA Config HTTP Error:", error);
+
+//       if (error.code === 404) {
+//         this.showNotification("⚠️ No FOTA info found for the machine.", "error");
+//       } else if (error.code === 0) {
+//         this.showNotification("🔌 Network error. Please check your connection.", "error");
+//       } else {
+//         this.showNotification(`❌ Error ${error.status}: ${error.error?.message || 'Unknown error occurred'}`, "error");
+//       }
+//     }
+//   );
+// }
+
 getMachinesByProject(clientId: number): void {
   if (!clientId || !this.merchantId) return;
  
@@ -493,7 +606,155 @@ submitUpdatedConfig(): void {
       }
     );
   }
- 
+  submitFotaConfig(): void {
+    // Validate Machine ID
+    if (!this.selectedMachineId) {
+      this.showNotification('⚠️ Please select a Machine ID.', 'error');
+      return;
+    }
+  
+    // Validate Selected Version
+    if (!this.selectedUpdatedVersion) {
+      this.showNotification('⚠️ Please select an Updated Version.', 'error');
+      return;
+    }
+  
+    // Build the FOTA object
+    const fotaConfig = {
+      currentVersion: this.installedStatus || '', // or null if needed
+      imenumber: this.uid || '',
+      machineid: this.selectedMachineInstalledId || '',
+      merchantid: this.merchantId || '',
+      updatedVersion: this.selectedUpdatedVersion || ''
+    };
+  
+    // Add to array if multiple are supported
+    this.fotaConfigList = this.fotaConfigList || []; // create if not exists
+    this.fotaConfigList.push(fotaConfig);
+  
+    // Log or send to server
+    console.log('📤 Sending FOTA Config List:', this.fotaConfigList);
+    this.dataService.savefota(this.fotaConfigList).subscribe(
+      (response: any) => {
+        console.log('✅ FOTA Config Submitted:', response);
+        if (response && response.code === 200) {
+          this.showNotification("✅ FOTA Config Submitted Successfully!", "success");
+          this.fotaConfigList = [];
+        } else {
+          this.showNotification(`⚠️ ${response.phrase || 'Unexpected response from server.'}`, "error");
+        }
+      },
+      (error: any) => {
+        console.error('❌ FOTA Submission Error:', error);
+        this.showNotification(`❌ Error: ${error.message || 'Unknown error occurred'}`, 'error');
+      }
+    );
+    
+  }
+  
+
+  // onSubmitMachineInstalled(): void {
+  //   debugger
+  //   if (!this.selectedMachineId || !this.installedStatus || !this.uid) {
+  //     this.notificationMessage = '⚠️ Please fill all fields.';
+  //     this.notificationType = 'error';
+  //     return;
+  //   }
+  
+  //   // Prepare the payload
+  //   const machineOnboardingPayload = {
+  //     machineId: this.selectedMachineId,
+  //     machineInfo: {
+  //       uid: this.uid,
+  //       installed: Number(this.installedStatus), // Convert to 1 (Yes) or 0 (No)
+  //     },
+  //     merchantId: this.merchantId
+  //   };
+  
+  //   // Call the API to submit the form
+  //   this.dataService.machineOnboarding(machineOnboardingPayload).subscribe(
+  //     (response: any) => {
+  //       if (response.code === 200) {
+  //         this.notificationMessage = '✅ Machine onboarded successfully.';
+  //         this.notificationType = 'success';
+          
+  //       } else {
+  //         this.notificationMessage = `⚠️ ${response.error || 'An error occurred.'}`;
+  //         this.notificationType = 'error';
+  //       }
+  //     },
+  //     (error) => {
+  //       this.notificationMessage = `❌ Error: ${error.message || 'Unknown error.'}`;
+  //       this.notificationType = 'error';
+  //     }
+  //   );
+  //   this.resetMachineInstalledForm();
+  // }
+
+  // onSubmitMachineInstalled(): void {
+  //   debugger;
+  //   if (!this.selectedMachineId || !this.installedStatus || !this.uid) {
+  //     this.showNotification('⚠️ Please fill all fields.', 'error');
+  //     return;
+  //   }
+  
+  //   const machineOnboardingPayload = {
+  //     machineId: this.selectedMachineId,
+  //     machineInfo: {
+  //       uid: this.uid,
+  //       installed: Number(this.installedStatus),
+  //     },
+  //     merchantId: this.merchantId
+  //   };
+  
+  //   this.dataService.machineOnboarding(machineOnboardingPayload).subscribe(
+  //     (response: any) => {
+  //       if (response.code === 200) {
+  //         this.showNotification('✅ Machine onboarded successfully.', 'success');
+  //         this.resetMachineInstalledForm();
+  //       } else {
+  //         this.showNotification(`⚠️ ${response.error || 'An error occurred.'}`, 'error');
+  //       }
+  //     },
+  //     (error) => {
+  //       this.showNotification(`❌ Error: ${error.message || 'Unknown error.'}`, 'error');
+  //     }
+  //   );
+  // }
+  onSubmitMachineInstalled(): void {
+    debugger;
+    if (!this.selectedMachineId || !this.installedStatus || !this.uid) {
+      this.showNotification('⚠️ Please fill all fields.', 'error');
+      return;
+    }
+  
+    const machineOnboardingPayload = {
+      machineId: this.selectedMachineId,
+      machineInfo: {
+        uid: this.uid,
+        installed: Number(this.installedStatus),
+      },
+      merchantId: this.merchantId
+    };
+  
+    // 🔍 Log the payload being sent to the API
+    console.log('📤 Submitting Machine Onboarding Payload:', machineOnboardingPayload);
+  
+    this.dataService.machineOnboarding(machineOnboardingPayload).subscribe(
+      (response: any) => {
+        if (response.code === 200) {
+          this.showNotification('✅ Machine Installed successfully.', 'success');
+          this.resetMachineInstalledForm();
+        } else {
+          this.showNotification(`⚠️ ${response.error || 'An error occurred.'}`, 'error');
+        }
+      },
+      (error) => {
+        this.showNotification(`❌ Error: ${error.message || 'Unknown error.'}`, 'error');
+      }
+    );
+  }
+  
   // validateHeaterInputs(): boolean {
   //   // Destructure updated values from the form state
   //   const { setHeaterTempA, setHeaterTempB, heaterAMinTemp, heaterBOnTemp } = this.updatedIncinerationValues;
@@ -674,9 +935,16 @@ submitUpdatedConfig(): void {
     this.updatedIncinerationValues = { scheduler: '', limitSwitch: '', napkinCost: '', setHeaterTempA: '', setHeaterTempB: '', heaterAMinTemp: '', heaterBOnTemp: '' };
   }
   onTabChange(tab: string): void {
+    debugger
     this.activeTab = tab;
     this.selectedMachineId = '';
- 
+    if (tab === 'MachineInstalled') {
+      this.resetMachineInstalledForm(); // Reset fields when changing tab
+    }
+    // if (this.activeTab === 'pricing1') {
+    //   this.getFotaVersionDetails();
+    // }
+  
     // Always reset both pricing and incineration values regardless of tab
     this.currentValues = {
       iid: '',
@@ -703,7 +971,14 @@ submitUpdatedConfig(): void {
       type: ''
     };
   }
- 
+  resetMachineInstalledForm(): void {
+    this.selectedMachineInstalledId = '';
+    this.installedStatus = '';
+    this.uid = '';
+    this.notificationMessage = '';
+    this.notificationType = '';
+  }
+  
   showNotification(message: string, type: 'success' | 'error') {
     this.notification.message = message;
     this.notification.type = type;

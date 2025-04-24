@@ -12,6 +12,7 @@
       <!-- Blue underline only for active tab -->
       <div *ngIf="activeTab === 'pricing'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
     </li>
+   
     <li class="nav-item" role="presentation">
       <button
         class="nav-link"
@@ -23,6 +24,38 @@
       <!-- Blue underline only for active tab -->
       <div *ngIf="activeTab === 'incineration'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
     </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'pricing1'"
+        (click)="onTabChange('pricing1')"
+        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
+        Fota
+      </button>
+      <!-- Blue underline only for active tab -->
+      <div *ngIf="activeTab === 'pricing1'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'machineInstalled'"
+        (click)="onTabChange('machineInstalled')"
+        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
+        Machine Installed
+      </button>
+      <div *ngIf="activeTab === 'machineInstalled'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
+    </li>
+    <!-- <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'fotaa'"
+        (click)="onTabChange('fotaa')"
+        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
+        FOTA
+      </button>
+      <div *ngIf="activeTab === 'fotaa'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
+    </li> -->
+   
   </ul>
  
   <div *ngIf="notification.message" [ngClass]="notification.type" class="custom-toast">
@@ -204,6 +237,7 @@
       </div>
     </div>
   </div>
+  
  
   <!-- Incineration Tab Content -->
   <div *ngIf="activeTab === 'incineration'">
@@ -496,4 +530,215 @@
     </div>
   </div>
 </div>
- 
+  
+<!-- Pricing1 Tab Content -->
+<div *ngIf="activeTab === 'pricing1'">
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+      <!-- Row: Client Name + Machine Dropdown with Search -->
+      <div class="row">
+        <!-- Project Dropdown -->
+        <div class="col-md-6 mb-3">
+          <label for="selectProject" class="form-label"> Client Name</label>
+          <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
+            <option [ngValue]="null" disabled>Client Name</option>
+
+            <option *ngFor="let project of projectList" [value]="project.ProjectId">
+              {{ project.projectname }}
+            </option>
+          </select>
+        </div>
+     
+      <!-- Machine Dropdown for Pricing Tab (Custom Dropdown with Search) -->
+      <div class="col-md-6 mb-3">
+        <label for="selectMachinePricing" class="form-label"> Machine</label>
+        <div class="position-relative">
+      
+          <div
+            class="form-select"
+            style="cursor: pointer;"
+            (click)="dropdownOpenPricing = !dropdownOpenPricing">
+            {{ selectedMachineIdPricing || 'Machine Id' }}
+          </div>
+
+          <div
+            *ngIf="dropdownOpenPricing"
+            class="border rounded position-absolute bg-white w-100 mt-1 shadow-sm zindex-dropdown"
+            style="max-height: 220px; overflow-y: auto;">
+           
+          
+            <input
+              type="text"
+              [(ngModel)]="machineSearchTermPricing"
+              class="form-control border-0 border-bottom rounded-0"
+              placeholder="Search..."
+              (click)="$event.stopPropagation()"
+            />
+        
+            <div
+              *ngFor="let id of machineIds | filterDropdown: machineSearchTermPricing"
+              (click)="selectMachinePricing(id)"
+              class="px-3 py-2 dropdown-item"
+              style="cursor: pointer;">
+              {{ id }}
+            </div>
+
+         
+            <div class="text-muted px-3 py-2" *ngIf="(machineIds | filterDropdown: machineSearchTermPricing)?.length === 0">
+              No machines found
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <!-- Existing FOTA content continues below -->
+      <div class="row">
+        <!-- IMEI Number (read-only input) -->
+        <div class="col-md-6 mb-3">
+          <label for="imei" class="form-label">IMEI Number</label>
+          <input class="form-control" [value]="fota?.imenumber" readonly />
+
+        </div>
+
+        <!-- Current Version (read-only) -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Current Version</label>
+          <input class="form-control" [value]="fota.currentVersion || 'N/A'" readonly />
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Updated Version (Dropdown) -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Updated Version</label>
+          <select class="form-select" [(ngModel)]="fota.updatedVersionSelected">
+            <option [ngValue]="null">Select Version</option>
+            <option *ngFor="let version of fota.updatedVersion" [value]="version">
+              {{ version }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 
+<div *ngIf="activeTab === 'machineInstalled'">
+  <div class="form-group">
+    <label for="machineInstalled">Select Machine:</label>
+    <select id="machineInstalled" [(ngModel)]="selectedMachineInstalledId">
+      <option *ngFor="let machine of machineIds" [value]="machine">{{ machine }}</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="installedStatus">Installed:</label>
+    <select id="installedStatus" [(ngModel)]="installedStatus">
+      <option value="1">Yes</option>
+      <option value="0">No</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="uid">UID:</label>
+    <input type="text" id="uid" [(ngModel)]="uid" />
+  </div>
+
+  <button (click)="onSubmitMachineInstalled()">Submit</button>
+
+  <div *ngIf="notificationMessage" [ngClass]="{'success': notificationType === 'success', 'error': notificationType === 'error'}">
+    {{ notificationMessage }}
+  </div>
+</div>
+
+  -->
+
+  <div *ngIf="activeTab === 'machineInstalled'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Client Name & Machine Dropdowns Side by Side -->
+        <div class="row">
+          <!-- Client Dropdown -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Client Name</label>
+            <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
+              <option [ngValue]="null" disabled>Select Client</option>
+              <option *ngFor="let project of projectList" [value]="project.ProjectId">
+                {{ project.projectname }}
+              </option>
+            </select>
+          </div>
+  
+          <!-- Machine Dropdown -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Select Machine</label>
+            <div class="position-relative">
+              <div
+                class="form-select"
+                style="cursor: pointer;"
+                (click)="dropdownOpenMachine = !dropdownOpenMachine">
+                {{ selectedMachineId || 'Select Machine' }}
+              </div>
+  
+              <div
+                *ngIf="dropdownOpenMachine"
+                class="border rounded position-absolute bg-white w-100 mt-1 shadow-sm zindex-dropdown"
+                style="max-height: 220px; overflow-y: auto;">
+                <input
+                  type="text"
+                  [(ngModel)]="machineSearchTerm"
+                  class="form-control border-0 border-bottom rounded-0"
+                  placeholder="Search for machine..."
+                  (click)="$event.stopPropagation()" />
+  
+                <div
+                  *ngFor="let machine of machineIds | filterDropdown: machineSearchTerm"
+                  (click)="selectMachine(machine)"
+                  class="px-3 py-2 dropdown-item"
+                  style="cursor: pointer;">
+                  {{ machine }}
+                </div>
+  
+                <div class="text-muted px-3 py-2" *ngIf="(machineIds | filterDropdown: machineSearchTerm)?.length === 0">
+                  No machines found
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+      <!-- Installed Dropdown & UID Input in Same Row -->
+<div class="row">
+  <!-- Installed Dropdown -->
+  <div class="col-md-6 mb-3">
+    <label class="form-label">Installed</label>
+    <select class="form-select" [(ngModel)]="installedStatus">
+      <option value="1">Yes</option>
+      <option value="0">No</option>
+    </select>
+  </div>
+
+  <!-- UID Input -->
+  <div class="col-md-6 mb-3">
+    <label class="form-label">UID</label>
+    <input type="text" class="form-control" [(ngModel)]="uid" />
+  </div>
+</div>
+
+  
+       <!-- Submit & Clear Buttons Centered -->
+<div class="d-flex justify-content-center gap-2 mt-3">
+  <button class="btn btn-primary px-4 custom-btn" (click)="onSubmitMachineInstalled()">Submit</button>
+  <button class="btn btn-sm custom-btn" (click)="resetMachineInstalledForm()">Clear</button>
+</div>
+
+  
+   
+
+    
+    
+    

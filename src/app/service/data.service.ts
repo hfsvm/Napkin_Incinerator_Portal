@@ -1159,7 +1159,37 @@ getMachinesByProject(projectId: number): Observable<any> {
         catchError(this.handleError)  // Handle any errors
       );
     }
+    
+    getFotaVersionDetails(merchantId: string, machineId: string): Observable<any> {
+      debugger
+      const url = `${this.url1}/getFotaVersionDetails/${merchantId}/${machineId}`;
+      console.log("📡 API CALL for fota:", url);
+    
+      return this.http.get(url, this.httpOptions).pipe(
+        retry(1),  // Retry once in case of failure
+        tap(response => console.log('🔹  fota Response:', response)),
+        catchError(this.handleError)  // Handle any errors
+      );
+    }
+    
+    savefota(fota: any): Observable<any> {
+      const url = `${this.url1}/saveFotaVersionDetails`;  // ✅ Updated API endpoint with flag
    
+      return this.http.post(url, fota, this.httpOptions).pipe(
+        retry(1),  // ✅ Retry once on failure
+        tap(response => console.log('🔹 fota save Response:', response)),
+        catchError(this.handleError)  // ✅ Handle errors
+      );
+    }
+    machineOnboarding(machineOnboarding:any): Observable<any> {
+      const url = `${this.url1}/machineOnBoarding`;  // ✅ Updated API endpoint with flag
+   
+      return this.http.post(url, machineOnboarding, this.httpOptions).pipe(
+        retry(1),  // ✅ Retry once on failure
+        tap(response => console.log('🔹 Machine Onboarding', response)),
+        catchError(this.handleError) 
+      );
+    }
   getTransactions(merchantId: string): Observable<any> {
     const url = `${this.url1}/merchantTransactions/${merchantId}/100/10`;
     return this.http.get(url, this.httpOptions).pipe(
