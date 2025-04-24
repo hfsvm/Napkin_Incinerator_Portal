@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation , OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation , OnDestroy, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataService } from '../../service/data.service';
 import { CommonDataService } from '../../Common/common-data.service';
@@ -21,6 +21,15 @@ export class MachinereportComponent implements OnInit, OnDestroy {
   selectedMachineId: string = '';
   machineIds: string[] = [];
   expandedOrders: Set<string> = new Set<string>();
+
+
+  machineSearchTerm: string = '';
+  filteredMachineIds: string[] = [];
+  showDropdown: boolean = false;
+  isDropdownOpen: boolean = false;
+
+  
+
 
   // Tabs
   activeTab: 'vending' | 'incineration' = 'vending';
@@ -145,6 +154,51 @@ refreshCountdown = 0;
 
 
 
+  // Toggle dropdown visibility
+toggleDropdown(): void {
+  this.isDropdownOpen = !this.isDropdownOpen;
+  if (this.isDropdownOpen) {
+    // Reset filter when opening
+    this.machineSearchTerm = '';
+    this.filteredMachineIds = [...this.machineIds];
+  }
+}
+
+
+
+// Select a machine from the dropdown
+selectMachine(id: string): void {
+  this.selectedMachineId = id;
+  this.isDropdownOpen = false;
+  this.onMachineChange();
+}
+
+// Filter machines based on search term
+filterMachines(): void {
+  if (!this.machineSearchTerm) {
+    this.filteredMachineIds = [...this.machineIds];
+  } else {
+    const searchTerm = this.machineSearchTerm.toLowerCase();
+    this.filteredMachineIds = this.machineIds.filter(id => 
+      id.toLowerCase().includes(searchTerm)
+    );
+  }
+} 
+
+// Close dropdown when clicking outside
+@HostListener('document:click', ['$event'])
+clickOutside(event: any): void {
+  const dropdown = document.querySelector('.machine-dropdown');
+  const button = document.querySelector('#machineDropdown');
+  
+  if (this.isDropdownOpen && 
+      dropdown && 
+      !dropdown.contains(event.target) && 
+      button && 
+      !button.contains(event.target)) {
+    this.isDropdownOpen = false;
+  }
+}
 
   
   loadMachineIdsFromUserDetails(): void {
@@ -153,6 +207,10 @@ refreshCountdown = 0;
     if (userDetails && Array.isArray(userDetails.machineId)) {
       this.machineIds = [...userDetails.machineId];
       console.log('✅ Loaded machine IDs from userDetails:', this.machineIds);
+
+      this.filteredMachineIds = [...this.machineIds]; // Initialize filtered list
+      console.log('✅ Loaded machine IDs from userDetails:', this.machineIds);
+  
   
       // If we have a machineId from URL, make sure it's selected in dropdown
       if (this.machineId) {
