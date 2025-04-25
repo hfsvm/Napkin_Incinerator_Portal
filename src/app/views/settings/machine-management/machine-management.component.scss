@@ -1,3 +1,6 @@
+body{
+  background-color: #e5e7ea;
+}
 /* ✅ Main Container - Light, Airy Background */
 .container {
     background: #F5F7FA; /* Light Grayish White */
@@ -53,35 +56,6 @@
     from { opacity: 0; }
     to { opacity: 1; }
   }
-  /* ✅ Tabs Section - Smaller, Balanced */
-  // .tabs {
-  //   display: flex;
-  //   gap: 10px;
-  //   margin-bottom: 20px;
-  // }
-  
-  // .tabs button {
-  //   flex: 1;
-  //   padding: 10px 16px;
-  //   border: none;
-  //   cursor: pointer;
-  //   font-size: 14px;
-
-  //   border-radius: 6px;
-  //   transition: all 0.3s ease-in-out;
-   
-  //   display: flex;
-  //   align-items: center;
-  //   justify-content: center;
-  //   gap: 8px;
-  //   text-transform: uppercase;
-  // }
-  
-  // .tabs button.active {
-  //   background: #4A90E2; /* Soft Sky Blue */
-  //   color: white;
-  //   box-shadow: 0px 3px 6px rgba(74, 144, 226, 0.3);
-  // }
   .tabs {
     display: flex;
     gap: 0px; /* Reduced space between tabs */
@@ -191,55 +165,6 @@
     margin-top: 20px;
   }
   
-//   .submit-btn, .clear-btn,.save-btn ,.edit-btn{
-//     display: flex;
-//     align-items: center;
-//     gap: 8px;
-//  width: 100px;
-//     padding: 10px 18px;
-//     border-radius: 6px;
-//     transition: all 0.3s ease-in-out;
-//     border: none;
-  
-//   }
-  
-//   .submit-btn {
-//     background: #4A90E2;
-//     // #7ebb55; /* Soft Blue */
-//     color: white;
-//     box-shadow: 0px 3px 8px rgba(74, 144, 226, 0.3);
-//     text-align: center;
-//   }
-  
-//   .clear-btn {
-//     background:#4A90E2;
-//     //  #E57373; /* Soft Red */
-//     color: white;
-//     text-align: center;
-    
-//   }
-  
-  // .submit-btn:hover {
-  //   background: #367DC4;
-  // }
-  
-  // .clear-btn:hover {
-  //   background: #C9302C;
-  // }
-  // .save-btn{
-  //   background:#4A90E2;
-  //   //  #e28c4a; 
-  //   color: white;
-  //   box-shadow: 0px 3px 8px rgba(74, 144, 226, 0.3);
-  //   text-align: center;
-  // }
-  // .edit-btn{
-  //   background: #4A90E2; /* Soft Blue */
-  //   color: white;
-  //   box-shadow: 0px 3px 8px rgba(55, 104, 159, 0.3);
-  //   text-align: center;
-  // }
-  /* ✅ JSON Preview Box */
   .submit-btn, .clear-btn, .save-btn, .edit-btn {
     display: flex;
     align-items: center;
@@ -357,4 +282,106 @@
     background-size: 16px;
     padding-right: 30px; /* Space for the arrow */
   }
+  
+
+
+  .machine-id-select {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    text-align: center;
+  }
+  
+  /* Container styles */
+  .machine-id-select ::ng-deep .ng-select-container {
+    height: 38px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+  }
+
+  /* This must be stronger than existing styles */
+.machine-id-select ::ng-deep.ng-has-value .ng-placeholder {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+  
+  
+  /* Dropdown panel styles */
+  .machine-id-select ::ng-deep .ng-dropdown-panel.ng-select-bottom {
+    width: 100%;
+    left: 0 !important;
+    top: 100% !important;
+    border: 1px solid #ced4da;
+    border-radius: 0 0 4px 4px;
+    margin-top: -1px;
+    background-color: #2e5382 !important; /* Light gray background */
+  }
+
+
+  .machine-id-select ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items {
+    background-color: #2e5382 !important;
+  }
+  
+  .machine-id-select{
+    background-color: #9fa2a5;
+  }
+  /* Search container */
+  .search-container {
+    padding: 8px; 
+    border-bottom: 1px solid #ced4da;
+    background-color: #dce3e9; /* Slightly darker gray for search area */
+  }
+  
+  /* Search input */
+  .dropdown-search {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #ffffff;
+  }
+  
+  /* Option styles */
+  .machine-id-select ::ng-deep .ng-option {
+    padding: 8px 10px;
+    background-color: #1b8af9;
+    border-bottom: 1px solid #202123;
+  }
+  
+  .machine-id-select ::ng-deep .ng-option:hover {
+    background-color: #d1d7dc;
+  }
+  
+  .machine-id-select ::ng-deep .ng-option.ng-option-selected {
+    background-color: #c2c8ce;
+    font-weight: 500;
+  }
+  
+  /* Ensure proper value display */
+  .machine-id-select ::ng-deep .ng-value-container {
+    padding-left: 10px;
+    justify-content: center; /* Center content horizontally */
+    display: flex;
+    align-items: center;     /* Center content vertically */
+    text-align: center;
+  
+  }
+  
+  .machine-id-select ::ng-deep .ng-value {
+    padding: 0;
+  }
+
+  .selcted-machine{
+    display: block;
+    width: 100%;
+  }
+
+
   

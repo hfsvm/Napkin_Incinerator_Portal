@@ -368,7 +368,7 @@ export class MachineManagementComponent implements OnInit {
   isMachineSelected: boolean = false; // Controls whether other tabs are enabled
   isLoading: boolean = false; // Flag to show loading state
   errorMessage: string = ''; // To display any error messages
-  machines: any[] = []; // List of Machines
+  // machines: any[] = []; // List of Machines
   // merchantId: string = 'VIKN250324'; // Hardcoded Merchant ID
 
   merchantId: string = ''; 
@@ -383,6 +383,8 @@ export class MachineManagementComponent implements OnInit {
   isEditingBusiness = false;
 isEditingTechnical = false;
 
+
+
   saveForm(): void {
     console.log("Form save function called!");
   }
@@ -393,7 +395,14 @@ isEditingTechnical = false;
     private cdr: ChangeDetectorRef
   ) {}
 
+  machines: any[] = []; // Your original machines array from userDetails
+  originalMachines: any[] = []; // Backup for filtering
+  
   ngOnInit(): void {
+
+    this.machines = this.commonDataService.userDetails.machineId;
+    this.originalMachines = [...this.machines]; // Create a copy for filtering
+  
     // Initialize forms
     this.initializeForms();
     // Load user details when the page is opened
@@ -404,7 +413,18 @@ isEditingTechnical = false;
     
   }
   
-
+  filterMachines(event: any) {
+    const searchTerm = event.target.value.toLowerCase();
+    if (!searchTerm) {
+      this.machines = [...this.originalMachines];
+    } else {
+      this.machines = this.originalMachines.filter(
+        machine => machine.toString().toLowerCase().includes(searchTerm)
+      );
+    }
+  }
+  
+  
   // Initialize forms for business, technical, and incinerator configurations
   initializeForms(): void {
     this.businessConfigForm = this.fb.group({
@@ -505,12 +525,16 @@ isEditingTechnical = false;
     });
   }
 
+
+
   enableEdit(type: string): void {
     if (type === 'business') {
       this.isEditingBusiness = true;
       Object.keys(this.businessConfigForm.controls).forEach(field => {
-        this.businessConfigForm.get(field)?.enable();
-      });
+        if (field !== 'mid') {
+          this.businessConfigForm.get(field)?.enable();
+        }
+            });
     } else if (type === 'technical') {
       this.isEditingTechnical = true;
       Object.keys(this.techConfigForm.controls).forEach(field => {
