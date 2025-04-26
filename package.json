@@ -43,7 +43,7 @@
     "@googlemaps/markerclusterer": "^2.5.3",
     "@googlemaps/markerclustererplus": "^1.2.10",
     "@maptiler/sdk": "^3.0.1",
-    "@ng-select/ng-select": "^8.1.1",
+  
     "azure-maps-control": "^3.6.0",
     "bootstrap": "^5.3.3",
     "chart.js": "^3.9.1",

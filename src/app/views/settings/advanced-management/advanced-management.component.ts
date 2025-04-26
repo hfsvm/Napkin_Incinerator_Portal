@@ -23,7 +23,7 @@ uid: string = '';
   merchantId: string = '';
   machineIds: string[] = [];
   selectedMachineId: string = '';
-  activeTab: string = 'fotaa'; // Active tab selector for pricing or incineration
+  activeTab: string = 'pricing'; // Active tab selector for pricing or incineration
   incinerationConfig: any = null;
   projectList: any[] = [];
  selectedProjectId!: number | null;
