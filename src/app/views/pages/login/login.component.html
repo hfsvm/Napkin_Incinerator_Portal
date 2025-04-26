@@ -258,7 +258,7 @@ workmine
           </button>
         </div>
      
-        <input type="text" id="captcha" formControlName="captcha" placeholder="Enter CAPTCHA" />
+        <input type="text" id="captcha" formControlName="captcha" placeholder="Enter CAPTCHA"    (paste)="preventPaste($event)"   required />
         <div *ngIf="fieldErrors.captcha" class="error-message show">
           {{ fieldErrors.captcha }}
         </div>

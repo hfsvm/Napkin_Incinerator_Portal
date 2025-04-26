@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { BrowserModule, Title } from '@angular/platform-browser';
@@ -82,6 +83,8 @@ const APP_CONTAINERS = [
 @NgModule({
   declarations: [AppComponent, ...APP_CONTAINERS, UserManagementComponent, MachineManagementComponent, AdvancedManagementComponent, ConfirmDialogComponent, MachinereportComponent ],
   imports: [
+    NgSelectModule,
+
     BrowserModule,
     ShareModule,
     BrowserAnimationsModule,

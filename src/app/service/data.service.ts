@@ -876,7 +876,6 @@ export class DataService {
     level4: string[] = []
   ): Observable<any> {
     let params = new HttpParams();
- debugger;
     // Ensure the order of parameters matches the API expectation
     params = params.set('endDate', `${endDate} 23:59:00`);
     level1.forEach(lvl => params = params.append('level1', lvl));

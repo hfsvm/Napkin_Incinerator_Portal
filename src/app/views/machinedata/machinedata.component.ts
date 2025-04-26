@@ -314,9 +314,24 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     this.selectedWards = []; // Clear selected wards (districts)
     this.selectedBeats = []; // Clear selected beats (machines)
     this.selectedProjects = []; // Clear selected projects
-  
-    // Reset the search query
-    this.searchQuery = '';
+
+  // ✅ Reset search filters
+  this.columnFilters = {
+    'Machine ID': '', 
+    'Location Name': '',
+    'Location Address': '',
+    'Uid': '',
+    'Machine Type': '',
+    'Status': '',
+    'Stock Status': '',
+    'Burning Status': ''
+  };
+
+  // // ✅ Reapply filtering logic if needed
+  // this.applyFiltersAndSort();
+
+
+
     this.filteredMachines = [...this.machines]; // Reset the filtered machines list to the original list
   
     // Reset the pagination to the first page
@@ -702,6 +717,7 @@ formatText(text: string | null): string {
   refreshData() {
     console.log('🔄 Refreshing Data...');
     this.loadMachineData();
+
     
   }
   // applyFiltersAndSort() {

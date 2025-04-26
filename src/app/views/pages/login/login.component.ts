@@ -62,6 +62,10 @@ export class LoginComponent implements OnInit {
     );
   }
  
+  preventPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+  }
+  
  
   showPassword: boolean = false;
  

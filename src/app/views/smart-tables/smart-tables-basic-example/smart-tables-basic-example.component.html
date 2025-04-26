@@ -8,11 +8,11 @@
        
       ]">
         <label>{{ filter.name }}:</label> -->
-
+ 
         <div class="refresh-circle">
           <span class="time">{{ formattedRefreshTime }}</span>
         </div>
-        
+       
         <div class="filter-container">
           <form>
             <div class="row align-items-center">
@@ -21,89 +21,73 @@
                 { name: 'State', key: 'zones', selected: selectedZones, options: zones },
                 { name: 'District', key: 'wards', selected: selectedWards, options: wards },
                 { name: 'Machines', key: 'machineIds', selected: selectedMachineIds, options: machineIds },
-            
+           
          
               ]">
                 <label>{{ filter.name }}:</label>
-      
+     
         <!-- ✅ If only one value, show it as text instead of dropdown -->
         <div *ngIf="filter.options.length === 1; else dropdownTemplate">
           <span class="single-value">{{ filter.options[0] }}</span>
         </div>
-      
+     
         <!-- ✅ If multiple values exist, show dropdown -->
         <!-- Dropdown with search -->
 <ng-template #dropdownTemplate>
   <div class="dropdown">
-    <button 
-      class="btn btn-light dropdown-toggle w-100" 
-      type="button" 
+    <button
+      class="btn btn-light dropdown-toggle w-100"
+      type="button"
       (click)="toggleDropdown(filter.key, $event)">
       {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : 'Select ' + filter.name }}
     </button>
-
+ 
     <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]">
-
+ 
       <!-- 🔍 Search Box ONLY for Machines, States, Districts -->
-      <input 
-        *ngIf="['machineIds', 'zones', 'wards','projects'].includes(filter.key)" 
-        type="text" 
-        class="form-control mx-2 my-1" 
-        placeholder="Search..." 
-        [(ngModel)]="searchTexts[filter.key]" 
+      <input
+        *ngIf="['machineIds', 'zones', 'wards','projects'].includes(filter.key)"
+        type="text"
+        class="form-control mx-2 my-1"
+        placeholder="Search..."
+        [(ngModel)]="searchTexts[filter.key]"
         name="search-{{filter.key}}" />
-
+ 
       <!-- 🔘 Select All -->
-      <!-- <label class="dropdown-item">
+      <label class="dropdown-item">
         <input type="checkbox" 
               [checked]="isAllSelected(filter.selected, filter.options)" 
               (change)="toggleSelectAll(filter.selected, filter.options, $event)">
         <b>Select All</b>
-      </label> -->
-      <label class="dropdown-item">
-        <input type="checkbox" 
-              [checked]="isAllSelected(filter.selected, filter.options)" 
-              (change)="toggleSelectAll(filter.selected, filter.options, $event, filter.key)">
-        <b>Select All</b>
       </label>
-
+ 
       <!-- 📝 Options with or without filter -->
-      <!-- <label 
+      <label 
         *ngFor="let option of ['machineIds', 'zones', 'wards','projects'].includes(filter.key) 
                             ? (filter.options | filterDropdown:searchTexts[filter.key]) 
                             : filter.options" 
         class="dropdown-item">
-        <input type="checkbox" 
-               [checked]="filter.selected.includes(option)" 
+        <input type="checkbox"
+               [checked]="filter.selected.includes(option)"
                (change)="toggleSelection(filter.selected, option)">
         {{ option }}
-      </label> -->
-      <label 
-  *ngFor="let option of ['machineIds', 'zones', 'wards','projects'].includes(filter.key) 
-                      ? (filter.options | filterDropdown:searchTexts[filter.key]) 
-                      : filter.options" 
-  class="dropdown-item">
-  <input type="checkbox" 
-         [checked]="filter.selected.includes(option)" 
-         (change)="toggleSelection(filter.selected, option, filter.key)">
-  {{ option }}
-</label>
+      </label>
 
     </div>
   </div>
 </ng-template>
-
+ 
       </div>
-    
-      
-
    
-
-
-  
-      
-      
-
+     
+ 
+   
+ 
+ 
+ 
+     
+     
+ 
       <div class="col">
         <label>Start Date:</label>
         <input
@@ -114,7 +98,7 @@
           [max]="endDate"
           (change)="onStartDateChange()" />
       </div>
-      
+     
       <div class="col">
         <label>End Date:</label>
         <input
@@ -125,29 +109,29 @@
           [min]="startDate"
           (change)="onEndDateChange()" />
       </div>
-      
-
+     
+ 
    
         <div class="col-12 d-flex justify-content-between mt-2">
        
           <button type="button" class="btn btn-sm " (click)="toggleSummaryType()" [disabled]="isLoading">
             {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
           </button>
-
-
-          
+ 
+ 
+         
 <button type="button" class="btn btn-sm " (click)="loadReport()" [disabled]="isLoading">
   Load Report
 </button>
-
+ 
         </div>
       </div>
     </form>
   </div>
-
-
-
-
+ 
+ 
+ 
+ 
   <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
   <div *ngIf="isLoading" class="loading-spinner">Loading...</div>
   <table class="report-summary">
@@ -164,7 +148,7 @@
       <td><b>DISTRICT</b></td>
       <td>All</td>
     </tr>
-  
+ 
     <tr>
       <td><b>REPORT GENERATED</b></td>
       <td>{{ reportGenerated | date: 'dd-MMM-yyyy' }}</td>
@@ -178,28 +162,28 @@
       <td>{{ reportToPeriod | date: 'dd-MMM-yyyy' }}</td>
     </tr>
   </table>
-
+ 
   <div class="search-wrapper">
     <label class="search-label">Search:</label>
     <div class="search-container">
-      <input 
-        type="text" 
-        [value]="searchQuery" 
-        (input)="setSearchQuery($event.target.value)" 
-        placeholder="Search" 
+      <input
+        type="text"
+        [value]="searchQuery"
+        (input)="setSearchQuery($event.target.value)"
+        placeholder="Search"
         class="search-input">
       <button class="search-button">
         <i class="fa fa-search"></i>
       </button>
     </div>
   </div>
-
-
-
+ 
+ 
+ 
   <div class="report-container">
-
+ 
     <div class="d-flex justify-content-end mb-2">
-      
+     
       <button class="btn  btn-sm" (click)="exportToExcel()" [disabled]="isLoading">⬇ Export to Excel</button>
     </div>
   <table class="report-table full-width" border="1">
@@ -222,7 +206,7 @@
         <th>SAN NAPKINS BURNT</th>
       </tr>
     </thead>
-  
+ 
     <tbody>
       <ng-container *ngFor="let machine of paginatedData">
         <ng-container *ngIf="summaryType === 'Daily'">
@@ -237,16 +221,16 @@
                   {{ machine.machineId }}
                 </a>
               </td>
-              
-              
-              
+             
+             
+             
               <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length" class="machine-location">
                 {{ extractLastTwoWords(machine.address) }}
               </td>
-              
+             
               <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.address || '' }}</td>
               <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.machineType || 'N/A' }}</td>
-  
+ 
            
               <td>{{ txn.date || '-' }}</td>
               <td>{{ txn.qty ?? 0 }}</td>
@@ -259,33 +243,33 @@
         </ng-container>
         <tr *ngIf="summaryType === 'Totals'">
           <td>{{ machine.srNo }}</td>
-          
+         
           <td>
             <a [routerLink]="['/machine-report', machine.machineId]">
               {{ machine.machineId }}
             </a>
           </td>
-        
+       
           <td>{{ extractLastTwoWords(machine.address) }}</td>
           <td>{{ machine.machineLocation }}</td>
           <td>{{ machine.machineType }}</td>
           <td><b></b></td>
-        
+       
           <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.qty ?? 0 }}</b></td>
           <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.cash ?? '₹ 0' }}</b></td>
           <td>-</td>
           <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.burnCycles ?? 0 }}</b></td>
           <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.sanNapkinsBurnt ?? 0 }}</b></td>
         </tr>
-        
-        
-        
-        
-        
-        
-        
+       
+       
+       
+       
+       
+       
+       
       </ng-container>
-  
+ 
       <tr class="grand-total-row">
         <td colspan="5"><b>Grand Total</b></td>
         <td><b>Total</b></td>
@@ -298,7 +282,7 @@
     </tbody>
   </table>
   <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
-
+ 
     <!-- Items per page -->
     <div class="d-flex align-items-center gap-2">
       <label class="mb-0 fw-bold text-dark" style="font-size: 1rem;">Items per page:</label>
@@ -312,28 +296,29 @@
         <span class="dropdown-icon"></span>
       </div>
     </div>
-  
+ 
     <!-- Pagination controls (Styled) -->
     <div class="d-flex align-items-center gap-2">
-  
+ 
       <button class="btn btn-lg pagination-btn"
               (click)="onPageChange(currentPage - 1)"
               [disabled]="isLoading || currentPage === 1"
               title="Previous Page">
         ‹
       </button>
-  
+ 
       <span class="fw-bold text-dark" style="font-size: 1.1rem;">
         Page {{ currentPage }} of {{ totalPages }}
       </span>
-  
+ 
       <button class="btn btn-lg pagination-btn"
               (click)="onPageChange(currentPage + 1)"
               [disabled]="isLoading || currentPage >= totalPages"
               title="Next Page">
         ›
       </button>
-  
+ 
     </div>
   </div>
-  
+ 
+ 

@@ -231,8 +231,8 @@
   </div>
   
    -->
-  
-   <div class="container">
+  <div class="body1">
+       <div class="container">
     <div class="tab-header mb-3">
       <button class="tab-button" [class.active]="selectedTab === 'advanced'" (click)="setTab('advanced')">
         <c-icon name="cil-settings"></c-icon> Machines
@@ -256,7 +256,7 @@
         <div class="row">
           <div class="form-group">
             <label>Machine ID:</label>
-            <input formControlName="mid" placeholder="Machine ID" />
+            <input formControlName="mid" placeholder="Machine ID" readonly/>
           </div>
   
           <div class="form-group">
@@ -345,7 +345,7 @@
           </div>
           <div class="form-group">
             <label>Machine ID:</label>
-            <input formControlName="mid" placeholder="Enter Machine ID" />
+            <input formControlName="mid" placeholder="Enter Machine ID"  readonly/>
           </div>
           <div class="form-group">
             <label>File Backup:</label>
@@ -559,19 +559,48 @@
         <div class="col-md-6 col-lg-4">
           <div class="card">
             <div class="card-body">
-              <h2 class="card-title text-center mb-3">Select Machine</h2>
+              <h2 class="card-title text-center mb-3">Select the Machine ID to Proceed
+
+              </h2>
               <div class="form-group  position-relative">
-                <select
+                <!-- <select
                   class="form-control machine-select"
                   [(ngModel)]="selectedMachineId"
                   (change)="onMachineSelect()"
                 >
-                  <option [ngValue]="null"class="machine" disabled>please Select a machine</option>
+                  <option [ngValue]="null"class="machine" disabled>Select MachineId</option>
                   <option *ngFor="let machine of machines" [ngValue]="machine">
                     {{ machine }}
                   </option>
-                </select>
-                <!-- Dropdown arrow icon (positioned absolutely) -->
+                </select> -->
+
+                <ng-select
+                [items]="machines"
+                [(ngModel)]="selectedMachineId"
+                [searchable]="false"
+                [clearable]="false"
+                placeholder="Select Machine ID"
+                (change)="onMachineSelect()"
+                appendTo="body"
+                class="machine-id-select"
+
+              >
+                <ng-template ng-label-tmp let-item="item">
+                  <span class = "selected-machines" >{{ item }}</span>
+                </ng-template>
+                <ng-template ng-header-tmp>
+                  <div class="search-container">
+                    <input 
+                      type="text" 
+                      class="dropdown-search" 
+                      placeholder="Search..." 
+                      (input)="filterMachines($event)"
+                    />
+                  </div>
+                </ng-template>
+              </ng-select>
+          
+                
                 <span class="dropdown-arrow">
                   <i class="fa fa-chevron-down"></i>
                 </span>
@@ -587,4 +616,4 @@
     <!-- Other tab content will remain the same... -->
     
   </div>
-  
+</div>
