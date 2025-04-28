@@ -562,8 +562,8 @@
     </div>
   </div>
 </div>
- 
-<!-- Pricing1 Tab Content -->
+  
+<!-- Pricing1 FOTA Tab Content -->
 <div *ngIf="activeTab === 'pricing1'">
   <div class="card shadow-sm mb-4">
     <div class="card-body">
@@ -624,71 +624,62 @@
         </div>
       </div>
     </div>
- 
-      <!-- Existing FOTA content continues below -->
-      <div class="row">
-        <!-- IMEI Number (read-only input) -->
-        <div class="col-md-6 mb-3">
-          <label for="imei" class="form-label">IMEI Number</label>
-          <input class="form-control" [value]="fota?.imenumber" readonly />
- 
-        </div>
- 
-        <!-- Current Version (read-only) -->
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Current Version</label>
-          <input class="form-control" [value]="fota.currentVersion || 'N/A'" readonly />
-        </div>
-      </div>
- 
-      <div class="row">
-        <!-- Updated Version (Dropdown) -->
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Updated Version</label>
-          <select class="form-select" [(ngModel)]="fota.updatedVersionSelected">
-            <option [ngValue]="null">Select Version</option>
-            <option *ngFor="let version of fota.updatedVersion" [value]="version">
-              {{ version }}
-            </option>
-          </select>
-        </div>
-      </div>
- 
+
+    <div class="container mt-4">
+      <h4 class="mb-3">📋 FOTA Machine Details</h4>
+      <button class="btn btn-success" (click)="addNewRow()">➕</button>
+      <!-- Table -->
+      <table class="table table-bordered table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>Select</th>
+            <th>Machine ID</th>
+            <th>IMEI Number</th>
+            <th>Current Version</th>
+            <th>Updated Version</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let machine of fotaMachines">
+            <td>
+              <input
+                type="checkbox"
+                [checked]="isSelected(machine)"
+                (change)="toggleSelection(machine)" />
+            </td>
+            <td>{{ machine.machineid }}</td>
+            <td>{{ machine.uid }}</td>
+            <td>{{ machine.installedStatus }}</td>
+            <td>
+              <select class="form-select" [(ngModel)]="machine.selectedUpdatedVersion">
+                <option *ngFor="let version of machine.updatedVersion" [value]="version">
+                  {{ version }}
+                </option>
+              </select>
+            </td>
+            <td> <!--  <td *ngIf="row.isNew"></td> -->
+              <button class="btn btn-danger btn-sm" (click)="deleteRow(i)">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    
+      <!-- Save Button -->
+      <button class="btn btn-success" (click)="saveSelected()" [disabled]="selectedMachines.length === 0">
+        💾 Save Selected ({{ selectedMachines.length }})
+      </button>
+    </div>
+
+
+
     </div>
   </div>
 </div>
- 
-<!--
-<div *ngIf="activeTab === 'machineInstalled'">
-  <div class="form-group">
-    <label for="machineInstalled">Select Machine:</label>
-    <select id="machineInstalled" [(ngModel)]="selectedMachineInstalledId">
-      <option *ngFor="let machine of machineIds" [value]="machine">{{ machine }}</option>
-    </select>
-  </div>
- 
-  <div class="form-group">
-    <label for="installedStatus">Installed:</label>
-    <select id="installedStatus" [(ngModel)]="installedStatus">
-      <option value="1">Yes</option>
-      <option value="0">No</option>
-    </select>
-  </div>
- 
-  <div class="form-group">
-    <label for="uid">UID:</label>
-    <input type="text" id="uid" [(ngModel)]="uid" />
-  </div>
- 
-  <button (click)="onSubmitMachineInstalled()">Submit</button>
- 
-  <div *ngIf="notificationMessage" [ngClass]="{'success': notificationType === 'success', 'error': notificationType === 'error'}">
-    {{ notificationMessage }}
-  </div>
-</div>
- 
-  -->
- 
+
+
+
+
+
   <div *ngIf="activeTab === 'machineInstalled'">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
@@ -744,24 +735,24 @@
         </div>
  
       <!-- Installed Dropdown & UID Input in Same Row -->
-<div class="row">
-  <!-- Installed Dropdown -->
-  <div class="col-md-6 mb-3">
-    <label class="form-label">Installed</label>
-    <select class="form-select" [(ngModel)]="installedStatus">
-      <option value="1">Yes</option>
-      <option value="0">No</option>
-    </select>
-  </div>
- 
-  <!-- UID Input -->
-  <div class="col-md-6 mb-3">
-    <label class="form-label">UID</label>
-    <input type="text" class="form-control" [(ngModel)]="uid" />
-  </div>
-</div>
- 
- 
+      <div class="row">
+        <!-- Installed Dropdown -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Installed</label>
+          <select class="form-select" [(ngModel)]="installedStatus">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+
+        <!-- UID Input -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">UID</label>
+          <input type="text" class="form-control" [(ngModel)]="uid" />
+        </div>
+      </div>
+
+  
        <!-- Submit & Clear Buttons Centered -->
 <div class="d-flex justify-content-center gap-2 mt-3">
   <button class="btn btn-primary px-4 custom-btn" (click)="onSubmitMachineInstalled()">Submit</button>

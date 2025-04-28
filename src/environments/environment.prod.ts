@@ -32,19 +32,23 @@ export const environment = {
   // url1:"http://vmdemo.hfsgroup.in:8080/hfs_vm/merchantPortal",
   // urld:"http://vmdemo.hfsgroup.in:8080/hfs_vm/incinerator",
 
+// PROD
 
-  url:  "http://vmdemo.hfsgroup.in:8080/hfs_vm/tab",
+   url:  "http://vmdemo.hfsgroup.in:8080/hfs_vm/tab",
  
-  urlc: "http://vmdemo.hfsgroup.in:8080/hfs_vm/customer",
-  urla: "http://vmdemo.hfsgroup.in:8080/hfs_vm/consumer",
-  url1:"http://vmprod.hfsgroup.in:8080/hfs_napkinIncinerator/portal",
-  urld:"http://vmdemo.hfsgroup.in:8080/hfs_vm/incinerator"
+   urlc: "http://vmdemo.hfsgroup.in:8080/hfs_vm/customer",
+   urla: "http://vmdemo.hfsgroup.in:8080/hfs_vm/consumer",
+  
+   url1:"http://vmprod.hfsgroup.in:8080/hfs_napkinIncinerator/portal",
+   urld:"http://vmdemo.hfsgroup.in:8080/hfs_vm/incinerator"
 
-  // url:  "http://vmuat.hfsgroup.in:8080/hfs_vm/tab",
- 
-  // urlc: "http://vmuat.hfsgroup.in:8080/hfs_vm/customer",
-  // urla: "http://vmuat.hfsgroup.in:8080/hfs_vm/consumer",
-  // url1:"http://vmuat.hfsgroup.in:8080/hfs_napkinIncinerator/portal",
-  // urld:"http://vmuat.hfsgroup.in:8080/hfs_vm/incinerator"
+  //UAT
+  //  url:  "http://vmuat.hfsgroup.in:8080/hfs_vm/tab",
+  //  urlc: "http://vmuat.hfsgroup.in:8080/hfs_vm/customer",
+  //  urla: "http://vmuat.hfsgroup.in:8080/hfs_vm/consumer",
+  //  url1:"http://vmuat.hfsgroup.in:8080/hfs_napkinIncinerator/portal",
+  //  urld:"http://vmuat.hfsgroup.in:8080/hfs_vm/incinerator"
+
+   
 
 };
