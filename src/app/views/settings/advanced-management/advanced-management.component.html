@@ -13,6 +13,7 @@
       <div *ngIf="activeTab === 'pricing'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
     </li>
    
+   
     <li class="nav-item" role="presentation">
       <button
         class="nav-link"
@@ -24,6 +25,38 @@
       <!-- Blue underline only for active tab -->
       <div *ngIf="activeTab === 'incineration'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
     </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'pricing1'"
+        (click)="onTabChange('pricing1')"
+        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
+        Fota
+      </button>
+      <!-- Blue underline only for active tab -->
+      <div *ngIf="activeTab === 'pricing1'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'machineInstalled'"
+        (click)="onTabChange('machineInstalled')"
+        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
+        Machine Installed
+      </button>
+      <div *ngIf="activeTab === 'machineInstalled'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
+    </li>
+    <!-- <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'fotaa'"
+        (click)="onTabChange('fotaa')"
+        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
+        FOTA
+      </button>
+      <div *ngIf="activeTab === 'fotaa'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
+    </li> -->
+   
     <li class="nav-item" role="presentation">
       <button
         class="nav-link"
@@ -462,8 +495,7 @@
       </td>
     </tr>
    
- 
-<!-- Heater A Min Temp -->
+
 <tr>
   <td><strong>Heater A Minimum Temperature</strong></td>
   <td class="text-center">{{ currentValues.heaterAMinTemp }}</td>

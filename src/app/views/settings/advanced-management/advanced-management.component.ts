@@ -998,10 +998,18 @@ uid: string = '';
     updatedVersion: [],  // Will come from API
     selectedVersion: null
   };
+  fotaData = {
+    machineid: '',
+    imenumber: '',
+    updatedVersion: [],  // Will come from API
+    selectedVersion: null
+  };
   notification = {
     message: '',
     type: ''  // 'success' or 'error'
   };
+  notificationMessage = '';
+notificationType = '';
   notificationMessage = '';
 notificationType = '';
   // Incineration Config Values (current values and updated values)
@@ -1120,6 +1128,7 @@ cancelPopup() {
  
   ngOnInit(): void {
     // this.getFotaVersionDetails();
+    // this.getFotaVersionDetails();
     this.filteredMachineIds = this.machineIds; // Set initially
     this.merchantId = this.commonDataService.getMerchantId();
     this.machineIds = Array.isArray(this.commonDataService.userDetails?.machineId)
@@ -1173,6 +1182,7 @@ cancelPopup() {
   }
  
 onMachineChange(): void {
+  // this.getFotaVersionDetails();
   // this.getFotaVersionDetails();
   // Reset the current values before fetching new data
   this.resetData();
@@ -1873,6 +1883,7 @@ submitUpdatedConfig(): void {
     this.updatedIncinerationValues = { scheduler: '', limitSwitch: '', napkinCost: '', setHeaterTempA: '', setHeaterTempB: '', heaterAMinTemp: '', heaterBOnTemp: '' };
   }
   onTabChange(tab: string): void {
+    debugger
     debugger
     this.activeTab = tab;
     this.selectedMachineId = '';
