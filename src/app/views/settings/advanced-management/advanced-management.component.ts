@@ -10,6 +10,10 @@ import { CommonDataService } from '../../../Common/common-data.service';
 })
 
 export class AdvancedManagementComponent implements OnInit {
+
+  fotaMachines: any[] = []; // Table data
+  selectedMachines: any[] = []; // Selected rows
+
   fotaTable: any[] = [];
   fotaRows: any[] = [];
 selectedFotaRows: Set<string> = new Set(); // store selected machineids
@@ -181,7 +185,7 @@ cancelPopup() {
 }
 
   ngOnInit(): void {
-    // this.getFotaVersionDetails();
+     this.getFotaVersionDetails("VIKN250324");
     this.filteredMachineIds = this.machineIds; // Set initially
     this.merchantId = this.commonDataService.getMerchantId();
     this.machineIds = Array.isArray(this.commonDataService.userDetails?.machineId)
@@ -349,51 +353,125 @@ onMachineChange(): void {
    
   );
   
-    this.dataService.getFotaVersionDetails(this.merchantId, this.selectedMachineId).subscribe(
-      (res: any) => {
-        console.log('📥 FOTA Version Response:', res);
+    // this.dataService.getFotaVersionDetails(this.merchantId, this.selectedMachineId).subscribe(
+    //   (res: any) => {
+    //     console.log('📥 FOTA Version Response:', res);
   
-        if (res.code !== 200 || res.error) {
-          const msg = res.phrase || res.error || 'FOTA version fetch error.';
-          this.showNotification(`⚠️ ${msg}`, 'error');
-          return;
-        }
+    //     if (res.code !== 200 || res.error) {
+    //       const msg = res.phrase || res.error || 'FOTA version fetch error.';
+    //       this.showNotification(`⚠️ ${msg}`, 'error');
+    //       return;
+    //     }
   
-        const fotaData = res.data;
+    //     const fotaData = res.data;
   
-        if (fotaData) {
-          this.selectedMachineId = fotaData.machineid || '';
-          this.installedStatus = fotaData.currentVersion || 'Not Installed';
-          this.uid = fotaData.imenumber || '';
-          this.fotaRows = fotaData.updatedVersion || [];
-          this.selectedUpdatedVersion = null; // For dropdown selection
-        } else {
-          this.selectedMachineId = '';
-          this.installedStatus = 'Not Available';
-          this.uid = '';
-          this.fotaRows = [];
-        }
+    //     if (fotaData) {
+    //       this.selectedMachineId = fotaData.machineid || '';
+    //       this.installedStatus = fotaData.currentVersion || 'Not Installed';
+    //       this.uid = fotaData.imenumber || '';
+    //       this.fotaRows = fotaData.updatedVersion || [];
+    //       this.selectedUpdatedVersion = null; // For dropdown selection
+    //     } else {
+    //       this.selectedMachineId = '';
+    //       this.installedStatus = 'Not Available';
+    //       this.uid = '';
+    //       this.fotaRows = [];
+    //     }
   
-        this.changeDetectorRef.detectChanges();
-      },
-      error => {
-        console.error("❌ FOTA Config HTTP Error:", error);
+    //     this.changeDetectorRef.detectChanges();
+    //   },
+    //   error => {
+    //     console.error("❌ FOTA Config HTTP Error:", error);
   
-        if (error.code === 404) {
-          this.showNotification("⚠️ No FOTA info found for the machine.", "error");
-        } else if (error.code === 0) {
-          this.showNotification("🔌 Network error. Please check your connection.", "error");
-        } else {
-          this.showNotification(`❌ Error ${error.status}: ${error.error?.message || 'Unknown error occurred'}`, "error");
-        }
-      }
-    );
+    //     if (error.code === 404) {
+    //       this.showNotification("⚠️ No FOTA info found for the machine.", "error");
+    //     } else if (error.code === 0) {
+    //       this.showNotification("🔌 Network error. Please check your connection.", "error");
+    //     } else {
+    //       this.showNotification(`❌ Error ${error.status}: ${error.error?.message || 'Unknown error occurred'}`, "error");
+    //     }
+    //   }
+    // );
   
   
 
   
   
 }
+
+getFotaVersionDetails(machineId: string) {
+  this.dataService.getFotaVersionDetails('VIKN250324', 'RZ1004').subscribe(
+    (res: any) => {
+      console.log('📥 FOTA Version Response:', res);
+
+      if (res.code !== 200 || res.error) {
+        const msg = res.phrase || res.error || 'FOTA version fetch error.';
+        this.showNotification(`⚠️ ${msg}`, 'error');
+        return;
+      }
+
+      const fotaData = res.data;
+
+      if (fotaData) {
+        this.fotaMachines.push({
+          machineid: fotaData.machineid || '',
+          installedStatus: fotaData.currentVersion || 'Not Installed',
+          uid: fotaData.imenumber || '',
+          updatedVersion: fotaData.updatedVersion || [],
+          selectedUpdatedVersion: null
+        });
+      }
+
+      this.changeDetectorRef.detectChanges();
+    },
+    error => {
+      console.error("❌ FOTA Config HTTP Error:", error);
+      if (error.code === 404) {
+        this.showNotification("⚠️ No FOTA info found for the machine.", "error");
+      } else if (error.code === 0) {
+        this.showNotification("🔌 Network error. Please check your connection.", "error");
+      } else {
+        this.showNotification(`❌ Error ${error.status}: ${error.error?.message || 'Unknown error occurred'}`, "error");
+      }
+    }
+  );
+}
+
+toggleSelection(machine: any) {
+  const index = this.selectedMachines.findIndex(x => x.machineid === machine.machineid);
+  if (index > -1) {
+    this.selectedMachines.splice(index, 1);
+  } else {
+    this.selectedMachines.push(machine);
+  }
+}
+
+isSelected(machine: any): boolean {
+  return this.selectedMachines.some(x => x.machineid === machine.machineid);
+}
+
+saveSelected() {
+  console.log('✅ Selected Machines to save:', this.selectedMachines);
+  // Post this.selectedMachines to your API if needed
+}
+
+addNewRow() {
+  this.fotaMachines.push({
+    machineid: '',
+    installedStatus: 'Not Installed',
+    uid: '',
+    updatedVersion: [],
+    selectedUpdatedVersion: null,
+   // isNew: true
+  });
+}
+
+deleteRow(index: number) {
+  if (index > -1) {
+    this.fotaRows.splice(index, 1);
+  }
+}
+
  
 // getFotaVersionDetails() {
 //   debugger
