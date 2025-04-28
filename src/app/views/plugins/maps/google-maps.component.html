@@ -264,6 +264,8 @@
                 </div>
               </div>
            
+
+              
            
               <div class="col-12">
                 <label class="filter-label">State:</label>
@@ -317,8 +319,65 @@
                       {{ district }}
                     </label>
                   </div>
-                                  </div>
               </div>
+              </div>
+
+<div class="col-12">
+  <label class="filter-label">Zone:</label>
+  <div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle w-100"
+            type="button"
+            (click)="toggleDropdown('zone')">
+      {{ zoneFilter.value.length ? 'Selected (' + zoneFilter.value.length + ')' : 'Select Zone' }}
+    </button>
+    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['zone']">
+      <label *ngFor="let zone of zones" class="dropdown-item">
+        <input type="checkbox"
+               [checked]="zoneFilter.value.includes(zone)"
+               (change)="toggleSelection(zoneFilter, zone)">
+        {{ zone }}
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="col-12">
+  <label class="filter-label">Ward:</label>
+  <div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle w-100"
+            type="button"
+            (click)="toggleDropdown('ward')">
+      {{ wardFilter.value.length ? 'Selected (' + wardFilter.value.length + ')' : 'Select Ward' }}
+    </button>
+    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['ward']">
+      <label *ngFor="let ward of wards" class="dropdown-item">
+        <input type="checkbox"
+               [checked]="wardFilter.value.includes(ward)"
+               (change)="toggleSelection(wardFilter, ward)">
+        {{ ward }}
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="col-12">
+  <label class="filter-label">Beat:</label>
+  <div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle w-100"
+            type="button"
+            (click)="toggleDropdown('beat')">
+      {{ beatFilter.value.length ? 'Selected (' + beatFilter.value.length + ')' : 'Select Beat' }}
+    </button>
+    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['beat']">
+      <label *ngFor="let beat of beats" class="dropdown-item">
+        <input type="checkbox"
+               [checked]="beatFilter.value.includes(beat)"
+               (change)="toggleSelection(beatFilter, beat)">
+        {{ beat }}
+      </label>
+    </div>
+  </div>
+</div>
              
               <div class="col-12">
                 <label class="filter-label">Machines:</label>
@@ -385,7 +444,7 @@
       </div>
     </div>
   </div>
-  </div>
+  </div> 
   
   
   

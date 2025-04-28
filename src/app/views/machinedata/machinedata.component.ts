@@ -75,6 +75,7 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   zones: string[] = [];
   wards: string[] = [];
   beats: string[] = [];
+  
 
   dropdownOpen: any = {};
   dashboardData: any = {};
@@ -98,6 +99,14 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   initialBeats: string[] = [];
   initialProjects: { ProjectId: number, projectname: string }[] = [];
 
+
+  projectsList: any[] = [];
+statesList: any[] = [];
+districtsList: any[] = [];
+machinesList: any[] = [];
+
+
+
   constructor(
     private dataService: DataService,
     private commonDataService: CommonDataService,
@@ -115,6 +124,17 @@ export class MachinedataComponent implements OnInit, OnDestroy {
       wards: '',
       beats: ''
     };
+
+    this.dropdownOpen = {
+      projects: false,
+      machineStatuses: false,
+      stockStatuses: false,
+      burnStatuses: false,
+      zones: false,
+      wards: false,
+      beats: false
+    };
+  
     // Subscribe to dashboard refresh
     this.refreshSubscription = this.dashboardRefreshService.refresh$.subscribe(() => {
       this.refreshDashboard();
@@ -139,32 +159,199 @@ export class MachinedataComponent implements OnInit, OnDestroy {
       // 🔄 Fetch machine IDs from updated API
   const merchantId = this.commonDataService.merchantId;
   const userId = this.commonDataService.userId;
+       console.log("merc", merchantId);
+       console.log("err", userId);
 
-  if (merchantId && userId !== null) { 
-    this.dataService.getUserDetails(merchantId, userId as number).subscribe({
+
+  debugger;
+
+  // if (merchantId && userId !== null) { 
+  //   this.dataService.getUserDetails(merchantId, userId as number).subscribe({
+  //     next: (response) => {
+  //       if (response?.code === 200 && response?.data?.machineId) {
+  //         this.beats = response.data.machineId;
+  //         this.selectedBeats = [...this.beats];  // Pre-select all machines
+
+  //         // Optional: update global userDetails with latest machineId
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error("❌ Error loading updated machine IDs:", err);
+  //     }
+  //   });
+  // } else {
+  //   console.warn("⚠️ merchantId or userId is missing, skipping machineId API fetch.");
+  // }
+
+  
+  //   // Initialize projects from user details
+  //   this.projects = this.commonDataService.userDetails?.projectName ?? [];
+  //   this.selectedProjects = this.projects.map(project => project.ProjectId);  // Pre-select all projects
+  //   console.log('Projects Array:', this.projects);
+  // }
+  if (merchantId && userId !== null) {
+    this.dataService.getUserDetailsByHierarchy(merchantId, userId as number).subscribe({
       next: (response) => {
-        if (response?.code === 200 && response?.data?.machineId) {
-          this.beats = response.data.machineId;
-          this.selectedBeats = [...this.beats];  // Pre-select all machines
-
-          // Optional: update global userDetails with latest machineId
+        debugger;
+        if (response?.code === 200 && response?.data) {
+          this.processUserDetails(response.data);
         }
       },
       error: (err) => {
-        console.error("❌ Error loading updated machine IDs:", err);
+        console.error("❌ Error loading user details:", err);
       }
     });
-  } else {
-    console.warn("⚠️ merchantId or userId is missing, skipping machineId API fetch.");
   }
+  
+}
+
+processUserDetails(userData: any) {
+  this.projectsList = userData.projects || [];
+
+  this.projects = this.projectsList.map((p: any) => ({
+    ProjectId: p.projectId,
+    projectname: p.projectName
+  }));
+
+  this.selectedProjects = [];
+  // this.zones = []; // Clear state list
+  this.wards = [];
+  this.beats = [];
+
+  console.log('✅ Projects:', this.projects);
+}
+
+filterStatesBasedOnProjects() {
+  // Clear current zones, wards and beats
+  // this.zones = [];
+  this.selectedZones = [];
+  // this.wards = [];
+  // this.selectedWards = [];
+  // this.beats = [];
+  // this.selectedBeats = [];
+
+  // Get selected projects
+  const selectedProjectsData = this.projectsList.filter((p: any) => 
+    this.selectedProjects.includes(p.projectId)
+  );
+
+  console.log('Selected Projects Data:', selectedProjectsData);
+  
+  // Extract all states from selected projects
+  let allStates: string[] = [];
+  selectedProjectsData.forEach((project: any) => {
+    if (project.states && Array.isArray(project.states)) {
+      project.states.forEach((stateObj: any) => {
+        if (stateObj.state) {
+          allStates.push(stateObj.state);
+        }
+      });
+    }
+  });
+  
+  // Remove duplicates and sort
+  this.zones = Array.from(new Set(allStates)).sort();
+  console.log('Extracted States:', allStates);
+
+  console.log('filterStatesBasedOnProjects endjbhvvcvc',this.zones)
 
   
-    // Initialize projects from user details
-    this.projects = this.commonDataService.userDetails?.projectName ?? [];
-    this.selectedProjects = this.projects.map(project => project.ProjectId);  // Pre-select all projects
-    console.log('Projects Array:', this.projects);
+  console.log('Extracted States from Selected Projects:', this.zones);
+
+    // Force change detection
+    this.changeDetectorRef.detectChanges();
+
+    console.log('filterStatesBasedOnProjects endjbhvvcvc',this.zones)
+
+
+}
+
+
+
+filterDistrictsBasedOnStates() {
+  // Save current wards selection
+  const currentSelectedWards = [...this.selectedWards];
+  
+  // // Clear wards array but not selectedWards yet
+  // this.wards = [];
+  
+  // If no zones selected, clear ward selections too
+  if (this.selectedZones.length === 0) {
+    this.selectedWards = [];
+    this.beats = [];
+    this.selectedBeats = [];
+    return;
   }
   
+  const selectedProjectsData = this.projectsList.filter((p: any) => 
+    this.selectedProjects.includes(p.projectId)
+  );
+  
+  let selectedStatesData: string[] = [];
+  selectedProjectsData.forEach((project: any) => {
+    if (project.states) {
+      project.states.forEach((state: any) => {
+        if (this.selectedZones.includes(state.state)) {
+          selectedStatesData.push(...state.districts.map((d: any) => d.district));
+        }
+      });
+    }
+  });
+
+  this.wards = Array.from(new Set(selectedStatesData)).sort();
+  
+  // Only reset selections if the new wards don't include current selections
+  this.selectedWards = currentSelectedWards.filter(ward => this.wards.includes(ward));
+  
+  // If all selections were cleared, also clear beats
+  if (this.selectedWards.length === 0) {
+    this.beats = [];
+    this.selectedBeats = [];
+  } else {
+    // Otherwise, filter beats based on current ward selections
+    this.filterMachinesBasedOnDistricts();
+  }
+  
+  console.log('✅ ✅ Districts updated:', this.wards);
+  console.log('✅ ✅ Selected districts:', this.selectedWards);
+}
+
+
+
+filterMachinesBasedOnDistricts() {
+  this.beats = [];
+  this.selectedBeats = [];
+  
+  if (this.selectedWards.length === 0 || this.selectedZones.length === 0) {
+    return; // No states or districts selected
+  }
+  
+  // Get selected projects
+  const selectedProjectsData = this.projectsList.filter((p: any) => 
+    this.selectedProjects.includes(p.projectId)
+  );
+  
+  // Extract machines from selected districts
+  let allMachines: string[] = [];
+  selectedProjectsData.forEach((project: any) => {
+    if (project.states) {
+      project.states.forEach((state: any) => {
+        if (this.selectedZones.includes(state.state)) {
+          state.districts.forEach((district: any) => {
+            if (this.selectedWards.includes(district.district)) {
+              allMachines.push(...district.machines);
+            }
+          });
+        }
+      });
+    }
+  });
+  
+  // Remove duplicates and sort
+  this.beats = Array.from(new Set(allMachines)).sort();
+  
+  console.log('Extracted Machines from Selected Districts:', this.beats);
+}
 
   startAutoRefresh(): void {
     // Refresh every 2 minutes (120,000 milliseconds)
@@ -172,24 +359,24 @@ export class MachinedataComponent implements OnInit, OnDestroy {
       console.log('🔄 Auto-refreshing machine data...');
       this.loadMachineData();
 
-          // Fetch latest machine IDs
-    const merchantId = this.commonDataService.merchantId;
-    const userId = this.commonDataService.userId;
+    //       // Fetch latest machine IDs
+    // const merchantId = this.commonDataService.merchantId;
+    // const userId = this.commonDataService.userId;
 
-    if (merchantId && userId !== null) {
-      this.dataService.getUserDetails(merchantId, userId as number).subscribe({
-        next: (response) => {
-          if (response?.code === 200 && response?.data?.machineId) {
-            this.beats = response.data.machineId;
-            this.selectedBeats = [...this.beats];
-            console.log("✅ Updated machine IDs via auto-refresh:", this.beats);
-          }
-        },
-        error: (err) => {
-          console.error("❌ Error during machineId auto-refresh:", err);
-        }
-      });
-    }
+    // if (merchantId && userId !== null) {
+    //   this.dataService.getUserDetails(merchantId, userId as number).subscribe({
+    //     next: (response) => {
+    //       if (response?.code === 200 && response?.data?.machineId) {
+    //         this.beats = response.data.machineId;
+    //         this.selectedBeats = [...this.beats];
+    //         console.log("✅✅✅ Updated machine IDs via auto-refresh:", this.beats);
+    //       }
+    //     },
+    //     error: (err) => {
+    //       console.error("❌ ✅✅Error during machineId auto-refresh:", err);
+    //     }
+    //   });
+    // }
 
     });
   }
@@ -276,7 +463,6 @@ export class MachinedataComponent implements OnInit, OnDestroy {
       this.selectedZones = [userDetails.state[0]]; // Fix state for District User
       this.selectedWards = [userDetails.district[0]]; // Assign district for District User
       // Disable the state dropdown for District User
-      this.isStateUser = false;  // Disable state selection
     }
  
     // For End User, fix state, district, and project name
@@ -357,7 +543,6 @@ export class MachinedataComponent implements OnInit, OnDestroy {
       this.isLoading = false;
       return;
     }
- 
     const queryParams: any = {
       merchantId,
       machineId: this.selectedBeats.length > 0 ? [...this.selectedBeats] : [...userDetails.machineId],
@@ -376,7 +561,6 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     }
  
     console.log('📡 Final API Call Params:', queryParams);
- 
     this.dataService
       .getMachineDashboardSummary(queryParams)
       .pipe(
@@ -389,7 +573,6 @@ export class MachinedataComponent implements OnInit, OnDestroy {
       .subscribe(
         (response: any) => {
           console.log('✅ API Response:', response);
- 
           if (response?.code === 200 && response.data) {
             this.machines = response.data.machines.map((machine: any) => ({
               ...machine,
@@ -549,7 +732,7 @@ formatText(text: string | null): string {
   // }
   toggleSelectAll(selectedArray: any[], optionsArray: any[], filterKey: string) {
     const allKeys = optionsArray.map(option => option.ProjectId || option.key || option);
-  
+    
     // If all items are selected, deselect all
     if (selectedArray.length === allKeys.length) {
       selectedArray.length = 0; // Clear selection
@@ -557,30 +740,74 @@ formatText(text: string | null): string {
       selectedArray.length = 0; // Clear current selection
       selectedArray.push(...allKeys); // Select all items
     }
-
-
-    if (filterKey === 'zones') {
-      this.filterWardsBasedOnZones(); // ✅ Update districts when zones are changed
+  
+    // Call appropriate filter function based on what changed
+    if (filterKey === 'projects') {
+      this.filterStatesBasedOnProjects(); // Update states when projects change
+    } else if (filterKey === 'zones') {  
+      this.filterWardsBasedOnZones(); // Update districts when zones change
     }
-  
-  
-    this.loadMachineData(); // Re-fetch data after change
-  }
-  toggleSelection(array: any[], value: string, filterKey: string) {
-    if (array.includes(value)) {
-      array.splice(array.indexOf(value), 1); // Remove selection
-    } else {
-      array.push(value); // Add to selection
-    }
-  
-
-    if (filterKey === 'zones') {
-      this.filterWardsBasedOnZones(); // ✅ Update districts when zones are changed
-    }
-  
+    
     this.loadMachineData(); // Re-fetch data after change
   }
   
+  
+// Modify your toggleSelection function in machinedata.component.ts
+toggleSelection(array: any[], value: string | number, filterKey: string) {
+  console.log(`Toggle selection for ${filterKey} with value:`, value);
+  console.log(`Current array before toggle:`, [...array]);
+  
+  // Prevent the code from proceeding if we're toggling zones and there's a race condition
+  if (filterKey === 'zones') {
+    // First ensure we clear the array safely
+    array.length = 0;
+    // Then push the new value
+    array.push(value);
+    
+    // Force Angular change detection
+    setTimeout(() => {
+      this.filterDistrictsBasedOnStates();
+      this.loadMachineData();
+      this.changeDetectorRef.detectChanges();
+    }, 0);
+    return;
+  }
+  
+  // Handle normal cases for other filter types
+  const index = array.indexOf(value);
+  if (index !== -1) {
+    array.splice(index, 1); // Remove selection
+  } else {
+    array.push(value); // Add to selection
+  }
+  
+  // Call appropriate filter function based on what changed
+  if (filterKey === 'projects') {
+    console.log('Calling filterStatesBasedOnProjects after project selection change');
+    this.filterStatesBasedOnProjects(); 
+  } else if (filterKey === 'zones') {
+    console.log('Calling filterDistrictsBasedOnStates after zone selection change');  
+    this.filterDistrictsBasedOnStates(); 
+  } else if (filterKey === 'wards') {
+    console.log('Calling filterMachinesBasedOnDistricts after ward selection change');
+    this.filterMachinesBasedOnDistricts(); 
+  }
+
+  console.log(`After selection toggle: ${filterKey} has ${array.length} selected items`);
+
+  console.log('toggleselection hjfbwvfjv V',this.zones)
+  console.log('toggleselection WARDS N D CB VBD V ',this.wards)
+
+
+  
+  // Add a slight delay before reloading data
+  setTimeout(() => {
+    this.loadMachineData();
+    this.changeDetectorRef.detectChanges();
+  }, 0);
+}
+
+
   updateFilters() {
     if (this.initialZones.length === 0) {
       // Store all unique values from the API response for filters
@@ -589,13 +816,18 @@ formatText(text: string | null): string {
       this.initialBeats = Array.from(new Set(this.machines.map(m => m.machineId).filter(Boolean))).sort();
       this.initialProjects = this.commonDataService.userDetails?.projectName ?? [];
     }
+    //  console.log('vcdgvgvsgvchvdvchdvc BEFORE ',this.zones)
+    // this.zones = [...this.initialZones].sort();
+    // console.log('vcdgvgvsgvchvdvchdvc-AFTER',this.zones)
+
+    // // Update wards based on selected zones (key feature you want to add)
+    // this.filterWardsBasedOnZones();
+    // this.beats = [...this.initialBeats].sort();
+    // this.projects = [...this.initialProjects].sort((a, b) => a.projectname.localeCompare(b.projectname));
  
-    this.zones = [...this.initialZones].sort();
-    // Update wards based on selected zones (key feature you want to add)
-    this.filterWardsBasedOnZones();
-    this.beats = [...this.initialBeats].sort();
-    this.projects = [...this.initialProjects].sort((a, b) => a.projectname.localeCompare(b.projectname));
- 
+
+    console.log('✅ Filters Updated: in the update filters ', this.zones,);
+
     console.log('✅ Filters Updated:', {
       zones: this.zones,
       wards: this.wards,
@@ -604,80 +836,130 @@ formatText(text: string | null): string {
     });
   }
  
-  // Key method for filtering districts based on selected states
   filterWardsBasedOnZones() {
+    this.wards = [];
+    this.selectedWards = [];
+    this.beats = [];
+    this.selectedBeats = [];
+    
     if (this.selectedZones.length === 0) {
-      // If no zones selected, show all wards
-      this.wards = [...this.initialWards];
-    } else {
-      // Filter wards based on selected zones
-      this.wards = Array.from(
-        new Set(
-          this.machines
-            .filter(machine => this.selectedZones.includes(machine.level1))
-            .map(machine => machine.level2)
-            .filter(Boolean)
-        )
-      ).sort();
+      return; // No zones selected, no districts to show
     }
- 
-    // Reset selected wards if they are not in the new filtered list
-    this.selectedWards = this.selectedWards.filter(ward => this.wards.includes(ward));
-   
-    console.log('🔍 Filtered Wards Based on Zones:', {
-      selectedZones: this.selectedZones,
-      filteredWards: this.wards,
-      selectedWards: this.selectedWards
-    });
-  }
- 
-  toggleDropdown(filterType: string) {
-    // If there is only one value, do not show dropdown
-    if ((filterType === 'zones' && this.zones.length === 1) ||
-        (filterType === 'wards' && this.wards.length === 1) ||
-        (filterType === 'beats' && this.beats.length === 1) ||
-        (filterType === 'projects' && this.projects.length === 1)) {
-      return;
-    }
- 
-    // Prevent dropdown toggle for 'zones' if the user is a District User
-    if (filterType === 'zones' && this.isDistrictUser) {
-      return;
-    }
-   
-    // Remove any potentially problematic elements (from second code)
-    document.querySelector('.fs-2.fw-semibold')?.remove();
- 
-    // Normal dropdown toggle
-    Object.keys(this.dropdownOpen).forEach(key => {
-      if (key !== filterType) {
-        this.dropdownOpen[key] = false;
-        this.searchText[key] = ''; // ✅ Already correct
-
+    
+    // Get selected projects
+    const selectedProjectsData = this.projectsList.filter((p: any) => 
+      this.selectedProjects.includes(p.projectId)
+    );
+    
+    // Extract districts from selected states
+    let allDistricts: string[] = [];
+    selectedProjectsData.forEach((project: any) => {
+      if (project.states) {
+        project.states.forEach((state: any) => {
+          if (this.selectedZones.includes(state.state)) {
+            state.districts.forEach((district: any) => {
+              allDistricts.push(district.district);
+            });
+          }
+        });
       }
     });
- 
-    this.dropdownOpen[filterType] = !this.dropdownOpen[filterType];
+    
+    // Remove duplicates and sort
+    this.wards = Array.from(new Set(allDistricts)).sort();
+    
+    console.log('Extracted Districts from Selected States:', this.wards);
+  } 
+//   toggleDropdown(filterType: string) {
+//     // If there is only one value, do not show dropdown
+//     if ((filterType === 'zones' && this.zones.length === 1) ||
+//         (filterType === 'wards' && this.wards.length === 1) ||
+//         (filterType === 'beats' && this.beats.length === 1) ||
+//         (filterType === 'projects' && this.projects.length === 1)) {
+//           console.log(`Only one ${filterType} available, but still allowing dropdown toggle`);
 
-    if (!this.dropdownOpen[filterType]) {
-      this.searchText[filterType] = ''; // Clear search text when closing
-    }
+//     }
+ 
+//   // Only prevent dropdown toggle for 'zones' if the user is actually a District User
+//   // based on their role from userDetails, not based on selection
+//   if (filterType === 'zones' && this.isDistrictUser ) {
+//       return;
+// }
+ 
+//     // Remove any potentially problematic elements (from second code)
+//     document.querySelector('.fs-2.fw-semibold')?.remove();
+ 
+//     // Normal dropdown toggle
+//     Object.keys(this.dropdownOpen).forEach(key => {
+//       if (key !== filterType) {
+//         this.dropdownOpen[key] = false;
+//         this.searchText[key] = ''; // ✅ Already correct
+
+//       }
+//     });
+ 
+//     this.dropdownOpen[filterType] = !this.dropdownOpen[filterType];
+
+//     if (!this.dropdownOpen[filterType]) {
+//       this.searchText[filterType] = ''; // Clear search text when closing
+//     }
     
     
  
-    // Auto-close dropdown after 15 seconds
-    if (this.dropdownOpen[filterType]) {
-      setTimeout(() => {
-        if (this.dropdownOpen[filterType]) {
-          this.dropdownOpen[filterType] = false;
-          this.searchText[filterType] = ''; // ✅ Clear search on auto-close
+//     // Auto-close dropdown after 15 seconds
+//     if (this.dropdownOpen[filterType]) {
+//       setTimeout(() => {
+//         if (this.dropdownOpen[filterType]) {
+//           this.dropdownOpen[filterType] = false;
+//           this.searchText[filterType] = ''; // ✅ Clear search on auto-close
 
-          console.log(`⏳ Auto-closed dropdown: ${filterType} after 15 sec`);
-        }
-      }, 15000);
+//           console.log(`⏳ Auto-closed dropdown: ${filterType} after 15 sec`);
+//         }
+//       }, 25000);
+//     }
+//   }
+
+
+
+toggleDropdown(filterType: string) {
+  // Close other dropdowns without affecting selections
+  Object.keys(this.dropdownOpen).forEach(key => {
+    if (key !== filterType) {
+      this.dropdownOpen[key] = false;
+      this.searchText[key] = '';
     }
+  });
+  
+  // Toggle the dropdown
+  this.dropdownOpen[filterType] = !this.dropdownOpen[filterType];
+  
+  if (this.dropdownOpen[filterType]) {
+    // If opening the zones dropdown, refresh the zones list without resetting selections
+    if (filterType === 'zones' && this.selectedProjects.length > 0) {
+      console.log('Refreshing zones list for dropdown open');
+      // Don't reset existing zone selections
+      const currentSelectedZones = [...this.selectedZones];
+      this.filterStatesBasedOnProjects();
+      
+      // Restore any valid selections
+      this.selectedZones = currentSelectedZones.filter(zone => this.zones.includes(zone));
+      this.changeDetectorRef.detectChanges();
+    }
+    
+    // Auto-close dropdown after 25 seconds
+    setTimeout(() => {
+      if (this.dropdownOpen[filterType]) {
+        this.dropdownOpen[filterType] = false;
+        this.searchText[filterType] = '';
+        console.log(`Auto-closed dropdown: ${filterType} after 25 sec`);
+      }
+    }, 25000);
+  } else {
+    this.searchText[filterType] = ''; // Clear search text when closing
   }
- 
+}
+
+
   handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
  

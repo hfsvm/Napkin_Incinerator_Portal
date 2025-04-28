@@ -223,15 +223,21 @@ placeholder="Search ..."
 ]">
 <label>{{ filter.name }}</label>
 
-<div *ngIf="filter.options.length === 1; else dropdownTemplate">
+<!-- <div *ngIf="filter.options.length === 1; else dropdownTemplate"> -->
+
+  <ng-container *ngTemplateOutlet="dropdownTemplate">
+
 <button class="btn btn-light w-100 single-value-btn" disabled>
   {{ filter.options[0].projectname || filter.options[0].value || filter.options[0] }}
-</button>
-</div>
+</button></ng-container>
+<!-- </div> -->
 
 <ng-template #dropdownTemplate>
 <div class="dropdown">
-  <button class="btn btn-light dropdown-toggle w-100" type="button" (click)="toggleDropdown(filter.key)">
+  <button class="btn btn-light dropdown-toggle w-100" type="button" 
+  (click)="toggleDropdown(filter.key)"
+  [disabled]="(filter.key === 'zones' && isDistrictUser)"
+  >
     {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : filter.name }}
   </button>
   <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]" [id]="'dropdown-' + filter.key">

@@ -1,3 +1,5 @@
+
+
  
 // import { Injectable } from '@angular/core';
 // import { Observable, throwError } from 'rxjs';
@@ -56,14 +58,24 @@
 // }
  
  
-//   /** 🔹 Extract only Machine IDs from the getMachines method **/
+//   // /** 🔹 Extract only Machine IDs from the getMachines method **/
+//   // getMachineIds(merchantId: string, fromNo: number = 0, count: number = 50): Observable<string[]> {
+//   //   return this.getMachines(merchantId, fromNo, count).pipe(
+//   //     map((response: { rowMachines: { machines: any[] }[] }) =>
+//   //       response.rowMachines[0].machines.map((m: any) => m.machineId)
+//   //     )
+//   //   );
+//   // }
+
 //   getMachineIds(merchantId: string, fromNo: number = 0, count: number = 50): Observable<string[]> {
 //     return this.getMachines(merchantId, fromNo, count).pipe(
-//       map((response: { rowMachines: { machines: any[] }[] }) =>
-//         response.rowMachines[0].machines.map((m: any) => m.machineId)
-//       )
+//       map((response: { rowMachines: { machines: any[] }[] }) => {
+//         const machinesArray = response?.rowMachines?.[0]?.machines || [];
+//         return machinesArray.map((m: any) => m.machineId);
+//       })
 //     );
 //   }
+  
  
 //   /** 🔹 Extract only machine locations from the getMachines method **/
 //   getMachineLocations(merchantId: string, fromNo: number = 0, count: number = 50): Observable<any[]> {
@@ -170,7 +182,6 @@
 //     level4: string[] = []
 //   ): Observable<any> {
 //     let params = new HttpParams();
- 
 //     // Ensure the order of parameters matches the API expectation
 //     params = params.set('endDate', `${endDate} 23:59:00`);
 //     level1.forEach(lvl => params = params.append('level1', lvl));
@@ -326,16 +337,57 @@
 //         catchError(this.handleError)  // ✅ Handle errors
 //       );
 //     }
-   
+ 
+// getAdvancedConfig(merchantId: string, machineId: string): Observable<any> {
+//   const url = `${this.url1}/getAdvancedConfig/${merchantId}/${machineId}`;
+//   return this.http.get(url, this.httpOptions).pipe(
+//     retry(1),
+//     tap(res => console.log('📥 Advanced Config Response:', res)),
+//     catchError(this.handleError)
+//   );
+// }
+ 
+// // POST
+// getMachinesByProject(projectId: number): Observable<any> {
+//   return this.http.post(`${this.url1}/getMachinesByProject`, { projectId });
+// }
+ 
+ 
 //     advnaceconfig2(advnaceconfig: any): Observable<any> {
 //       const url = `${this.url1}/sendQRBusinessconfig`;  // ✅ Updated API endpoint with flag
    
 //       return this.http.post(url, advnaceconfig, this.httpOptions).pipe(
 //         retry(1),  // ✅ Retry once on failure
-//         tap(response => console.log('🔹 advance Config Response:', response)),
+//         tap(response => console.log('🔹 advance Config Response for qr:', response)),
 //         catchError(this.handleError)  // ✅ Handle errors
 //       );
 //     }
+//     // businessQr(payload: any): Observable<any> {
+//     //   const url = `${this.url1}/sendQRBusinessconfig`;
+//     //   return this.http.post(url, payload, this.httpOptions).pipe(
+//     //     retry(1),
+//     //     tap(response => console.log('🔹 advance Config Response:', response)),
+//     //     catchError(this.handleError)
+//     //   );
+//     // }
+//     // businessQr(payload: any, flag: number): Observable<any> {
+//     //   const url = `${this.url1}/sendQRBusinessconfig/${flag}`;
+//     //   return this.http.post(url, payload, this.httpOptions).pipe(
+//     //     retry(1),
+//     //     tap(response => console.log('🔹 advance Config Response:', response)),
+//     //     catchError(this.handleError)
+//     //   );
+//     // }
+   
+//     businessQr(payload: any, flag: number = 0): Observable<any> {
+//       const url = `${this.url1}/sendQRBusinessconfig/${flag}`;
+//       return this.http.post(url, payload, this.httpOptions).pipe(
+//         retry(1),
+//         tap(response => console.log('🔹 advance Config Response for qr:', response)),
+//         catchError(this.handleError)
+//       );
+//     }
+   
 //     // businessConfig(businessConfig: any): Observable<any> {
 //     //   const url = `${this.url1}/businessconfig`;  // ✅ API endpoint
    
@@ -345,15 +397,7 @@
 //     //     catchError(this.handleError)  // ✅ Handle errors
 //     //   );
 //     // }// no flag in this
-//     businessConfig(businessConfig: any, flag: string): Observable<any> {
-//       const url = `${this.url1}/saveBusinessconfig/${flag}`;  // ✅ Updated API endpoint with flag
-   
-//       return this.http.post(url, businessConfig, this.httpOptions).pipe(
-//         retry(1),  // ✅ Retry once on failure
-//         tap(response => console.log('🔹 Business Config Response:', response)),
-//         catchError(this.handleError)  // ✅ Handle errors
-//       );
-//     }
+ 
    
 //     // techconfig(techconfig: any): Observable<any> {
 //     //   const url = `${this.url1}/techconfig`;  // ✅ API endpoint
@@ -373,6 +417,30 @@
 //     //     catchError(this.handleError)  // ✅ Handle errors
 //     //   );
 //     // }
+ 
+ 
+//     businessConfig(businessConfig: any, flag: string): Observable<any> {
+//       const url = `${this.url1}/saveBusinessconfig/${flag}`;  // ✅ Updated API endpoint with flag
+   
+//       return this.http.post(url, businessConfig, this.httpOptions).pipe(
+//         retry(1),  // ✅ Retry once on failure
+//         tap(response => console.log('🔹 Business Config Response:', response)),
+//         catchError(this.handleError)  // ✅ Handle errors
+//       );
+//     }
+ 
+   
+   
+//     getBusinessConfig(merchantId: string, machineId: string): Observable<any> {
+//       const url = `${this.url1}/getBusinessConfig/${merchantId}/${machineId}`;
+//       console.log("📡 API CALL:", url);
+   
+//       return this.http.get(url, this.httpOptions).pipe(
+//         retry(1),  // Retry once in case of failure
+//         tap(response => console.log('🔹 Business Config Response:', response)),
+//         catchError(this.handleError)  // Handle any errors
+//       );
+//     }
 //     techconfig(techconfig: any, flag: string): Observable<any> {
 //       const url = `${this.url1}/saveTechconfig/${flag}`;
      
@@ -386,19 +454,6 @@
 //         catchError(this.handleError)
 //       );
 //     }
-   
-   
-//     getBusinessConfig(merchantId: string, machineId: string): Observable<any> {
-//       const url = `${this.url1}/getBusinessConfig/${merchantId}/${machineId}`;
-//       console.log("📡 API CALL:", url);
-   
-//       return this.http.get(url, this.httpOptions).pipe(
-//         retry(1),  // Retry once in case of failure
-//         tap(response => console.log('🔹 Business Config Response:', response)),
-//         catchError(this.handleError)  // Handle any errors
-//       );
-//     }
-   
 //     getTechConfig(merchantId: string, machineId: string, field: string): Observable<any> {
 //       const url = `${this.url1}/getTechconfig/${merchantId}/${machineId}/${field}`;
 //       console.log("📡 API CALL:", url);
@@ -418,6 +473,30 @@
 //       catchError(this.handleError)
 //     );
 //   }
+//   // getMachinesByClient(merchantId: string, clientId: number): Observable<any> {
+//   //   return this.http.get<any>(`${this.url1}/getMachinesByClient/${merchantId}/${clientId}`);
+//   // }
+//   getMachinesByClient(merchantId: string, clientId: number): Observable<any> {
+//     const url = `${this.url1}/getMachinesByClient/${merchantId}/${clientId}`;
+//     console.log("📡 API CALL:", url);
+ 
+//     return this.http.get(url, this.httpOptions).pipe(
+//       retry(1),
+//       tap(response => console.log('🔹 client', response)),
+//       catchError(this.handleError)
+//     );
+//   }
+//   getItemsByMerchant(merchantId: string): Observable<any> {
+//     const url = `${this.url1}/getItemDetails/${merchantId}`;
+//     console.log("📡 API CALL:", url);
+ 
+//     return this.http.get(url, this.httpOptions).pipe(
+//       retry(1),
+//       tap(response => console.log('🔹 client', response)),
+//       catchError(this.handleError)
+//     );
+//   }
+ 
 //  /** 🔹 Login API */
 //  login(email: string, password: string, merchantId: string,captcha:string): Observable<any> {
 //   const url = `${this.url1}/login`;
@@ -693,7 +772,7 @@
 
 
 
-
+ 
  
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
@@ -760,7 +839,7 @@ export class DataService {
   //     )
   //   );
   // }
-
+ 
   getMachineIds(merchantId: string, fromNo: number = 0, count: number = 50): Observable<string[]> {
     return this.getMachines(merchantId, fromNo, count).pipe(
       map((response: { rowMachines: { machines: any[] }[] }) => {
@@ -769,7 +848,7 @@ export class DataService {
       })
     );
   }
-  
+ 
  
   /** 🔹 Extract only machine locations from the getMachines method **/
   getMachineLocations(merchantId: string, fromNo: number = 0, count: number = 50): Observable<any[]> {
@@ -1159,6 +1238,36 @@ getMachinesByProject(projectId: number): Observable<any> {
       );
     }
    
+    getFotaVersionDetails(merchantId: string, machineId: string): Observable<any> {
+      debugger
+      const url = `${this.url1}/getFotaVersionDetails/${merchantId}/${machineId}`;
+      console.log("📡 API CALL for fota:", url);
+   
+      return this.http.get(url, this.httpOptions).pipe(
+        retry(1),  // Retry once in case of failure
+        tap(response => console.log('🔹  fota Response:', response)),
+        catchError(this.handleError)  // Handle any errors
+      );
+    }
+   
+    savefota(fota: any): Observable<any> {
+      const url = `${this.url1}/saveFotaVersionDetails`;  // ✅ Updated API endpoint with flag
+   
+      return this.http.post(url, fota, this.httpOptions).pipe(
+        retry(1),  // ✅ Retry once on failure
+        tap(response => console.log('🔹 fota save Response:', response)),
+        catchError(this.handleError)  // ✅ Handle errors
+      );
+    }
+    machineOnboarding(machineOnboarding:any): Observable<any> {
+      const url = `${this.url1}/machineOnBoarding`;  // ✅ Updated API endpoint with flag
+   
+      return this.http.post(url, machineOnboarding, this.httpOptions).pipe(
+        retry(1),  // ✅ Retry once on failure
+        tap(response => console.log('🔹 Machine Onboarding', response)),
+        catchError(this.handleError)
+      );
+    }
   getTransactions(merchantId: string): Observable<any> {
     const url = `${this.url1}/merchantTransactions/${merchantId}/100/10`;
     return this.http.get(url, this.httpOptions).pipe(
@@ -1214,6 +1323,29 @@ getMachinesByProject(projectId: number): Observable<any> {
       catchError(this.handleError)
     );
   }
+
+
+  /** 🔹 Get User Details */
+getUserDetailsByHierarchy(merchantId: string, userId: number): Observable<any> {
+  debugger;
+
+  const url = `${this.url1}/getUserDetailsByHierarchy/${merchantId}/${userId}`;
+  console.log("📡 API CALL:", url);
+  debugger;
+
+
+  return this.http.get(url, this.httpOptions).pipe(
+    retry(1),
+    tap(response => console.log('🔹 User Details Response:', response)),
+    catchError(this.handleError)
+  );
+
+}
+  // // Fetch User Details by Hierarchy
+  // getUserDetailsByHierarchy(merchantId: String, userId: number): Observable<any> {
+  //   return this.http.get<any>(`${this.url1}/portal/getUserDetailsByHierarchy/${merchantId}/${userId}`);
+  // }
+
  
   getCaptcha(): Observable<any> {
     const url = `${this.url1}/getCaptcha`;  // ✅ Updated API endpoint with flag
@@ -1255,13 +1387,21 @@ getMachineDashboardSummary1(
   level1: string = '',
   level2: string = '',
   level3: string = '',
-   level4: string = ''
+  level4: string = '',
+   zone: string = '',    // Add zone parameter
+   ward: string = '',    // Add ward parameter
+   beat: string = ''     // Add beat parameter
+ 
 ): Observable<any> {
   const params = new HttpParams()
     .set('merchantId', merchantId)
     .set('machineStatus', machineStatus)
     .set('stockStatus', stockStatus)
     .set('burnStatus', burnStatus)
+    .set('zone', zone)       // Add zone parameter
+    .set('ward', ward)       // Add ward parameter
+    .set('beat', beat)      // Add beat parameter
+
     .set('level1', level1)
     .set('level2', level2)
     .set('level3', level3)
@@ -1458,5 +1598,6 @@ getMachineDashboardSummary1(
       );
     }
 }
+ 
  
  
