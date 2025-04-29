@@ -31,7 +31,7 @@
         [class.active]="activeTab === 'pricing1'"
         (click)="onTabChange('pricing1')"
         style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
-        Fota
+        FOTA
       </button>
       <!-- Blue underline only for active tab -->
       <div *ngIf="activeTab === 'pricing1'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
@@ -46,49 +46,6 @@
       </button>
       <div *ngIf="activeTab === 'machineInstalled'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
     </li>
-    <!-- <li class="nav-item" role="presentation">
-      <button
-        class="nav-link"
-        [class.active]="activeTab === 'fotaa'"
-        (click)="onTabChange('fotaa')"
-        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
-        FOTA
-      </button>
-      <div *ngIf="activeTab === 'fotaa'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
-    </li> -->
-   
-    <li class="nav-item" role="presentation">
-      <button
-        class="nav-link"
-        [class.active]="activeTab === 'pricing1'"
-        (click)="onTabChange('pricing1')"
-        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
-        Fota
-      </button>
-      <!-- Blue underline only for active tab -->
-      <div *ngIf="activeTab === 'pricing1'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button
-        class="nav-link"
-        [class.active]="activeTab === 'machineInstalled'"
-        (click)="onTabChange('machineInstalled')"
-        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
-        Machine Installed
-      </button>
-      <div *ngIf="activeTab === 'machineInstalled'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
-    </li>
-    <!-- <li class="nav-item" role="presentation">
-      <button
-        class="nav-link"
-        [class.active]="activeTab === 'fotaa'"
-        (click)="onTabChange('fotaa')"
-        style="border: none; color: #0066cc; padding: 10px 15px; font-weight: bold; outline: none; background: none;">
-        FOTA
-      </button>
-      <div *ngIf="activeTab === 'fotaa'" style="height: 2px; background-color: #0066cc; margin-top: 5px;"></div>
-    </li> -->
-   
   </ul>
  
   <div *ngIf="notification.message" [ngClass]="notification.type" class="custom-toast">
@@ -101,22 +58,6 @@
     <!-- Card Layout for Pricing -->
     <div class="card shadow-sm mb-4">
       <div class="card-body">
-       
- 
-        <!-- Machine Selection Form -->
-        <!-- <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="merchantId" class="form-label">Merchant ID</label>
-            <input class="form-control" [value]="merchantId" readonly />
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="selectMachine" class="form-label">Select Machine</label>
-            <select class="form-select" [(ngModel)]="selectedMachineId" (change)="onMachineChange()">
-              <option value="" disabled selected>Select Machine</option>
-              <option *ngFor="let id of machineIds" [value]="id">{{ id }}</option>
-            </select>
-          </div>
-        </div> -->
         <div class="row">
           <!-- Project Dropdown -->
           <div class="col-md-6 mb-3">
@@ -584,14 +525,14 @@
      
       <!-- Machine Dropdown for Pricing Tab (Custom Dropdown with Search) -->
       <div class="col-md-6 mb-3">
-        <label for="selectMachinePricing" class="form-label"> Machine</label>
+        <label for="selectMachinePricing" class="form-label"> Machine</label> 
         <div class="position-relative">
      
           <div
             class="form-select"
             style="cursor: pointer;"
             (click)="dropdownOpenPricing = !dropdownOpenPricing">
-            {{ selectedMachineIdPricing || 'Machine Id' }}
+            {{ selectedFotaMachineId || 'Machine Id' }}
           </div>
  
           <div
@@ -610,7 +551,7 @@
        
             <div
               *ngFor="let id of machineIds | filterDropdown: machineSearchTermPricing"
-              (click)="selectMachinePricing(id)"
+              (click)="selectMachineFota(id)"
               class="px-3 py-2 dropdown-item"
               style="cursor: pointer;">
               {{ id }}
@@ -627,25 +568,30 @@
 
     <div class="container mt-4">
       <h4 class="mb-3">📋 FOTA Machine Details</h4>
-      <button class="btn btn-success" (click)="addNewRow()">➕</button>
-      <!-- Table -->
+    
       <table class="table table-bordered table-hover">
         <thead class="table-light">
           <tr>
-            <th>Select</th>
+            <th>
+              <input
+                type="checkbox"
+                [(ngModel)]="masterSelected"
+                (change)="toggleSelectAll()" />
+            </th>
             <th>Machine ID</th>
             <th>IMEI Number</th>
             <th>Current Version</th>
             <th>Updated Version</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let machine of fotaMachines">
+          <tr *ngFor="let machine of fotaMachines; let i = index">
             <td>
               <input
                 type="checkbox"
-                [checked]="isSelected(machine)"
-                (change)="toggleSelection(machine)" />
+                [(ngModel)]="machine.isSelected"
+                (change)="checkIfAllSelected()" />
             </td>
             <td>{{ machine.machineid }}</td>
             <td>{{ machine.uid }}</td>
@@ -657,26 +603,27 @@
                 </option>
               </select>
             </td>
-            <td> <!--  <td *ngIf="row.isNew"></td> -->
-              <button class="btn btn-danger btn-sm" (click)="deleteRow(i)">🗑️</button>
+            
+            <td class="d-flex align-items-center justify-content-center">
+              <button class="btn btn-danger btn-sm d-flex align-items-center justify-content-center p-1"
+                      style="width: 35px; height: 35px; "
+                      (click)="deleteRow(machine)">
+                🗑️
+              </button>
             </td>
+            
           </tr>
         </tbody>
       </table>
     
       <!-- Save Button -->
-      <button class="btn btn-success" (click)="saveSelected()" [disabled]="selectedMachines.length === 0">
-        💾 Save Selected ({{ selectedMachines.length }})
+      <button class="btn btn-success" (click)="submitFotaConfig()" [disabled]="selectedMachines.length === 0">
+        💾 Submit
       </button>
     </div>
-
-
-
     </div>
   </div>
 </div>
-
-
 
 
 
