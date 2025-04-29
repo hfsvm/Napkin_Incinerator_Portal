@@ -228,7 +228,7 @@ filterStatesBasedOnProjects() {
   // this.wards = [];
   // this.selectedWards = [];
   // this.beats = [];
-  // this.selectedBeats = [];
+  this.selectedBeats = [];
 
   // Get selected projects
   const selectedProjectsData = this.projectsList.filter((p: any) => 

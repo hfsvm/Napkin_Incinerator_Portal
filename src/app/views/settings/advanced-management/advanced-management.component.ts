@@ -1002,18 +1002,10 @@ uid: string = '';
     updatedVersion: [],  // Will come from API
     selectedVersion: null
   };
-  fotaData = {
-    machineid: '',
-    imenumber: '',
-    updatedVersion: [],  // Will come from API
-    selectedVersion: null
-  };
   notification = {
     message: '',
     type: ''  // 'success' or 'error'
   };
-  notificationMessage = '';
-notificationType = '';
   notificationMessage = '';
 notificationType = '';
   // Incineration Config Values (current values and updated values)
