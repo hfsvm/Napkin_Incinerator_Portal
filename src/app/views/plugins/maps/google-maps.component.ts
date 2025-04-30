@@ -107,7 +107,8 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     hierarchicalData: HierarchyResponse | null = null;
     userId: number = 0;
 
-
+    clientId!: number;
+    projectId!: number;
   
 
 
@@ -266,7 +267,19 @@ refreshCountdown = 0;
           console.log('✅✅✅✅✅✅Hierarchy API Response:', response);
 
           this.hierarchicalData = response.data;
-          this.processHierarchicalData();
+
+
+          this.clientId = response.data.clientId;
+          this.projectId = response.data.projects?.[0]?.projectId;
+          console.log('📌 Extracted projectId:', this.projectId);
+
+
+
+      // 🛠 Ensure both values are not accidentally set the same unless it's valid
+      console.log('📌 Extracted clientId:', this.clientId);
+
+
+      this.processHierarchicalData();
           this.loadMachineData(); // Load machine data after hierarchy is processed
           debugger;
         } else {
@@ -613,6 +626,10 @@ loadMachineData(): void {
     zone: this.zoneFilter.value?.length ? this.zoneFilter.value : [],
     ward: this.wardFilter.value?.length ? this.wardFilter.value : [],
     beat: this.beatFilter.value?.length ? this.beatFilter.value : [],
+
+    client: this.clientId,
+    project: this.projectId
+  
   };
  
   console.log('📡 API Call Params:', queryParams);

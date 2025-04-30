@@ -7,6 +7,37 @@ import { Subscription, interval } from 'rxjs';  // Import interval and Subscript
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
+interface Beat {
+  beat: string;
+  machines: string[];
+}
+
+interface Ward {
+  ward: string;
+  beats: Beat[];
+}
+
+interface Zone {
+  zone: string;
+  wards: Ward[];
+}
+
+interface District {
+  district: string;
+  zones: Zone[];
+}
+
+interface State {
+  state: string;
+  districts: District[];
+}
+
+interface Project {
+  projectName: string;
+  states: State[];
+}
+
+
 @Component({
   selector: 'app-machinedata',
   templateUrl: './machinedata.component.html',
@@ -29,8 +60,7 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   private countdownInterval!: any;
   refreshCountdown = 0;
   // Projects (from second code)
-  projects: { ProjectId: number, projectname: string }[] = [];
-  selectedProjects: number[] = [];
+  // projects: { ProjectId: number, projectname: string }[] = [];
 
   // Pagination (from second code)
   currentPage: number = 1;
@@ -68,16 +98,33 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   selectedMachineStatuses: string[] = ['1', '2'];
   selectedStockStatuses: string[] = [];
   selectedBurnStatuses: string[] = [];
-  selectedZones: string[] = [];
-  selectedWards: string[] = [];
-  selectedBeats: string[] = [];
 
-  zones: string[] = [];
-  wards: string[] = [];
-  beats: string[] = [];
-  
 
   dropdownOpen: any = {};
+  // searchText: any = {};
+
+  // Initialize the variables you'll use for filtering
+  fullData: any[] = [];
+  selectedProjects: any[] = [];
+  selectedZones: any[] = [];
+  selectedWards: any[] = [];
+  selectedSubZones: any[] = [];
+  selectedWardList: any[] = [];
+  selectedBeatList: any[] = [];
+  selectedBeats: any[] = [];
+
+  projects: any[] = [];
+  zones: any[] = [];
+  wards: any[] = [];
+  subZones: any[] = [];
+  wardList: any[] = [];
+  beatList: any[] = [];
+  beats: any[] = [];
+
+  userDatadetails: any[] = [];
+
+  
+
   dashboardData: any = {};
   columnFilters: any = {
     'Machine ID': '',
@@ -114,6 +161,8 @@ machinesList: any[] = [];
     private dashboardRefreshService: DashboardRefreshService
   ) {}
 
+  
+
   ngOnInit() {
     this.searchText = {
       projects: '',
@@ -142,216 +191,397 @@ machinesList: any[] = [];
   
     // Start auto-refresh functionality
     this.startAutoRefresh(); 
-  
-    // Start the countdown
     this.startRefreshCountdown();  // <-- Start the countdown here
   
     // Load machine data and user roles
     this.loadMachineData();
     document.addEventListener('click', this.handleClickOutside.bind(this));
     this.loadUserRole();
+
+    const merchantId = this.commonDataService.merchantId || '';
+    const userId = this.commonDataService.userId || 0 ;
+
+//   this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe({
+//     next: (response) => {
+//       if (response?.code === 200 && response?.data) {
+//         this.fullData = response.data.projects;
+//         this.projects = this.fullData; // Assign projects to options
+//         console.log("Hierarchy Data: ", this.fullData);
+//       }
+//     },
+//     error: (error) => {
+//       console.error('Error fetching hierarchy data: ', error);
+//     }
+//   });
+
+ 
   
-    // // Add Machines to Beats Without Disturbing Other Code
-    // this.beats = this.commonDataService.userDetails?.machineId ?? [];
-    // this.selectedBeats = [...this.beats];  // Pre-select all machines
+// }
 
 
-      // 🔄 Fetch machine IDs from updated API
-  const merchantId = this.commonDataService.merchantId;
-  const userId = this.commonDataService.userId;
-       console.log("merc", merchantId);
-       console.log("err", userId);
+
+//  // Handle dropdown toggling
+//  toggleDropdown(key: string) {
+//   this.dropdownOpen[key] = !this.dropdownOpen[key];
+// }
+
+// // Toggle select all logic
+// toggleSelectAll(selected: any[], options: any[], key: string) {
+//   if (selected.length === options.length) {
+//     selected.length = 0;
+//   } else {
+//     selected.length = 0;
+//     selected.push(...options.map(opt => opt.ProjectId || opt.key || opt));
+//   }
+//   this.handleCascadingFilters(key);
+// }
+
+// toggleSelection(selected: any[], value: any, key: string) {
+//   const index = selected.indexOf(value);
+//   if (index >= 0) {
+//     selected.splice(index, 1);
+//   } else {
+//     selected.push(value);
+//   }
+//   this.handleCascadingFilters(key);
+// }
+
+// handleCascadingFilters(key: string) {
+//   switch (key) {
+//     case 'projects':
+//       this.filterZones();
+//       break;
+//     case 'zones':
+//       this.filterWards();
+//       break;
+//     case 'wards':
+//       this.filterSubZones();
+//       break;
+//     case 'selectedSubZones':
+//       this.filterWardList();
+//       break;
+//     case 'selectedWardList':
+//       this.filterBeatList();
+//       break;
+//     case 'selectedBeatList':
+//       this.filterMachines();
+//       break;
+//   }
+// }
 
 
-  debugger;
 
-  // if (merchantId && userId !== null) { 
-  //   this.dataService.getUserDetails(merchantId, userId as number).subscribe({
-  //     next: (response) => {
-  //       if (response?.code === 200 && response?.data?.machineId) {
-  //         this.beats = response.data.machineId;
-  //         this.selectedBeats = [...this.beats];  // Pre-select all machines
+// filterZones() {
+//   this.zones = [];
+//   this.selectedZones = [];
+//   this.selectedProjects.forEach(pid => {
+//     const project = this.fullData.find(p => p.projectId === pid);
+//     project?.states?.forEach(state => {
+//       state.districts?.forEach(district => {
+//         district.zones?.forEach(zone => {
+//           if (!this.zones.find(z => z.zone === zone.zone)) {
+//             this.zones.push(zone);
+//           }
+//         });
+//       });
+//     });
+//   });
+//   this.filterWards();
+// }
 
-  //         // Optional: update global userDetails with latest machineId
-  //       }
-  //     },
-  //     error: (err) => {
-  //       console.error("❌ Error loading updated machine IDs:", err);
-  //     }
-  //   });
-  // } else {
-  //   console.warn("⚠️ merchantId or userId is missing, skipping machineId API fetch.");
-  // }
+// filterWards() {
+//   this.wards = [];
+//   this.selectedWards = [];
+//   this.zones.forEach(zone => {
+//     zone.wards?.forEach(ward => {
+//       if (!this.wards.find(w => w.ward === ward.ward)) {
+//         this.wards.push(ward);
+//       }
+//     });
+//   });
+//   this.filterSubZones();
+// }
 
-  
-  //   // Initialize projects from user details
-  //   this.projects = this.commonDataService.userDetails?.projectName ?? [];
-  //   this.selectedProjects = this.projects.map(project => project.ProjectId);  // Pre-select all projects
-  //   console.log('Projects Array:', this.projects);
-  // }
-  if (merchantId && userId !== null) {
-    this.dataService.getUserDetailsByHierarchy(merchantId, userId as number).subscribe({
-      next: (response) => {
-        debugger;
-        if (response?.code === 200 && response?.data) {
-          this.processUserDetails(response.data);
-        }
-      },
-      error: (err) => {
-        console.error("❌ Error loading user details:", err);
+// filterSubZones() {
+//   this.subZones = [];
+//   this.selectedSubZones = [];
+//   this.wards.forEach(ward => {
+//     ward.beats?.forEach(beat => {
+//       if (!this.subZones.includes(beat.beat)) {
+//         this.subZones.push({ value: beat.beat });
+//       }
+//     });
+//   });
+//   this.filterWardList();
+// }
+
+// filterWardList() {
+//   this.wardList = [];
+//   this.selectedWardList = [];
+//   this.subZones.forEach(beat => {
+//     if (!this.wardList.includes(beat)) {
+//       this.wardList.push(beat);
+//     }
+//   });
+//   this.filterBeatList();
+// }
+
+// filterBeatList() {
+//   this.beatList = [];
+//   this.selectedBeatList = [];
+//   this.wardList.forEach(beat => {
+//     if (!this.beatList.includes(beat)) {
+//       this.beatList.push(beat);
+//     }
+//   });
+//   this.filterMachines();
+// }
+
+// filterMachines() {
+//   this.beats = [];
+//   this.selectedBeats = [];
+//   this.selectedBeatList.forEach(beat => {
+//     const allBeats = this.wardList.filter(w => w.beat === beat);
+//     allBeats.forEach(b => {
+//       if (b.machines) {
+//         this.beats.push(...b.machines);
+//       }
+//     });
+//   });
+// }
+
+
+this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe({
+  next: (response) => {
+    if (response?.code === 200 && response?.data) {
+      this.fullData = response.data.projects;
+     // this.projects = this.fullData; // Assign projects to options
+
+      this.projects = this.fullData.map((p: any) => ({
+        ProjectId: p.projectId,
+        projectname: p.projectName
+      }));
+
+
+      
+
+    
+      console.log("Hierarchy Data: ", this.fullData);
+    }
+  },
+  error: (error) => {
+    console.error('Error fetching hierarchy data: ', error);
+  }
+});
+}
+
+// Handle dropdown toggling
+toggleDropdown(key: string) {
+this.dropdownOpen[key] = !this.dropdownOpen[key];
+}
+
+// Toggle select all logic
+toggleSelectAll(selected: any[], options: any[], key: string) {
+if (selected.length === options.length) {
+  selected.length = 0;
+} else {
+  selected.length = 0;
+  selected.push(...options.map(opt => opt.ProjectId || opt.key || opt));
+}
+this.handleCascadingFilters(key);
+}
+
+toggleSelection(selected: any[], value: any, key: string) {
+const index = selected.indexOf(value);
+if (index >= 0) {
+  selected.splice(index, 1);
+} else {
+  selected.push(value);
+}
+this.handleCascadingFilters(key);
+}
+
+handleCascadingFilters(key: string) {
+switch (key) {
+  case 'projects':
+    this.filterStates();
+    break;
+  case 'zones':
+    this.filterWards();
+    break;
+  case 'wards':
+    this.filterSubZones();
+    break;
+  case 'selectedSubZones':
+    this.filterWardList();
+    break;
+  case 'selectedWardList':
+    this.filterBeatList();
+    break;
+  case 'selectedBeatList':
+    this.filterMachines();
+    break;
+}
+}
+
+// Filter functions for cascading dropdowns
+
+filterStates() {
+  this.zones = [];
+  this.selectedZones = [];
+
+  this.selectedProjects.forEach(pid => {
+    const project = this.fullData.find(p => p.projectId === pid);
+    project?.states?.forEach((stateobj: any) => {
+      if (!this.zones.includes(stateobj.state)) {
+        this.zones.push(stateobj.state);
       }
     });
-  }
-  
+  });
+
+ // this.filterWards();
 }
 
-processUserDetails(userData: any) {
-  this.projectsList = userData.projects || [];
-
-  this.projects = this.projectsList.map((p: any) => ({
-    ProjectId: p.projectId,
-    projectname: p.projectName
-  }));
-
-  this.selectedProjects = [];
-  // this.zones = []; // Clear state list
+filterWards() {
   this.wards = [];
-  this.beats = [];
+  this.selectedWards = [];
 
-  console.log('✅ Projects:', this.projects);
+  this.selectedProjects.forEach(pid => {
+    const project = this.fullData.find(p => p.projectId === pid);
+    project?.states?.forEach((stateobj: any) => {
+      if (this.zones.includes(stateobj.state)) {
+        stateobj.districts?.forEach((districtobj: any) => {
+          if (!this.wards.find(w => w.district === districtobj.district)) {
+            this.wards.push(districtobj.district);
+          }
+        });
+      }
+    });
+  });
+
+ // this.filterSubZones();
 }
 
-filterStatesBasedOnProjects() {
-  // Clear current zones, wards and beats
-  // this.zones = [];
-  this.selectedZones = [];
-  // this.wards = [];
-  // this.selectedWards = [];
-  // this.beats = [];
+filterSubZones() {
+  this.subZones = [];
+  this.selectedSubZones = [];
+
+  this.selectedProjects.forEach(pid => {
+    const project = this.fullData.find(p => p.projectId === pid);
+    project?.states?.forEach((stateobj: any) => {
+      if (this.zones.includes(stateobj.state)) {
+        stateobj.districts?.forEach((districtobj: any) => {
+          if (this.wards.includes(districtobj.district)) {
+            districtobj.zones?.forEach((zoneobj: any) => {
+              if (!this.subZones.includes(zoneobj.zone)) {
+                this.subZones.push(zoneobj.zone); // Push plain string value
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+ // this.filterWardList();
+}
+
+filterWardList() {
+  this.wardList = [];
+  this.selectedWardList = [];
+
+  this.selectedProjects.forEach(pid => {
+    const project = this.fullData.find(p => p.projectId === pid);
+    project?.states?.forEach((stateobj: any) => {
+      if (this.zones.includes(stateobj.state)) {
+        stateobj.districts?.forEach((districtobj: any) => {
+          if (this.wards.includes(districtobj.district)) {
+            districtobj.zones?.forEach((zoneobj: any) => {
+              if (this.subZones.includes(zoneobj.zone)) {
+                zoneobj.wards?.forEach((wardobj: any) => {
+                  if (!this.wardList.includes(wardobj.ward)) {
+                    this.wardList.push(wardobj.ward);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  // this.filterBeatList();
+}
+
+filterBeatList() {
+  this.beatList = [];
+  this.selectedBeatList = [];
+
+  this.selectedProjects.forEach(pid => {
+    const project = this.fullData.find(p => p.projectId === pid);
+    project?.states?.forEach((stateobj: any) => {
+      if (this.zones.includes(stateobj.state)) {
+        stateobj.districts?.forEach((districtobj: any) => {
+          if (this.wards.includes(districtobj.district)) {
+            districtobj.zones?.forEach((zoneobj: any) => {
+              if (this.subZones.includes(zoneobj.zone)) {
+                zoneobj.wards?.forEach((wardobj: any) => {
+                  // ✅ Use selectedWardList here, not wardList
+                  if (this.selectedWardList.includes(wardobj.ward)) {
+                    wardobj.beats?.forEach((beatobj: any) => {
+                      if (!this.beatList.includes(beatobj.beat)) {
+                        this.beatList.push(beatobj.beat);
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  // this.filterMachines(); // Optional next step
+}
+
+filterMachines() {
+  this.beats = [];
   this.selectedBeats = [];
 
-  // Get selected projects
-  const selectedProjectsData = this.projectsList.filter((p: any) => 
-    this.selectedProjects.includes(p.projectId)
-  );
-
-  console.log('Selected Projects Data:', selectedProjectsData);
-  
-  // Extract all states from selected projects
-  let allStates: string[] = [];
-  selectedProjectsData.forEach((project: any) => {
-    if (project.states && Array.isArray(project.states)) {
-      project.states.forEach((stateObj: any) => {
-        if (stateObj.state) {
-          allStates.push(stateObj.state);
-        }
-      });
-    }
+  this.selectedProjects.forEach(pid => {
+    const project = this.fullData.find(p => p.projectId === pid);
+    project?.states?.forEach((stateobj: any) => {
+      if (this.zones.includes(stateobj.state)) {
+        stateobj.districts?.forEach((districtobj: any) => {
+          if (this.wards.includes(districtobj.district)) {
+            districtobj.zones?.forEach((zoneobj: any) => {
+              if (this.subZones.includes(zoneobj.zone)) {
+                zoneobj.wards?.forEach((wardobj: any) => {
+                  if (this.selectedWardList.includes(wardobj.ward)) {
+                    wardobj.beats?.forEach((beatobj: any) => {
+                      if (this.selectedBeatList.includes(beatobj.beat)) {
+                        if (beatobj.machines) {
+                          this.beats.push(...beatobj.machines);
+                        }
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
   });
-  
-  // Remove duplicates and sort
-  this.zones = Array.from(new Set(allStates)).sort();
-  console.log('Extracted States:', allStates);
-
-  console.log('filterStatesBasedOnProjects endjbhvvcvc',this.zones)
-
-  
-  console.log('Extracted States from Selected Projects:', this.zones);
-
-    // Force change detection
-    this.changeDetectorRef.detectChanges();
-
-    console.log('filterStatesBasedOnProjects endjbhvvcvc',this.zones)
-
-
 }
 
 
 
-filterDistrictsBasedOnStates() {
-  // Save current wards selection
-  const currentSelectedWards = [...this.selectedWards];
-  
-  // // Clear wards array but not selectedWards yet
-  // this.wards = [];
-  
-  // If no zones selected, clear ward selections too
-  if (this.selectedZones.length === 0) {
-    this.selectedWards = [];
-    this.beats = [];
-    this.selectedBeats = [];
-    return;
-  }
-  
-  const selectedProjectsData = this.projectsList.filter((p: any) => 
-    this.selectedProjects.includes(p.projectId)
-  );
-  
-  let selectedStatesData: string[] = [];
-  selectedProjectsData.forEach((project: any) => {
-    if (project.states) {
-      project.states.forEach((state: any) => {
-        if (this.selectedZones.includes(state.state)) {
-          selectedStatesData.push(...state.districts.map((d: any) => d.district));
-        }
-      });
-    }
-  });
 
-  this.wards = Array.from(new Set(selectedStatesData)).sort();
-  
-  // Only reset selections if the new wards don't include current selections
-  this.selectedWards = currentSelectedWards.filter(ward => this.wards.includes(ward));
-  
-  // If all selections were cleared, also clear beats
-  if (this.selectedWards.length === 0) {
-    this.beats = [];
-    this.selectedBeats = [];
-  } else {
-    // Otherwise, filter beats based on current ward selections
-    this.filterMachinesBasedOnDistricts();
-  }
-  
-  console.log('✅ ✅ Districts updated:', this.wards);
-  console.log('✅ ✅ Selected districts:', this.selectedWards);
-}
-
-
-
-filterMachinesBasedOnDistricts() {
-  this.beats = [];
-  this.selectedBeats = [];
-  
-  if (this.selectedWards.length === 0 || this.selectedZones.length === 0) {
-    return; // No states or districts selected
-  }
-  
-  // Get selected projects
-  const selectedProjectsData = this.projectsList.filter((p: any) => 
-    this.selectedProjects.includes(p.projectId)
-  );
-  
-  // Extract machines from selected districts
-  let allMachines: string[] = [];
-  selectedProjectsData.forEach((project: any) => {
-    if (project.states) {
-      project.states.forEach((state: any) => {
-        if (this.selectedZones.includes(state.state)) {
-          state.districts.forEach((district: any) => {
-            if (this.selectedWards.includes(district.district)) {
-              allMachines.push(...district.machines);
-            }
-          });
-        }
-      });
-    }
-  });
-  
-  // Remove duplicates and sort
-  this.beats = Array.from(new Set(allMachines)).sort();
-  
-  console.log('Extracted Machines from Selected Districts:', this.beats);
-}
 
   startAutoRefresh(): void {
     // Refresh every 2 minutes (120,000 milliseconds)
@@ -430,9 +660,12 @@ filterMachinesBasedOnDistricts() {
 
   loadUserRole() {
     const userDetails = this.commonDataService.userDetails;
+    console.log("❌❌❌ USERDATAdetails")
+
+
  
     if (!userDetails) {
-      console.error('❌ No user details found!');
+      console.error('❌❌❌ No user details found!');
       return;
     }
  
@@ -537,23 +770,27 @@ filterMachinesBasedOnDistricts() {
  
     const merchantId = this.commonDataService.merchantId ?? '';
     const userDetails = this.commonDataService.userDetails;
- 
-    if (!userDetails || !userDetails.machineId || userDetails.machineId.length === 0) {
-      console.error('❌ Missing User Details! API request cannot proceed.');
-      this.isLoading = false;
-      return;
-    }
+
+    const userDetail = this.userDatadetails;
     const queryParams: any = {
+    
       merchantId,
-      machineId: this.selectedBeats.length > 0 ? [...this.selectedBeats] : [...userDetails.machineId],
+      // machineId: this.selectedBeats.length > 0 ? [...this.selectedBeats] : [...userDetails.machineId],
       machineStatus: this.selectedMachineStatuses.length > 0 ? [...this.selectedMachineStatuses] : ['1', '2'],
       stockStatus: this.selectedStockStatuses.length > 0 ? [...this.selectedStockStatuses] : [],
       burnStatus: this.selectedBurnStatuses.length > 0 ? [...this.selectedBurnStatuses] : [],
       level1: this.selectedZones.length > 0 ? [...this.selectedZones] : [],
       level2: this.selectedWards.length > 0 ? [...this.selectedWards] : [],
       level3: [], // Default to empty array
-      level4: this.selectedProjects.length > 0 ? [...this.selectedProjects] : [] // Added from second code
+      level4: this.selectedProjects.length > 0 ? [...this.selectedProjects] : [], // Added from second code
+
+      client:userDetails.clientId,
+      project:  userDetails.projectId
     };
+
+    console.log("query ", queryParams)
+
+    console.log("machinedata dasboard clientid ", userDetails)
  
     // Ensure `level3` is NOT the same as `machineId`
     if (this.selectedBeats.length > 0 && this.selectedBeats !== userDetails.machineId) {
@@ -561,15 +798,7 @@ filterMachinesBasedOnDistricts() {
     }
  
     console.log('📡 Final API Call Params:', queryParams);
-    this.dataService
-      .getMachineDashboardSummary(queryParams)
-      .pipe(
-        timeout(10000),
-        catchError((error) => {
-          this.handleServerError(error);
-          return throwError(() => error);
-        })
-      )
+    this.dataService.getMachineDashboardSummary(queryParams)
       .subscribe(
         (response: any) => {
           console.log('✅ API Response:', response);
@@ -605,7 +834,7 @@ filterMachinesBasedOnDistricts() {
               itemsDispensed: response.data.itemsDispensed ?? 0
             };
  
-            this.updateFilters();
+            
             
           } else {
             console.warn('⚠️ No valid data received.');
@@ -704,261 +933,6 @@ formatText(text: string | null): string {
     this.paginateMachines();
   }
  
-  // toggleSelectAll(selectedArray: any[], optionsArray: any[], filterKey?: string) {
-  //   // Handle project selection specially
-  //   if (filterKey === 'projects') {
-  //     const allKeys = optionsArray.map(option => option.ProjectId);
-     
-  //     if (selectedArray.length === allKeys.length) {
-  //       selectedArray.length = 0; // Clear array
-  //     } else {
-  //       selectedArray.splice(0, selectedArray.length, ...allKeys); // Fill array
-  //     }
-  //   } else {
-  //     // For other types (machine statuses, etc.)
-  //     const allKeys = optionsArray.map(option => option.key || option);
-     
-  //     const allSelected = allKeys.every(key => selectedArray.includes(key));
-     
-  //     if (allSelected) {
-  //       selectedArray.length = 0; // unselect all
-  //     } else {
-  //       selectedArray.length = 0;
-  //       selectedArray.push(...allKeys); // select all
-  //     }
-  //   }
- 
-  //   this.loadMachineData();
-  // }
-  toggleSelectAll(selectedArray: any[], optionsArray: any[], filterKey: string) {
-    const allKeys = optionsArray.map(option => option.ProjectId || option.key || option);
-    
-    // If all items are selected, deselect all
-    if (selectedArray.length === allKeys.length) {
-      selectedArray.length = 0; // Clear selection
-    } else {
-      selectedArray.length = 0; // Clear current selection
-      selectedArray.push(...allKeys); // Select all items
-    }
-  
-    // Call appropriate filter function based on what changed
-    if (filterKey === 'projects') {
-      this.filterStatesBasedOnProjects(); // Update states when projects change
-    } else if (filterKey === 'zones') {  
-      this.filterWardsBasedOnZones(); // Update districts when zones change
-    }
-    
-    this.loadMachineData(); // Re-fetch data after change
-  }
-  
-  
-// Modify your toggleSelection function in machinedata.component.ts
-toggleSelection(array: any[], value: string | number, filterKey: string) {
-  console.log(`Toggle selection for ${filterKey} with value:`, value);
-  console.log(`Current array before toggle:`, [...array]);
-  
-  // Prevent the code from proceeding if we're toggling zones and there's a race condition
-  if (filterKey === 'zones') {
-    // First ensure we clear the array safely
-    array.length = 0;
-    // Then push the new value
-    array.push(value);
-    
-    // Force Angular change detection
-    setTimeout(() => {
-      this.filterDistrictsBasedOnStates();
-      this.loadMachineData();
-      this.changeDetectorRef.detectChanges();
-    }, 0);
-    return;
-  }
-  
-  // Handle normal cases for other filter types
-  const index = array.indexOf(value);
-  if (index !== -1) {
-    array.splice(index, 1); // Remove selection
-  } else {
-    array.push(value); // Add to selection
-  }
-  
-  // Call appropriate filter function based on what changed
-  if (filterKey === 'projects') {
-    console.log('Calling filterStatesBasedOnProjects after project selection change');
-    this.filterStatesBasedOnProjects(); 
-  } else if (filterKey === 'zones') {
-    console.log('Calling filterDistrictsBasedOnStates after zone selection change');  
-    this.filterDistrictsBasedOnStates(); 
-  } else if (filterKey === 'wards') {
-    console.log('Calling filterMachinesBasedOnDistricts after ward selection change');
-    this.filterMachinesBasedOnDistricts(); 
-  }
-
-  console.log(`After selection toggle: ${filterKey} has ${array.length} selected items`);
-
-  console.log('toggleselection hjfbwvfjv V',this.zones)
-  console.log('toggleselection WARDS N D CB VBD V ',this.wards)
-
-
-  
-  // Add a slight delay before reloading data
-  setTimeout(() => {
-    this.loadMachineData();
-    this.changeDetectorRef.detectChanges();
-  }, 0);
-}
-
-
-  updateFilters() {
-    if (this.initialZones.length === 0) {
-      // Store all unique values from the API response for filters
-      this.initialZones = Array.from(new Set(this.machines.map(m => m.level1).filter(Boolean))).sort();
-      this.initialWards = Array.from(new Set(this.machines.map(m => m.level2).filter(Boolean))).sort();
-      this.initialBeats = Array.from(new Set(this.machines.map(m => m.machineId).filter(Boolean))).sort();
-      this.initialProjects = this.commonDataService.userDetails?.projectName ?? [];
-    }
-    //  console.log('vcdgvgvsgvchvdvchdvc BEFORE ',this.zones)
-    // this.zones = [...this.initialZones].sort();
-    // console.log('vcdgvgvsgvchvdvchdvc-AFTER',this.zones)
-
-    // // Update wards based on selected zones (key feature you want to add)
-    // this.filterWardsBasedOnZones();
-    // this.beats = [...this.initialBeats].sort();
-    // this.projects = [...this.initialProjects].sort((a, b) => a.projectname.localeCompare(b.projectname));
- 
-
-    console.log('✅ Filters Updated: in the update filters ', this.zones,);
-
-    console.log('✅ Filters Updated:', {
-      zones: this.zones,
-      wards: this.wards,
-      beats: this.beats,
-      projects: this.projects
-    });
-  }
- 
-  filterWardsBasedOnZones() {
-    this.wards = [];
-    this.selectedWards = [];
-    this.beats = [];
-    this.selectedBeats = [];
-    
-    if (this.selectedZones.length === 0) {
-      return; // No zones selected, no districts to show
-    }
-    
-    // Get selected projects
-    const selectedProjectsData = this.projectsList.filter((p: any) => 
-      this.selectedProjects.includes(p.projectId)
-    );
-    
-    // Extract districts from selected states
-    let allDistricts: string[] = [];
-    selectedProjectsData.forEach((project: any) => {
-      if (project.states) {
-        project.states.forEach((state: any) => {
-          if (this.selectedZones.includes(state.state)) {
-            state.districts.forEach((district: any) => {
-              allDistricts.push(district.district);
-            });
-          }
-        });
-      }
-    });
-    
-    // Remove duplicates and sort
-    this.wards = Array.from(new Set(allDistricts)).sort();
-    
-    console.log('Extracted Districts from Selected States:', this.wards);
-  } 
-//   toggleDropdown(filterType: string) {
-//     // If there is only one value, do not show dropdown
-//     if ((filterType === 'zones' && this.zones.length === 1) ||
-//         (filterType === 'wards' && this.wards.length === 1) ||
-//         (filterType === 'beats' && this.beats.length === 1) ||
-//         (filterType === 'projects' && this.projects.length === 1)) {
-//           console.log(`Only one ${filterType} available, but still allowing dropdown toggle`);
-
-//     }
- 
-//   // Only prevent dropdown toggle for 'zones' if the user is actually a District User
-//   // based on their role from userDetails, not based on selection
-//   if (filterType === 'zones' && this.isDistrictUser ) {
-//       return;
-// }
- 
-//     // Remove any potentially problematic elements (from second code)
-//     document.querySelector('.fs-2.fw-semibold')?.remove();
- 
-//     // Normal dropdown toggle
-//     Object.keys(this.dropdownOpen).forEach(key => {
-//       if (key !== filterType) {
-//         this.dropdownOpen[key] = false;
-//         this.searchText[key] = ''; // ✅ Already correct
-
-//       }
-//     });
- 
-//     this.dropdownOpen[filterType] = !this.dropdownOpen[filterType];
-
-//     if (!this.dropdownOpen[filterType]) {
-//       this.searchText[filterType] = ''; // Clear search text when closing
-//     }
-    
-    
- 
-//     // Auto-close dropdown after 15 seconds
-//     if (this.dropdownOpen[filterType]) {
-//       setTimeout(() => {
-//         if (this.dropdownOpen[filterType]) {
-//           this.dropdownOpen[filterType] = false;
-//           this.searchText[filterType] = ''; // ✅ Clear search on auto-close
-
-//           console.log(`⏳ Auto-closed dropdown: ${filterType} after 15 sec`);
-//         }
-//       }, 25000);
-//     }
-//   }
-
-
-
-toggleDropdown(filterType: string) {
-  // Close other dropdowns without affecting selections
-  Object.keys(this.dropdownOpen).forEach(key => {
-    if (key !== filterType) {
-      this.dropdownOpen[key] = false;
-      this.searchText[key] = '';
-    }
-  });
-  
-  // Toggle the dropdown
-  this.dropdownOpen[filterType] = !this.dropdownOpen[filterType];
-  
-  if (this.dropdownOpen[filterType]) {
-    // If opening the zones dropdown, refresh the zones list without resetting selections
-    if (filterType === 'zones' && this.selectedProjects.length > 0) {
-      console.log('Refreshing zones list for dropdown open');
-      // Don't reset existing zone selections
-      const currentSelectedZones = [...this.selectedZones];
-      this.filterStatesBasedOnProjects();
-      
-      // Restore any valid selections
-      this.selectedZones = currentSelectedZones.filter(zone => this.zones.includes(zone));
-      this.changeDetectorRef.detectChanges();
-    }
-    
-    // Auto-close dropdown after 25 seconds
-    setTimeout(() => {
-      if (this.dropdownOpen[filterType]) {
-        this.dropdownOpen[filterType] = false;
-        this.searchText[filterType] = '';
-        console.log(`Auto-closed dropdown: ${filterType} after 25 sec`);
-      }
-    }, 25000);
-  } else {
-    this.searchText[filterType] = ''; // Clear search text when closing
-  }
-}
-
 
   handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -1002,32 +976,7 @@ toggleDropdown(filterType: string) {
 
     
   }
-  // applyFiltersAndSort() {
-  //   this.filteredMachines = this.machines.filter(machine => {
-
-
-
   
-  //     return (!this.columnFilters['Machine ID'] || machine.machineId.toLowerCase().includes(this.columnFilters['Machine ID'].toLowerCase())) &&
-  //            (!this.columnFilters['Machine Type'] || machine.machineType.toLowerCase().includes(this.columnFilters['Machine Type'].toLowerCase())) &&
-  //            (!this.columnFilters['Status'] || (machine.status === '1' ? 'Online' : 'Offline').toLowerCase().includes(this.columnFilters['Status'].toLowerCase())) &&
-  //            (!this.columnFilters['Stock Status'] || machine.stockStatus.toLowerCase().includes(this.columnFilters['Stock Status'].toLowerCase())) &&
-            
-  //            (!this.columnFilters['Burning Status'] || this.getBurningStatusLabel(machine.burningStatus).toLowerCase().includes(this.columnFilters['Burning Status'].toLowerCase()));
-
-                  
-  //   });
-  
-  //   if (this.sortKey) {
-  //     this.filteredMachines.sort((a, b) => {
-  //       const valueA = a[this.sortKey]?.toString().toLowerCase();
-  //       const valueB = b[this.sortKey]?.toString().toLowerCase();
-  //       if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
-  //       if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
-  //       return 0;
-  //     });
-  //   }
-  // }
   
   sortData(key: string) {
     if (this.sortKey === key) {

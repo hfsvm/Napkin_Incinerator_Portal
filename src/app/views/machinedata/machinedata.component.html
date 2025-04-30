@@ -210,68 +210,49 @@ placeholder="Search ..."
 
 </div>
 <div class="card-body">
-<div class="row filter container">
-<div class="col" *ngFor="let filter of [
-{ name: 'Client Name', key: 'projects', selected: selectedProjects, options: projects },
-{ name: 'Machine Status', key: 'machineStatuses', selected: selectedMachineStatuses, options: machineStatuses },
-{ name: 'Stock Status', key: 'stockStatuses', selected: selectedStockStatuses, options: stockStatuses },
-{ name: 'Burn Status', key: 'burnStatuses', selected: selectedBurnStatuses, options: burnStatuses },
-{ name: 'State', key: 'zones', selected: selectedZones, options: zones },
-{ name: 'District', key: 'wards', selected: selectedWards, options: wards },
-{ name: 'Machines', key: 'beats', selected: selectedBeats, options: beats },
+  <div class="row filter container">
+    <div class="col" *ngFor="let filter of [
+      { name: 'Client Name', key: 'projects', selected: selectedProjects, options: projects },
+      { name: 'Machine Status', key: 'machineStatuses', selected: selectedMachineStatuses, options: machineStatuses },
+      { name: 'Stock Status', key: 'stockStatuses', selected: selectedStockStatuses, options: stockStatuses },
+      { name: 'Burn Status', key: 'burnStatuses', selected: selectedBurnStatuses, options: burnStatuses },
+      { name: 'State', key: 'zones', selected: selectedZones, options: zones },
+      { name: 'District', key: 'wards', selected: selectedWards, options: wards },
+      { name: 'Zone', key: 'selectedSubZones', selected: selectedSubZones, options: subZones },
+      { name: 'Ward', key: 'selectedWardList', selected: selectedWardList, options: wardList },
+      { name: 'Beat', key: 'selectedBeatList', selected: selectedBeatList, options: beatList },
+      { name: 'Machines', key: 'beats', selected: selectedBeats, options: beats },
+    ]">
+      <label>{{ filter.name }}</label>
+      <ng-container *ngTemplateOutlet="dropdownTemplate">
+        <button class="btn btn-light w-100 single-value-btn" disabled>
+          {{ filter.options[0].projectname || filter.options[0].value || filter.options[0] }}
+        </button>
+      </ng-container>
 
-]">
-<label>{{ filter.name }}</label>
+      <ng-template #dropdownTemplate>
+        <div class="dropdown">
+          <button class="btn btn-light dropdown-toggle w-100" type="button" (click)="toggleDropdown(filter.key)">
+            {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : filter.name }}
+          </button>
+          <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]" [id]="'dropdown-' + filter.key">
+            <div *ngIf="['beats', 'wards', 'zones', 'projects'].includes(filter.key)" style="padding: 6px;">
+              <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchText[filter.key]" (click)="$event.stopPropagation()" />
+            </div>
+            <label class="dropdown-item d-flex align-items-center" style="gap: 6px;">
+              <input type="checkbox" [checked]="filter.selected.length === filter.options.length && filter.options.length > 0" (change)="toggleSelectAll(filter.selected, filter.options, filter.key)">
+              <strong style="margin: 0;">Select All</strong>
+            </label>
 
-<!-- <div *ngIf="filter.options.length === 1; else dropdownTemplate"> -->
-
-  <ng-container *ngTemplateOutlet="dropdownTemplate">
-
-<button class="btn btn-light w-100 single-value-btn" disabled>
-  {{ filter.options[0].projectname || filter.options[0].value || filter.options[0] }}
-</button></ng-container>
-<!-- </div> -->
-
-<ng-template #dropdownTemplate>
-<div class="dropdown">
-  <button class="btn btn-light dropdown-toggle w-100" type="button" 
-  (click)="toggleDropdown(filter.key)"
-  [disabled]="(filter.key === 'zones' && isDistrictUser)"
-  >
-    {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : filter.name }}
-  </button>
-  <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]" [id]="'dropdown-' + filter.key">
-    <div *ngIf="['beats', 'wards', 'zones', 'projects','uid'].includes(filter.key)" style="padding: 6px;">
-      <input
-        type="text"
-        class="form-control"
-        placeholder="Search..."
-        [(ngModel)]="searchText[filter.key]"
-        (click)="$event.stopPropagation()"
-      />
+            <label *ngFor="let option of filter.options | filterDropdown: searchText[filter.key]" class="dropdown-item">
+              <input type="checkbox" [checked]="filter.selected.includes(option.ProjectId || option.key || option)" (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option, filter.key)">
+              {{ option.projectname || option.value || option }}
+            </label>
+          </div>
+        </div>
+      </ng-template>
     </div>
-    <label class="dropdown-item d-flex align-items-center" style="gap: 6px;">
-      <input
-        type="checkbox"
-        [checked]="filter.selected.length === filter.options.length && filter.options.length > 0"
-        (change)="toggleSelectAll(filter.selected, filter.options, filter.key)">
-      <strong style="margin: 0;">Select All</strong>
-    </label>
-   
-
-    <label *ngFor="let option of filter.options | filterDropdown: searchText[filter.key]" class="dropdown-item">
-      <input
-        type="checkbox"
-        [checked]="filter.selected.includes(option.ProjectId || option.key || option)"
-        (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option, filter.key)">
-      {{ option.projectname || option.value || option }}
-    </label>
-   
   </div>
-</div>
-</ng-template>
-</div>
-</div>
 </div>
 
 <div class="card p-3"> 

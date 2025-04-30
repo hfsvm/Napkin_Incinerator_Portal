@@ -379,6 +379,7 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     }
   }
   
+  
 
   fetchDashboardData(): void {
     if (!this.merchantId) return;
@@ -391,6 +392,10 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
       return;
     }
 
+    console.log('📌 Extracted projectId:', userDetails.projectId);
+    console.log('📌 Extracted ClientId:', userDetails.clientId);
+    
+
     const queryParams: any = {
       merchantId: this.merchantId,
       machineStatus: ['1', '2'],
@@ -399,12 +404,14 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
       level1: userDetails.state?.join(',') || '',
       level2: userDetails.district?.join(',') || '',
       level3: userDetails.companyName?.[0]?.ClientId || '',
-      machineId: userDetails.machineId?.join(',') || ''
+      machineId: userDetails.machineId?.join(',') || '',
+      client:userDetails.clientId,
+      project: userDetails.projectId
     };
-
+debugger;
     const apiUrl = `${this.dataService.url1}/getMachineDashboardSummary?${new URLSearchParams(queryParams).toString()}`;
     console.log('📡 Final API URL:', apiUrl);
-
+debugger;
     this.dataService.getMachineDashboardSummary(queryParams).subscribe({
       next: (response) => {
         console.log('✅ API Response:', response);

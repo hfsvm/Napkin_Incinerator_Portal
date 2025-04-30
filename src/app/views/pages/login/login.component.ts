@@ -27,8 +27,8 @@ export class LoginComponent implements OnInit {
     merchantId: '',
     captcha:'',
   };
- 
- 
+ projectName: any
+ projectId: any
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -134,7 +134,8 @@ onSubmit(): void {
     (response: any) => {
       this.loading = false;
       if (response.code === 200 && response.data) {
-    
+    debugger;
+        // this.router.navigate(['/widgets']);
 
         const { userId, roleName, userName } = response.data;
         this.commonDataService.updateUserDetails(response.data);
@@ -152,7 +153,7 @@ onSubmit(): void {
         localStorage.setItem('userName', userName);
         localStorage.setItem('userDetails', stringified);
  
-        this.getUserDetails(merchantId, userId);
+        this.getUserDetailsByHierarchy(merchantId, userId);
       } else {
         this.setSpecificFieldError(response?.error);
         this.loadCaptcha(); // ✅ Load new captcha after server says wrong
@@ -180,13 +181,15 @@ startAutoRefresh(merchantId: string, userId: number): void {
   const refreshInterval = setInterval(() => {
     console.log('🔁 Auto-refresh triggered from login service at:', new Date().toLocaleTimeString());
     
-    this.dataService.getUserDetails(merchantId, userId).subscribe(
+    this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe(
       (res: any) => {
         if (res.code === 200 && res.phrase === 'Success' && res.data) {
           const userData = res.data;
           
           // Process the data like you do in getUserDetails
-          const projectName = Array.isArray(userData.projectName) ? userData.projectName : [];
+          const projectName = Array.isArray(userData.projects.projectName) ? userData.projects.projectName : [];
+          const projectId = Array.isArray(userData.projects.projectId) ? userData.projects.projectId : [];
+
           const companyData = userData.companyName && userData.companyName.length > 0 ? userData.companyName[0] : null;
           const companyName = companyData ? companyData.companyname : null;
           const clientId = companyData ? companyData.ClientId : null;
@@ -195,6 +198,7 @@ startAutoRefresh(merchantId: string, userId: number): void {
           const enrichedUserDetails = {
             ...userData,
             projectName,
+            projectId,
             companyName,
             clientId
           };
@@ -262,42 +266,61 @@ ngOnDestroy(): void {
   }
  
  
-  getUserDetails(merchantId: string, userId: number): void {
+  getUserDetailsByHierarchy(merchantId: string, userId: number): void {
     console.log('🔹 Fetching User Details for:', { merchantId, userId });
  
-    this.dataService.getUserDetails(merchantId, userId).subscribe(
+    this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe(
       (response: any) => {
-        console.log('✅ getUserDetails API Response from service:', response);
+        console.log('✅ getUserDetailsByHierarchy API Response from service:', response);
  
         if (response.code === 200 && response.phrase === 'Success' && response.data) {
           const userData = response.data;
+
+
+          debugger;
           console.log('🔹 Extracted User Data:', userData);
  
-          // ✅ Extract project name, company name, and client ID
-          const projectName = Array.isArray(userData.projectName)
-          ? userData.projectName
-          : [];
-       
-       
+      //     // ✅ Extract project name, company name, and client ID
+      //     const projectName: string[] = Array.isArray(userData?.projects?.projectName)
+      //     ? userData.projects.projectName
+      //     : [];
+        
+      //   const projectId: string[] = Array.isArray(userData?.projects?.projectId)
+      //     ? userData.projects.projectId
+      //     : [];
+        
+      //  console.log("projectname: ==>",projectName)
+      //  console.log("projectId: ==>",projectId)
+
+
+      const projectName: string[] = userData.projects?.map((p: any) => p.projectName) || [];
+      const projectId: number[] = userData.projects?.map((p: any) => p.projectId) || [];
+      const clientId =  userData.clientId;
+
+       console.log("projectname: ==>",projectName)
+       console.log("projectId: ==>",projectId)
+       console.log("ClientId: ==>",clientId)
+
  
           const companyData = userData.companyName && userData.companyName.length > 0 ? userData.companyName[0] : null;
           const companyName = companyData ? companyData.companyname : null;
-          const clientId = companyData ? companyData.ClientId : null;
+          
  
-          console.log("📌 Extracted Project Name:", projectName);
+         
           console.log("🏢 Extracted Company Name:", companyName);
-          console.log("🆔 Extracted Client ID:", clientId);
  
           // ✅ Update CommonDataService
           this.commonDataService.userDetails = {
             ...userData,
             projectName,
- 
+            projectId,
             companyName,
             clientId
           };
  
-          console.log('✅ CommonDataService Updated with User Details:', this.commonDataService);
+          console.log('✅✅✅ CommonDataService Updated with User Details:', this.commonDataService);
+          console.log('✅✅✅ CommonDataService Updated with User Details:', this.commonDataService.userDetails);
+
  
           // ✅ Persist updated details in sessionStorage & localStorage
           sessionStorage.setItem('userDetails', JSON.stringify(this.commonDataService.userDetails));
