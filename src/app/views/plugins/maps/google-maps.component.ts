@@ -327,12 +327,10 @@ machinesList: any[] = [];
     this.errorMessage = '';
     
     console.log(`📡 Loading hierarchical data for merchant ${this.merchantId} and user ${this.userId}`);
-    debugger;
 
     
     this.dataService.getUserDetailsByHierarchy(this.merchantId, this.userId).subscribe(
       (response: any) => {
-        debugger;
         console.log('✅ Hierarchy API Response:', response);
         
         if (response?.code === 200 && response.data) {
@@ -360,7 +358,6 @@ machinesList: any[] = [];
 
       //this.processHierarchicalData();
           this.loadMachineData(); // Load machine data after hierarchy is processed
-          debugger;
         } else {
           console.warn('⚠️ No valid hierarchy data received.');
           this.isLoading = false;
@@ -373,7 +370,6 @@ machinesList: any[] = [];
         this.errorMessage = 'Error loading hierarchy data: ' + (error.message || 'Unknown error');
       }
     );
-    debugger;
   }
   
   
@@ -505,132 +501,463 @@ searchTexts: { [key: string]: string } = {};
     this.filterPanelOpen = !this.filterPanelOpen;
   }
  
-  // loadMachineData(): void {
-  //   this.isLoading = true;
-  //   this.errorMessage = '';
- 
-  //   // Build queryParams based on selected filters and hierarchical data
-  //   const queryParams: any = {
-  //     merchantId: this.merchantId,
-  //     machineId: this.machineFilter.value?.length ? this.machineFilter.value : this.getAllSelectedMachines(),
-  //     machineStatus: this.machineStatusFilter.value?.length ? this.machineStatusFilter.value : ['1', '2'],
-  //     stockStatus: this.stockStatusFilter.value?.length ? this.stockStatusFilter.value : [],
-  //     burnStatus: this.buttonStatusFilter.value?.length ? this.buttonStatusFilter.value : [],
-  //     level1: this.stateFilter.value?.length ? this.stateFilter.value : this.states,
-  //     level2: this.districtFilter.value?.length ? this.districtFilter.value : [],
-  //     // Use direct parameter names for new filters
-  //     zone: this.zoneFilter.value?.length ? this.zoneFilter.value : [],
-  //     ward: this.wardFilter.value?.length ? this.wardFilter.value : [],
-  //     beat: this.beatFilter.value?.length ? this.beatFilter.value : [],
-  //   };
- 
-  //   console.log('📡 API Call Params:', queryParams);
- 
-  //   this.dataService.getMachineDashboardSummary(queryParams).subscribe(
-  //     (response: any) => {
-  //       console.log('✅ API Response:', response);
- 
-  //       if (response?.code === 200 && response.data) {
-  //         this.machines = response.data.machines.map((machine: any) => ({
-  //           ...machine,
-  //           stockStatus: this.mapStockStatus(machine.stockStatus),
-  //           burnStatus: this.mapBurnStatus(machine.burningStatus),
 
-  //         // Ensure state and district are mapped correctly
-  //         state: machine.level1 || 'Unknown',
-  //         district: machine.level2 || 'Unknown',
-  //         // Use the direct properties for zone, ward, beat
-  //         zone: machine.zone || 'Unknown',
-  //         ward: machine.ward || 'Unknown',
-  //         beat: machine.beat || 'Unknown',
 
-  //           burningCycles: machine.burningCycles ?? 0,
-  //           totalBurningCycles: machine.totalBurningCycles ?? 0,
-  //           totalBurningCount: machine.totalburningCount ?? 0,
-  //           itemsBurnt: machine.itemsBurnt ?? 0,
-  //           itemsDispensed: machine.itemsDispensed ?? 0,
-  //           collection: machine.collection ?? 0,
-  //           imsi: machine.imsi ?? 'N/A',
-  //           rssi: machine.rssi ?? 'N/A',
-  //           location: machine.latitude && machine.longitude
-  //             ? [parseFloat(machine.longitude), parseFloat(machine.latitude)]
-  //             : null
-  //         }));
+
+
+//   loadMachineData() {
+//     this.isLoading = true;
+//     this.errorMessage = '';
+ 
+//     const merchantId = this.commonDataService.merchantId ?? '';
+//     const userDetails = this.commonDataService.userDetails;
+
+//     const userDetail = this.userDatadetails;
+// // console.log("123456789000000000==>",      [...this.hierarchySelection.state] )
+
+// //     console.log("123456789000000000==>",[...this.selectedBeatList])
+//     const queryParams: any = {
+      
+    
+//       merchantId,
+//       // machineId: this.selectedBeats.length > 0 ? [...this.selectedBeats] : [...userDetails.machineId],
+//       machineStatus: this.selectedMachineStatuses.length > 0 ? [...this.selectedMachineStatuses] : ['1', '2'],
+//       stockStatus: this.selectedStockStatuses.length > 0 ? [...this.selectedStockStatuses] : [],
+//       burnStatus: this.selectedBurnStatuses.length > 0 ? [...this.selectedBurnStatuses] : [],
+//       // level1: this.selectedZones.length > 0 ? [...this.selectedZones] : [],
+//       // level2: this.selectedWards.length > 0 ? [...this.selectedWards] : [],
+//       level3: [], // Default to empty array
+//       // level4: this.selectedProjects.length > 0 ? [...this.selectedProjects] : [], // Added from second code
+
+//   // Pass only selected filters, not all possible ones
+
+//   state: this.hierarchySelection.state.length > 0 ? [...this.hierarchySelection.state] : [],
+//   district: this.hierarchySelection.district.length > 0 ? [...this.hierarchySelection.district] : [],
+//   zone: this.hierarchySelection.zone.length > 0 ? [...this.hierarchySelection.zone] : [],
+//   ward: this.hierarchySelection.ward.length > 0 ? [...this.hierarchySelection.ward] : [],
+//   beat: this.hierarchySelection.beat.length > 0 ? [...this.hierarchySelection.beat] : [],
+  
+
+//       client:userDetails.clientId,
+//       project:  userDetails.projectId
+//     };
+//       // Include machine selection if available
+//   if (this.selectedBeats.length > 0) {
+//     queryParams.machineId = [...this.selectedBeats];
+//   }
+
+
+//     console.log("query ", queryParams)
+
+//     console.log("machinedata dasboard clientid ", userDetails)
+ 
+//   this.dataService.getMachineDashboardSummary(queryParams).subscribe(
+//     (response: any) => {
+//       console.log('✅ API Response:', response);
+ 
+//       if (response?.code === 200 && response.data) {
+//         this.updateMap(); // Refresh map markers
+
+//         // Add debugging to see raw data from API
+//         console.log('🔍 Raw Machine Data from API:', response.data.machines.slice(0, 3));
+        
+//         this.machines = response.data.machines.map((machine: any) => {
+//           // CRITICAL FIX: Use the correct field names from API response
+//           // The API might be returning level1/level2 in different fields than expected
+//           const state = machine.level1 || machine.state || '';
+//           const district = machine.level2 || machine.district || '';
           
+//           console.log("❌❌❌❌❌❌",`Machine ${machine.machineId} - Raw level1: ${machine.level1}, Raw state: ${machine.state}`);
+          
+//           const mappedMachine = {
+//             ...machine,
+//             stockStatus: this.mapStockStatus(machine.stockStatus),
+//             burnStatus: this.mapBurnStatus(machine.burningStatus),
 
-  //         this.updateMap();
-  //       } else {
-  //         console.warn('⚠️ No valid data received.');
-  //       }
+//             // Fix: Explicitly assign state and district from API response
+//             state: state,
+//             district: district,
+//             zone: machine.zone || '',
+//             ward: machine.ward || '',
+//             beat: machine.beat || '',
 
-  //       this.isLoading = false;
-  //     },
-  //     (error) => {
-  //       console.error('❌ API Call Failed:', error);
-  //       this.isLoading = false;
-  //       this.errorMessage = 'Failed to load machine data: ' + (error.message || 'Unknown error');
-  //     }
-  //   );
-  // }
+//             burningCycles: machine.burningCycles ?? 0,
+//             totalBurningCycles: machine.totalBurningCycles ?? 0,
+//             totalBurningCount: machine.totalburningCount ?? 0,
+//             itemsBurnt: machine.itemsBurnt ?? 0,
+//             itemsDispensed: machine.itemsDispensed ?? 0,
+//             collection: machine.collection ?? 0,
+//             imsi: machine.imsi ?? 'N/A',
+//             rssi: machine.rssi ?? 'N/A',
+//             location: machine.latitude && machine.longitude
+//               ? [parseFloat(machine.longitude), parseFloat(machine.latitude)]
+//               : null
+//           };
+          
+//           return mappedMachine;
+//         });
+        
+//         // IMPORTANT: Add debugging after mapping to see what values are being used
+//         console.log('🔍 First 3 Mapped Machines:', this.machines.slice(0, 3));
+//         console.log('🔍 Unique States After Mapping:', [...new Set(this.machines.map(m => m.state))]);
+        
+//         // this.updateMap();
+//       } else {
+//         console.warn('⚠️ No valid data received.');
+//       }
+
+//       this.isLoading = false;
+//     },
+//     (error) => {
+//       console.error('❌ API Call Failed:', error);
+//       this.isLoading = false;
+//       this.errorMessage = 'Failed to load machine data: ' + (error.message || 'Unknown error');
+//     }
+//   );
+// }
 
 
+// 1. Fix for the toggleSelectAll function
+toggleSelectAll(selected: any[], options: any[], key: string) {
+  // First check if all items are already selected
+  const allSelected = selected.length === options.length && options.length > 0;
+  
+  console.log(`Toggle Select All for ${key} - Current selection: ${selected.length}/${options.length} items`);
+  
+  if (allSelected) {
+    // Clear the selection
+    selected.length = 0;  // This modifies the array in-place
+    console.log(`Cleared all selections for ${key}`);
+    
+    // Clear dependent filters when appropriate
+    this.clearDependentSelections(key);
+  } else {
+    // Clear the array first
+    selected.length = 0;
+    
+    // Then add all values from options
+    options.forEach(option => {
+      // Extract the appropriate ID from the option
+      const value = typeof option === 'object' ? 
+        (option.ProjectId || option.key || option.id || option.value) : option;
+      
+      selected.push(value);
+    });
+    
+    console.log(`Selected all ${selected.length} options for ${key}`);
+  }
+  
+  // Update the hierarchy selection with a new array reference
+  this.updateHierarchySelection(key, [...selected]);
+  
+  // Rebuild filter chain
+  this.rebuildFilterChain(key);
+  
+  // Reload data with updated filters
+  this.loadMachineData();
+}
 
+// 2. Fix for the toggleSelection function
+toggleSelection(selectedArray: any[], value: any, key: string) {
+  const index = selectedArray.indexOf(value);
+  
+  if (index >= 0) {
+    // Deselecting an item
+    selectedArray.splice(index, 1);
+    console.log(`Removed ${value} from ${key} selections`);
+  } else {
+    // Selecting an item
+    selectedArray.push(value);
+    console.log(`Added ${value} to ${key} selections`);
+  }
 
-// Fix for the loadMachineData function to properly map state data
-loadMachineData(): void {
+  // Update the hierarchy selection with a new array reference
+  this.updateHierarchySelection(key, [...selectedArray]);
+  
+  // Rebuild filter chain
+  this.rebuildFilterChain(key);
+  
+  // Reload data with updated filters
+  this.loadMachineData();
+}
+
+// 3. Fixed updateHierarchySelection function
+updateHierarchySelection(key: string, selectedArray: any[]) {
+  console.log(`Updating hierarchy for ${key} with ${selectedArray.length} selections`);
+  
+  // Always assign a NEW array to trigger change detection
+  switch (key) {
+    case 'projects':
+      this.hierarchySelection.project = [...selectedArray];
+      break;
+    case 'zones':
+    case 'state':
+      this.hierarchySelection.state = [...selectedArray];
+      break;
+    case 'wards':
+    case 'district':
+      this.hierarchySelection.district = [...selectedArray];
+      break;
+    case 'selectedSubZones':
+    case 'zone':
+      this.hierarchySelection.zone = [...selectedArray];
+      break;
+    case 'selectedWardList':
+    case 'ward':
+      this.hierarchySelection.ward = [...selectedArray];
+      break;
+    case 'selectedBeatList':
+    case 'beat':
+      this.hierarchySelection.beat = [...selectedArray];
+      break;
+  }
+  
+  // Print the updated hierarchy for debugging
+  console.log('Updated hierarchy selection:', JSON.stringify(this.hierarchySelection));
+}
+
+// 4. Improved updateMap function that properly handles all selected options
+updateMap(): void {
+  console.log("🔄 updateMap() called!");
+
+  // Clear old markers
+  this.markers.forEach(marker => marker.remove());
+  this.markers = [];
+
+  // Get selected filters from hierarchy
+  const selectedStates = this.hierarchySelection.state || [];
+  const selectedDistricts = this.hierarchySelection.district || [];
+  const selectedZones = this.hierarchySelection.zone || [];
+  const selectedWards = this.hierarchySelection.ward || [];
+  const selectedBeats = this.hierarchySelection.beat || [];
+
+  const selectedMachines = this.machineFilter?.value || [];
+  const selectedStockStatuses = this.stockStatusFilter?.value || [];
+  const selectedMachineStatuses = this.machineStatusFilter?.value || [];
+  const selectedBurnStatusesRaw = this.buttonStatusFilter?.value || [];
+
+  // Log all filter values for debugging
+  console.log("🗺️ Current Filter Values:", {
+    states: selectedStates,
+    districts: selectedDistricts,
+    zones: selectedZones,
+    wards: selectedWards,
+    beats: selectedBeats,
+    machines: selectedMachines,
+    stockStatuses: selectedStockStatuses,
+    machineStatuses: selectedMachineStatuses,
+    burnStatuses: selectedBurnStatusesRaw
+  });
+
+  // Map burn status labels to numeric values
+  const burnStatusMapping: Record<string, number> = {
+    "Burning": 2,
+    "Idle": 1
+  };
+
+  const selectedBurnStatuses = selectedBurnStatusesRaw
+    .map((status: string) => burnStatusMapping[status])
+    .filter(v => v !== undefined);
+
+  // CRITICAL: Log the unique values in the machines data to help debug
+  console.log("Available values in machines data:", {
+    states: [...new Set(this.machines.map(m => m.state))],
+    districts: [...new Set(this.machines.map(m => m.district))],
+    zones: [...new Set(this.machines.map(m => m.zone))],
+    wards: [...new Set(this.machines.map(m => m.ward))],
+    beats: [...new Set(this.machines.map(m => m.beat))]
+  });
+
+  // Filter machines based on ALL selected criteria
+  const filteredMachines = this.machines.filter(machine => {
+    // For each filter type, if no selections are made, don't filter on that criteria
+    // If selections ARE made, machine must match at least one selected value
+    
+    // STATE filtering - check if no states selected or if machine's state is in selected states
+    const stateMatch = selectedStates.length === 0 || 
+                      (machine.state && selectedStates.includes(machine.state));
+    
+    // DISTRICT filtering
+    const districtMatch = selectedDistricts.length === 0 || 
+                         (machine.district && selectedDistricts.includes(machine.district));
+    
+    // ZONE filtering 
+    const zoneMatch = selectedZones.length === 0 || 
+                     (machine.zone && selectedZones.includes(machine.zone));
+    
+    // WARD filtering
+    const wardMatch = selectedWards.length === 0 || 
+                     (machine.ward && selectedWards.includes(machine.ward));
+    
+    // BEAT filtering
+    const beatMatch = selectedBeats.length === 0 || 
+                     (machine.beat && selectedBeats.includes(machine.beat));
+    
+    // MACHINE ID filtering
+    const machineMatch = selectedMachines.length === 0 || 
+                        selectedMachines.includes(machine.machineId);
+    
+    // STOCK STATUS filtering
+    const stockMatch = selectedStockStatuses.length === 0 || 
+                      selectedStockStatuses.includes(machine.stockStatus);
+    
+    // MACHINE STATUS filtering
+    const statusMatch = selectedMachineStatuses.length === 0 || 
+                        selectedMachineStatuses.includes(machine.status);
+    
+    // BURN STATUS filtering
+    const burnMatch = selectedBurnStatuses.length === 0 || 
+                      selectedBurnStatuses.includes(machine.burnStatus);
+
+    // Debug when a machine doesn't match
+    if (!stateMatch || !districtMatch || !zoneMatch || !wardMatch || !beatMatch) {
+      console.log(`Machine ${machine.machineId} filtered out:`, {
+        state: machine.state, stateMatch,
+        district: machine.district, districtMatch,
+        zone: machine.zone, zoneMatch,
+        ward: machine.ward, wardMatch,
+        beat: machine.beat, beatMatch
+      });
+    }
+
+    // Machine matches if it passes ALL filter criteria
+    return stateMatch && districtMatch && zoneMatch && wardMatch && beatMatch && 
+           machineMatch && stockMatch && statusMatch && burnMatch;
+  });
+
+  console.log(`🔍 Filtered ${filteredMachines.length} of ${this.machines.length} machines`);
+
+  if (filteredMachines.length === 0) {
+    console.warn("⚠️ No matching machines found based on filters.");
+    return; // Exit early if no machines match
+  }
+
+  // Handle overlapping markers
+  const locationMap = new Map<string, number>();
+
+  // Create markers for all filtered machines
+  filteredMachines.forEach(machine => {
+    if (!machine.location) {
+      console.warn(`Machine ${machine.machineId} has no location data`);
+      return;
+    }
+
+    const [lng, lat] = machine.location;
+    const key = `${lng},${lat}`;
+
+    // Handle overlapping markers by slightly offsetting them
+    if (locationMap.has(key)) {
+      const count = locationMap.get(key)! + 1;
+      locationMap.set(key, count);
+
+      const angle = (count * 45) * (Math.PI / 180);
+      const radius = 0.000001 * count;
+      machine.location = [
+        lng + radius * Math.cos(angle),
+        lat + radius * Math.sin(angle)
+      ];
+    } else {
+      locationMap.set(key, 1);
+    }
+
+    // Set marker icon based on machine status
+    const iconUrl = this.getStockStatusIcon(machine.stockStatus);
+
+    const markerElement = document.createElement('div');
+    markerElement.className = 'custom-marker';
+    markerElement.style.backgroundImage = `url(${iconUrl})`;
+    markerElement.style.width = '40px';
+    markerElement.style.height = '40px';
+    markerElement.style.backgroundSize = 'contain';
+    markerElement.style.backgroundRepeat = 'no-repeat';
+
+    // Zoom on double-click
+    markerElement.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      this.map.flyTo({
+        center: machine.location,
+        zoom: 15,
+        speed: 5,
+        curve: 1,
+        easing(t) {
+          return t;
+        }
+      });
+    });
+
+    // Create popup with machine info
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: true
+    }).setHTML(this.generatePopupHTML(machine));
+
+    // Create and add marker to map
+    const newMarker = new maplibregl.Marker({ element: markerElement })
+      .setLngLat(machine.location)
+      .setPopup(popup)
+      .addTo(this.map);
+
+    // Store marker for later removal
+    this.markers.push(newMarker);
+  });
+  
+  console.log(`✅ Added ${this.markers.length} markers to map`);
+}
+
+// 5. Improved loadMachineData function
+loadMachineData() {
   this.isLoading = true;
   this.errorMessage = '';
- 
-  // Build queryParams based on selected filters and hierarchical data
-  const queryParams: any = {
-    merchantId: this.merchantId,
-    machineId: this.machineFilter.value?.length ? this.machineFilter.value : this.getAllSelectedMachines(),
-    machineStatus: this.machineStatusFilter.value?.length ? this.machineStatusFilter.value : ['1', '2'],
-    stockStatus: this.stockStatusFilter.value?.length ? this.stockStatusFilter.value : [],
-    burnStatus: this.buttonStatusFilter.value?.length ? this.buttonStatusFilter.value : [],
-    // Fix: Only send specific state selections when chosen
-    level1: this.stateFilter.value?.length ? this.stateFilter.value : [],
-    level2: this.districtFilter.value?.length ? this.districtFilter.value : [],
-    // Use direct parameter names for new filters
-    zone: this.zoneFilter.value?.length ? this.zoneFilter.value : [],
-    ward: this.wardFilter.value?.length ? this.wardFilter.value : [],
-    beat: this.beatFilter.value?.length ? this.beatFilter.value : [],
 
-    client: this.clientId,
-    project: this.projectId
-  
+  const merchantId = this.commonDataService.merchantId ?? '';
+  const userDetails = this.commonDataService.userDetails;
+
+  // Build API query parameters
+  const queryParams: any = {
+    merchantId,
+    
+    // Include filter parameters based on selections
+    machineStatus: this.selectedMachineStatuses?.length > 0 ? [...this.selectedMachineStatuses] : ['1', '2'],
+    stockStatus: this.selectedStockStatuses?.length > 0 ? [...this.selectedStockStatuses] : [],
+    burnStatus: this.selectedBurnStatuses?.length > 0 ? [...this.selectedBurnStatuses] : [],
+    
+    // Pass ALL selected filter values (even if multiple are selected)
+    state: this.hierarchySelection.state?.length > 0 ? [...this.hierarchySelection.state] : [],
+    district: this.hierarchySelection.district?.length > 0 ? [...this.hierarchySelection.district] : [],
+    zone: this.hierarchySelection.zone?.length > 0 ? [...this.hierarchySelection.zone] : [],
+    ward: this.hierarchySelection.ward?.length > 0 ? [...this.hierarchySelection.ward] : [],
+    beat: this.hierarchySelection.beat?.length > 0 ? [...this.hierarchySelection.beat] : [],
+    
+    client: userDetails.clientId,
+    project: userDetails.projectId
   };
- 
-  console.log('📡 API Call Params:', queryParams);
- 
+
+  // Include machine selection if available
+  if (this.selectedBeats?.length > 0) {
+    queryParams.machineId = [...this.selectedBeats];
+  }
+
+  console.log("API Query Parameters:", queryParams);
+
   this.dataService.getMachineDashboardSummary(queryParams).subscribe(
     (response: any) => {
       console.log('✅ API Response:', response);
- 
+
       if (response?.code === 200 && response.data) {
-        // Add debugging to see raw data from API
-        console.log('🔍 Raw Machine Data from API:', response.data.machines.slice(0, 3));
-        
+        // Process machines data
         this.machines = response.data.machines.map((machine: any) => {
-          // CRITICAL FIX: Use the correct field names from API response
-          // The API might be returning level1/level2 in different fields than expected
-          const state = machine.level1 || machine.state || '';
-          const district = machine.level2 || machine.district || '';
-          
-          console.log("❌❌❌❌❌❌",`Machine ${machine.machineId} - Raw level1: ${machine.level1}, Raw state: ${machine.state}`);
-          
           const mappedMachine = {
             ...machine,
             stockStatus: this.mapStockStatus(machine.stockStatus),
             burnStatus: this.mapBurnStatus(machine.burningStatus),
-
-            // Fix: Explicitly assign state and district from API response
-            state: state,
-            district: district,
+            
+            // Ensure we have consistent property naming
+            state: machine.level1 || machine.state || '',
+            district: machine.level2 || machine.district || '',
             zone: machine.zone || '',
             ward: machine.ward || '',
             beat: machine.beat || '',
-
+            
             burningCycles: machine.burningCycles ?? 0,
             totalBurningCycles: machine.totalBurningCycles ?? 0,
             totalBurningCount: machine.totalburningCount ?? 0,
@@ -647,13 +974,14 @@ loadMachineData(): void {
           return mappedMachine;
         });
         
-        // IMPORTANT: Add debugging after mapping to see what values are being used
-        console.log('🔍 First 3 Mapped Machines:', this.machines.slice(0, 3));
-        console.log('🔍 Unique States After Mapping:', [...new Set(this.machines.map(m => m.state))]);
+        console.log('🔍 Processed Machines:', this.machines.length);
         
+        // Update map after processing data
         this.updateMap();
       } else {
         console.warn('⚠️ No valid data received.');
+        this.machines = [];
+        this.updateMap(); // Still call updateMap to clear markers
       }
 
       this.isLoading = false;
@@ -665,83 +993,6 @@ loadMachineData(): void {
     }
   );
 }
-
-
-
-  // loadMachineData(): void {
-  //   this.isLoading = true;
-  //   this.errorMessage = '';
-   
-  //   // Build queryParams based on selected filters and hierarchical data
-  //   const queryParams: any = {
-  //     merchantId: this.merchantId,
-  //     machineId: this.machineFilter.value?.length ? this.machineFilter.value : this.getAllSelectedMachines(),
-  //     machineStatus: this.machineStatusFilter.value?.length ? this.machineStatusFilter.value : ['1', '2'],
-  //     stockStatus: this.stockStatusFilter.value?.length ? this.stockStatusFilter.value : [],
-  //     burnStatus: this.buttonStatusFilter.value?.length ? this.buttonStatusFilter.value : [],
-  //     // Fix: Only send specific state selections, not all states when none are selected
-  //     level1: this.stateFilter.value?.length ? this.stateFilter.value : [],
-  //     level2: this.districtFilter.value?.length ? this.districtFilter.value : [],
-  //     // Use direct parameter names for new filters
-  //     zone: this.zoneFilter.value?.length ? this.zoneFilter.value : [],
-  //     ward: this.wardFilter.value?.length ? this.wardFilter.value : [],
-  //     beat: this.beatFilter.value?.length ? this.beatFilter.value : [],
-  //   };
-   
-  //   console.log('📡 API Call Params:', queryParams);
-   
-  //   this.dataService.getMachineDashboardSummary(queryParams).subscribe(
-  //     (response: any) => {
-  //       console.log('✅ API Response:', response);
-   
-  //       if (response?.code === 200 && response.data) {
-  //         this.machines = response.data.machines.map((machine: any) => {
-  //           // Fix: Ensure proper mapping of hierarchical data
-  //           const mappedMachine = {
-  //             ...machine,
-  //             stockStatus: this.mapStockStatus(machine.stockStatus),
-  //             burnStatus: this.mapBurnStatus(machine.burningStatus),
-  
-  //             // Fix: Properly map hierarchical data, ensuring values aren't 'Unknown' by default
-  //             state: machine.level1 || '',
-  //             district: machine.level2 || '',
-  //             zone: machine.zone || '',
-  //             ward: machine.ward || '',
-  //             beat: machine.beat || '',
-  
-  //             burningCycles: machine.burningCycles ?? 0,
-  //             totalBurningCycles: machine.totalBurningCycles ?? 0,
-  //             totalBurningCount: machine.totalburningCount ?? 0,
-  //             itemsBurnt: machine.itemsBurnt ?? 0,
-  //             itemsDispensed: machine.itemsDispensed ?? 0,
-  //             collection: machine.collection ?? 0,
-  //             imsi: machine.imsi ?? 'N/A',
-  //             rssi: machine.rssi ?? 'N/A',
-  //             location: machine.latitude && machine.longitude
-  //               ? [parseFloat(machine.longitude), parseFloat(machine.latitude)]
-  //               : null
-  //           };
-  
-  //           // Debug log to see what state value is coming from API
-  //           console.log("⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️",`Machine ${machine.machineId} state: ${mappedMachine.state}, district: ${mappedMachine.district}`);
-            
-  //           return mappedMachine;
-  //         });
-          
-  //         this.updateMap();
-  //       } else {
-  //         console.warn('⚠️ No valid data received.');
-  //       }
-  
-  //       this.isLoading = false;
-  //     },
-  //     (error) => {
-  //       console.error('❌ API Call Failed:', error);
-  //       this.isLoading = false;
-  //       this.errorMessage = 'Failed to load machine data: ' + (error.message || 'Unknown error');
-  //     }
-  //   );
-  // }
   
   
 
@@ -857,30 +1108,51 @@ closePopup(popupElement: Element, machineId: string | null): void {
 }
 
      
+
+
+
+
+
+
+// Fix for updateMap to correctly filter based on states
 // updateMap(): void {
-// console.log("🔄 updateMap() called!");
+//   console.log("🔄 updateMap() called!");
 
-// // Clear old markers
-// this.markers.forEach(marker => marker.remove());
-// this.markers = [];
+//   // Clear old markers
+//   this.markers.forEach(marker => marker.remove());
+//   this.markers = [];
 
-// // Get selected filters
-// const selectedStates = this.stateFilter.value || [];
-// const selectedDistricts = this.districtFilter.value || [];
-//     // Add these new filter values
-//     const selectedZones = this.zoneFilter.value || [];
-//     const selectedWards = this.wardFilter.value || [];
-//     const selectedBeats = this.beatFilter.value || [];
+//   // Get selected filters
+//   console.log("All available states:", this.states);
+// //   const selectedStates = this.stateFilter.setValue([...this.hierarchySelection.state]);
+// //   const selectedDistricts=this.districtFilter.setValue([...this.hierarchySelection.district]);
+// //   const selectedZones =this.zoneFilter.setValue([...this.hierarchySelection.zone]);
+// // const selectedWards =this.wardFilter.setValue([...this.hierarchySelection.ward]);
+// // const selectedBeats = this.beatFilter.setValue([...this.hierarchySelection.beat]);
 
-// const selectedMachines = this.machineFilter.value || [];
-// const selectedStockStatuses = this.stockStatusFilter.value || [];
-// const selectedMachineStatuses = this.machineStatusFilter.value || [];
-// const selectedBurnStatusesRaw = this.buttonStatusFilter.value || [];  // Convert to string
+// // const selectedStates = this.stateFilter.value || [];
+// //   const selectedDistricts = this.districtFilter.value || [];
+// //   const selectedZones = this.zoneFilter.value || [];
+// //   const selectedWards = this.wardFilter.value || [];
+// //   const selectedBeats = this.beatFilter.value || [];
 
+// const selectedStates = this.hierarchySelection.state || [];
+// const selectedDistricts = this.hierarchySelection.district || [];
+// const selectedZones = this.hierarchySelection.zone || [];
+// const selectedWards = this.hierarchySelection.ward || [];
+// const selectedBeats = this.hierarchySelection.beat || [];
+
+//   const selectedMachines = this.machineFilter.value || [];
+//   const selectedStockStatuses = this.stockStatusFilter.value || [];
+
+//   const selectedMachineStatuses = this.machineStatusFilter.value || [];
+//   const selectedBurnStatusesRaw = this.buttonStatusFilter.value || [];
+
+//   console.log("Selected states from dropdown:", selectedStates);
 
 
 //   // Log all filter values for debugging
-//   console.log("🗺️ 🗺️🗺️🗺️Current Filter Values:", {
+//   console.log("🗺️ Current Filter Values:", {
 //     states: selectedStates,
 //     districts: selectedDistricts,
 //     zones: selectedZones,
@@ -892,302 +1164,143 @@ closePopup(popupElement: Element, machineId: string | null): void {
 //     burnStatuses: selectedBurnStatusesRaw
 //   });
 
-// // console.log("🔥 Raw Burn Status Filter Value:", selectedBurnStatusesRaw);
-//   // 🔹 Map burn status labels (e.g., "Burning", "Idle") to numeric values (1, 0)
+//   // Map burn status labels to numeric values
 //   const burnStatusMapping: Record<string, number> = {
 //     "Burning": 2,
 //     "Idle": 1
-// };
+//   };
 
-// const selectedBurnStatuses = selectedBurnStatusesRaw.map((status: string) => burnStatusMapping[status]).filter(v => v !== undefined);
+//   const selectedBurnStatuses = selectedBurnStatusesRaw
+//     .map((status: string) => burnStatusMapping[status])
+//     .filter(v => v !== undefined);
 
-// // console.log("🔥 Selected Burn Statuses (Mapped):", selectedBurnStatuses);
-// // console.log("🔥 Burn Status in Machines:", this.machines.map(m => `${m.machineId}: ${m.burnStatus}`));
-
-
-// console.log("🗺️ Selected Filters:", {
-//   selectedStates,
-//   selectedDistricts,
-//   selectedZones,
-//   selectedWards,
-//   selectedBeats,
-
-//   selectedMachines,
-//   selectedStockStatuses,
-//   selectedMachineStatuses,
-//   selectedBurnStatuses
-// });
-
-
-//     // // ✅ Log Burn Status in Machines
-//     // console.log("🔥 Checking burnStatus values in machines:");
-//     // this.machines.forEach(machine => console.log(`Machine ID: ${machine.machineId}, Burn Status: ${machine.burnStatus}`));
-
-
-//     const filteredMachines = this.machines.filter(machine => {
-//       const stateMatch = selectedStates.length === 0 || selectedStates.includes(machine.state);
-//       const districtMatch = selectedDistricts.length === 0 || selectedDistricts.includes(machine.district);
-//       const zoneMatch = selectedZones.length === 0 || selectedZones.includes(machine.zone);
-//       const wardMatch = selectedWards.length === 0 || selectedWards.includes(machine.ward);
-//       const beatMatch = selectedBeats.length === 0 || selectedBeats.includes(machine.beat);
-//       const machineMatch = selectedMachines.length === 0 || selectedMachines.includes(machine.machineId);
-//       const stockMatch = selectedStockStatuses.length === 0 || selectedStockStatuses.includes(machine.stockStatus);
-//       const statusMatch = selectedMachineStatuses.length === 0 || selectedMachineStatuses.includes(machine.status);
-//       const burnMatch = selectedBurnStatuses.length === 0 || selectedBurnStatuses.includes(machine.burnStatus);
-  
-//       // Detailed debugging for the first machine
-//       if (machine === this.machines[0]) {
-//         console.log('First machine filter details:', {
-//           machine: machine.machineId,
-//           stateMatch,
-//           districtMatch,
-//           zoneMatch,
-//           wardMatch,
-//           beatMatch,
-//           machineMatch,
-//           stockMatch,
-//           statusMatch,
-//           burnMatch
-//         });
-//       }
-  
-//       return stateMatch && districtMatch && zoneMatch && wardMatch && beatMatch && 
-//              machineMatch && stockMatch && statusMatch && burnMatch;
-//     });
-  
-// console.log("🔍 Filtered Machines:", filteredMachines.length);
-
-// if (filteredMachines.length === 0) {
-//   console.warn("⚠️ No matching machines found based on filters.");
-// }
-
-// // Handle overlapping markers
-// const locationMap = new Map<string, number>();
-
-// filteredMachines.forEach(machine => {
-//   if (!machine.location) return;
-
-//   const [lng, lat] = machine.location;
-//   const key = `${lng},${lat}`;
-
-//   if (locationMap.has(key)) {
-//     const count = locationMap.get(key)! + 1;
-//     locationMap.set(key, count);
-
-//     const angle = (count * 45) * (Math.PI / 180);
-//     const radius = 0.000001 * count;
-//     machine.location = [
-//       lng + radius * Math.cos(angle),
-//       lat + radius * Math.sin(angle)
-//     ];
-//   } else {
-//     locationMap.set(key, 1);
+//   // CRITICAL DEBUGGING: Compare selected states to actual states in machines
+//   if (selectedStates.length > 0) {
+//     console.log("🔍 Selected States from filter:", selectedStates);
+//     const availableStates = [...new Set(this.machines.map(m => m.state))];
+//     console.log("🔍 Available States in Machines:", availableStates);
+    
+//     // Check if any selected states exist in the machines
+//     const existingStates = selectedStates.filter(state => availableStates.includes(state));
+//     console.log("🔍 Matching States:", existingStates);
 //   }
 
-//   // Set marker icon dynamically based on stock status
-//   const iconUrl = this.getStockStatusIcon(machine.stockStatus);
+//   // Filter machines based on selected filters
+//   const filteredMachines = this.machines.filter(machine => {
 
-//   const markerElement = document.createElement('div');
-//   markerElement.className = 'custom-marker';
-//   markerElement.style.backgroundImage = `url(${iconUrl})`;
-//   markerElement.style.width = '40px';
-//   markerElement.style.height = '40px';
-//   markerElement.style.backgroundSize = 'contain';
-//   markerElement.style.backgroundRepeat = 'no-repeat';
+//     console.log("this selcted machinessss", this.machines)
+//     // FIX: Check case-insensitive state matching and log specific information
+//     const stateMatches = selectedStates.length === 0 || 
+//                   selectedStates.some(state => {
+//                     const matches = machine.state.toLowerCase() === state.toLowerCase();
+//                     if (selectedStates.includes(state) && !matches) {
+//                       console.log(`State mismatch: Machine state "${machine.state}" != selected "${state}"`);
+//                     }
+//                     return matches;
+//                   });
+    
+//     const districtMatch = selectedDistricts.length === 0 || 
+//                          (machine.district && selectedDistricts.includes(machine.district));
+    
+//     const zoneMatch = selectedZones.length === 0 || 
+//                      (machine.zone && selectedZones.includes(machine.zone));
+    
+//     const wardMatch = selectedWards.length === 0 || 
+//                      (machine.ward && selectedWards.includes(machine.ward));
+    
+//     const beatMatch = selectedBeats.length === 0 || 
+//                      (machine.beat && selectedBeats.includes(machine.beat));
+    
+//     const machineMatch = selectedMachines.length === 0 || 
+//                          selectedMachines.includes(machine.machineId);
+    
+//     const stockMatch = selectedStockStatuses.length === 0 || 
+//                        selectedStockStatuses.includes(machine.stockStatus);
+    
+//     const statusMatch = selectedMachineStatuses.length === 0 || 
+//                         selectedMachineStatuses.includes(machine.status);
+    
+//     const burnMatch = selectedBurnStatuses.length === 0 || 
+//                       selectedBurnStatuses.includes(machine.burnStatus);
 
-
-//   // ✅ Zoom on double-click
-// markerElement.addEventListener('dblclick', (e) => {
-//   e.stopPropagation(); // Prevent map's default double-click zoom
-//   this.map.flyTo({
-//     center: machine.location,
-//     zoom: 15,  // 🔍 Adjust zoom level as needed
-//     speed: 5,
-//     curve: 1,
-//     easing(t) {
-//       return t;
+//     // Track why a machine is being filtered out (if it is)
+//     if (selectedStates.length > 0 && !stateMatches) {
+//       console.log(`Machine ${machine.machineId} filtered out - state: ${machine.state}`);
 //     }
+
+//     return stateMatches && districtMatch && zoneMatch && wardMatch && beatMatch && 
+//            machineMatch && stockMatch && statusMatch && burnMatch;
 //   });
-// });
 
+//   console.log("🔍 Filtered Machines:", filteredMachines.length);
 
+//   if (filteredMachines.length === 0) {
+//     console.warn("⚠️ No matching machines found based on filters.");
+//   }
 
+//   // Handle overlapping markers
+//   const locationMap = new Map<string, number>();
 
+//   filteredMachines.forEach(machine => {
+//     if (!machine.location) return;
 
+//     const [lng, lat] = machine.location;
+//     const key = `${lng},${lat}`;
 
+//     if (locationMap.has(key)) {
+//       const count = locationMap.get(key)! + 1;
+//       locationMap.set(key, count);
 
-// Fix for updateMap to correctly filter based on states
-updateMap(): void {
-  console.log("🔄 updateMap() called!");
+//       const angle = (count * 45) * (Math.PI / 180);
+//       const radius = 0.000001 * count;
+//       machine.location = [
+//         lng + radius * Math.cos(angle),
+//         lat + radius * Math.sin(angle)
+//       ];
+//     } else {
+//       locationMap.set(key, 1);
+//     }
 
-  // Clear old markers
-  this.markers.forEach(marker => marker.remove());
-  this.markers = [];
+//     // Set marker icon dynamically based on stock status
+//     const iconUrl = this.getStockStatusIcon(machine.stockStatus);
 
-  // Get selected filters
-  console.log("All available states:", this.states);
-  const selectedStates = this.stateFilter.value || [];
-  console.log("Selected states from dropdown:", selectedStates);
-  
-  const selectedDistricts = this.districtFilter.value || [];
-  const selectedZones = this.zoneFilter.value || [];
-  const selectedWards = this.wardFilter.value || [];
-  const selectedBeats = this.beatFilter.value || [];
-  const selectedMachines = this.machineFilter.value || [];
-  const selectedStockStatuses = this.stockStatusFilter.value || [];
-  const selectedMachineStatuses = this.machineStatusFilter.value || [];
-  const selectedBurnStatusesRaw = this.buttonStatusFilter.value || [];
+//     const markerElement = document.createElement('div');
+//     markerElement.className = 'custom-marker';
+//     markerElement.style.backgroundImage = `url(${iconUrl})`;
+//     markerElement.style.width = '40px';
+//     markerElement.style.height = '40px';
+//     markerElement.style.backgroundSize = 'contain';
+//     markerElement.style.backgroundRepeat = 'no-repeat';
 
-  // Log all filter values for debugging
-  console.log("🗺️ Current Filter Values:", {
-    states: selectedStates,
-    districts: selectedDistricts,
-    zones: selectedZones,
-    wards: selectedWards,
-    beats: selectedBeats,
-    machines: selectedMachines,
-    stockStatuses: selectedStockStatuses,
-    machineStatuses: selectedMachineStatuses,
-    burnStatuses: selectedBurnStatusesRaw
-  });
+//     // Zoom on double-click
+//     markerElement.addEventListener('dblclick', (e) => {
+//       e.stopPropagation(); 
+//       this.map.flyTo({
+//         center: machine.location,
+//         zoom: 15,
+//         speed: 5,
+//         curve: 1,
+//         easing(t) {
+//           return t;
+//         }
+//       });
+//     });
 
-  // Map burn status labels to numeric values
-  const burnStatusMapping: Record<string, number> = {
-    "Burning": 2,
-    "Idle": 1
-  };
+// const popup = new maplibregl.Popup({
+//   closeButton: false,  // Disable default close button, we'll use our custom one
+//   closeOnClick: true  // Disable closing when clicking map
+// }).setHTML(this.generatePopupHTML(machine));
 
-  const selectedBurnStatuses = selectedBurnStatusesRaw
-    .map((status: string) => burnStatusMapping[status])
-    .filter(v => v !== undefined);
+//   // Create marker
+//   const newMarker = new maplibregl.Marker({ element: markerElement })
+//     .setLngLat(machine.location)
+//     // .setPopup(new maplibregl.Popup().setHTML(this.generatePopupHTML(machine)))
+//     .setPopup(popup)
+//     .addTo(this.map);
 
-  // CRITICAL DEBUGGING: Compare selected states to actual states in machines
-  if (selectedStates.length > 0) {
-    console.log("🔍 Selected States from filter:", selectedStates);
-    const availableStates = [...new Set(this.machines.map(m => m.state))];
-    console.log("🔍 Available States in Machines:", availableStates);
-    
-    // Check if any selected states exist in the machines
-    const existingStates = selectedStates.filter(state => availableStates.includes(state));
-    console.log("🔍 Matching States:", existingStates);
-  }
-
-  // Filter machines based on selected filters
-  const filteredMachines = this.machines.filter(machine => {
-
-    console.log("this selcted machinessss", this.machines)
-    // FIX: Check case-insensitive state matching and log specific information
-    const stateMatches = selectedStates.length === 0 || 
-                  selectedStates.some(state => {
-                    const matches = machine.state.toLowerCase() === state.toLowerCase();
-                    if (selectedStates.includes(state) && !matches) {
-                      console.log(`State mismatch: Machine state "${machine.state}" != selected "${state}"`);
-                    }
-                    return matches;
-                  });
-    
-    const districtMatch = selectedDistricts.length === 0 || 
-                         (machine.district && selectedDistricts.includes(machine.district));
-    
-    const zoneMatch = selectedZones.length === 0 || 
-                     (machine.zone && selectedZones.includes(machine.zone));
-    
-    const wardMatch = selectedWards.length === 0 || 
-                     (machine.ward && selectedWards.includes(machine.ward));
-    
-    const beatMatch = selectedBeats.length === 0 || 
-                     (machine.beat && selectedBeats.includes(machine.beat));
-    
-    const machineMatch = selectedMachines.length === 0 || 
-                         selectedMachines.includes(machine.machineId);
-    
-    const stockMatch = selectedStockStatuses.length === 0 || 
-                       selectedStockStatuses.includes(machine.stockStatus);
-    
-    const statusMatch = selectedMachineStatuses.length === 0 || 
-                        selectedMachineStatuses.includes(machine.status);
-    
-    const burnMatch = selectedBurnStatuses.length === 0 || 
-                      selectedBurnStatuses.includes(machine.burnStatus);
-
-    // Track why a machine is being filtered out (if it is)
-    if (selectedStates.length > 0 && !stateMatches) {
-      console.log(`Machine ${machine.machineId} filtered out - state: ${machine.state}`);
-    }
-
-    return stateMatches && districtMatch && zoneMatch && wardMatch && beatMatch && 
-           machineMatch && stockMatch && statusMatch && burnMatch;
-  });
-
-  console.log("🔍 Filtered Machines:", filteredMachines.length);
-
-  if (filteredMachines.length === 0) {
-    console.warn("⚠️ No matching machines found based on filters.");
-  }
-
-  // Handle overlapping markers
-  const locationMap = new Map<string, number>();
-
-  filteredMachines.forEach(machine => {
-    if (!machine.location) return;
-
-    const [lng, lat] = machine.location;
-    const key = `${lng},${lat}`;
-
-    if (locationMap.has(key)) {
-      const count = locationMap.get(key)! + 1;
-      locationMap.set(key, count);
-
-      const angle = (count * 45) * (Math.PI / 180);
-      const radius = 0.000001 * count;
-      machine.location = [
-        lng + radius * Math.cos(angle),
-        lat + radius * Math.sin(angle)
-      ];
-    } else {
-      locationMap.set(key, 1);
-    }
-
-    // Set marker icon dynamically based on stock status
-    const iconUrl = this.getStockStatusIcon(machine.stockStatus);
-
-    const markerElement = document.createElement('div');
-    markerElement.className = 'custom-marker';
-    markerElement.style.backgroundImage = `url(${iconUrl})`;
-    markerElement.style.width = '40px';
-    markerElement.style.height = '40px';
-    markerElement.style.backgroundSize = 'contain';
-    markerElement.style.backgroundRepeat = 'no-repeat';
-
-    // Zoom on double-click
-    markerElement.addEventListener('dblclick', (e) => {
-      e.stopPropagation(); 
-      this.map.flyTo({
-        center: machine.location,
-        zoom: 15,
-        speed: 5,
-        curve: 1,
-        easing(t) {
-          return t;
-        }
-      });
-    });
-
-const popup = new maplibregl.Popup({
-  closeButton: false,  // Disable default close button, we'll use our custom one
-  closeOnClick: true  // Disable closing when clicking map
-}).setHTML(this.generatePopupHTML(machine));
-
-  // Create marker
-  const newMarker = new maplibregl.Marker({ element: markerElement })
-    .setLngLat(machine.location)
-    // .setPopup(new maplibregl.Popup().setHTML(this.generatePopupHTML(machine)))
-    .setPopup(popup)
-    .addTo(this.map);
-
-  this.markers.push(newMarker);
-}); 
-}
+//   this.markers.push(newMarker);
+// }); 
+// }
 
  
   getStockStatusIcon(status: number): string {
@@ -1254,13 +1367,86 @@ case 2: burningStatusText = 'Burning'; break;
 
 
   
-    toggleSelectAll(filterControl: FormControl, items: string[]): void {
-      const allSelected = filterControl.value.length === items.length;
-      filterControl.setValue(allSelected ? [] : [...items]); // Toggle selection
-      console.log(`🔹 Updated ${filterControl} Selection: ${filterControl.value}`);
+// toggleSelectAll(selected: any[], options: any[], key: string) {
+//   // Check if all items are already selected
+//   const allSelected = selected.length === options.length && options.length > 0;
+  
+//   if (allSelected) {
+//     // Clear the selection
+//     selected.length = 0;  // This modifies the array in-place
+    
+//     // Clear dependent filters when needed
+//     this.clearDependentSelections(key);
+//   } else {
+//     // Select all items
+//     // First clear the array
+//     selected.length = 0;
+    
+//     // Then add all values from options
+//     options.forEach(option => {
+//       const value = option.ProjectId || option.key || option;
+//       selected.push(value);
+//     });
+//   }
+  
+//   // Update the hierarchy selection
+//   this.updateHierarchySelection(key, [...selected]);
+  
+//   // Rebuild filter chain
+//   this.rebuildFilterChain(key);
+  
+//   // Reload data with updated filters
+//   this.loadMachineData();
+// }
 
-      this.updateMap();
-    }
+
+    // toggleSelectAll(filterControl: FormControl, items: any[], key: string): void {
+    //   const allSelected = filterControl.value.length === items.length;
+    
+    //   // Toggle selection
+    //   if (allSelected) {
+    //     filterControl.setValue([]);
+    
+    //     // Optionally clear dependent selections
+    //     this.clearDependentSelections(key);
+    //   } else {
+    //     // You can customize how to extract the value from item
+    //     const selectedValues = items.map(item => item.ProjectId || item.key || item);
+    //     filterControl.setValue(selectedValues);
+    //   }
+    
+    //   console.log(`🔹 Updated ${key} Selection: ${filterControl.value}`);
+    
+    //   // Update hierarchy and reload
+    //   this.updateHierarchySelection(key, filterControl.value);
+    //   this.rebuildFilterChain(key);
+    //   this.loadMachineData();
+    // }
+    
+
+    // toggleSelectAll(key: string, items: any[], filterControl: FormControl) {
+    //   const currentValues = filterControl.value || [];
+    //   const allSelected = currentValues.length === items.length;
+    
+    //   if (allSelected) {
+    //     filterControl.setValue([]);
+    //     this.clearDependentSelections(key);
+    //   } else {
+    //     const selectedValues = items.map(item => {
+    //       if (typeof item === 'object') {
+    //         return item.ProjectId ?? item.key ?? item.id ?? item.value ?? '';
+    //       }
+    //       return item;
+    //     });
+    
+    //     filterControl.setValue([...selectedValues]);
+    //   }
+    
+    //   this.updateHierarchySelection(key, filterControl.value);
+    //   this.rebuildFilterChain(key);
+    //   this.loadMachineData();
+    // }
+        
          
     toggleDropdown(key: string) {
       // Close all other dropdowns
@@ -1275,30 +1461,190 @@ case 2: burningStatusText = 'Burning'; break;
     
     // Second change: Fix the issue with deselecting and reselecting in dropdowns
     
-    // Updated toggleSelection method to properly handle deselection and reselection
-    toggleSelection(selectedArray: any[], value: any, key: string) {
-      const index = selectedArray.indexOf(value);
-      if (index >= 0) {
-        // Deselecting an item
-        selectedArray.splice(index, 1);
+    // // Updated toggleSelection method to properly handle deselection and reselection
+    // toggleSelection(selectedArray: any[], value: any, key: string) {
+    //   const index = selectedArray.indexOf(value);
+    //   if (index >= 0) {
+    //     // Deselecting an item
+    //     selectedArray.splice(index, 1);
         
-        // Reset dependent selections when a parent item is deselected
-       // this.clearDependentSelections(key);
-      } else {
-        // Selecting an item
-        selectedArray.push(value);
-      }
+    //     // Reset dependent selections when a parent item is deselected
+    //    // this.clearDependentSelections(key);
+    //   } else {
+    //     // Selecting an item
+    //     selectedArray.push(value);
+    //   }
     
-      // Update the hierarchy selection
-     // this.updateHierarchySelection(key, selectedArray);
-      
-      // Always rebuild the entire filter chain to ensure consistency
-      this.rebuildFilterChain(key);
-      
-      // Reload data with updated filters
-      this.loadMachineData();
-    }
 
+    //   this.updateHierarchySelection(key, selectedArray);
+
+    //   // Update the hierarchy selection
+    //  // this.updateHierarchySelection(key, selectedArray);
+      
+    //   // Always rebuild the entire filter chain to ensure consistency
+    //   this.rebuildFilterChain(key);
+      
+    //   // Reload data with updated filters
+    //   this.loadMachineData();
+    // }
+
+
+    // FIX 2: Improved toggleSelection implementation to properly handle multiple selections
+// toggleSelection(selectedArray: any[], value: any, key: string) {
+//   const index = selectedArray.indexOf(value);
+//   if (index >= 0) {
+//     // Deselecting an item
+//     selectedArray.splice(index, 1);
+//   } else {
+//     // Selecting an item
+//     selectedArray.push(value);
+//   }
+
+//   // Update the hierarchy selection with a new array reference
+//   this.updateHierarchySelection(key, [...selectedArray]);
+  
+//   // Always rebuild the entire filter chain to ensure consistency
+//   this.rebuildFilterChain(key);
+  
+//   // Reload data with updated filters
+//   this.loadMachineData();
+// }
+
+
+
+    // toggleSelection(selectedArray: any[], value: any, key: string) {
+    //   const index = selectedArray.indexOf(value);
+    //   if (index >= 0) {
+    //     // Deselecting an item
+    //     selectedArray.splice(index, 1);
+        
+    //     // Reset dependent selections when a parent item is deselected
+    //     // this.clearDependentSelections(key);
+    //   } else {
+    //     // Selecting an item
+    //     selectedArray.push(value);
+    //   }
+    
+    //   // Update the hierarchy selection
+    //   this.updateHierarchySelection(key, selectedArray);
+      
+    //   // Always rebuild the entire filter chain to ensure consistency
+    //   this.rebuildFilterChain(key);
+      
+    //   // Reload data with updated filters
+    //   this.loadMachineData();
+    // }
+    
+    // updateHierarchySelection(key: string, selectedArray: any[]) {
+    //   switch (key) {
+    //     case 'projects':
+    //       this.hierarchySelection.project = [...selectedArray];
+    //       break;
+    //     case 'zones':
+    //     case 'state':
+    //       this.hierarchySelection.state = [...selectedArray];
+    //       break;
+    //     case 'wards':
+    //     case 'district':
+    //       this.hierarchySelection.district = [...selectedArray];
+    //       break;
+    //     case 'selectedSubZones':
+    //     case 'zone':
+    //       this.hierarchySelection.zone = [...selectedArray];
+    //       break;
+    //     case 'selectedWardList':
+    //     case 'ward':
+    //       this.hierarchySelection.ward = [...selectedArray];
+    //       break;
+    //     case 'selectedBeatList':
+    //     case 'beat':
+    //       this.hierarchySelection.beat = [...selectedArray];
+    //       break;
+    //   }
+    // }
+
+
+    clearDependentSelections(key: string) {
+      switch (key) {
+        case 'project':
+          if (this.selectedProjects.length === 0) {
+            this.selectedZones = [];
+            this.selectedWards = [];
+            this.selectedSubZones = [];
+            this.selectedWardList = [];
+            this.selectedBeatList = [];
+            this.selectedBeats = [];
+            
+            // Clear hierarchy selections as well
+            this.hierarchySelection.state = [];
+            this.hierarchySelection.district = [];
+            this.hierarchySelection.zone = [];
+            this.hierarchySelection.ward = [];
+            this.hierarchySelection.beat = [];
+          }
+          break;
+        case 'zones':
+        case 'state':
+          if (this.selectedZones.length === 0) {
+            this.selectedWards = [];
+            this.selectedSubZones = [];
+            this.selectedWardList = [];
+            this.selectedBeatList = [];
+            this.selectedBeats = [];
+            
+            // Clear hierarchy selections
+            this.hierarchySelection.district = [];
+            this.hierarchySelection.zone = [];
+            this.hierarchySelection.ward = [];
+            this.hierarchySelection.beat = [];
+          }
+          break;
+        case 'wards':
+        case 'district':
+          if (this.selectedWards.length === 0) {
+            this.selectedSubZones = [];
+            this.selectedWardList = [];
+            this.selectedBeatList = [];
+            this.selectedBeats = [];
+            
+            // Clear hierarchy selections
+            this.hierarchySelection.zone = [];
+            this.hierarchySelection.ward = [];
+            this.hierarchySelection.beat = [];
+          }
+          break;
+        case 'selectedSubZones':
+        case 'zone':
+          if (this.selectedSubZones.length === 0) {
+            this.selectedWardList = [];
+            this.selectedBeatList = [];
+            this.selectedBeats = [];
+            
+            // Clear hierarchy selections
+            this.hierarchySelection.ward = [];
+            this.hierarchySelection.beat = [];
+          }
+          break;
+        case 'selectedWardList':
+        case 'ward':
+          if (this.selectedWardList.length === 0) {
+            this.selectedBeatList = [];
+            this.selectedBeats = [];
+            
+            // Clear hierarchy selection
+            this.hierarchySelection.beat = [];
+          }
+          break;
+        case 'selectedBeatList':
+        case 'beat':
+          if (this.selectedBeatList.length === 0) {
+            this.selectedBeats = [];
+          }
+          break;
+      }
+    }
+    
+    
     rebuildFilterChain(startKey: string) {
       // Determine where to start rebuilding based on the changed key
       switch(startKey) {
