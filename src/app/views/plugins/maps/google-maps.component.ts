@@ -6,47 +6,35 @@ import { CommonDataService } from '../../../Common/common-data.service';
 import * as maplibregl from 'maplibre-gl';
 import { Subscription, interval } from 'rxjs';
 
-
-
-// Define interfaces for hierarchical data
 interface Beat {
   beat: string;
   machines: string[];
 }
-
+ 
 interface Ward {
   ward: string;
   beats: Beat[];
 }
-
+ 
 interface Zone {
   zone: string;
   wards: Ward[];
 }
-
+ 
 interface District {
   district: string;
   zones: Zone[];
-  machines: string[] | null;
 }
-
+ 
 interface State {
   state: string;
   districts: District[];
 }
-
+ 
 interface Project {
-  projectId: number;
   projectName: string;
   states: State[];
 }
-
-interface HierarchyResponse {
-  clientId: number;
-  companyName: string;
-  projects: Project[];
-}
-
 
 
 
@@ -58,10 +46,8 @@ interface HierarchyResponse {
 export class GoogleMapsComponent implements OnInit, AfterViewInit {
   private map!: maplibregl.Map;
   private markers: maplibregl.Marker[] = [];
-  isLoading = false;
-  errorMessage = '';
   filterPanelOpen = true;
-  dropdownOpen: { [key: string]: boolean } = {};
+  //dropdownOpen: { [key: string]: boolean } = {};
   machineSearchTerm: string = '';
   districtSearchTerm: string = '';
   stateSearchTerm: string = '';
@@ -89,13 +75,11 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     beatFilter = new FormControl<string[]>([]);
   
  
-  machines: any[] = [];
+
   states: string[] = [];
   districts: string[] = [];
   merchantId: string = '';
-    zones: string[] = [];
-    wards: string[] = [];
-    beats: string[] = [];
+  
     
     stateDistrictMap: { [state: string]: string[] } = {};
     districtZoneMap: { [district: string]: string[] } = {};
@@ -103,8 +87,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     wardBeatMap: { [ward: string]: string[] } = {};
     beatMachineMap: { [beat: string]: string[] } = {};
 
-  
-    hierarchicalData: HierarchyResponse | null = null;
     userId: number = 0;
 
     clientId!: number;
@@ -116,6 +98,102 @@ private autoRefreshSubscription!: Subscription;
 private refreshInterval = 120; // refresh interval in seconds
 private countdownInterval!: any;
 refreshCountdown = 0;
+
+// map data start
+isLoading = false;
+errorMessage = '';
+machines: any[] = [];
+filteredMachines: any[] = [];
+userRole: string = ''; // Stores the role of the logged-in user
+isAdmin: boolean = false;
+isStateUser: boolean = false;
+isDistrictUser: boolean = false;
+isEndUser: boolean = false;
+currentPage: number = 1;
+itemsPerPage: number = 10;
+paginatedMachines: any[] = [];
+searchQuery: string = '';
+searchText: { [key: string]: string } = {
+  projects: '',
+  machineStatuses: '',
+  stockStatuses: '',
+  burnStatuses: '',
+  zones: '',
+  wards: '',
+  beats: ''
+};
+machineStatuses = [
+  { key: '1', value: 'Online' },
+  { key: '2', value: 'Offline' }
+];
+stockStatuses = [
+  { key: '2', value: 'Full (Ok)' },
+  { key: '0', value: 'Empty' },
+  { key: '1', value: 'Low' }
+];
+burnStatuses = [
+  { key: '1', value: 'Idle' },
+  { key: '2', value: 'Burning' }
+];
+selectedMachineStatuses: string[] = ['1', '2'];
+selectedStockStatuses: string[] = [];
+selectedBurnStatuses: string[] = [];
+dropdownOpen: any = {};
+fullData: any[] = [];
+hierarchicalData: any[] = [];
+selectedProjects: any[] = [];
+selectedZones: any[] = [];
+selectedWards: any[] = [];
+selectedSubZones: any[] = [];
+selectedWardList: any[] = [];
+selectedBeatList: any[] = [];
+selectedBeats: any[] = [];
+projects: any[] = [];
+zones: any[] = [];
+wards: any[] = [];
+subZones: any[] = [];
+wardList: any[] = [];
+beatList: any[] = [];
+beats: any[] = [];
+userDatadetails: any[] = [];
+hierarchySelection: {
+  state: string[];
+  district: string[];
+  zone: string[];
+  ward: string[];
+  beat: string[];
+  project: string[];
+} = {
+  state: [],
+  district: [],
+  zone: [],
+  ward: [],
+  beat: [],
+  project: [],
+};
+dashboardData: any = {};
+columnFilters: any = {
+  'Machine ID': '',
+  'Location Name': '',
+  'Location Address': '',
+  "UID": '',
+  'Machine Type': '',
+  'Status': '',
+  'Stock Status': '',
+  'Burning Status': ''
+};
+sortKey: string = '';
+sortDirection: 'asc' | 'desc' = 'asc';
+initialZones: string[] = [];
+initialWards: string[] = [];
+initialBeats: string[] = [];
+initialProjects: { ProjectId: number, projectname: string }[] = [];
+projectsList: any[] = [];
+statesList: any[] = [];
+districtsList: any[] = [];
+machinesList: any[] = [];
+
+//map data end
 
 
  
@@ -129,11 +207,6 @@ refreshCountdown = 0;
     this.merchantId = this.commonDataService.merchantId ?? '';
     this.userId = this.commonDataService.userId ?? 0;
 
-    // console.log("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU",this.userId)
-    // console.log("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU",this.merchantId)
-
- 
-    // Simulate a page reload
     if (!sessionStorage.getItem('reloaded')) {
       sessionStorage.setItem('reloaded', 'true');
       window.location.reload();
@@ -267,6 +340,12 @@ refreshCountdown = 0;
           console.log('✅✅✅✅✅✅Hierarchy API Response:', response);
 
           this.hierarchicalData = response.data;
+          this.fullData = response.data.projects;
+
+          this.projects = this.fullData.map((p: any) => ({
+            ProjectId: p.projectId,
+            projectname: p.projectName
+          }));
 
 
           this.clientId = response.data.clientId;
@@ -279,7 +358,7 @@ refreshCountdown = 0;
       console.log('📌 Extracted clientId:', this.clientId);
 
 
-      this.processHierarchicalData();
+      //this.processHierarchicalData();
           this.loadMachineData(); // Load machine data after hierarchy is processed
           debugger;
         } else {
@@ -295,116 +374,6 @@ refreshCountdown = 0;
       }
     );
     debugger;
-  }
-  
-  processHierarchicalData(): void {
-    if (!this.hierarchicalData) return;
-
-
-    console.log('🔄🔄🔄🔄🔄🔄🔄 Processing hierarchical data...',this.hierarchicalData);
-
-      
-    console.log('🔄 Processing hierarchical data...');
-      
-    // Reset all maps
-    this.stateDistrictMap = {};
-    this.districtZoneMap = {};
-    this.zoneWardMap = {};
-    this.wardBeatMap = {};
-    this.beatMachineMap = {};
-      
-    // Reset all arrays
-    this.states = [];
-    this.districts = [];
-    this.zones = [];
-    this.wards = [];
-    this.beats = [];
-      
-    // Process projects
-    if (this.hierarchicalData.projects && Array.isArray(this.hierarchicalData.projects)) {
-      this.hierarchicalData.projects.forEach(project => {
-        // Process states from each project
-        if (project.states && Array.isArray(project.states)) {
-          project.states.forEach(state => {
-            const stateName = state.state;
-            if (!this.states.includes(stateName)) {
-              this.states.push(stateName);
-
-            }
-              
-            if (!this.stateDistrictMap[stateName]) {
-              this.stateDistrictMap[stateName] = [];
-            }
-              
-            // Process districts
-            if (state.districts && Array.isArray(state.districts)) {
-              state.districts.forEach(district => {
-                const districtName = district.district;
-                if (!this.stateDistrictMap[stateName].includes(districtName)) {
-                  this.stateDistrictMap[stateName].push(districtName);
-                }
-                  
-                if (!this.districtZoneMap[districtName]) {
-                  this.districtZoneMap[districtName] = [];
-                }
-                  
-                // Process zones
-                if (district.zones && Array.isArray(district.zones)) {
-                  district.zones.forEach(zone => {
-                    const zoneName = zone.zone;
-                    if (!this.districtZoneMap[districtName].includes(zoneName)) {
-                      this.districtZoneMap[districtName].push(zoneName);
-                    }
-                      
-                    if (!this.zoneWardMap[zoneName]) {
-                      this.zoneWardMap[zoneName] = [];
-                    }
-                      
-                    // Process wards
-                    if (zone.wards && Array.isArray(zone.wards)) {
-                      zone.wards.forEach(ward => {
-                        const wardName = ward.ward;
-                        if (!this.zoneWardMap[zoneName].includes(wardName)) {
-                          this.zoneWardMap[zoneName].push(wardName);
-                        }
-                          
-                        if (!this.wardBeatMap[wardName]) {
-                          this.wardBeatMap[wardName] = [];
-                        }
-                          
-                        // Process beats
-                        if (ward.beats && Array.isArray(ward.beats)) {
-                          ward.beats.forEach(beat => {
-                            const beatName = beat.beat;
-                            if (!this.wardBeatMap[wardName].includes(beatName)) {
-                              this.wardBeatMap[wardName].push(beatName);
-                            }
-                              
-                            // Store machines for this beat
-                            this.beatMachineMap[beatName] = beat.machines || [];
-                          });
-                        }
-                      });
-                    }
-                  });
-                }
-              });
-            }
-          });
-        }
-      });
-
-
-    }
-      
-    // Log the processed data
-    console.log('📊📊📊📊 Processed hierarchical data:');
-    console.log('States:', this.states);
-    console.log('State-District Map:', this.stateDistrictMap);
-    console.log('District-Zone Map:', this.districtZoneMap);
-    console.log('Zone-Ward Map:', this.zoneWardMap);
-    console.log('Ward-Beat Map:', this.wardBeatMap);
-    console.log('Beat-Machine Map:', this.beatMachineMap);
   }
   
   
@@ -1204,155 +1173,6 @@ updateMap(): void {
       });
     });
 
-
-// // Fix 2: Updated updateMap method to properly filter machines
-// updateMap(): void {
-//   console.log("🔄 updateMap() called!");
-
-//   // Clear old markers
-//   this.markers.forEach(marker => marker.remove());
-//   this.markers = [];
-
-//   // Get selected filters
-
-//   console.log("stsnb cxab cbnx cnbx cbn xcnbtstst", this.states)
-
-//   const selectedStates = this.stateFilter.value || [];
-
-//   console.log(" SELCTED STATE stsnb cxab cbnx cnbx cbn xcnbtstst", selectedStates)
-
-//   const selectedDistricts = this.districtFilter.value || [];
-//   const selectedZones = this.zoneFilter.value || [];
-//   const selectedWards = this.wardFilter.value || [];
-//   const selectedBeats = this.beatFilter.value || [];
-//   const selectedMachines = this.machineFilter.value || [];
-//   const selectedStockStatuses = this.stockStatusFilter.value || [];
-//   const selectedMachineStatuses = this.machineStatusFilter.value || [];
-//   const selectedBurnStatusesRaw = this.buttonStatusFilter.value || [];
-
-//   // Log all filter values for debugging
-//   console.log("🗺️ 🗺️🗺️🗺️🗺️🗺️🗺️🗺️🗺️🗺️Current Filter Values:", {
-//     states: selectedStates,
-//     districts: selectedDistricts,
-//     zones: selectedZones,
-//     wards: selectedWards,
-//     beats: selectedBeats,
-//     machines: selectedMachines,
-//     stockStatuses: selectedStockStatuses,
-//     machineStatuses: selectedMachineStatuses,
-//     burnStatuses: selectedBurnStatusesRaw
-//   });
-
-//   // Map burn status labels to numeric values
-//   const burnStatusMapping: Record<string, number> = {
-//     "Burning": 2,
-//     "Idle": 1
-//   };
-
-//   const selectedBurnStatuses = selectedBurnStatusesRaw.map((status: string) => burnStatusMapping[status]).filter(v => v !== undefined);
-
-//   // Fix: Additional debugging to help identify state matching issues
-//   if (selectedStates.length > 0) {
-//     console.log("🔍 Selected States:", selectedStates);
-//     console.log("🔍 Available States in Machines:", [...new Set(this.machines.map(m => m.state))]);
-//   }
-
-//   const filteredMachines = this.machines.filter(machine => {
-//     // Fix: Improved state matching logic to handle empty strings
-//     const stateMatch = selectedStates.length === 0 || 
-//                        (machine.state && selectedStates.includes(machine.state));
-    
-//     const districtMatch = selectedDistricts.length === 0 || 
-//                          (machine.district && selectedDistricts.includes(machine.district));
-    
-//     const zoneMatch = selectedZones.length === 0 || 
-//                      (machine.zone && selectedZones.includes(machine.zone));
-    
-//     const wardMatch = selectedWards.length === 0 || 
-//                      (machine.ward && selectedWards.includes(machine.ward));
-    
-//     const beatMatch = selectedBeats.length === 0 || 
-//                      (machine.beat && selectedBeats.includes(machine.beat));
-    
-//     const machineMatch = selectedMachines.length === 0 || 
-//                          selectedMachines.includes(machine.machineId);
-    
-//     const stockMatch = selectedStockStatuses.length === 0 || 
-//                        selectedStockStatuses.includes(machine.stockStatus);
-    
-//     const statusMatch = selectedMachineStatuses.length === 0 || 
-//                         selectedMachineStatuses.includes(machine.status);
-    
-//     const burnMatch = selectedBurnStatuses.length === 0 || 
-//                       selectedBurnStatuses.includes(machine.burnStatus);
-
-//     // Detailed debugging for matching
-//     if (selectedStates.length > 0 && !stateMatch) {
-//       console.log(`Machine ${machine.machineId} state ${machine.state} not in selected states ${selectedStates}`);
-//     }
-
-//     return stateMatch && districtMatch && zoneMatch && wardMatch && beatMatch && 
-//            machineMatch && stockMatch && statusMatch && burnMatch;
-//   });
-
-//   console.log("🔍 Filtered Machines:", filteredMachines.length);
-
-//   if (filteredMachines.length === 0) {
-//     console.warn("⚠️ No matching machines found based on filters.");
-//   }
-
-//   // Rest of the updateMap function remains the same
-//   // Handle overlapping markers
-//   const locationMap = new Map<string, number>();
-
-//   filteredMachines.forEach(machine => {
-//     if (!machine.location) return;
-
-//     const [lng, lat] = machine.location;
-//     const key = `${lng},${lat}`;
-
-//     if (locationMap.has(key)) {
-//       const count = locationMap.get(key)! + 1;
-//       locationMap.set(key, count);
-
-//       const angle = (count * 45) * (Math.PI / 180);
-//       const radius = 0.000001 * count;
-//       machine.location = [
-//         lng + radius * Math.cos(angle),
-//         lat + radius * Math.sin(angle)
-//       ];
-//     } else {
-//       locationMap.set(key, 1);
-//     }
-
-//     // Set marker icon dynamically based on stock status
-//     const iconUrl = this.getStockStatusIcon(machine.stockStatus);
-
-//     const markerElement = document.createElement('div');
-//     markerElement.className = 'custom-marker';
-//     markerElement.style.backgroundImage = `url(${iconUrl})`;
-//     markerElement.style.width = '40px';
-//     markerElement.style.height = '40px';
-//     markerElement.style.backgroundSize = 'contain';
-//     markerElement.style.backgroundRepeat = 'no-repeat';
-
-//     // Zoom on double-click
-//     markerElement.addEventListener('dblclick', (e) => {
-//       e.stopPropagation(); 
-//       this.map.flyTo({
-//         center: machine.location,
-//         zoom: 15,
-//         speed: 5,
-//         curve: 1,
-//         easing(t) {
-//           return t;
-//         }
-//       });
-//     });
-
-
-
-// In your updateMap method, create the popup with closeButton: false
 const popup = new maplibregl.Popup({
   closeButton: false,  // Disable default close button, we'll use our custom one
   closeOnClick: true  // Disable closing when clicking map
@@ -1366,15 +1186,7 @@ const popup = new maplibregl.Popup({
     .addTo(this.map);
 
   this.markers.push(newMarker);
-
-
-  
 }); 
-
-console.log("✅ Markers updated. Current count:", this.markers.length);
-
-
-
 }
 
  
@@ -1441,24 +1253,7 @@ case 2: burningStatusText = 'Burning'; break;
 }
 
 
-
-    // toggleDropdown(filterKey: string): void {
-    //   this.dropdownOpen[filterKey] = !this.dropdownOpen[filterKey];
-    //   this.cdr.detectChanges();
-    // }before adding the dropdwon fix
-    toggleDropdown(filterKey: string): void {
-      const isCurrentlyOpen = this.dropdownOpen[filterKey];
-   
- 
-      Object.keys(this.dropdownOpen).forEach(key => {
-        this.dropdownOpen[key] = false;
-      });
-   
- 
-      this.dropdownOpen[filterKey] = !isCurrentlyOpen;
-   
-      this.cdr.detectChanges();
-    }
+  
     toggleSelectAll(filterControl: FormControl, items: string[]): void {
       const allSelected = filterControl.value.length === items.length;
       filterControl.setValue(allSelected ? [] : [...items]); // Toggle selection
@@ -1467,22 +1262,238 @@ case 2: burningStatusText = 'Burning'; break;
       this.updateMap();
     }
          
-    toggleSelection(filterControl: FormControl, value: number): void {
-      let selectedValues = filterControl.value || [];
-   
-      if (selectedValues.includes(value)) {
-        selectedValues = selectedValues.filter((v : string | number) => v !== value);
-        console.log("updated selectedValues", selectedValues);
-      } else {
-        selectedValues.push(value);
+    toggleDropdown(key: string) {
+      // Close all other dropdowns
+      for (const dropdownKey in this.dropdownOpen) {
+        if (dropdownKey !== key) {
+          this.dropdownOpen[dropdownKey] = false;
+        }
       }
-   
-      filterControl.setValue(selectedValues);
-      console.log(`🔹 Updated Filter Selection: ${selectedValues}`);
-
-      this.updateMap();
+      // Toggle the selected dropdown
+      this.dropdownOpen[key] = !this.dropdownOpen[key];
     }
-         
+    
+    // Second change: Fix the issue with deselecting and reselecting in dropdowns
+    
+    // Updated toggleSelection method to properly handle deselection and reselection
+    toggleSelection(selectedArray: any[], value: any, key: string) {
+      const index = selectedArray.indexOf(value);
+      if (index >= 0) {
+        // Deselecting an item
+        selectedArray.splice(index, 1);
+        
+        // Reset dependent selections when a parent item is deselected
+       // this.clearDependentSelections(key);
+      } else {
+        // Selecting an item
+        selectedArray.push(value);
+      }
+    
+      // Update the hierarchy selection
+     // this.updateHierarchySelection(key, selectedArray);
+      
+      // Always rebuild the entire filter chain to ensure consistency
+      this.rebuildFilterChain(key);
+      
+      // Reload data with updated filters
+      this.loadMachineData();
+    }
+
+    rebuildFilterChain(startKey: string) {
+      // Determine where to start rebuilding based on the changed key
+      switch(startKey) {
+        case 'projects':
+          this.filterStates();
+          this.filterWards();
+          this.filterSubZones();
+          this.filterWardList();
+          this.filterBeatList();
+          this.filterMachines();
+          break;
+        case 'zones':
+        case 'state':
+          this.filterWards();
+          this.filterSubZones();
+          this.filterWardList();
+          this.filterBeatList();
+          this.filterMachines();
+          break;
+        case 'wards':
+        case 'district':
+          this.filterSubZones();
+          this.filterWardList();
+          this.filterBeatList();
+          this.filterMachines();
+          break;
+        case 'selectedSubZones':
+        case 'zone':
+          this.filterWardList();
+          this.filterBeatList();
+          this.filterMachines();
+          break;
+        case 'selectedWardList':
+        case 'ward':
+          this.filterBeatList();
+          this.filterMachines();
+          break;
+        case 'selectedBeatList':
+        case 'beat':
+          this.filterMachines();
+          break;
+      }
+    }
+    filterStates() {
+      this.zones = [];
+      this.selectedZones = [];
+     
+      this.selectedProjects.forEach(pid => {
+        const project = this.fullData.find(p => p.projectId === pid);
+        project?.states?.forEach((stateobj: any) => {
+          if (!this.zones.includes(stateobj.state)) {
+            this.zones.push(stateobj.state);
+          }
+        });
+      });
+     
+     // this.filterWards();
+    }
+     
+    filterWards() {
+      this.wards = [];
+      this.selectedWards = [];
+     
+      this.selectedProjects.forEach(pid => {
+        const project = this.fullData.find(p => p.projectId === pid);
+        project?.states?.forEach((stateobj: any) => {
+          if (this.selectedZones.includes(stateobj.state)) {
+            stateobj.districts?.forEach((districtobj: any) => {
+              if (!this.wards.find(w => w.district === districtobj.district)) {
+                this.wards.push(districtobj.district);
+              }
+            });
+          }
+        });
+      });
+     
+     // this.filterSubZones();
+    }
+     
+    filterSubZones() {
+      this.subZones = [];
+      this.selectedSubZones = [];
+     
+      this.selectedProjects.forEach(pid => {
+        const project = this.fullData.find(p => p.projectId === pid);
+        project?.states?.forEach((stateobj: any) => {
+          if (this.selectedZones.includes(stateobj.state)) {
+            stateobj.districts?.forEach((districtobj: any) => {
+              if (this.selectedWards.includes(districtobj.district)) {
+                districtobj.zones?.forEach((zoneobj: any) => {
+                  if (!this.subZones.includes(zoneobj.zone)) {
+                    this.subZones.push(zoneobj.zone); // Push plain string value
+                  }
+                });
+              }
+            });
+          }
+        });
+      });
+     
+     // this.filterWardList();
+    }
+     
+    filterWardList() {
+      this.wardList = [];
+      this.selectedWardList = [];
+     
+      this.selectedProjects.forEach(pid => {
+        const project = this.fullData.find(p => p.projectId === pid);
+        project?.states?.forEach((stateobj: any) => {
+          if (this.selectedZones.includes(stateobj.state)) {
+            stateobj.districts?.forEach((districtobj: any) => {
+              if (this.selectedWards.includes(districtobj.district)) {
+                districtobj.zones?.forEach((zoneobj: any) => {
+                  if (this.selectedSubZones.includes(zoneobj.zone)) {
+                    zoneobj.wards?.forEach((wardobj: any) => {
+                      if (!this.wardList.includes(wardobj.ward)) {
+                        this.wardList.push(wardobj.ward);
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      });
+     
+      // this.filterBeatList();
+    }
+     
+    filterBeatList() {
+      this.beatList = [];
+      this.selectedBeatList = [];
+     
+      this.selectedProjects.forEach(pid => {
+        const project = this.fullData.find(p => p.projectId === pid);
+        project?.states?.forEach((stateobj: any) => {
+          if (this.selectedZones.includes(stateobj.state)) {
+            stateobj.districts?.forEach((districtobj: any) => {
+              if (this.selectedWards.includes(districtobj.district)) {
+                districtobj.zones?.forEach((zoneobj: any) => {
+                  if (this.selectedSubZones.includes(zoneobj.zone)) {
+                    zoneobj.wards?.forEach((wardobj: any) => {
+                      // ✅ Use selectedWardList here, not wardList
+                      if (this.selectedWardList.includes(wardobj.ward)) {
+                        wardobj.beats?.forEach((beatobj: any) => {
+                          if (!this.beatList.includes(beatobj.beat)) {
+                            this.beatList.push(beatobj.beat);
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      });
+     
+      // this.filterMachines(); // Optional next step
+    }
+     
+    filterMachines() {
+      this.beats = [];
+      this.selectedBeats = [];
+     
+      this.selectedProjects.forEach(pid => {
+        const project = this.fullData.find(p => p.projectId === pid);
+        project?.states?.forEach((stateobj: any) => {
+          if (this.selectedZones.includes(stateobj.state)) {
+            stateobj.districts?.forEach((districtobj: any) => {
+              if (this.selectedWards.includes(districtobj.district)) {
+                districtobj.zones?.forEach((zoneobj: any) => {
+                  if (this.selectedSubZones.includes(zoneobj.zone)) {
+                    zoneobj.wards?.forEach((wardobj: any) => {
+                      if (this.selectedWardList.includes(wardobj.ward)) {
+                        wardobj.beats?.forEach((beatobj: any) => {
+                          if (this.selectedBeatList.includes(beatobj.beat)) {
+                            if (beatobj.machines) {
+                              this.beats.push(...beatobj.machines);
+                            }
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      });
+    }
     refreshFilters(): void {
       console.log('🔄 Refreshing Filters and clearing selections...');
    

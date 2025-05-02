@@ -1,9 +1,7 @@
-
-
-    <div class="refresh-circle">
-      <span class="time">{{ formattedRefreshTime }}</span>
-    </div>
-      
+<div class="refresh-circle">
+  <span class="time">{{ formattedRefreshTime }}</span>
+</div>
+  
 <div class="container-fluid ultra-advanced-map-ui">
   <div *ngIf="errorMessage" class="alert alert-danger text-center">
     {{ errorMessage }}
@@ -18,247 +16,85 @@
             <i class="fas" [ngClass]="{'fa-chevron-down': !filterPanelOpen, 'fa-chevron-up': filterPanelOpen}"></i>
           </button>
         </h4>
-  
+
         <div *ngIf="filterPanelOpen">
           <form>
-            <div class="row">
-     
-              <div class="col-12">
-                <label class="filter-label">Stock Status:</label>
-                <div class="dropdown">
-                  <button class="btn btn-primary dropdown-toggle w-100"
-                          type="button"
-                          (click)="toggleDropdown('stock')">
-                    {{ stockStatusFilter.value.length ? 'Selected (' + stockStatusFilter.value.length + ')' : 'Select Stock Status' }}
-                  </button>
-                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['stock']">
-                    <label *ngFor="let status of stockOptions" class="dropdown-item">
-                      <input type="checkbox"
-                             [checked]="stockStatusFilter.value.includes(status.value)"
-                             (change)="toggleSelection(stockStatusFilter, status.value)">
-                      {{ status.label }}
-                    </label>
-                                </div>
-                </div>
-              </div>
-  
-           
-              <div class="col-12">
-                <label class="filter-label">Burn Status:</label>
-                <div class="dropdown">
-                  <button class="btn btn-primary dropdown-toggle w-100"
-                          type="button"
-                          (click)="toggleDropdown('burnStatus')">
-                    {{ buttonStatusFilter.value.length ? 'Selected (' + buttonStatusFilter.value.length + ')' : 'Select Burn Status' }}
-                  </button>
-                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['burnStatus']">
-                    <label *ngFor="let status of ['Idle', 'Burning']" class="dropdown-item">
-                      <input type="checkbox"
-                             [checked]="buttonStatusFilter.value.includes(status)"
-                             (change)="toggleSelection(buttonStatusFilter, status)">
-                      {{ status }}
-                    </label>
+            <div class="card-body">
+              <div class="container">
+      
+                <!-- Display each filter in its own row -->
+                <div *ngFor="let filter of [
+                  { name: 'Client Name', key: 'projects', selected: selectedProjects, options: projects },
+                  { name: 'Machine Status', key: 'machineStatuses', selected: selectedMachineStatuses, options: machineStatuses },
+                  { name: 'Stock Status', key: 'stockStatuses', selected: selectedStockStatuses, options: stockStatuses },
+                  { name: 'Burn Status', key: 'burnStatuses', selected: selectedBurnStatuses, options: burnStatuses },
+                  { name: 'State', key: 'zones', selected: selectedZones, options: zones },
+                  { name: 'District', key: 'wards', selected: selectedWards, options: wards },
+                  { name: 'Zone', key: 'selectedSubZones', selected: selectedSubZones, options: subZones },
+                  { name: 'Ward', key: 'selectedWardList', selected: selectedWardList, options: wardList },
+                  { name: 'Beat', key: 'selectedBeatList', selected: selectedBeatList, options: beatList },
+                  { name: 'Machines', key: 'beats', selected: selectedBeats, options: beats },
+                ]" class="row filter mb-3">
+                  <div class="col-12">
+                    <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"></ng-container>
                   </div>
                 </div>
-              </div>
-  
-              <div class="col-12">
-                <label class="filter-label">Machine Status:</label>
-                <div class="dropdown">
-                  <button class="btn btn-primary dropdown-toggle w-100"
-                          type="button"
-                          (click)="toggleDropdown('machine')">
-                    {{ machineStatusFilter.value.length ? 'Selected (' + machineStatusFilter.value.length + ')' : 'Select Machine Status' }}
-                  </button>
-                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['machine']">
-                    <label *ngFor="let status of ['Online', 'Offline']" class="dropdown-item">
-                      <input type="checkbox"
-                             [checked]="machineStatusFilter.value.includes(status)"
-                             (change)="toggleSelection(machineStatusFilter, status)">
-                      {{ status }}
-                    </label>
+      
+                <!-- Refresh Button -->
+                <div class="row">
+                  <div class="col-12 text-center mt-3">
+                    <button class="btn btn-danger w-100" (click)="refreshFilters()">
+                      🔄 Refresh
+                    </button>
                   </div>
                 </div>
+      
               </div>
-           
-
-              
-           
-              <div class="col-12">
-                <label class="filter-label">State:</label>
-                <div class="dropdown">
-                  <button class="btn btn-primary dropdown-toggle w-100"
-                          type="button"
-                          (click)="toggleDropdown('state')">
-                    {{ stateFilter.value.length ? 'Selected (' + stateFilter.value.length + ')' : 'Select State' }}
-                  </button>
-                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['state']">
-                 
-                    <label class="dropdown-item">
-                      <input type="checkbox"
-                             [checked]="stateFilter.value.length === states.length"
-                             (change)="toggleSelectAll(stateFilter, states)">
-                      Select All
-                    </label>
-                   
-                    <label *ngFor="let state of states" class="dropdown-item">
-                      <input type="checkbox"
-                             [checked]="stateFilter.value.includes(state)"
-                             (change)="toggleSelection(stateFilter, state)">
-                      {{ state }}
-                    </label>
-                  </div>
-                </div>
-              </div>
-  
-           
-              <div class="col-12">
-                <label class="filter-label">District:</label>
-                <div class="dropdown">
-                  <button class="btn btn-primary dropdown-toggle w-100"
-                          type="button"
-                          (click)="toggleDropdown('district')">
-                    {{ districtFilter.value.length ? 'Selected (' + districtFilter.value.length + ')' : 'Select District' }}
-                  </button>
-                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['district']">
-                 
-                    <label class="dropdown-item">
-                      <input type="checkbox"
-                             [checked]="districtFilter.value.length === districts.length"
-                             (change)="toggleSelectAll(districtFilter, districts)">
-                      Select All
-                    </label>
-                 
-                    <label *ngFor="let district of districts" class="dropdown-item">
-                      <input type="checkbox"
-                             [checked]="districtFilter.value.includes(district)"
-                             (change)="toggleSelection(districtFilter, district)">
-                      {{ district }}
-                    </label>
-                  </div>
-              </div>
-              </div>
-
-<div class="col-12">
-  <label class="filter-label">Zone:</label>
-  <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle w-100"
-            type="button"
-            (click)="toggleDropdown('zone')">
-      {{ zoneFilter.value.length ? 'Selected (' + zoneFilter.value.length + ')' : 'Select Zone' }}
-    </button>
-    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['zone']">
-      <label *ngFor="let zone of zones" class="dropdown-item">
-        <input type="checkbox"
-               [checked]="zoneFilter.value.includes(zone)"
-               (change)="toggleSelection(zoneFilter, zone)">
-        {{ zone }}
-      </label>
-    </div>
-  </div>
-</div>
-
-<div class="col-12">
-  <label class="filter-label">Ward:</label>
-  <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle w-100"
-            type="button"
-            (click)="toggleDropdown('ward')">
-      {{ wardFilter.value.length ? 'Selected (' + wardFilter.value.length + ')' : 'Select Ward' }}
-    </button>
-    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['ward']">
-      <label *ngFor="let ward of wards" class="dropdown-item">
-        <input type="checkbox"
-               [checked]="wardFilter.value.includes(ward)"
-               (change)="toggleSelection(wardFilter, ward)">
-        {{ ward }}
-      </label>
-    </div>
-  </div>
-</div>
-
-<div class="col-12">
-  <label class="filter-label">Beat:</label>
-  <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle w-100"
-            type="button"
-            (click)="toggleDropdown('beat')">
-      {{ beatFilter.value.length ? 'Selected (' + beatFilter.value.length + ')' : 'Select Beat' }}
-    </button>
-    <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['beat']">
-      <label *ngFor="let beat of beats" class="dropdown-item">
-        <input type="checkbox"
-               [checked]="beatFilter.value.includes(beat)"
-               (change)="toggleSelection(beatFilter, beat)">
-        {{ beat }}
-      </label>
-    </div>
-  </div>
-</div>
-             
-              <div class="col-12">
-                <label class="filter-label">Machines:</label>
-                <div class="dropdown">
-                  <button class="btn btn-primary dropdown-toggle w-100"
-                          type="button"
-                          (click)="toggleDropdown('machineId')">
-                    {{ machineFilter.value.length ? 'Selected (' + machineFilter.value.length + ')' : 'Select Machine ID' }}
-                  </button>
-              
-                  <div class="dropdown-menu dropdown-animated show" *ngIf="dropdownOpen['machineId']" style="max-height: 300px; overflow-y: auto;">
-                    <div class="px-2 pb-2">
-                      <input 
-                      type="text" 
-                      [(ngModel)]="machineSearchTerm"
-                      [ngModelOptions]="{standalone: true}" 
-                      class="form-control" 
-                      placeholder="Search Machine ID"
-                    >
-                    </div>
-              
-                    <label class="dropdown-item">
-                      <input type="checkbox"
-                             [checked]="machineFilter.value.length === machines.length"
-                             (change)="toggleSelectAll(machineFilter, machineIds)">
-                      Select All
-                    </label>
-              
-                    <label *ngFor="let machine of machines | filterDropdown: machineSearchTerm" class="dropdown-item">
-                      <input type="checkbox"
-                             [checked]="machineFilter.value.includes(machine.machineId)"
-                             (change)="toggleSelection(machineFilter, machine.machineId)">
-                      {{ machine.machineId }}
-                    </label>
-                  </div>
-                </div>
-              </div>
-              
-  
-              <div class="col-12 text-center mt-3">
-                <button class="btn btn-danger w-100" (click)="refreshFilters()">
-                  🔄 Refresh
-                </button>
-              </div>
-  
             </div>
+      
+            <!-- Dropdown Template -->
+            <ng-template #dropdownTemplate let-filter>
+              <label>{{ filter.name }}</label>
+              <div class="dropdown">
+                <button class="btn btn-light dropdown-toggle w-100" type="button" (click)="toggleDropdown(filter.key)">
+                  {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : filter.name }}
+                </button>
+                <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]" [id]="'dropdown-' + filter.key">
+                  <div *ngIf="['beats', 'wards', 'zones', 'projects'].includes(filter.key)" style="padding: 6px;">
+                    <input type="text" class="form-control" placeholder="Search..." 
+                           [(ngModel)]="searchText[filter.key]" 
+                           [ngModelOptions]="{standalone: true}"
+                           (click)="$event.stopPropagation()" />
+                  </div>
+                  <label class="dropdown-item d-flex align-items-center" style="gap: 6px;">
+                    <input type="checkbox" [checked]="filter.selected.length === filter.options.length && filter.options.length > 0"
+                           (change)="toggleSelectAll(filter.selected, filter.options, filter.key)">
+                    <strong style="margin: 0;">Select All</strong>
+                  </label>
+                  <label *ngFor="let option of filter.options | filterDropdown: searchText[filter.key]" class="dropdown-item">
+                    <input type="checkbox" [checked]="filter.selected.includes(option.ProjectId || option.key || option)" 
+                           (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option, filter.key)">
+                    {{ option.projectname || option.value || option }}
+                  </label>
+                </div>
+              </div>
+            </ng-template>
           </form>
+          
         </div>
       </div>
     </div>
-  
+
     <div class="col-lg-9 col-md-8 col-sm-12 map-column">
       <div class="map-container shadow-lg rounded">
         <div id="map" style="width: 100%; height: 650px;"></div>
-  
+
          
   <div class="zoom-controls">
     <button (click)="zoomIn()">＋</button>
     <button (click)="zoomOut()">－</button>
-  
+
       </div>
     </div>
   </div>
   </div> 
-  
-  
-  
