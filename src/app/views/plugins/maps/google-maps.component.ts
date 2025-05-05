@@ -192,9 +192,11 @@ projectsList: any[] = [];
 statesList: any[] = [];
 districtsList: any[] = [];
 machinesList: any[] = [];
+  clientFilter: any;
 
 //map data end
 
+selectedMapView: string = 'auto'; // Default value
 
  
   constructor(
@@ -202,6 +204,10 @@ machinesList: any[] = [];
     private commonDataService: CommonDataService,
     private cdr: ChangeDetectorRef
   ) {}
+
+
+
+  
  
   ngOnInit(): void {
     this.merchantId = this.commonDataService.merchantId ?? '';
@@ -305,6 +311,22 @@ machinesList: any[] = [];
       clearInterval(this.countdownInterval);
     }
     
+  }
+
+
+  changeMapView(viewType: string): void {
+    // Empty logic placeholder
+    console.log('Map view changed to:', viewType);
+  }
+
+  navigateTo(destination: string): void {
+    // Empty logic placeholder
+    console.log('Navigating to:', destination);
+  }
+
+  navigateToZone(zoneNumber: number): void {
+    // Empty logic placeholder
+    console.log('Navigating to Zone:', zoneNumber);
   }
 
   
@@ -468,7 +490,7 @@ manualRefresh(): void {
       container: 'map',
       style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Ldz7Kz6Xwxrw9kq0aYn3',
       center: [78.9629, 20.5937],
-      zoom: 5
+      zoom: 4.3
     });
  
     this.map.on('load', () => {
@@ -502,6 +524,8 @@ searchTexts: { [key: string]: string } = {};
   }
  
 
+
+  
 
 
 
@@ -1459,111 +1483,6 @@ case 2: burningStatusText = 'Burning'; break;
       this.dropdownOpen[key] = !this.dropdownOpen[key];
     }
     
-    // Second change: Fix the issue with deselecting and reselecting in dropdowns
-    
-    // // Updated toggleSelection method to properly handle deselection and reselection
-    // toggleSelection(selectedArray: any[], value: any, key: string) {
-    //   const index = selectedArray.indexOf(value);
-    //   if (index >= 0) {
-    //     // Deselecting an item
-    //     selectedArray.splice(index, 1);
-        
-    //     // Reset dependent selections when a parent item is deselected
-    //    // this.clearDependentSelections(key);
-    //   } else {
-    //     // Selecting an item
-    //     selectedArray.push(value);
-    //   }
-    
-
-    //   this.updateHierarchySelection(key, selectedArray);
-
-    //   // Update the hierarchy selection
-    //  // this.updateHierarchySelection(key, selectedArray);
-      
-    //   // Always rebuild the entire filter chain to ensure consistency
-    //   this.rebuildFilterChain(key);
-      
-    //   // Reload data with updated filters
-    //   this.loadMachineData();
-    // }
-
-
-    // FIX 2: Improved toggleSelection implementation to properly handle multiple selections
-// toggleSelection(selectedArray: any[], value: any, key: string) {
-//   const index = selectedArray.indexOf(value);
-//   if (index >= 0) {
-//     // Deselecting an item
-//     selectedArray.splice(index, 1);
-//   } else {
-//     // Selecting an item
-//     selectedArray.push(value);
-//   }
-
-//   // Update the hierarchy selection with a new array reference
-//   this.updateHierarchySelection(key, [...selectedArray]);
-  
-//   // Always rebuild the entire filter chain to ensure consistency
-//   this.rebuildFilterChain(key);
-  
-//   // Reload data with updated filters
-//   this.loadMachineData();
-// }
-
-
-
-    // toggleSelection(selectedArray: any[], value: any, key: string) {
-    //   const index = selectedArray.indexOf(value);
-    //   if (index >= 0) {
-    //     // Deselecting an item
-    //     selectedArray.splice(index, 1);
-        
-    //     // Reset dependent selections when a parent item is deselected
-    //     // this.clearDependentSelections(key);
-    //   } else {
-    //     // Selecting an item
-    //     selectedArray.push(value);
-    //   }
-    
-    //   // Update the hierarchy selection
-    //   this.updateHierarchySelection(key, selectedArray);
-      
-    //   // Always rebuild the entire filter chain to ensure consistency
-    //   this.rebuildFilterChain(key);
-      
-    //   // Reload data with updated filters
-    //   this.loadMachineData();
-    // }
-    
-    // updateHierarchySelection(key: string, selectedArray: any[]) {
-    //   switch (key) {
-    //     case 'projects':
-    //       this.hierarchySelection.project = [...selectedArray];
-    //       break;
-    //     case 'zones':
-    //     case 'state':
-    //       this.hierarchySelection.state = [...selectedArray];
-    //       break;
-    //     case 'wards':
-    //     case 'district':
-    //       this.hierarchySelection.district = [...selectedArray];
-    //       break;
-    //     case 'selectedSubZones':
-    //     case 'zone':
-    //       this.hierarchySelection.zone = [...selectedArray];
-    //       break;
-    //     case 'selectedWardList':
-    //     case 'ward':
-    //       this.hierarchySelection.ward = [...selectedArray];
-    //       break;
-    //     case 'selectedBeatList':
-    //     case 'beat':
-    //       this.hierarchySelection.beat = [...selectedArray];
-    //       break;
-    //   }
-    // }
-
-
     clearDependentSelections(key: string) {
       switch (key) {
         case 'project':
@@ -1840,7 +1759,7 @@ case 2: burningStatusText = 'Burning'; break;
         });
       });
     }
-    refreshFilters(): void {
+    refreshFilters1(): void {
       console.log('🔄 Refreshing Filters and clearing selections...');
    
       // Reset all filter FormControls to empty arrays
@@ -1863,7 +1782,46 @@ case 2: burningStatusText = 'Burning'; break;
       // Trigger data reload
       this.loadMachineData();
     }
-             
+
+
+    // refreshFilters(): void {
+    //   console.log('🔄 Refreshing Filters and clearing selections...');
+    
+    //   // Use runOutsideAngular if there's heavy processing (optional)
+    //   this.zone.runOutsideAngular(() => {
+    //     // Reset all FormControl filters
+    //     const filters = [
+    //       this.stateFilter,
+    //       this.districtFilter,
+    //       this.machineFilter,
+    //       this.stockStatusFilter,
+    //       this.buttonStatusFilter,
+    //       this.machineStatusFilter,
+    //       this.zoneFilter,
+    //       this.wardFilter,
+    //       this.beatFilter
+    //     ];
+    
+    //     filters.forEach(f => f.setValue([], { emitEvent: false }));
+    
+    //     // Reset dropdowns
+    //     this.dropdownOpen = {};
+    
+    //     // Force detection & reload data inside Angular zone
+    //     this.zones.run(() => {
+    //       this.loadMachineData();
+    //     });
+    //   });
+    // }
+    
+            
+    refreshFilters(): void {
+      window.location.reload();
+    }
+    
+
+
+
     handleClickOutside(event: MouseEvent): void {
       if (!event.target) return;
       const target = event.target as HTMLElement;

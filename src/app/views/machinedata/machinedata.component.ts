@@ -2064,16 +2064,10 @@ toggleSelectAll(selectedArray: any[], options: any[], key: string) {
       
     
       merchantId,
-      // machineId: this.selectedBeats.length > 0 ? [...this.selectedBeats] : [...userDetails.machineId],
       machineStatus: this.selectedMachineStatuses.length > 0 ? [...this.selectedMachineStatuses] : ['1', '2'],
       stockStatus: this.selectedStockStatuses.length > 0 ? [...this.selectedStockStatuses] : [],
       burnStatus: this.selectedBurnStatuses.length > 0 ? [...this.selectedBurnStatuses] : [],
-      // level1: this.selectedZones.length > 0 ? [...this.selectedZones] : [],
-      // level2: this.selectedWards.length > 0 ? [...this.selectedWards] : [],
       level3: [], // Default to empty array
-      // level4: this.selectedProjects.length > 0 ? [...this.selectedProjects] : [], // Added from second code
-
-  // Pass only selected filters, not all possible ones
 
   state: this.hierarchySelection.state.length > 0 ? [...this.hierarchySelection.state] : [],
   district: this.hierarchySelection.district.length > 0 ? [...this.hierarchySelection.district] : [],
@@ -2086,7 +2080,6 @@ toggleSelectAll(selectedArray: any[], options: any[], key: string) {
       project:  userDetails.projectId
     };
 debugger;
-      // Include machine selection if available
   if (this.selectedBeats.length > 0) {
     queryParams.machineId = [...this.selectedBeats];
   }
@@ -2096,10 +2089,6 @@ debugger;
 
     console.log("machinedata dasboard clientid ", userDetails)
  
-    // // Ensure `level3` is NOT the same as `machineId`
-    // if (this.selectedBeats.length > 0 && this.selectedBeats !== userDetails.machineId) {
-    //   queryParams.level3 = [];
-    // }
  
     console.log('📡 Final API Call Params:', queryParams);
     this.dataService.getMachineDashboardSummary(queryParams)

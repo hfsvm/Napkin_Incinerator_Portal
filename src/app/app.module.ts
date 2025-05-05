@@ -84,6 +84,7 @@ const APP_CONTAINERS = [
   declarations: [AppComponent, ...APP_CONTAINERS, UserManagementComponent, MachineManagementComponent, AdvancedManagementComponent, ConfirmDialogComponent, MachinereportComponent ],
   imports: [
    
+    FormsModule,
 
     BrowserModule,
     ShareModule,

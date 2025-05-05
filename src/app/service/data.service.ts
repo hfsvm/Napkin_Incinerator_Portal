@@ -944,7 +944,7 @@ export class DataService {
   //   );
   // }
  
-  getMachineAndIncineratorTransaction(
+  getMachineAndIncineratorTransaction1(
     startDate: string,
     endDate: string,
     merchantId: string,
@@ -985,6 +985,90 @@ export class DataService {
     );
   }
  
+  getMachineAndIncineratorTransaction2(queryParams: any): Observable<any> {
+    debugger;
+    let params = new HttpParams();
+  
+    // Append formatted date-time for start and end
+    if (queryParams.startDate) {
+      params = params.set('startDate', `${queryParams.startDate} 00:00:00`);
+    }
+    if (queryParams.endDate) {
+      params = params.set('endDate', `${queryParams.endDate} 23:59:00`);
+    }
+  
+    // Dynamically append other query parameters
+    Object.keys(queryParams).forEach((key) => {
+      const value = queryParams[key];
+      if (value && key !== 'startDate' && key !== 'endDate') {
+        if (Array.isArray(value)) {
+          value.forEach((v: string) => {
+            params = params.append(key, v);
+          });
+        } else {
+          params = params.set(key, value);
+        }
+      }
+    });
+  
+    const apiUrl = `${this.url1}/getMachineAndIncineratorTransaction?${params.toString()}`;
+    console.log("📡 API CALL URL:", apiUrl);
+  
+    return this.http.get(apiUrl, {
+      headers: new HttpHeaders({
+        'hfskey': 'HFSAdmin@1',
+        'accept': '*/*'
+      })
+    }).pipe(
+      retry(1),
+      catchError(this.handleError),
+      tap(response => console.log("✅ GET Response:", response))
+    );
+  }
+  
+  getMachineAndIncineratorTransaction(queryParams: any): Observable<any> {
+    debugger;
+  
+    const body: any = {};
+  
+    // Format start and end dates to include time as expected
+    if (queryParams.startDate) {
+      body.startDate = `${queryParams.startDate} 00:00:00`;
+    }
+    if (queryParams.endDate) {
+      body.endDate = `${queryParams.endDate} 23:59:00`;
+    }
+  
+    // Convert other fields to comma-separated strings or assign directly
+    Object.keys(queryParams).forEach((key) => {
+      if (key !== 'startDate' && key !== 'endDate') {
+        const value = queryParams[key];
+        if (Array.isArray(value)) {
+          body[key] = value.length > 0 ? value.join(',') : '';
+        } else {
+          body[key] = value ?? '';
+        }
+      }
+    });
+  
+    const apiUrl = `${this.url1}/getMachineAndIncineratorTransaction`;
+  
+    console.log("📡 Final POST Body for Transaction:", body);
+    console.log("📡 Calling URL:", apiUrl);
+  
+    return this.http.post(apiUrl, body, {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'hfskey': 'HFSAdmin@1',
+        'accept': '*/*'
+      })
+    }).pipe(
+      retry(1),
+      catchError(this.handleError),
+      tap(response => console.log("✅ POST Response:", response))
+    );
+  }
+  
  
   getMachineTransaction(
     merchantId: string,
@@ -1039,12 +1123,45 @@ export class DataService {
  
     return this.http.get(url, this.httpOptions).pipe(
       retry(1),
-      tap(response => console.log('🔹 advanced Response:', response)),
+      tap(response => console.log('🔹tran advanced Response:', response)),
       catchError(this.handleError)
     );
   }
- 
-    getMachineDashboardSummary(queryParams: any): Observable<any> {
+  getMachineDashboardSummary(queryParams: any): Observable<any> {
+    const body: any = {};
+  
+    // Convert arrays to comma-separated strings; keep scalar values as-is
+    Object.keys(queryParams).forEach(key => {
+      const value = queryParams[key];
+      if (Array.isArray(value)) {
+        body[key] = value.length > 0 ? value.join(',') : '';
+      } else {
+        body[key] = value ?? '';  // Default to empty string if undefined/null
+      }
+    });
+  
+    const apiUrl = `${this.url1}/getMachineDashboardSummary`;
+  
+    // ✅ Custom headers (adjust if needed)
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'hfskey': 'HFSAdmin@1'  // Include this if the backend requires it
+    });
+  
+    // ✅ Logging for debugging
+    console.log("📡 Final POST Body:", body);
+    console.log("📡 Calling URL:", apiUrl);
+  
+    // ✅ HTTP POST request with error handling
+    return this.http.post(apiUrl, body, { headers }).pipe(
+      timeout(60000),
+      retry(1),
+      catchError(this.handleError),
+      tap(response => console.log('✅ POST API Response:', response))
+    );
+  }
+  
+    getMachineDashboardSummary2(queryParams: any): Observable<any> {
       let params = new HttpParams();
    
       // ✅ Correctly format query params, especially for `machineId`

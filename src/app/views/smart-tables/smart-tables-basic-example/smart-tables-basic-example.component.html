@@ -5,67 +5,83 @@
 <div class="filter-container">
   <form>
     <div class="row align-items-center">
-      <div class="col" *ngFor="let filter of [
-      { name: 'Client', key: 'projects', selected: selectedProjectNames, options:  projectNames, isProject:true },
-        { name: 'State', key: 'zones', selected: selectedZones, options: zones },
-        { name: 'District', key: 'wards', selected: selectedWards, options: wards },
-        { name: 'Machines', key: 'machineIds', selected: selectedMachineIds, options: machineIds },
-   
- 
-      ]">
-        <label>{{ filter.name }}:</label>
+      
+      
+          <!-- Row 1: First 6 filters -->
 
-<!-- ✅ If only one value, show it as text instead of dropdown -->
-<div *ngIf="filter.options.length === 1; else dropdownTemplate">
-  <span class="single-value">{{ filter.options[0] }}</span>
-</div>
+          
+          <div class="row filter">
+            <div class="col" *ngFor="let filter of [
+              { name: 'Client Name', key: 'projects', selected: selectedProjects, options: projects },
+              { name: 'State', key: 'zones', selected: selectedZones, options: zones },
+              { name: 'District', key: 'wards', selected: selectedWards, options: wards },
+              { name: 'Zone', key: 'selectedSubZones', selected: selectedSubZones, options: subZones },
 
-<!-- ✅ If multiple values exist, show dropdown -->
-<!-- Dropdown with search -->
-<ng-template #dropdownTemplate>
-<div class="dropdown">
-<button
-class="btn btn-light dropdown-toggle w-100"
-type="button"
-(click)="toggleDropdown(filter.key, $event)">
-{{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : 'Select ' + filter.name }}
-</button>
+            ]">
+              <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"></ng-container>
+            </div>
+          </div>
+      
+          <!-- Row 2: Remaining 4 filters -->
+          <div class="row filter mt-3">
+            <div class="col" *ngFor="let filter of [
+              { name: 'Ward', key: 'selectedWardList', selected: selectedWardList, options: wardList },
+              { name: 'Beat', key: 'selectedBeatList', selected: selectedBeatList, options: beatList },
+              { name: 'Machines', key: 'beats', selected: selectedBeats, options: beats },
+            ]">
+              <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"></ng-container>
+            </div>
+            <div class="col">
+              <label>Start Date:</label>
+              <input
+                type="date"
+                [(ngModel)]="startDate"
+                name="startDate"
+                class="form-control"
+                [max]="endDate"
+                (change)="onStartDateChange()" />
+              </div>
+              
+              <div class="col">
+              <label>End Date:</label>
+              <input
+                type="date"
+                [(ngModel)]="endDate"
+                name="endDate"
+                class="form-control"
+                [min]="startDate"
+                (change)="onEndDateChange()" />
+              </div>
+          </div>
+        
+      
+        <!-- Dropdown Template -->
+        <ng-template #dropdownTemplate let-filter>
+          <label>{{ filter.name }}</label>
+          <div class="dropdown">
+            <button class="btn btn-light dropdown-toggle w-100" type="button" (click)="toggleDropdown(filter.key)">
+              {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : filter.name }}
+            </button>
+            <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]" [id]="'dropdown-' + filter.key">
+              <div *ngIf="['beats', 'wards', 'zones', 'projects'].includes(filter.key)" style="padding: 6px;">
+                <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchText[filter.key]" [ngModelOptions]="{standalone: true}" (click)="$event.stopPropagation()" />
 
-<div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]">
-
-<!-- 🔍 Search Box ONLY for Machines, States, Districts -->
-<input
-*ngIf="['machineIds', 'zones', 'wards','projects'].includes(filter.key)"
-type="text"
-class="form-control mx-2 my-1"
-placeholder="Search..."
-[(ngModel)]="searchTexts[filter.key]"
-name="search-{{filter.key}}" />
-
-<!-- 🔘 Select All -->
-<label class="dropdown-item">
-<input type="checkbox"
-      [checked]="isAllSelected(filter.selected, filter.options)"
-      (change)="toggleSelectAll(filter.selected, filter.options, $event)">
-<b>Select All</b>
-</label>
-
-<label
-*ngFor="let option of ['machineIds', 'zones', 'wards','projects'].includes(filter.key)
-                    ? (filter.options | filterDropdown:searchTexts[filter.key])
-                    : filter.options"
-class="dropdown-item">
-<input type="checkbox"
-       [checked]="filter.selected.includes(option)"
-       (change)="toggleSelection(filter.selected, option)">
-{{ option }}
-</label>
-
-</div>
-</div>
-</ng-template>
-
-</div>
+              </div>
+      
+              <label class="dropdown-item d-flex align-items-center" style="gap: 6px;">
+                <input type="checkbox" [checked]="filter.selected.length === filter.options.length && filter.options.length > 0" (change)="toggleSelectAll(filter.selected, filter.options, filter.key)">
+                <strong style="margin: 0;">Select All</strong>
+              </label>
+      
+              <label *ngFor="let option of filter.options | filterDropdown: searchText[filter.key]" class="dropdown-item">
+                <input type="checkbox" [checked]="filter.selected.includes(option.ProjectId || option.key || option)" 
+                       (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option, filter.key)">
+                {{ option.projectname || option.value || option }}
+              </label>
+            </div>
+          </div>
+        </ng-template>
+      
 
 
 
@@ -76,7 +92,7 @@ class="dropdown-item">
 
 
 
-<div class="col">
+<!-- <div class="col">
 <label>Start Date:</label>
 <input
   type="date"
@@ -96,19 +112,19 @@ class="dropdown-item">
   class="form-control"
   [min]="startDate"
   (change)="onEndDateChange()" />
-</div>
+</div> -->
 
 
 
 <div class="col-12 d-flex justify-content-between mt-2">
 
-  <button type="button" class="btn btn-sm " (click)="toggleSummaryType()" [disabled]="isLoading">
+  <button type="button" class="btn btn-sm " (click)="toggleSummaryType()" >
     {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
   </button>
 
 
  
-<button type="button" class="btn btn-sm " (click)="loadReport()" [disabled]="isLoading">
+<button type="button" class="btn btn-sm " (click)="loadReport()">
 Load Report
 </button>
 
@@ -172,7 +188,7 @@ class="search-input">
 
 <div class="d-flex justify-content-end mb-2">
 
-<button class="btn  btn-sm" (click)="exportToExcel()" [disabled]="isLoading">⬇ Export to Excel</button>
+<button class="btn  btn-sm" (click)="exportToExcel()">⬇ Export to Excel</button>
 </div>
 <table class="report-table full-width" border="1">
 <thead class="headers">

@@ -199,6 +199,9 @@ cancelPopup() {
     const userDetails = this.commonDataService.userDetails;
  
     this.projectList = userDetails?.projectName || [];
+    console.log('PROJECTLIST OF THE DATA',this.projectList );
+
+    
  
     if (this.projectList.length > 0) {
       this.selectedProjectId = this.projectList[0].ProjectId;

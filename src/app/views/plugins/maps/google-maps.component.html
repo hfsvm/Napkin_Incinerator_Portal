@@ -8,22 +8,49 @@
   </div>
  
   <div class="row">
-    <div class="col-lg-3 col-md-4 col-sm-12 filter-column">
+    <div class="col-lg-4 col-md-4 col-sm-12 filter-column">
       <div class="filter-container p-3 shadow-lg rounded bg-white">
-        <h4 class="text-center">
+        <div class="position-relative mb-3" style="min-height: 32px;">
+          <!-- Centered Smart Filters + Toggle -->
+          <div class="d-flex justify-content-center align-items-center">
+            <i class="fas fa-filter me-2"></i>
+    <span class="fw-bold" style="font-size: 1.30rem;">Smart Filters</span>
+            <button class="btn btn-sm btn-light ms-2 p-1" (click)="toggleFilterPanel()" title="Toggle Filters">
+              <i class="fas" [ngClass]="{'fa-chevron-down': !filterPanelOpen, 'fa-chevron-up': filterPanelOpen}" style="font-size: 0.6rem;"></i>
+            </button>
+          </div>
+        
+          <!-- Right-Aligned Refresh Icon -->
+          <div class="position-absolute end-0 top-0">
+            <i class="fas fa-sync-alt text-danger"
+               style="cursor: pointer; font-size: 1.3rem;"
+               (click)="refreshFilters()"
+               title="Refresh Filters"></i>
+          </div>
+        </div>
+        
+        <!-- <h4 class="text-center">
           <i class="fas fa-filter"></i> Smart Filters
           <button class="btn btn-sm btn-light float-right" (click)="toggleFilterPanel()">
             <i class="fas" [ngClass]="{'fa-chevron-down': !filterPanelOpen, 'fa-chevron-up': filterPanelOpen}"></i>
           </button>
         </h4>
+                          <div class="col-12 text-center mt-3">
+                            <i class="fas fa-sync-alt text-danger" 
+                               style="cursor: pointer; font-size: 1.5rem;" 
+                               (click)="refreshFilters()"
+                               title="Refresh Filters">
+                            </i>
+                          </div>
+         -->
  
         <div *ngIf="filterPanelOpen">
           <form>
             <div class="card-body">
               <div class="container">
      
-                <!-- Display each filter in its own row -->
-                <div *ngFor="let filter of [
+                <!-- Display each filter in its own row  Working all correctly-->
+                <!-- <div *ngFor="let filter of [
                   { name: 'Client Name', key: 'projects', selected: selectedProjects, options: projects },
                   { name: 'Machine Status', key: 'machineStatuses', selected: selectedMachineStatuses, options: machineStatuses },
                   { name: 'Stock Status', key: 'stockStatuses', selected: selectedStockStatuses, options: stockStatuses },
@@ -34,20 +61,51 @@
                   { name: 'Ward', key: 'selectedWardList', selected: selectedWardList, options: wardList },
                   { name: 'Beat', key: 'selectedBeatList', selected: selectedBeatList, options: beatList },
                   { name: 'Machines', key: 'beats', selected: selectedBeats, options: beats },
-                ]" class="row filter mb-3">
+                ]" class="row filter mb-1">
                   <div class="col-12">
                     <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"></ng-container>
                   </div>
-                </div>
-     
-                <!-- Refresh Button -->
-                <!-- <div class="row">
-                  <div class="col-12 text-center mt-3">
-                    <button class="btn btn-danger w-100" (click)="refreshFilters()">
-                      🔄 Refresh
-                    </button>
-                  </div>
                 </div> -->
+               
+               
+               
+                <!-- Group filters into pairs for two columns per row -->
+               <div class="row">
+                <!-- Loop through filters in pairs -->
+                <ng-container *ngFor="let filterPair of [
+                  [
+                    { name: 'Client Name', key: 'projects', selected: selectedProjects, options: projects },
+                    { name: 'Machine Status', key: 'machineStatuses', selected: selectedMachineStatuses, options: machineStatuses }
+                  ],
+                  [
+                    { name: 'Stock Status', key: 'stockStatuses', selected: selectedStockStatuses, options: stockStatuses },
+                    { name: 'Burn Status', key: 'burnStatuses', selected: selectedBurnStatuses, options: burnStatuses }
+                  ],
+                  [
+                    { name: 'State', key: 'zones', selected: selectedZones, options: zones },
+                    { name: 'District', key: 'wards', selected: selectedWards, options: wards }
+                  ],
+                  [
+                    { name: 'Zone', key: 'selectedSubZones', selected: selectedSubZones, options: subZones },
+                    { name: 'Ward', key: 'selectedWardList', selected: selectedWardList, options: wardList }
+                  ],
+                  [
+                    { name: 'Beat', key: 'selectedBeatList', selected: selectedBeatList, options: beatList },
+                    { name: 'Machines', key: 'beats', selected: selectedBeats, options: beats }
+                  ]
+                ]">
+                <div class="row mb-3"> <!-- Add spacing between rows using mb-3 -->
+
+                  <div class="col-md-6 mb-2" *ngFor="let filter of filterPair">
+                    <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"></ng-container>
+                  </div>
+                  </div>
+                </ng-container>
+              </div>
+    
+
+
+                
      
               </div>
             </div>
@@ -85,7 +143,7 @@
       </div>
     </div>
  
-    <div class="col-lg-9 col-md-8 col-sm-12 map-column">
+    <div class="col-lg-8 col-md-8 col-sm-12 map-column">
       <div class="map-container shadow-lg rounded">
         <div id="map" style="width: 100%; height: 650px;"></div>
  
@@ -96,6 +154,44 @@
  
       </div>
     </div>
+    
+  <!-- Radio button controls - Added below map -->
+  <div class="map-controls bg-white p-3 mt-3 rounded shadow">
+    <div class="d-flex justify-content-center gap-4 mb-3">
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioAuto" value="auto" [(ngModel)]="selectedMapView" (change)="changeMapView('auto')">
+        <label class="form-check-label" for="radioAuto">Auto</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioZone" value="zone" [(ngModel)]="selectedMapView" (change)="changeMapView('zone')">
+        <label class="form-check-label" for="radioZone">Zone</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioWard" value="ward" [(ngModel)]="selectedMapView" (change)="changeMapView('ward')">
+        <label class="form-check-label" for="radioWard">Ward</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioBeat" value="beat" [(ngModel)]="selectedMapView" (change)="changeMapView('beat')">
+        <label class="form-check-label" for="radioBeat">Beat</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioMachine" value="machine" [(ngModel)]="selectedMapView" (change)="changeMapView('machine')">
+        <label class="form-check-label" for="radioMachine">Machine</label>
+      </div>
+    </div>
+    
+    <!-- Navigation buttons -->
+    <div class="d-flex justify-content-center flex-wrap gap-2">
+      <button class="btn btn-outline-primary" (click)="navigateTo('home')">Home</button>
+      <button class="btn btn-outline-primary" (click)="navigateTo('graphs')">Graphs</button>
+      <button class="btn btn-outline-primary" (click)="navigateToZone(1)">Zone 1</button>
+      <button class="btn btn-outline-primary" (click)="navigateToZone(2)">Zone 2</button>
+      <button class="btn btn-outline-primary" (click)="navigateToZone(3)">Zone 3</button>
+      <button class="btn btn-outline-primary" (click)="navigateToZone(4)">Zone 4</button>
+      <button class="btn btn-outline-primary" (click)="navigateToZone(5)">Zone 5</button>
+      <button class="btn btn-outline-primary" (click)="navigateToZone(6)">Zone 6</button>
+      <button class="btn btn-outline-primary" (click)="navigateToZone(7)">Zone 7</button>
+    </div>
   </div>
-  </div>
+</div>
  
