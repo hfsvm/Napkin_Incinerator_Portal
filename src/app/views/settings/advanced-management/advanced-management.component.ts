@@ -109,7 +109,8 @@ popupConfirmAction: () => void = () => {};
     private commonDataService: CommonDataService,
     private dataService: DataService,
     private changeDetectorRef: ChangeDetectorRef,
-    private eRef: ElementRef
+    private eRef: ElementRef,
+    private cdr: ChangeDetectorRef
   ) {}
  
   // @HostListener('document:click', ['$event'])
@@ -120,7 +121,6 @@ popupConfirmAction: () => void = () => {};
   // }
  
   selectMachinePricing(id: string) {
-    debugger
     this.selectedMachineIdPricing = id;
     this.selectedMachineId = id;
     this.dropdownOpenPricing = false;
@@ -198,23 +198,49 @@ cancelPopup() {
     : [];
     const userDetails = this.commonDataService.userDetails;
  
-    this.projectList = userDetails?.projectName || [];
-    console.log('PROJECTLIST OF THE DATA',this.projectList );
+  //   this.projectList = userDetails?.projectNa || [];
+  //   console.log('PROJECTLIST OF THE DATA',this.projectList );
+
 
     
  
+  //   if (this.projectList.length > 0) {
+  //     debugger;
+      
+  //     this.selectedProjectId = this.projectList[0].ProjectId;
+  //     if (this.projectList.length > 0) {
+  //       this.selectedProjectId = this.projectList[0].ProjectId;
+  //    console.log("projectiddddddd",this.selectedProjectId)
+  //       if (this.selectedProjectId !== null) {
+  //         debugger;
+  //         this.getMachinesByProject(this.selectedProjectId!);
+  //       }
+  //     }
+  //     this.getItemsByMerchant(this.merchantId);
+  //   }
+  // }
+
+
+    // ✅ Properly set the project list
+    this.projectList = userDetails?.projects || [];
+
+    console.log('✅✅✅✅✅✅Project List=====>:', this.projectList);
+  
     if (this.projectList.length > 0) {
-      this.selectedProjectId = this.projectList[0].ProjectId;
-      if (this.projectList.length > 0) {
-        this.selectedProjectId = this.projectList[0].ProjectId;
-     
-        if (this.selectedProjectId !== null) {
-          this.getMachinesByProject(this.selectedProjectId!);
-        }
+      // this.selectedProjectId = this.projectList[0].projectId;
+
+      this.selectedProjectId = null;
+
+      console.log("Selected Project ID:", this.selectedProjectId);
+  
+      if (this.selectedProjectId !== null) {
+        this.getMachinesByProject(this.selectedProjectId);
       }
+  
       this.getItemsByMerchant(this.merchantId);
     }
   }
+  
   getItemsByMerchant(merchantId: string): void {
     this.dataService.getItemsByMerchant(merchantId).subscribe(
       (res) => {
@@ -241,9 +267,16 @@ cancelPopup() {
     }
   }
   onProjectChange(): void {
+    this.selectedMachineId = ''; // 👈 Clear previously selected machine
+    this.filteredMachineIds = [];  // 👈 Optionally clear machine list before loading new ones
+    this.selectedMachineIdPricing = ''; // 👈 Clear dropdown placeholder value
+
+  
     if (this.selectedProjectId !== null) {
       this.getMachinesByProject(this.selectedProjectId);
     }
+    this.cdr.detectChanges(); // 👈 Force refresh if needed
+
   }
  
 onMachineChange(): void {
@@ -251,7 +284,6 @@ onMachineChange(): void {
   // this.getFotaVersionDetails();
   // Reset the current values before fetching new data
   this.resetData();
- debugger
   if (!this.selectedMachineId) {
     this.showNotification("⚠️ Please select a machine first.", "error");
     return;
@@ -405,7 +437,6 @@ onMachineChange(): void {
 }
 
 selectMachineFota(id: string) {
-  debugger
   this.selectedFotaMachineId = id;
   console.log('Fota Machine selected:', id); // ✅ debug
 
@@ -418,7 +449,6 @@ selectMachineFota(id: string) {
   // Fetch fota data based on selectedMachineId
   this.dataService.getFotaVersionDetails(this.merchantId, this.selectedFotaMachineId).subscribe(
     (res: any) => {
-      debugger;
       console.log('📥 FOTA Version Response:', res);
 
       if (res.code !== 200 || res.error) {
@@ -488,7 +518,6 @@ saveSelected() {
 }
 
 deleteRow(machine: any) {
-  debugger;
   const index = this.fotaMachines.indexOf(machine);
   if (index > -1) {
     this.fotaMachines.splice(index, 1);
@@ -498,7 +527,6 @@ deleteRow(machine: any) {
 
 
 submitFotaConfig(): void {
-  debugger;
   var merchantid = this.merchantId;
   const invalidMachines = this.selectedMachines.filter(
     machine =>
@@ -548,11 +576,13 @@ submitFotaConfig(): void {
 }
 
 getMachinesByProject(clientId: number): void {
+  console.log("client id ============>",clientId)
   if (!clientId || !this.merchantId) return;
  
   this.dataService.getMachinesByClient(this.merchantId, clientId).subscribe(
     (res: any) => {
       if (res.code === 200 && Array.isArray(res.data)) {
+        debugger;
         this.machineIds = res.data;  // ✅ correct key
         this.selectedMachineId = ''; // reset previously selected machine
         this.selectedFotaMachineId = '';
@@ -719,7 +749,6 @@ submitUpdatedConfig(): void {
   }
   
   onSubmitMachineInstalled(): void {
-    debugger;
     if (!this.selectedMachineId || !this.installedStatus || !this.uid) {
       this.showNotification('⚠️ Please fill all fields.', 'error');
       return;
@@ -932,8 +961,6 @@ submitUpdatedConfig(): void {
     this.updatedIncinerationValues = { scheduler: '', limitSwitch: '', napkinCost: '', setHeaterTempA: '', setHeaterTempB: '', heaterAMinTemp: '', heaterBOnTemp: '' };
   }
   onTabChange(tab: string): void {
-    debugger
-    debugger
     this.activeTab = tab;
     this.selectedMachineId = '';
     if (tab === 'MachineInstalled') {

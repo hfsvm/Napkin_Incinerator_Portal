@@ -71,6 +71,7 @@ refreshCountdown = 0;
 
     this.merchantId = localStorage.getItem('merchantId') || '';
     this.machineId = this.route.snapshot.paramMap.get('machineId') || '';
+
     this.selectedMachineId = this.machineId;
     this.groupTransactions();
     const today = new Date();
@@ -79,6 +80,9 @@ refreshCountdown = 0;
     
     this.startDate = this.formatDateForAPI(sevenDaysAgo);
     this.endDate = this.formatDateForAPI(today);
+
+
+    this.fetchTransactions();
     
     // Fetch list of machine IDs for the dropdown
     this.loadMachineIdsFromUserDetails();
@@ -203,6 +207,10 @@ clickOutside(event: any): void {
   
   loadMachineIdsFromUserDetails(): void {
     const userDetails = this.commonDataService.userDetails;
+
+    console.log("hhhhhhhhhhhhhh",this.selectedMachineId)
+    console.log("hhhhhhhhhhhhhh",this.merchantId)
+
   
     if (userDetails && Array.isArray(userDetails.machineId)) {
       this.machineIds = [...userDetails.machineId];
@@ -223,13 +231,16 @@ clickOutside(event: any): void {
         // Update URL to reflect the auto-selected machine WITHOUT navigation
         history.replaceState({}, '', `/machinereport/${this.machineId}`);
       }
-      
+
       // Fetch data for the selected machine after setting it
-      if (this.selectedMachineId && this.merchantId) {
-        this.fetchTransactions();
-      }
-    } else {
-      console.error('❌ machineId is missing or invalid in userDetails:', userDetails);
+    //   // if (this.selectedMachineId && this.merchantId) {
+    //   //   console.log("djbfjdwvhsdvxgvhdsbvhdsvhuwfhdvjsfhjbfdhhhhhhhhhhhhhh",this.selectedMachineId)
+    //   //   console.log("djbfjdwvhsdvxgvhdsbvhdsvhuwfhdvjsfhjbfdhhhhhhhhhhhhhh",this.merchantId)
+
+    //   //   this.fetchTransactions();
+    //   // }
+    // } else {
+    //   console.error('❌ machineId is missing or invalid in userDetails:', userDetails);
     }
   }
 

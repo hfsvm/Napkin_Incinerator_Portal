@@ -212,7 +212,9 @@ selectedProjectNames: string[] = []; // New property for selected project names
   districtsList: any[] = [];
   machinesList: any[] = [];
   userId: number = 0;
-  
+  // isBmcClient: boolean;
+  isBmcClient: boolean = false; // ✅ safest
+
 
   // report variables end 
 
@@ -250,6 +252,9 @@ selectedProjectNames: string[] = []; // New property for selected project names
  
   // Start the countdown
   this.startRefreshCountdown();
+
+  this.updatePagination();
+
 }
  
 
@@ -358,7 +363,10 @@ debugger;
         // this.projectId = response.data.projects?.[0]?.projectId;
         // console.log('📌 Extracted projectId:', this.projectId);
 
-
+// Check if selected project (client) is BMC
+const selectedProject = this.fullData.find(p => p.projectName.toLowerCase().includes('bmc'));
+this.isBmcClient = !!selectedProject;
+      
 
 
 
@@ -377,6 +385,130 @@ debugger;
     }
   );
 }
+
+// disabledStates = false;
+// disabledDistricts = false;
+
+// isBmcClient!: boolean;
+
+
+// checkIfClientIsBMC() {
+//   const selectedProject = this.projects.find(p => this.selectedProjects.includes(p.ProjectId));
+//   if (selectedProject?.projectname?.toLowerCase() === 'bmc') {
+//     this.disabledStates = true;
+//     this.disabledDistricts = true;
+//   } else {
+//     this.disabledStates = false;
+//     this.disabledDistricts = false;
+//   }
+// }
+
+
+// checkIfClientIsBMC1() {
+//   const selectedProject = this.projects.find(p => this.selectedProjects.includes(p.ProjectId));
+//   this.isBmcClient = !!(selectedProject?.projectname?.toLowerCase() === 'bmc');
+  
+//   this.disabledStates = this.isBmcClient;
+//   this.disabledDistricts = this.isBmcClient;
+// }
+
+
+// checkIfClientIsBMC() {
+//   const selectedProject = this.projects.find(p => this.selectedProjects.includes(p.ProjectId));
+//   this.isBmcClient = !!(selectedProject?.projectname?.toLowerCase() === 'bmc');
+  
+//   if (this.isBmcClient) {
+//     // Automatically select all states and districts
+//     const project = this.fullData.find(p => p.projectName.toLowerCase().includes('bmc'));
+//     this.selectedZones = project?.states?.map((s: any) => s.state) || [];
+//     this.selectedWards = project?.states?.reduce((districts: string[], stateObj: any) => {
+//       stateObj.districts?.forEach((districtObj: any) => {
+//         if (!districts.includes(districtObj.district)) {
+//           districts.push(districtObj.district);
+//         }
+//       });
+//       return districts;
+//     }, []);
+    
+//     // Update state and district dropdown placeholders
+//     this.disabledStates = true;
+//     this.disabledDistricts = true;
+//   } else {
+//     this.selectedZones = [];
+//     this.selectedWards = [];
+//     this.disabledStates = false;
+//     this.disabledDistricts = false;
+//   }
+// }
+
+
+// filterStates() {
+//   this.zones = [];
+//   this.selectedZones = [];
+
+//   if (this.isBmcClient) {
+//     const project = this.fullData.find(p => p.projectName.toLowerCase().includes('bmc'));
+
+//     // Auto-select all states
+//     const allStates = project?.states?.map((s: any) => s.state) || [];
+//     this.selectedZones = allStates;
+//     this.disabledStates = true; // Used in template to disable dropdown
+
+//     this.filterWards(); // Proceed to next level
+//   } else {
+//     this.selectedProjects.forEach(pid => {
+//       const project = this.fullData.find(p => p.projectId === pid);
+//       project?.states?.forEach((stateobj: any) => {
+//         if (!this.zones.includes(stateobj.state)) {
+//           this.zones.push(stateobj.state);
+//         }
+//       });
+//     });
+
+//     this.disabledStates = false;
+//   }
+// }
+
+
+// filterWards() {
+//   this.wards = [];
+//   this.selectedWards = [];
+
+//   if (this.isBmcClient) {
+//     const project = this.fullData.find(p => p.projectName.toLowerCase().includes('bmc'));
+
+//     const autoDistricts: string[] = [];
+
+//     project?.states?.forEach((stateobj: any) => {
+//       stateobj.districts?.forEach((districtobj: any) => {
+//         if (!autoDistricts.includes(districtobj.district)) {
+//           autoDistricts.push(districtobj.district);
+//         }
+//       });
+//     });
+
+//     this.selectedWards = autoDistricts;
+//     this.disabledDistricts = true; // Used in UI template
+
+//     this.filterSubZones();
+//   } else {
+//     this.selectedProjects.forEach(pid => {
+//       const project = this.fullData.find(p => p.projectId === pid);
+//       project?.states?.forEach((stateobj: any) => {
+//         if (this.selectedZones.includes(stateobj.state)) {
+//           stateobj.districts?.forEach((districtobj: any) => {
+//             if (!this.wards.find((w: any) => w.district === districtobj.district)) {
+//               this.wards.push(districtobj.district);
+//             }
+//           });
+//         }
+//       });
+//     });
+
+//     this.disabledDistricts = false;
+//   }
+// }
+
 
 
 // Filter functions for cascading dropdowns
@@ -730,63 +862,198 @@ resetRefreshCountdown(): void {
  
  
  
+// onPageChange(page: number): void {
+//   if (page >= 1 && page <= this.totalPages) {
+//     this.currentPage = page;
+//     this.updatePagination();
+//   }
+// }
+ 
+ 
+// updatePagination() {
+//   const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+ 
+//   // ✅ Apply Search Filter Before Pagination
+//   let filteredResults: ReportItem[] = this.reportsData;
+ 
+//   if (this.searchQuery.trim()) {
+//     const query = this.searchQuery.toLowerCase();
+ 
+//     filteredResults = this.reportsData
+//       .map(machine => {
+//         // ✅ Ensure All Machine-Level Fields Are Strings Before Searching
+//         const machineMatches = [
+//           machine.machineId?.toString().toLowerCase() ?? '',
+//           machine.machineLocation?.toString().toLowerCase() ?? '',
+//           machine.address?.toString().toLowerCase() ?? '',
+//           machine.machineType?.toString().toLowerCase() ?? ''
+//         ].some(value => value.includes(query)); // ✅ Check if query is found in any machine field
+ 
+//         // ✅ Ensure All Transaction Fields Are Strings Before Searching
+//         const filteredTransactions = machine.transactions?.filter(txn =>
+//           Object.values(txn || {}).some(value =>
+//             value !== null && value !== undefined &&
+//             value.toString().toLowerCase().includes(query)
+//           )
+//         ) || [];
+       
+//         // ✅ Keep the machine if it matches OR any transaction matches
+//         if (machineMatches || filteredTransactions.length > 0) {
+//           return { ...machine, transactions: filteredTransactions.length > 0 ? filteredTransactions : machine.transactions };
+//         }
+//         return undefined;
+//       })
+//       .filter((machine): machine is ReportItem => machine !== undefined); // ✅ Remove `undefined` values
+//   }
+ 
+//   // Store the filtered data for pagination calculations
+//   this.filteredData = filteredResults;
+ 
+//   // ✅ Ensure current page is valid after changing items per page
+//   const maxPage = Math.max(1, Math.ceil(this.filteredData.length / this.itemsPerPage));
+
+//   if (this.currentPage > maxPage) {
+//     this.currentPage = maxPage;
+//   }
+ 
+//   // ✅ Paginate the Filtered Data
+//   this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.itemsPerPage);
+// }
+
+// get totalPages(): number {
+//   return Math.ceil(this.filteredData.length / this.itemsPerPage);
+// }
+
+
 onPageChange(page: number): void {
+  console.log('Trying to change to page:', page); // Always logs
   if (page >= 1 && page <= this.totalPages) {
     this.currentPage = page;
     this.updatePagination();
   }
 }
- 
- 
-updatePagination() {
-  const startIndex = (this.currentPage - 1) * this.itemsPerPage;
- 
-  // ✅ Apply Search Filter Before Pagination
+
+get totalPages(): number {
+  return Math.max(1, Math.ceil(this.filteredData.length / this.itemsPerPage));
+}
+
+updatePagination(): void {
+  const query = this.searchQuery.trim().toLowerCase();
+
+  // Step 1: Filter data based on search
   let filteredResults: ReportItem[] = this.reportsData;
- 
-  if (this.searchQuery.trim()) {
-    const query = this.searchQuery.toLowerCase();
- 
+
+  if (query) {
     filteredResults = this.reportsData
       .map(machine => {
-        // ✅ Ensure All Machine-Level Fields Are Strings Before Searching
         const machineMatches = [
           machine.machineId?.toString().toLowerCase() ?? '',
           machine.machineLocation?.toString().toLowerCase() ?? '',
           machine.address?.toString().toLowerCase() ?? '',
           machine.machineType?.toString().toLowerCase() ?? ''
-        ].some(value => value.includes(query)); // ✅ Check if query is found in any machine field
- 
-        // ✅ Ensure All Transaction Fields Are Strings Before Searching
+        ].some(value => value.includes(query));
+
         const filteredTransactions = machine.transactions?.filter(txn =>
           Object.values(txn || {}).some(value =>
             value !== null && value !== undefined &&
             value.toString().toLowerCase().includes(query)
           )
         ) || [];
-       
-        // ✅ Keep the machine if it matches OR any transaction matches
+
         if (machineMatches || filteredTransactions.length > 0) {
-          return { ...machine, transactions: filteredTransactions.length > 0 ? filteredTransactions : machine.transactions };
+          return {
+            ...machine,
+            transactions: filteredTransactions.length > 0 ? filteredTransactions : machine.transactions
+          };
         }
         return undefined;
       })
-      .filter((machine): machine is ReportItem => machine !== undefined); // ✅ Remove `undefined` values
+      .filter((machine): machine is ReportItem => machine !== undefined);
   }
- 
-  // Store the filtered data for pagination calculations
+
+  // Step 2: Update filteredData
   this.filteredData = filteredResults;
- 
-  // ✅ Ensure current page is valid after changing items per page
-  const maxPage = Math.max(1, Math.ceil(this.filteredData.length / this.itemsPerPage));
-  if (this.currentPage > maxPage) {
-    this.currentPage = maxPage;
+
+  // Step 3: Ensure currentPage is within bounds
+  const totalPages = this.totalPages; // Uses the getter
+  if (this.currentPage > totalPages) {
+    this.currentPage = totalPages;
+  } else if (this.currentPage < 1) {
+    this.currentPage = 1;
   }
- 
-  // ✅ Paginate the Filtered Data
+
+  // Step 4: Paginate the filtered data
+  const startIndex = (this.currentPage - 1) * this.itemsPerPage;
   this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.itemsPerPage);
 }
+
  
+
+// onPageChange(page: number): void {
+//   console.log('Trying to change to page:', page);
+  
+//   // Only change page if it's valid and not already on that page
+//   if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+//     this.currentPage = page;
+//     this.updatePagination();
+    
+//   }
+// }
+
+// get totalPages(): number {
+//   // Ensure we always have at least 1 page, even with no data
+//   return Math.max(1, Math.ceil(this.filteredData.length / this.itemsPerPage));
+// }
+
+// updatePagination(): void {
+//   // Apply search filtering first
+//   const query = this.searchQuery.trim().toLowerCase();
+  
+//   if (query) {
+//     this.filteredData = this.reportsData.filter(item => 
+//       this.itemMatchesSearch(item, query)
+//     );
+//   } else {
+//     this.filteredData = [...this.reportsData];
+//   }
+  
+//   // Safety check - make sure currentPage is valid after filtering
+//   const maxPages = Math.max(1, Math.ceil(this.filteredData.length / this.itemsPerPage));
+//   if (this.currentPage > maxPages) {
+//     this.currentPage = maxPages;
+//   }
+  
+//   // Get current page data
+//   const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+//   this.paginatedData = this.filteredData.slice(startIndex, startIndex + this.itemsPerPage);
+  
+//   // Force change detection
+//   this.cdr.detectChanges();
+// }
+
+// Helper method to check if an item matches search
+
+
+
+private itemMatchesSearch(item: ReportItem, query: string): boolean {
+  // Check machine properties
+  if (
+    (item.machineId?.toString().toLowerCase() || '').includes(query) ||
+    (item.machineLocation?.toLowerCase() || '').includes(query) ||
+    (item.address?.toLowerCase() || '').includes(query) ||
+    (item.machineType?.toLowerCase() || '').includes(query)
+  ) {
+    return true;
+  }
+  
+  // Check transactions
+  return (item.transactions || []).some(txn => 
+    Object.values(txn || {}).some(val => 
+      val !== null && val !== undefined && 
+      val.toString().toLowerCase().includes(query)
+    )
+  );
+}
  
  
 onProjectChange() {
@@ -881,7 +1148,6 @@ return this.paginatedData.findIndex(m => m.machineId === machine.machineId) + 1 
 }
  
 loadReport() {
-debugger;
 this.isLoading = true;
 this.errorMessage = '';
  
@@ -1169,9 +1435,7 @@ clearSearch() {
   this.searchQuery = '';
 }
  
-get totalPages(): number {
-  return Math.ceil(this.filteredData.length / this.itemsPerPage);
-}
+
  
 onMachineChange(machine: string, event: any) {
   if (event.target.checked) {

@@ -59,8 +59,12 @@
         <ng-template #dropdownTemplate let-filter>
           <label>{{ filter.name }}</label>
           <div class="dropdown">
-            <button class="btn btn-light dropdown-toggle w-100" type="button" (click)="toggleDropdown(filter.key)">
-              {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : filter.name }}
+            <button 
+            class="btn btn-light dropdown-toggle w-100" 
+            type="button" 
+            [disabled]="(filter.key === 'zones' && disabledStates) || (filter.key === 'wards' && disabledDistricts)" 
+            (click)="toggleDropdown(filter.key)">
+                        {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : filter.name }}
             </button>
             <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]" [id]="'dropdown-' + filter.key">
               <div *ngIf="['beats', 'wards', 'zones', 'projects'].includes(filter.key)" style="padding: 6px;">
@@ -306,7 +310,7 @@ class="search-input">
 
 <button class="btn btn-lg pagination-btn"
       (click)="onPageChange(currentPage - 1)"
-      [disabled]="isLoading || currentPage === 1"
+      [disabled]="isLoading || currentPage <= 1"
       title="Previous Page">
 ‹
 </button>
