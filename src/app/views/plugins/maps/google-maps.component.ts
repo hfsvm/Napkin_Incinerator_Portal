@@ -338,7 +338,7 @@ selectedMapView: string = 'auto'; // Default value
 
     setTimeout(() => {
       this.initializeMap(); // Call the new initializeMap method
-    }, 500);
+    }, 1);
   }
 
 
@@ -394,6 +394,42 @@ selectedMapView: string = 'auto'; // Default value
     );
   }
   
+  
+
+  isBmcClient = false;
+disabledStates = false;
+disabledDistricts = false;
+
+
+checkIfClientIsBMC_Map(): void {
+  const selectedProject = this.projects.find(p => this.selectedProjects.includes(p.ProjectId));
+  this.isBmcClient = !!(selectedProject?.projectname?.toLowerCase() === 'bmc');
+
+  if (this.isBmcClient) {
+    const project = this.fullData.find(p => p.projectName.toLowerCase().includes('bmc'));
+
+    // Auto-select all zones (states) and wards (districts)
+    this.selectedZones = project?.states?.map((s: any) => s.state) || [];
+    this.selectedWards = project?.states?.reduce((acc: string[], stateObj: any) => {
+      stateObj.districts?.forEach((districtObj: any) => {
+        if (!acc.includes(districtObj.district)) {
+          acc.push(districtObj.district);
+        }
+      });
+      return acc;
+    }, []);
+
+    this.disabledStates = true;
+    this.disabledDistricts = true;
+  } else {
+    this.selectedZones = [];
+    this.selectedWards = [];
+    this.disabledStates = false;
+    this.disabledDistricts = false;
+  }
+}
+
+
   
   // Update districts based on selected states
   updateDistrictsFromStates(selectedStates: string[]): void {

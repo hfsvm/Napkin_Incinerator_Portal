@@ -2103,6 +2103,8 @@ debugger;
             this.machines = response.data.machines.map((machine: any) => ({
               ...machine,
               pcbNo: machine.pcbNo,
+              uid: machine.uid ===response.data.machines[0].uid ? 'N/A' : machine.uid,
+ 
               status: machine.status === 'Online' ? '1' : '2',
               stockStatus: machine.stockStatus?.length > 0
                 ? machine.stockStatus.map((stock: any) =>
@@ -2211,6 +2213,8 @@ formatText(text: string | null): string {
     } else {
       this.filteredMachines = this.machines.filter(machine =>
         machine.machineId.includes(this.searchQuery) ||
+        machine.uid?.includes(this.searchQuery) ||
+        machine.uid?.includes(this.searchQuery) ||
         machine.machineType?.includes(this.searchQuery) ||
         machine.status?.includes(this.searchQuery) ||
         machine.stockStatus?.includes(this.searchQuery) ||

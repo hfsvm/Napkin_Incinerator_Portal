@@ -155,7 +155,7 @@ export class CommonDataService {
     this.userId = Number(sessionStorage.getItem('userId')) || Number(localStorage.getItem('userId'));
     this.roleName = sessionStorage.getItem('roleName') || localStorage.getItem('roleName');
     this.userDetails = JSON.parse(sessionStorage.getItem('userDetails') || localStorage.getItem('userDetails') || '{}');
- 
+ console.log("✅✅ user details", this.userDetails)
     console.log("✅ CommonDataService Loaded:", {
       merchantId: this.merchantId,
       userId: this.userId,

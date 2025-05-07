@@ -60,7 +60,7 @@
       <div class="card-body">
         <div class="row">
           <!-- Project Dropdown -->
-          <div class="col-md-6 mb-3">
+          <!-- <div class="col-md-6 mb-3">
             <label for="selectProject" class="form-label"> Client Name</label>
             <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
               <option [ngValue]="null" disabled>Client Name</option>
@@ -69,8 +69,22 @@
                 {{ project.projectname }}
               </option>
             </select>
-          </div>
+          </div> -->
        
+
+          <!-- Project Dropdown -->
+<div class="col-md-6 mb-3">
+  <label for="selectProject" class="form-label">Client Name</label>
+  <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
+    <option [ngValue]="null" disabled selected>Select Client</option>
+    
+    <!-- ✅ Use correct property names -->
+    <option *ngFor="let project of projectList" [value]="project.projectId">
+      {{ project.projectName }}
+    </option>
+  </select>
+</div>
+
         <!-- Machine Dropdown for Pricing Tab (Custom Dropdown with Search) -->
         <div class="col-md-6 mb-3">
           <label for="selectMachinePricing" class="form-label"> Machine</label>
@@ -222,7 +236,7 @@
         <!-- Machine Selection Form -->
         <div class="row">
           <!-- Project Dropdown -->
-          <div class="col-md-6 mb-3">
+          <!-- <div class="col-md-6 mb-3">
             <label for="selectProject" class="form-label"> Client Name</label>
             <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
               <option [ngValue]="null" disabled> client Name</option>
@@ -231,7 +245,21 @@
                 {{ project.projectname }}
               </option>
             </select>
+          </div> -->
+
+
+          <div class="col-md-6 mb-3">
+            <label for="selectProject" class="form-label">Client Name</label>
+            <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
+              <option [ngValue]="null" disabled selected>Select Client</option>
+              
+              <!-- ✅ Use correct property names -->
+              <option *ngFor="let project of projectList" [value]="project.projectId">
+                {{ project.projectName }}
+              </option>
+            </select>
           </div>
+          
        
           <!-- Machine Dropdown -->
           <div class="col-md-6 mb-3">
@@ -512,7 +540,7 @@
       <!-- Row: Client Name + Machine Dropdown with Search -->
       <div class="row">
         <!-- Project Dropdown -->
-        <div class="col-md-6 mb-3">
+        <!-- <div class="col-md-6 mb-3">
           <label for="selectProject" class="form-label"> Client Name</label>
           <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
             <option [ngValue]="null" disabled>Client Name</option>
@@ -521,8 +549,21 @@
               {{ project.projectname }}
             </option>
           </select>
-        </div>
+        </div> -->
      
+
+        <div class="col-md-6 mb-3">
+          <label for="selectProject" class="form-label">Client Name</label>
+          <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
+            <option [ngValue]="null" disabled selected>Select Client</option>
+            
+            <!-- ✅ Use correct property names -->
+            <option *ngFor="let project of projectList" [value]="project.projectId">
+              {{ project.projectName }}
+            </option>
+          </select>
+        </div>
+        
       <!-- Machine Dropdown for Pricing Tab (Custom Dropdown with Search) -->
       <div class="col-md-6 mb-3">
         <label for="selectMachinePricing" class="form-label"> Machine</label> 
@@ -633,7 +674,7 @@
         <!-- Client Name & Machine Dropdowns Side by Side -->
         <div class="row">
           <!-- Client Dropdown -->
-          <div class="col-md-6 mb-3">
+          <!-- <div class="col-md-6 mb-3">
             <label class="form-label">Client Name</label>
             <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
               <option [ngValue]="null" disabled>Select Client</option>
@@ -641,7 +682,21 @@
                 {{ project.projectname }}
               </option>
             </select>
+          </div> -->
+
+
+          <div class="col-md-6 mb-3">
+            <label for="selectProject" class="form-label">Client Name</label>
+            <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
+              <option [ngValue]="null" disabled selected>Select Client</option>
+              
+              <!-- ✅ Use correct property names -->
+              <option *ngFor="let project of projectList" [value]="project.projectId">
+                {{ project.projectName }}
+              </option>
+            </select>
           </div>
+          
  
           <!-- Machine Dropdown -->
           <div class="col-md-6 mb-3">
