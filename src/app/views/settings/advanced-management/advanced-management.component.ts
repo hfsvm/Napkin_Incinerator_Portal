@@ -963,6 +963,8 @@ submitUpdatedConfig(): void {
   onTabChange(tab: string): void {
     this.activeTab = tab;
     this.selectedMachineId = '';
+    this.selectedProjectId = null;
+
     if (tab === 'MachineInstalled') {
       this.resetMachineInstalledForm(); // Reset fields when changing tab
     }

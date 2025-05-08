@@ -210,6 +210,9 @@ import { AdvancedManagementComponent } from './views/settings/advanced-managemen
 import { MachinedataComponent } from './views/machinedata/machinedata.component';
 import { MachinereportComponent } from './views/machinereport/machinereport.component';
 import { GoogleMapsComponent } from './views/plugins/maps/google-maps.component';
+import { ZoneDashboardComponent } from './views/zone-dashboard/zone-dashboard.component';
+
+
 
 const routes: Routes = [
   {
@@ -221,12 +224,35 @@ const routes: Routes = [
     path: 'standalone-map',
     component: GoogleMapsComponent
   },
+
+  {
+    path: 'zone-dashboard',
+    component: ZoneDashboardComponent,
+    data: {
+      title: 'Zone Dashboard'
+    }
+  },
+
+  // {
+  //   path: '',
+  //   component: ZoneDashboardComponent
+  // },
+
   {
     path: 'login',
     component: LoginComponent,
     data: {
       title: 'Login Page'
     }},
+
+    // {
+    //   path: 'zone/:id',
+    //   component: ZoneDashboardComponent,
+    //   data: {
+    //     title: 'Zone Dashboard'
+    //   }
+    // },
+  
 
     // { path: 'dashboard', component: WidgetsComponent, canActivate: [AuthGuard] },
     // { path: 'dashboard', component: VideosComponent, canActivate: [AuthGuard] },
@@ -275,6 +301,10 @@ const routes: Routes = [
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule)
       },
+
+
+
+
       {
         path: 'base',
         loadChildren: () =>
