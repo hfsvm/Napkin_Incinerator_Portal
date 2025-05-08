@@ -785,6 +785,9 @@ import { CommonDataService } from '../Common/common-data.service';
   providedIn: 'root'
 })
 export class DataService {
+  getRunningMachinesDetail(merchantId: string, clientId: number) {
+    throw new Error('Method not implemented.');
+  }
   url = environment.url;
   urld = environment.urld;
   url1 = environment.url1;
@@ -1228,14 +1231,14 @@ export class DataService {
       );
     }
  
-getAdvancedConfig(merchantId: string, machineId: string): Observable<any> {
-  const url = `${this.url1}/getAdvancedConfig/${merchantId}/${machineId}`;
-  return this.http.get(url, this.httpOptions).pipe(
-    retry(1),
-    tap(res => console.log('📥 Advanced Config Response:', res)),
-    catchError(this.handleError)
-  );
-}
+// getAdvancedConfig(merchantId: string, machineId: string): Observable<any> {
+//   const url = `${this.url1}/getAdvancedConfig/${merchantId}/${machineId}`;
+//   return this.http.get(url, this.httpOptions).pipe(
+//     retry(1),
+//     tap(res => console.log('📥 Advanced Config Response:', res)),
+//     catchError(this.handleError)
+//   );
+// }
  
 // POST
 getMachinesByProject(projectId: number): Observable<any> {
@@ -1406,6 +1409,19 @@ getMachinesByProject(projectId: number): Observable<any> {
       catchError(this.handleError)
     );
   }
+  getOnlineMachinesByClient(merchantId: string, ProjetId: number): Observable<any> {
+    debugger;
+    const url = `${this.url1}/getRunningMachinesDetail/${merchantId}/${ProjetId}`;
+    console.log("📡 API CALL:", url);
+ 
+    return this.http.get(url, this.httpOptions).pipe(
+      retry(1),
+      tap(response => console.log('🔹 client', response)),
+      catchError(this.handleError)
+    );
+  }
+
+
   getItemsByMerchant(merchantId: string): Observable<any> {
     const url = `${this.url1}/getItemDetails/${merchantId}`;
     console.log("📡 API CALL:", url);

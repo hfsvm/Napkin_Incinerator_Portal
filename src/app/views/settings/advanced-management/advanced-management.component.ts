@@ -19,6 +19,7 @@ export class AdvancedManagementComponent implements OnInit {
 
   fotaTable: any[] = [];
   fotaRows: any[] = [];
+  installedDate: string = '';
   selectedFotaRows: Set<string> = new Set(); // store selected machineids
  
   selectedVersion: string = '';
@@ -29,13 +30,18 @@ uid: string = '';
   schedulerMinute: number | null = null;
   merchantId: string = '';
   machineIds: string[] = [];
+  fotamachineIds: string[] = [];
   selectedMachineId: string = '';
   selectedFotaMachineId: string = '';
   activeTab: string = 'pricing'; // Active tab selector for pricing or incineration
   incinerationConfig: any = null;
   projectList: any[] = [];
  selectedProjectId!: number | null;
+ selectedProjectIdfota!: number | null;
  clientId!: number;
+ clientname: string = '';
+ currentTab: string = 'Pricing';
+// projectId: number;
  searchText: string = '';
  filteredMachineIds: string[] = [];
  selectedMachineIdPricing: string | null = null;
@@ -110,7 +116,8 @@ popupConfirmAction: () => void = () => {};
     private dataService: DataService,
     private changeDetectorRef: ChangeDetectorRef,
     private eRef: ElementRef,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+   
   ) {}
  
   // @HostListener('document:click', ['$event'])
@@ -193,6 +200,7 @@ cancelPopup() {
     // this.getFotaVersionDetails("VIKN250324");
     this.filteredMachineIds = this.machineIds; // Set initially
     this.merchantId = this.commonDataService.getMerchantId();
+    this.clientname = '';
     this.machineIds = Array.isArray(this.commonDataService.userDetails?.machineId)
     ? this.commonDataService.userDetails.machineId
     : [];
@@ -239,6 +247,20 @@ cancelPopup() {
   
       this.getItemsByMerchant(this.merchantId);
     }
+
+    if (this.projectList.length > 0) {
+      // this.selectedProjectId = this.projectList[0].projectId;
+
+      this.selectedProjectIdfota = null;
+
+      console.log("Selected Project ID fota:", this.selectedProjectIdfota);
+  
+      if (this.selectedProjectIdfota !== null) {
+        this.getMachinesByProject(this.selectedProjectIdfota);
+      }
+  
+      this.getItemsByMerchant(this.merchantId);
+    }
   }
   
   getItemsByMerchant(merchantId: string): void {
@@ -278,6 +300,20 @@ cancelPopup() {
     this.cdr.detectChanges(); // 👈 Force refresh if needed
 
   }
+
+  onProjectChangeFota(): void {
+    this.selectedMachineId = ''; // 👈 Clear previously selected machine
+    this.filteredMachineIds = [];  // 👈 Optionally clear machine list before loading new ones
+    this.selectedMachineIdPricing = ''; // 👈 Clear dropdown placeholder value
+
+  
+    if (this.selectedProjectIdfota !== null) {
+      this.getOnlineMachinesByProject(this.selectedProjectIdfota);
+    }
+    this.cdr.detectChanges(); // 👈 Force refresh if needed
+
+  }
+ 
  
 onMachineChange(): void {
   // this.getFotaVersionDetails();
@@ -333,66 +369,67 @@ onMachineChange(): void {
  
  
   // 🔥 Fetch Incineration Config
-  this.dataService.getAdvancedConfig(this.merchantId, this.selectedMachineId).subscribe(
-    (res: any) => {
-      console.log('📥 Incineration Config Response:', res);
+  // this.dataService.getAdvancedConfig(this.merchantId, this.selectedMachineId).subscribe(
+  //   (res: any) => {
+  //     debugger;
+  //     console.log('📥 Incineration Config Response:', res);
  
-      if (res.code !== 200 || res.error) {
-        const msg = res.phrase || res.error || 'Advanced configuration error.';
-        this.showNotification(`⚠️ ${msg}`, 'error');
-        return;
-      }
+  //     if (res.code !== 200 || res.error) {
+  //       const msg = res.phrase || res.error || 'Advanced configuration error.';
+  //       this.showNotification(`⚠️ ${msg}`, 'error');
+  //       return;
+  //     }
  
-      const incinerationData = res.data;
+  //     const incinerationData = res.data;
  
-      if (incinerationData) {
-        this.incinerationCurrentValues.scheduler = incinerationData.scheduler || '';
-        this.incinerationCurrentValues.limitSwitch = incinerationData.limitSwitch || '';
-        this.incinerationCurrentValues.napkinCost = incinerationData.napkinCost || '';
-        this.incinerationCurrentValues.setHeaterTempA = incinerationData.setHeaterTempA || '';
-        this.incinerationCurrentValues.setHeaterTempB = incinerationData.setHeaterTempB || '';
-        this.incinerationCurrentValues.heaterAMinTemp = incinerationData.heaterAMinTemp || '';
-        this.incinerationCurrentValues.heaterBOnTemp = incinerationData.heaterBOnTemp || '';
+  //     if (incinerationData) {
+  //       this.incinerationCurrentValues.scheduler = incinerationData.scheduler || '';
+  //       this.incinerationCurrentValues.limitSwitch = incinerationData.limitSwitch || '';
+  //       this.incinerationCurrentValues.napkinCost = incinerationData.napkinCost || '';
+  //       this.incinerationCurrentValues.setHeaterTempA = incinerationData.setHeaterTempA || '';
+  //       this.incinerationCurrentValues.setHeaterTempB = incinerationData.setHeaterTempB || '';
+  //       this.incinerationCurrentValues.heaterAMinTemp = incinerationData.heaterAMinTemp || '';
+  //       this.incinerationCurrentValues.heaterBOnTemp = incinerationData.heaterBOnTemp || '';
  
-        if (this.activeTab === 'incineration') {
-          this.currentValues = {
-            iid: '',
-            itp: '',
-            qrBytes: '',
-            ...this.incinerationCurrentValues
-          };
-        }
-      } else {
-        this.incinerationCurrentValues = {
-          scheduler: '',
-          limitSwitch: '',
-          napkinCost: '',
-          setHeaterTempA: '',
-          setHeaterTempB: '',
-          heaterAMinTemp: '',
-          heaterBOnTemp: ''
-        };
-      }
+  //       if (this.activeTab === 'incineration') {
+  //         this.currentValues = {
+  //           iid: '',
+  //           itp: '',
+  //           qrBytes: '',
+  //           ...this.incinerationCurrentValues
+  //         };
+  //       }
+  //     } else {
+  //       this.incinerationCurrentValues = {
+  //         scheduler: '',
+  //         limitSwitch: '',
+  //         napkinCost: '',
+  //         setHeaterTempA: '',
+  //         setHeaterTempB: '',
+  //         heaterAMinTemp: '',
+  //         heaterBOnTemp: ''
+  //       };
+  //     }
  
-      this.changeDetectorRef.detectChanges();
-    },
-    error => {
-      console.error("❌ Incineration Config HTTP Error:", error);
+  //     this.changeDetectorRef.detectChanges();
+  //   },
+  //   error => {
+  //     console.error("❌ Incineration Config HTTP Error:", error);
    
-      if (error.code === 404) {
-        this.showNotification("No configuration found for the selected machine. Please set configurations.", "error");
-      } else if (error.code === 401) {
-        this.showNotification("🔒 Error 401: Unauthorized access.", "error");
-      } else if (error.code === 500) {
-        this.showNotification("💥 Error 500: Server error occurred.", "error");
-      } else if (error.code === 0) {
-        this.showNotification("🔌 Network error. Please check your connection.", "error");
-      } else {
-        this.showNotification(`❌ Error ${error.status}: ${error.error?.message || 'Unknown error occurred'}`, "error");
-      }
-    }
+  //     if (error.code === 404) {
+  //       this.showNotification("No configuration found for the selected machine. Please set configurations.", "error");
+  //     } else if (error.code === 401) {
+  //       this.showNotification("🔒 Error 401: Unauthorized access.", "error");
+  //     } else if (error.code === 500) {
+  //       this.showNotification("💥 Error 500: Server error occurred.", "error");
+  //     } else if (error.code === 0) {
+  //       this.showNotification("🔌 Network error. Please check your connection.", "error");
+  //     } else {
+  //       this.showNotification(`❌ Error ${error.status}: ${error.error?.message || 'Unknown error occurred'}`, "error");
+  //     }
+  //   }
    
-  );
+  // );
   
     // this.dataService.getFotaVersionDetails(this.merchantId, this.selectedMachineId).subscribe(
     //   (res: any) => {
@@ -575,14 +612,16 @@ submitFotaConfig(): void {
  
 }
 
-getMachinesByProject(clientId: number): void {
-  console.log("client id ============>",clientId)
-  if (!clientId || !this.merchantId) return;
+getOnlineMachinesByProject(clienId: number): void {
+  console.log("client id ============>",clienId)
+  if (!clienId || !this.merchantId) return;
  
-  this.dataService.getMachinesByClient(this.merchantId, clientId).subscribe(
+  this.dataService.getOnlineMachinesByClient(this.merchantId, clienId).subscribe(
+    
+  // this.dataService.getRunningMachinesDetail(this.merchantId, clientId).subscribe(
     (res: any) => {
       if (res.code === 200 && Array.isArray(res.data)) {
-        debugger;
+        console.log("response data for the fota screen machineIds ============>",res.data)
         this.machineIds = res.data;  // ✅ correct key
         this.selectedMachineId = ''; // reset previously selected machine
         this.selectedFotaMachineId = '';
@@ -599,6 +638,32 @@ getMachinesByProject(clientId: number): void {
   );
 }
  
+
+getMachinesByProject(clientId: number): void {
+  console.log("client id ============>",clientId)
+  if (!clientId || !this.merchantId) return;
+ 
+  this.dataService.getMachinesByClient(this.merchantId, clientId).subscribe(
+    
+  // this.dataService.getRunningMachinesDetail(this.merchantId, clientId).subscribe(
+    (res: any) => {
+      if (res.code === 200 && Array.isArray(res.data)) {
+        console.log("response data for the other screens machineIds ============>",res.data)
+        this.machineIds = res.data;  // ✅ correct key
+        this.selectedMachineId = ''; // reset previously selected machine
+        this.selectedFotaMachineId = '';
+        this.changeDetectorRef.detectChanges();
+      } else {
+        this.machineIds = [];
+        this.showNotification("⚠️ No machines found for selected client.", "error");
+      }
+    },
+    error => {
+      console.error("❌ Error fetching machines by client:", error);
+      this.showNotification("❌ Failed to fetch machines for selected client.", "error");
+    }
+  );
+}
  
  
 // Helper method to reset data
@@ -753,21 +818,25 @@ submitUpdatedConfig(): void {
       this.showNotification('⚠️ Please fill all fields.', 'error');
       return;
     }
- 
     const machineOnboardingPayload = {
+    
       machineId: this.selectedMachineId,
       machineInfo: {
         uid: this.uid,
         installed: Number(this.installedStatus),
+        installedDate: this.installedDate.toString()
+        
       },
+         installed: Number(this.installedStatus),
       merchantId: this.merchantId
     };
  
     // 🔍 Log the payload being sent to the API
     console.log('📤 Submitting Machine Onboarding Payload:', machineOnboardingPayload);
- 
     this.dataService.machineOnboarding(machineOnboardingPayload).subscribe(
+    
       (response: any) => {
+       
         if (response.code === 200) {
           this.showNotification('✅ Machine Installed successfully.', 'success');
           this.resetMachineInstalledForm();
@@ -960,11 +1029,33 @@ submitUpdatedConfig(): void {
     this.schedulerMinute = null;
     this.updatedIncinerationValues = { scheduler: '', limitSwitch: '', napkinCost: '', setHeaterTempA: '', setHeaterTempB: '', heaterAMinTemp: '', heaterBOnTemp: '' };
   }
-  onTabChange(tab: string): void {
+ 
+  clearClientAndMachine(): void {
+    
+    this.selectedClientId = '';
+    this.selectedMachineId = '';
+  }
+  // switchTab(tabName: string):void {
+  //   this.currentTab = tabName;
+
+  //   this.clientname = '';
+  //   this.machineIds = [];
+
+  // }
+    onTabChange(tab: string): void {
+    
     this.activeTab = tab;
     this.selectedMachineId = '';
-    this.selectedProjectId = null;
 
+    //to clear the selected clinet id when tab is changed
+    this.selectedProjectId = null;
+    this.machineIds = [];
+
+    this.clientname = '';
+
+    this.clearClientAndMachine();
+    
+    
     if (tab === 'MachineInstalled') {
       this.resetMachineInstalledForm(); // Reset fields when changing tab
     }
@@ -1005,6 +1096,9 @@ submitUpdatedConfig(): void {
     this.notificationMessage = '';
     this.notificationType = '';
     this.selectedFotaMachineId = '';
+    this.installedDate ='';
+    this.machineIds = [];
+    this.fotamachineIds = [];
   }
  
   showNotification(message: string, type: 'success' | 'error') {
