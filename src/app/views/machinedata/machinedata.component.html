@@ -290,7 +290,7 @@
   <th (click)="sortData('stockStatus')" style="cursor: pointer;">Stock Status 🔽</th>
   <th (click)="sortData('burningStatus')" style="cursor: pointer;">Burning Status 🔽</th> -->
   <th (click)="sortData('machineId')" style="cursor: pointer; white-space: nowrap;">Machine ID 🔽</th>
-  <th (click)="sortData('pcb no')" style="cursor: pointer; white-space: nowrap;">Pcb No 🔽</th>
+  <th (click)="sortData('pcbNo')" style="cursor: pointer; white-space: nowrap;">Pcb No 🔽</th>
   <th (click)="sortData('address')" style="cursor: pointer; white-space: nowrap;">Location Name 🔽</th>
   <th (click)="sortData('address')" style="cursor: pointer; white-space: nowrap;">Location Address 🔽</th>
   <th (click)="sortData('uid')" style="cursor: pointer; white-space: nowrap;">Uid 🔽</th>
@@ -329,7 +329,7 @@
     <input
       type="text"
       class="form-control form-control-sm"
-      placeholder="pcb no"
+      placeholder="pcb No"
       [(ngModel)]="columnFilters['PCB NO']"
       (ngModelChange)="applyFiltersAndSort()"
     />
@@ -365,6 +365,16 @@
     (ngModelChange)="applyFiltersAndSort()"
   />
   </th>
+
+  <!-- <th>
+    <input
+    type="text"
+    class="form-control form-control-sm"
+    placeholder="pcbNo"
+    [(ngModel)]="columnFilters['PcbNO']"
+    (ngModelChange)="applyFiltersAndSort()"
+  />
+  </th> -->
   
   
   
@@ -437,9 +447,9 @@
 
       <!-- ✅ Location Address -->
       <td>{{ machine.address || '' }}</td>
-  
-      <td></td>
+      <td>{{ machine.uid || ''}}</td>
       <td>{{ machine.machineType }}</td>
+      
   
       <td>
         <span class="badge badge-fixed px-3 py-2"
@@ -462,8 +472,10 @@
           {{ machine.stockStatus }}
         </span>
       </td>
-  <td>{{ machine.uid || ''}}</td>
-  <td>{{ machine.machineType }}</td>
+ 
+  <!-- <td>{{ machine.machineType }}</td> -->
+ 
+  <!-- <td>{{ machine.pcbNo || ''}}</td> -->
   
       <td>
         <span class="badge badge-fixed px-3 py-2"
