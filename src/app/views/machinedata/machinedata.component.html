@@ -290,6 +290,7 @@
   <th (click)="sortData('stockStatus')" style="cursor: pointer;">Stock Status 🔽</th>
   <th (click)="sortData('burningStatus')" style="cursor: pointer;">Burning Status 🔽</th> -->
   <th (click)="sortData('machineId')" style="cursor: pointer; white-space: nowrap;">Machine ID 🔽</th>
+  <th (click)="sortData('pcbNo')" style="cursor: pointer; white-space: nowrap;">Pcb No 🔽</th>
   <th (click)="sortData('address')" style="cursor: pointer; white-space: nowrap;">Location Name 🔽</th>
   <th (click)="sortData('address')" style="cursor: pointer; white-space: nowrap;">Location Address 🔽</th>
   <th (click)="sortData('uid')" style="cursor: pointer; white-space: nowrap;">Uid 🔽</th>
@@ -323,7 +324,17 @@
       (ngModelChange)="applyFiltersAndSort()"
     />
   </th>
- 
+
+  <th>
+    <input
+      type="text"
+      class="form-control form-control-sm"
+      placeholder="pcb No"
+      [(ngModel)]="columnFilters['PCB NO']"
+      (ngModelChange)="applyFiltersAndSort()"
+    />
+  </th>
+  
   <th>
     <input
     type="text"
@@ -354,9 +365,19 @@
     (ngModelChange)="applyFiltersAndSort()"
   />
   </th>
- 
- 
- 
+
+  <!-- <th>
+    <input
+    type="text"
+    class="form-control form-control-sm"
+    placeholder="pcbNo"
+    [(ngModel)]="columnFilters['PcbNO']"
+    (ngModelChange)="applyFiltersAndSort()"
+  />
+  </th> -->
+  
+  
+  
   <th>
     <input
       type="text"
@@ -407,77 +428,86 @@
   </thead>
  
   <tbody>
-  <tr *ngFor="let machine of filteredMachines.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage); let i = index">
-  <td>{{ i + 1 }}</td>
-  <td>
-    <!-- Machine ID as clickable link -->
-    <a [routerLink]="['/machine-report', machine.machineId]" style="color: #007bff; text-decoration: underline; cursor: pointer;">
-      {{ machine.machineId }}
-    </a>
-  </td>
-  <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-    {{ getLastPartAfterLastComma(machine.address) || 'No Address' }}
-  </td>
+    <tr *ngFor="let machine of filteredMachines.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage); let i = index">
+      <td>{{ i + 1 }}</td>
+      <td>
+        <!-- Machine ID as clickable link -->
+        <a [routerLink]="['/machine-report', machine.machineId]" style="color: #007bff; text-decoration: underline; cursor: pointer;">
+          {{ machine.machineId }}
+        </a>
+      </td>
+  
+      <!-- ✅ PCB NO -->
+      <td>{{ machine.pcbNo }}</td>
+  
+      <!-- ✅ Location Name -->
+      <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        {{ getLastPartAfterLastComma(machine.address) || 'No Address' }}
+      </td> 
+
+      <!-- ✅ Location Address -->
+      <td>{{ machine.address || '' }}</td>
+      <td>{{ machine.uid || ''}}</td>
+      <td>{{ machine.machineType }}</td>
+      
+  
+      <td>
+        <span class="badge badge-fixed px-3 py-2"
+          [ngStyle]="{
+            'background-color': machine.status === '1' ? '#7ED321' : '#fcba4e',
+            'color': '#000000'
+          }">
+          {{ machine.status === '1' ? 'Online' : 'Offline' }}
+        </span>
+      </td>
+  
+      <td>
+        <span class="badge badge-fixed px-3 py-2"
+          [ngStyle]="{
+            'background-color': machine.stockStatus === 'Empty' ? '#E57373' :
+                                machine.stockStatus === 'Low' ? '#FFA500' :
+                                machine.stockStatus === 'Full' ? '#7ED321' : 'transparent',
+            'color': '#000000'
+          }">
+          {{ machine.stockStatus }}
+        </span>
+      </td>
  
+  <!-- <td>{{ machine.machineType }}</td> -->
  
- 
- 
-  <td >{{ machine.address || '' }}</td>
- 
-  <td>{{ machine.uid || ''}}</td>
-  <td>{{ machine.machineType }}</td>
- 
- 
-  <td>
-    <span class="badge badge-fixed px-3 py-2"
-      [ngStyle]="{
-        'background-color': machine.status === '1' ? '#7ED321' : '#fcba4e',
-        'color': '#000000'
-      }">
-      {{ machine.status === '1' ? 'Online' : 'Offline' }}
-    </span>
-  </td>
-  <td>
-    <span class="badge badge-fixed px-3 py-2"
-      [ngStyle]="{
-        'background-color': machine.stockStatus === 'Empty' ? '#E57373' :
-                            machine.stockStatus === 'Low' ? '#FFA500' :
-                            machine.stockStatus === 'Full' ? '#7ED321' : 'transparent',
-        'color': '#000000'
-      }">
-      {{ machine.stockStatus }}
-    </span>
-  </td>
-  <td>
-    <span class="badge badge-fixed px-3 py-2"
-      [ngClass]="{
-        'bg-warning text-black': machine.burningStatus === '2',
-        'bg-secondary text-black': machine.burningStatus === '1',
-        'bg-light text-black': machine.burningStatus === 'N/A'
-      }">
-      <ng-container *ngIf="machine.burningStatus === '2'">🔥Burning</ng-container>
-      <ng-container *ngIf="machine.burningStatus === '1'">
-        <img src="./assets/img/icon/hourglass.png" width="16" height="16" style="vertical-align: middle; margin-right: 4px;" />
-        Idle
-      </ng-container>
-      <ng-container *ngIf="machine.burningStatus !== '1' && machine.burningStatus !== '2'">N/A</ng-container>
-    </span>
-  </td>
-  <td>
-    <div class="view-btn-container" style="position: relative; display: inline-block;">
-      <button class="btn btn-info btn-sm">View</button>
-      <div class="tooltip-info">
-        <strong>MachineId:</strong> {{ machine.machineId }}<br>
-        <strong>Stock Status:</strong> {{ machine.stockStatus }}<br>
-        <strong>Items Dispensed:</strong> {{ machine.itemsDispensed }}<br>
-        <strong>Status:</strong> {{ machine.status === '1' ? 'Online ' : 'Offline ' }}<br>
-        <strong>Collection:</strong> {{ machine.collection }}<br>
-        <strong>Items Burnt:</strong> {{ machine.itemsBurnt }}<br>
-        <strong>Burning Cycles:</strong> {{ machine.burningCycles }}<br>
-      </div>
-    </div>
-  </td>
-  </tr>
+  <!-- <td>{{ machine.pcbNo || ''}}</td> -->
+  
+      <td>
+        <span class="badge badge-fixed px-3 py-2"
+          [ngClass]="{
+            'bg-warning text-black': machine.burningStatus === '2',
+            'bg-secondary text-black': machine.burningStatus === '1',
+            'bg-light text-black': machine.burningStatus === 'N/A'
+          }">
+          <ng-container *ngIf="machine.burningStatus === '2'">🔥Burning</ng-container>
+          <ng-container *ngIf="machine.burningStatus === '1'">
+            <img src="./assets/img/icon/hourglass.png" width="16" height="16" style="vertical-align: middle; margin-right: 4px;" />
+            Idle
+          </ng-container>
+          <ng-container *ngIf="machine.burningStatus !== '1' && machine.burningStatus !== '2'">N/A</ng-container>
+        </span>
+      </td>
+  
+      <td>
+        <div class="view-btn-container" style="position: relative; display: inline-block;">
+          <button class="btn btn-info btn-sm">View</button>
+          <div class="tooltip-info">
+            <strong>MachineId:</strong> {{ machine.machineId }}<br>
+            <strong>Stock Status:</strong> {{ machine.stockStatus }}<br>
+            <strong>Items Dispensed:</strong> {{ machine.itemsDispensed }}<br>
+            <strong>Status:</strong> {{ machine.status === '1' ? 'Online ' : 'Offline ' }}<br>
+            <strong>Collection:</strong> {{ machine.collection }}<br>
+            <strong>Items Burnt:</strong> {{ machine.itemsBurnt }}<br>
+            <strong>Burning Cycles:</strong> {{ machine.burningCycles }}<br>
+          </div>
+        </div>
+      </td>
+    </tr>
   </tbody>
   </table>
   </div>

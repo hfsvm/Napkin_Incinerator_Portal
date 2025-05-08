@@ -1051,12 +1051,10 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   dashboardData: any = {};
   columnFilters: any = {
     'Machine ID': '',
-    "pcbno": '',
+    "pcbNo": '',
     'Location Name': '',
     'Location Address': '',
-    "UID": '',
-    
- 
+    'UID': '',
     'Machine Type': '',
     'Status': '',
     'Stock Status': '',
@@ -2020,7 +2018,7 @@ toggleSelectAll(selectedArray: any[], options: any[], key: string) {
   // ✅ Reset search filters
   this.columnFilters = {
     'Machine ID': '',
-    'pcbno': '', 
+    'pcbNo': '', 
     'Location Name': '',
     'Location Address': '',
     'Uid': '',
@@ -2102,7 +2100,7 @@ debugger;
           if (response?.code === 200 && response.data) {
             this.machines = response.data.machines.map((machine: any) => ({
               ...machine,
-              pcbNo: machine.pcbNo,
+              pcbNo: machine.pcbNo === response.data.machines[0].pcbNo ? '' : machine.pcbNo,
               uid: machine.uid ===response.data.machines[0].uid ? 'N/A' : machine.uid,
  
               status: machine.status === 'Online' ? '1' : '2',
@@ -2214,6 +2212,7 @@ formatText(text: string | null): string {
       this.filteredMachines = this.machines.filter(machine =>
         machine.machineId.includes(this.searchQuery) ||
         machine.uid?.includes(this.searchQuery) ||
+        machine.pcbNo?.includes(this.searchQuery) ||
         machine.machineType?.includes(this.searchQuery) ||
         machine.status?.includes(this.searchQuery) ||
         machine.stockStatus?.includes(this.searchQuery) ||
@@ -2295,14 +2294,14 @@ formatText(text: string | null): string {
 
   applyFiltersAndSort() {
     this.filteredMachines = this.machines.filter(machine => {
-      const pcbno = machine.pcbno?.toLowerCase() || '';
+      const pcbNo = machine.pcbNo?.toLowerCase() || '';
       const locationAddress = machine.address?.toLowerCase() || '';
       const locationName = this.getLastPartAfterLastComma(machine.address || '').toLowerCase();
       const uid = machine.uid?.toLowerCase() || '';
   
       return (
         (!this.columnFilters['Machine ID'] || machine.machineId.toLowerCase().includes(this.columnFilters['Machine ID'].toLowerCase())) &&
-        (!this.columnFilters['PCBNO'] || pcbno.toLowerCase().includes(this.columnFilters['PCBNO'].toLowerCase())) &&
+        (!this.columnFilters['PcbNO'] || pcbNo.toLowerCase().includes(this.columnFilters['PcbNO'].toLowerCase())) &&
         (!this.columnFilters['Machine Type'] || machine.machineType.toLowerCase().includes(this.columnFilters['Machine Type'].toLowerCase())) &&
         (!this.columnFilters['Status'] || (machine.status === '1' ? 'Online' : 'Offline').toLowerCase().includes(this.columnFilters['Status'].toLowerCase())) &&
         (!this.columnFilters['Stock Status'] || machine.stockStatus.toLowerCase().includes(this.columnFilters['Stock Status'].toLowerCase())) &&
