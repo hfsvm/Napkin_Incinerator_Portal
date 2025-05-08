@@ -2206,7 +2206,6 @@ formatText(text: string | null): string {
       this.filteredMachines = this.machines.filter(machine =>
         machine.machineId.includes(this.searchQuery) ||
         machine.uid?.includes(this.searchQuery) ||
-        machine.uid?.includes(this.searchQuery) ||
         machine.machineType?.includes(this.searchQuery) ||
         machine.status?.includes(this.searchQuery) ||
         machine.stockStatus?.includes(this.searchQuery) ||

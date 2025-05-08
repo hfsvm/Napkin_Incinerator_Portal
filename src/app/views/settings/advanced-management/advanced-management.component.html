@@ -554,7 +554,7 @@
 
         <div class="col-md-6 mb-3">
           <label for="selectProject" class="form-label">Client Name</label>
-          <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
+          <select class="form-select" [(ngModel)]="selectedProjectIdfota" (change)="onProjectChangeFota()">
             <option [ngValue]="null" disabled selected>Select Client</option>
             
             <!-- ✅ Use correct property names -->
@@ -753,8 +753,14 @@
           <input type="text" class="form-control" [(ngModel)]="uid" />
         </div>
       </div>
-
-  
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Installed Date </label>
+        <br>
+        <input type="date" id="installedDate" class="styled-input">
+      <br>
+      </div>
+      
+     
        <!-- Submit & Clear Buttons Centered -->
 <div class="d-flex justify-content-center gap-2 mt-3">
   <button class="btn btn-primary px-4 custom-btn" (click)="onSubmitMachineInstalled()">Submit</button>
