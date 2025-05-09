@@ -11,6 +11,9 @@ import { CommonDataService } from '../../../Common/common-data.service';
 })
  
 export class AdvancedManagementComponent implements OnInit {
+  currentTime: string = '';
+  private timer: any;
+
 
   fotaMachines: any[] = []; // Table data
   selectedMachines: any[] = []; // Selected rows
@@ -19,9 +22,8 @@ export class AdvancedManagementComponent implements OnInit {
 
   fotaTable: any[] = [];
   fotaRows: any[] = [];
-  installedDate: string = '';
+  // installedDate: string = '';
   selectedFotaRows: Set<string> = new Set(); // store selected machineids
- 
   selectedVersion: string = '';
   selectedMachineInstalledId: string = '';
 installedStatus: string = ''; // Installed status (1 or 0)
@@ -197,6 +199,11 @@ cancelPopup() {
 }
  
   ngOnInit(): void {
+
+    // this.updateTime(); // Set immediately
+    // this.timer = setInterval(() => this.updateTime(), 1000);
+
+
     // this.getFotaVersionDetails("VIKN250324");
     this.filteredMachineIds = this.machineIds; // Set initially
     this.merchantId = this.commonDataService.getMerchantId();
@@ -262,6 +269,12 @@ cancelPopup() {
       this.getItemsByMerchant(this.merchantId);
     }
   }
+  // updateTime(): void {
+  //   const now = new Date();
+  //   this.currentTime = now.toLocaleTimeString(); // Formats in HH:MM:SS
+  //   console.log ("Current time:", this.currentTime);
+  // }
+
   
   getItemsByMerchant(merchantId: string): void {
     this.dataService.getItemsByMerchant(merchantId).subscribe(
@@ -366,6 +379,8 @@ onMachineChange(): void {
       }
     }
   );
+
+  
  
  
   // 🔥 Fetch Incineration Config
@@ -995,7 +1010,8 @@ submitUpdatedConfig(): void {
       heaterAMinTemp: this.updatedIncinerationValues.heaterAMinTemp || this.incinerationCurrentValues.heaterAMinTemp,
       heaterBOnTemp: this.updatedIncinerationValues.heaterBOnTemp || this.incinerationCurrentValues.heaterBOnTemp,
       machineId: this.selectedMachineId,
-      merchantId: this.merchantId
+      merchantId: this.merchantId,
+      installedDate: this.installedDate
     };
  
     // Send payload to the API
@@ -1255,9 +1271,20 @@ toggleDropdown(event: MouseEvent): void {
  
 // Close dropdown when clicking outside
  
+
+installedDate: string = '';
+
+onDateChange(event: string) {
+  // Convert to your required format: 'YYYY-MM-DD HH:mm:ss'
+  const date = new Date(event);
+  const formatted = this.formatDateTime(date);
+  console.log('Formatted Date:', formatted); // e.g. 2025-05-08 23:59:00
+}
+
+formatDateTime(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}   ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
  
 }
- 
- 
- 
- 
