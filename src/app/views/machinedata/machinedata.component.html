@@ -1,11 +1,11 @@
-<!-- 
+<!--
 <div class="container-fluid">
-
+ 
   <div class="d-flex justify-content-end mb-3">
     <button class="btn btn-primary" (click)="refreshData()">🔄 Refresh Data</button>
   </div>
-
-  
+ 
+ 
   <div class="row">
     <div class="col-md-3" *ngFor="let card of [
       { title: 'Machines Installed', value: dashboardData.machinesInstalled, color: 'info', icon: '🖥️' },
@@ -28,8 +28,8 @@
       </div>
     </div>
   </div>
-
-
+ 
+ 
   <div class="card mb-3">
     <div class="card-header">
       <h3>Filters</h3>
@@ -51,21 +51,21 @@
             </button>
             <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]">
               <label *ngFor="let option of filter.options" class="dropdown-item">
-                <input type="checkbox" 
-       [checked]="filter.selected.includes(option.key || option)" 
+                <input type="checkbox"
+       [checked]="filter.selected.includes(option.key || option)"
        (change)="toggleSelection(filter.selected, option.key || option, filter.key)">
-
+ 
                 {{ option.value || option }}
               </label>
             </div>
-            
-            
+           
+           
           </div>
         </div>
       </div>
     </div>
   </div>
-
+ 
   <div class="card p-3">
     <h3>Machine Report</h3>
     <table class="table table-bordered">
@@ -83,30 +83,30 @@
         <tr *ngFor="let machine of filteredMachines; let i = index">
           <td>{{ i + 1 }}</td>
           <td>{{ machine.machineId }}</td>
-          
+         
          
           <td [ngClass]="{'text-success': machine.status === '1', 'text-danger': machine.status !== '1'}">
             {{ machine.status === '1' ? 'Online ' : 'Offline ' }}
           </td>
-
-          
+ 
+         
           <td [ngClass]="{
-  'text-danger': machine.stockStatus === 'Empty', 
+  'text-danger': machine.stockStatus === 'Empty',
   'text-warning': machine.stockStatus === 'Low',
   'text-success': machine.stockStatus === 'Full'
 }">
   {{ machine.stockStatus }}
 </td>
-
-          
-      
-          
-
+ 
+         
+     
+         
+ 
        
           <td [ngClass]="{'text-warning': machine.burningStatus === '2', 'text-black': machine.burningStatus !== '2'}">
             {{ machine.burningStatus === '2' ? ' 🔥' : 'Idle ⏳' }}
           </td>
-
+ 
           <td>
             <button class="btn btn-info btn-sm" (mouseenter)="showInfo(machine.machineId)" (mouseleave)="hideInfo()">View</button>
             <div *ngIf="hoveredMachineId === machine.machineId" class="tooltip-info">
@@ -116,22 +116,22 @@
               <strong>RSSI:</strong> {{ machine.rssi }}
             </div>
           </td>
-          
-          
+         
+         
         </tr>
       </tbody>
     </table>
   </div>
 </div> -->
 <!-- Dashboard Summary Cards -->
-
-
-
-
+ 
+ 
+ 
+ 
 <!--<td [ngClass]="{'text-warning': machine.burningStatus === '2', 'text-black': machine.burningStatus !== '2'}">
   {{ machine.burningStatus === '2' ? ' 🔥' : 'Idle ⏳' }}
 </td>
-
+ 
 <td>
   <button class="btn btn-info btn-sm" (mouseenter)="showInfo(machine.machineId)" (mouseleave)="hideInfo()">View</button>
   <div *ngIf="hoveredMachineId === machine.machineId" class="tooltip-info">
@@ -141,16 +141,16 @@
     <strong>RSSI:</strong> {{ machine.rssi }}
   </div>
 </td>
-
-
+ 
+ 
 </tr>
 </tbody>
 </table>
 </div>
 </div> -->
-
-
-
+ 
+ 
+ 
 <!-- Dashboard Summary Cards -->
 <div class="refresh-circle">
   <span class="time">{{ formattedRefreshTime }}</span>
@@ -177,23 +177,23 @@
   style="text-align: center; font-size: 16px; margin-top: auto; margin-bottom: auto;">
   {{ card.value }}
   </p>
-  
+ 
   <!-- ✅ Stock Status Special Handling (Without Changing Card Size) -->
   <p *ngIf="card.title === 'Stock Status'"
   style="display: flex; flex-direction: column; align-items: center; justify-content: center;
          font-size: 14px; line-height: 1.2; height: 40px; margin-top: auto; margin-bottom: auto;">
   <span>Empty: {{ dashboardData.stockEmpty }} | Full: {{ dashboardData.stockOk }}</span>
   </p>
-  
+ 
        
-  
-  
+ 
+ 
   </div>
   </div>
   </div>
   </div>
   </div>
-  
+ 
   <div class="card mb-3 mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
   <div class="mb-3 d-flex align-items-center gap-2">
@@ -203,14 +203,14 @@
   [(ngModel)]="searchTerm"
   (input)="onSearchChange()"
   /> -->
-  
+ 
   <!-- <small class="text-muted">Supports RegEx (e.g. `^A.*`, `Machine[0-9]+`)</small> -->
   <button class="btn btn-primary btn-sm ms-2" (click)="clearFilters()"> Clear Filters</button>
   </div>
-  
+ 
   <!-- <h3 class="mb-3">Filters</h3> -->
   <button class="btn btn-primary btn-sm" (click)="refreshData()">🔄 Refresh Data</button>
-  
+ 
   </div>
   <div class="card-body">
     <div class="container">
@@ -227,7 +227,7 @@
           <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"></ng-container>
         </div>
       </div>
-  
+ 
       <!-- Row 2: Remaining 4 filters -->
       <div class="row filter mt-3">
         <div class="col" *ngFor="let filter of [
@@ -240,7 +240,7 @@
         </div>
       </div>
     </div>
-  
+ 
     <!-- Dropdown Template -->
     <ng-template #dropdownTemplate let-filter>
       <label>{{ filter.name }}</label>
@@ -252,14 +252,14 @@
           <div *ngIf="['beats', 'wards', 'zones', 'projects'].includes(filter.key)" style="padding: 6px;">
             <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchText[filter.key]" (click)="$event.stopPropagation()" />
           </div>
-  
+ 
           <label class="dropdown-item d-flex align-items-center" style="gap: 6px;">
             <input type="checkbox" [checked]="filter.selected.length === filter.options.length && filter.options.length > 0" (change)="toggleSelectAll(filter.selected, filter.options, filter.key)">
             <strong style="margin: 0;">Select All</strong>
           </label>
-  
+ 
           <label *ngFor="let option of filter.options | filterDropdown: searchText[filter.key]" class="dropdown-item">
-            <input type="checkbox" [checked]="filter.selected.includes(option.ProjectId || option.key || option)" 
+            <input type="checkbox" [checked]="filter.selected.includes(option.ProjectId || option.key || option)"
                    (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option, filter.key)">
             {{ option.projectname || option.value || option }}
           </label>
@@ -267,13 +267,13 @@
       </div>
     </ng-template>
   </div>
-  
-  
-  <div class="card p-3"> 
+ 
+ 
+  <div class="card p-3">
   <h3>Machine Report</h3>
-  
+ 
   <!-- Filters -->
-  
+ 
   <div class="table-responsive">
   <table class="table table-bordered">
   <thead>
@@ -298,10 +298,10 @@
   <th (click)="sortData('status')" style="cursor: pointer; white-space: nowrap;">Status 🔽</th>
   <th (click)="sortData('stockStatus')" style="cursor: pointer; white-space: nowrap;">Stock Status 🔽</th>
   <th (click)="sortData('burningStatus')" style="cursor: pointer; white-space: nowrap;">Burning Status 🔽</th>
-  
+ 
   <th>Info</th>
   </tr>
-  
+ 
   <!-- Search Filters Row -->
   <tr>
   <!-- Sr. No. filter (disabled input) -->
@@ -313,7 +313,7 @@
       disabled
     /> -->
   </th>
-  
+ 
   <!-- Filter inputs for each searchable column -->
   <th>
     <input
@@ -344,7 +344,7 @@
     (ngModelChange)="applyFiltersAndSort()"
   />
   </th>
-  
+ 
   <th>
     <input
     type="text"
@@ -354,8 +354,8 @@
     (ngModelChange)="applyFiltersAndSort()"
   />
   </th>
-  
-  
+ 
+ 
   <th>
     <input
     type="text"
@@ -396,7 +396,7 @@
       (ngModelChange)="applyFiltersAndSort()"
     />
   </th>
-  <th> 
+  <th>
     <input
       type="text"
       class="form-control form-control-sm"
@@ -414,19 +414,19 @@
       (ngModelChange)="applyFiltersAndSort()"
     />
   </th>
-  
-  <!-- Info filter (disabled input)
+ 
+  <!-- Info filter (disabled input) -->
   <th>
     <input
       type="text"
       class="form-control form-control-sm"
       placeholder="Search"
       disabled
-    /> 
-  </th> -->
+    />
+  </th>
   </tr>
   </thead>
-  
+ 
   <tbody>
     <tr *ngFor="let machine of filteredMachines.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage); let i = index">
       <td>{{ i + 1 }}</td>
@@ -511,59 +511,74 @@
   </tbody>
   </table>
   </div>
-  
-  <!-- Pagination Controls -->
+  <!-- Pagination -->
+  <!-- <div class="pagination-controls">
+  <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+  <span>Page {{ currentPage }}</span>
+  <button (click)="onPageChange(currentPage + 1)" [disabled]="currentPage * itemsPerPage >= filteredMachines.length">Next</button>
+  </div> -->
+  <!-- Pagination -->
+  <!-- Pagination -->
+ 
   <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
-    <!-- Items per page -->
-    <div class="d-flex align-items-center gap-2">
-      <label class="mb-0 fw-bold text-dark" style="font-size: 1rem;">Items per page:</label>
-      <div class="position-relative" style="min-width: 100px;">
-        <select class="form-select form-select-lg custom-select"
-            [(ngModel)]="itemsPerPage"
-            (change)="onPageChange(1)">
-          <option *ngFor="let option of [10, 20, 50, 100]" [value]="option">{{ option }}</option>
-        </select>
-        <span class="dropdown-icon"></span>
-      </div>
-    </div>
-  
-    <!-- Pagination -->
-    <div class="d-flex align-items-center gap-2">
-      <button class="btn btn-lg pagination-btn"
-        (click)="onPageChange(currentPage - 1)"
-        [disabled]="currentPage === 1"
-        title="Previous Page">
-        ‹
-      </button>
-  
-      <span class="fw-bold text-dark" style="font-size: 1.1rem;">
-        Page {{ currentPage }} of {{ totalPages }}
-      </span>
-  
-      <button class="btn btn-lg pagination-btn"
-        (click)="onPageChange(currentPage + 1)"
-        [disabled]="currentPage === totalPages"
-        title="Next Page">
-        ›
-      </button>
-    </div>
+ 
+  <!-- Items per page -->
+  <div class="d-flex align-items-center gap-2">
+  <label class="mb-0 fw-bold text-dark" style="font-size: 1rem;">Items per page:</label>
+  <div class="position-relative" style="min-width: 100px;">
+  <select class="form-select form-select-lg custom-select"
+      [(ngModel)]="itemsPerPage"
+      (change)="onPageChange(1)">
+  <option *ngFor="let option of [10, 20, 50, 100]" [value]="option">{{ option }}</option>
+  </select>
+  <span class="dropdown-icon"></span>
   </div>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  </div>
+ 
+  <!-- Pagination controls -->
+  <div class="d-flex align-items-center gap-2">
+ 
+  <button class="btn btn-lg pagination-btn"
+    (click)="onPageChange(currentPage - 1)"
+    [disabled]="currentPage === 1"
+    title="Previous Page">
+  ‹
+  </button>
+ 
+  <span class="fw-bold text-dark" style="font-size: 1.1rem;">
+  Page {{ currentPage }} of {{ totalPages }}
+  </span>
+ 
+  <button class="btn btn-lg pagination-btn"
+    (click)="onPageChange(currentPage + 1)"
+    [disabled]="currentPage === totalPages"
+    title="Next Page">
+  ›
+  </button>
+ 
+  </div>
+  </div>
+ 
+ 
+  </div>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
