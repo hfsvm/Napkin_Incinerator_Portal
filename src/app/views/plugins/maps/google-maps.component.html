@@ -182,8 +182,7 @@
     </div> -->
     
 
-    <div class="d-flex justify-content-center gap-4 mb-3">
-      <div class="form-check form-check-inline">
+      <!-- <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="mapViewOptions" id="radioAuto" 
                value="auto" [(ngModel)]="selectedMapView" (change)="changeMapView('auto')">
         <label class="form-check-label" for="radioAuto">Auto</label>
@@ -207,16 +206,47 @@
         <input class="form-check-input" type="radio" name="mapViewOptions" id="radioMachine" 
                value="machine" [(ngModel)]="selectedMapView" (change)="changeMapView('machine')">
         <label class="form-check-label" for="radioMachine">Machine</label>
+      </div> -->
+
+
+
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioMachine" value="machine" 
+               [(ngModel)]="selectedMapView" (change)="changeMapView('machine')">
+        <label class="form-check-label" for="radioMachine">Machines</label>
       </div>
+      
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioZone" value="zone" 
+               [(ngModel)]="selectedMapView" (change)="changeMapView('zone')">
+        <label class="form-check-label" for="radioZone">Zone</label>
+      </div>
+      
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioWard" value="ward" 
+               [(ngModel)]="selectedMapView" (change)="changeMapView('ward')">
+        <label class="form-check-label" for="radioWard">Ward</label>
+      </div>
+      
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioBeat" value="beat" 
+               [(ngModel)]="selectedMapView" (change)="changeMapView('beat')">
+        <label class="form-check-label" for="radioBeat">Beat</label>
+      </div>
+    
+      <div class="d-flex justify-content-center flex-wrap gap-2">
+        <button class="btn btn-outline-primary" (click)="navigateTo('home')">Home</button>
+        <button class="btn btn-outline-primary" (click)="navigateTo('graphs')">Graphs</button>
+        <button class="btn btn-outline-primary" (click)="navigateToZone(1)">Zone 1</button>
+      </div>
+
+
     </div>
   </div>
   
+
     <!-- Navigation buttons -->
-    <div class="d-flex justify-content-center flex-wrap gap-2">
-      <button class="btn btn-outline-primary" (click)="navigateTo('home')">Home</button>
-      <button class="btn btn-outline-primary" (click)="navigateTo('graphs')">Graphs</button>
-      <button class="btn btn-outline-primary" (click)="navigateToZone(1)">Zone 1</button>
-    </div>
+
   </div>
 </div>
  

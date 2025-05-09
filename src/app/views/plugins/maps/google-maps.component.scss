@@ -378,3 +378,96 @@
 .maplibregl-ctrl-zoom-out {
   all: unset;
 }
+
+
+
+// Add styles for zone markers in your component CSS
+
+// .zone-marker {
+//   cursor: pointer;
+//   transition: all 0.2s ease;
+//   font-family: Arial, sans-serif;
+//   user-select: none;
+//   z-index: 1;
+// }
+
+// .zone-marker:hover {
+//   transform: scale(1.05);
+//   box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+// }
+
+// .zone-popup {
+//   padding: 12px;
+//   border-radius: 4px;
+//   max-width: 250px;
+// }
+
+// .zone-popup h4 {
+//   margin-top: 0;
+//   margin-bottom: 10px;
+//   color: #4CAF50;
+//   border-bottom: 1px solid #e0e0e0;
+//   padding-bottom: 5px;
+// }
+
+// .zone-stats {
+//   margin-top: 10px;
+// }
+
+// .zone-stats div {
+//   margin-bottom: 5px;
+// }
+
+
+
+.zone-marker, .ward-marker, .beat-marker {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: Arial, sans-serif;
+  user-select: none;
+  z-index: 1;
+}
+
+.zone-marker:hover, .ward-marker:hover, .beat-marker:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.zone-popup, .ward-popup, .beat-popup {
+  padding: 12px;
+  border-radius: 4px;
+  max-width: 250px;
+}
+
+.zone-popup h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #4CAF50; /* Green for zone */
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 5px;
+}
+
+.ward-popup h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #2196F3; /* Blue for ward */
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 5px;
+}
+
+.beat-popup h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #FF9800; /* Orange for beat */
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 5px;
+}
+
+.zone-stats, .ward-stats, .beat-stats {
+  margin-top: 10px;
+}
+
+.zone-stats div, .ward-stats div, .beat-stats div {
+  margin-bottom: 5px;
+}
+

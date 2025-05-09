@@ -130,6 +130,10 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
 
     clientId!: number;
     projectId!: number;
+
+
+    selectedMapView: string = 'machine'; // Default view is machine-level
+
   
 
 
@@ -235,7 +239,6 @@ machinesList: any[] = [];
 
 //map data end
 
-selectedMapView: string = 'auto'; // Default value
 
  
   constructor(
@@ -253,7 +256,7 @@ selectedMapView: string = 'auto'; // Default value
     this.merchantId = this.commonDataService.merchantId ?? '';
     this.userId = this.commonDataService.userId ?? 0;
 
-    this.loadInitialData();
+    // this.loadInitialData();
 
 
     if (!sessionStorage.getItem('reloaded')) {
@@ -355,714 +358,6 @@ selectedMapView: string = 'auto'; // Default value
     }
     
   }
-
-
-
-
-
-
-
-
-/*start*/
-
-// Enhanced changeMapView function to handle different view types  
-
-// Modified changeMapView function with explicit console logging
-changeMapView(viewType: string): void {
-  debugger;
-  console.log('📍 Map view changing to:', viewType);
-  this.selectedMapView = viewType;
-  
-  // Clear existing markers with confirmation
-  this.clearAllMarkers();
-  console.log('✓ Cleared all existing markers');
-  
-  // Force a small delay to ensure UI updates
-  setTimeout(() => {
-    switch (viewType) {
-      case 'zone':
-        console.log('▶️ Showing Zone View');
-        this.showZoneView();
-        debugger;
-
-        break;
-      case 'ward':
-        console.log('▶️ Showing Ward View');
-        this.showWardView();
-        break;
-      case 'beat':
-        console.log('▶️ Showing Beat View');
-        this.showBeatView();
-        break;
-      case 'machine':
-        console.log('▶️ Showing Machine View');
-        // Default view - individual machines
-        this.updateMap();
-        break;
-      case 'auto':
-      default:
-        console.log('▶️ Showing Auto View');
-        this.handleAutoView();
-        break;
-    }
-  }, 100);
-}
-
-// Helper method to ensure all markers are properly cleared
-private clearAllMarkers(): void {
-  if (this.markers && this.markers.length > 0) {
-    console.log(`Removing ${this.markers.length} existing markers`);
-    this.markers.forEach(marker => {
-      if (marker) marker.remove();
-    });
-    this.markers = [];
-  } else {
-    console.log('No existing markers to clear');
-  }
-}
-
-// Function to display zone-level view
-private showZoneView(): void {
-  debugger;
-  console.log('Starting Zone View creation...');
-  
-  // Check if we have the map and data available
-  if (!this.map) {
-    console.error('❌ Map not initialized!');
-    return;
-  }
-  
-  if (!this.dashboardData?.machines || this.dashboardData.machines.length === 0) {
-    console.warn('⚠️ No machine data available for zone view');
-    return;
-  }
-  
-  console.log(`Found ${this.dashboardData.machines.length} machines in data`);
-  
-  // Extract unique zones with their coordinates
-  const zoneMap = new Map<string, { 
-    latitude: number, 
-    longitude: number, 
-    machineCount: number,
-    onlineCount: number,
-    offlineCount: number,
-    stockOkCount: number,
-    stockLowCount: number,
-    stockEmptyCount: number
-  }>();
-  
-  // Process all machines to collect zone data
-  this.dashboardData.machines.forEach((machine: { zone: any; zonelatitude: any; zonelongitude: any; machineId: any; status: string; stockStatus: string | any[]; }) => {
-    debugger;
-    if (!machine.zone || !machine.zonelatitude || !machine.zonelongitude) {
-      console.warn(`Machine ${machine.machineId} missing zone data`);
-      return; // Skip machines without zone data
-    }
-    
-    const zoneName = machine.zone;
-    
-    if (!zoneMap.has(zoneName)) {
-      // Initialize new zone entry
-      zoneMap.set(zoneName, {
-        latitude: machine.zonelatitude,
-        longitude: machine.zonelongitude,
-        machineCount: 0,
-        onlineCount: 0,
-        offlineCount: 0,
-        stockOkCount: 0,
-        stockLowCount: 0,
-        stockEmptyCount: 0
-      });
-    }
-    
-    // Update zone statistics
-    const zoneData = zoneMap.get(zoneName)!;
-    zoneData.machineCount++;
-    
-    // Count online/offline
-    if (machine.status === 'Online') {
-      zoneData.onlineCount++;
-    } else {
-      zoneData.offlineCount++;
-    }
-    
-    // Count stock status (taking the first spring status as representative)
-    if (machine.stockStatus && machine.stockStatus.length > 0) {
-      const stockStatus = machine.stockStatus[0].SpringStatus;
-      if (stockStatus === 'Ok') {
-        zoneData.stockOkCount++;
-      } else if (stockStatus === 'Low Stock') {
-        zoneData.stockLowCount++;
-      } else if (stockStatus === 'No Stock') {
-        zoneData.stockEmptyCount++;
-      }
-    }
-  });
-  
-  console.log(`✅ Found ${zoneMap.size} unique zones`);
-  
-  // Log zones for debugging
-  console.log('Zone data:', Array.from(zoneMap.entries()));
-  
-  // Create markers for each zone
-  zoneMap.forEach((zoneData, zoneName) => {
-    if (!zoneData.latitude || !zoneData.longitude) {
-      console.warn(`Zone ${zoneName} has invalid coordinates:`, zoneData);
-      return;
-    }
-    
-    console.log(`Creating marker for zone: ${zoneName} at [${zoneData.longitude}, ${zoneData.latitude}]`);
-    
-    try {
-
-      debugger;
-      // Create custom marker element
-      const markerElement = document.createElement('div');
-      markerElement.className = 'zone-marker';
-      markerElement.style.width = '50px';
-      markerElement.style.height = '50px';
-      markerElement.style.borderRadius = '50%';
-      markerElement.style.backgroundColor = 'rgba(33, 150, 243, 0.8)';
-      markerElement.style.border = '3px solid #fff';
-      markerElement.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.3)';
-      markerElement.style.display = 'flex';
-      markerElement.style.justifyContent = 'center';
-      markerElement.style.alignItems = 'center';
-      markerElement.style.color = '#fff';
-      markerElement.style.fontWeight = 'bold';
-      markerElement.style.fontSize = '16px';
-      markerElement.innerText = zoneData.machineCount.toString();
-      
-      // Create popup with zone info
-      const popupHTML = `
-        <div class="zone-popup">
-          <h5>${zoneName}</h5>
-          <div><strong>Machines:</strong> ${zoneData.machineCount}</div>
-          <div><strong>Online:</strong> ${zoneData.onlineCount}</div>
-          <div><strong>Offline:</strong> ${zoneData.offlineCount}</div>
-          <div><strong>Stock Status:</strong></div>
-          <div>✅ OK: ${zoneData.stockOkCount}</div>
-          <div>⚠️ Low: ${zoneData.stockLowCount}</div>
-          <div>❌ Empty: ${zoneData.stockEmptyCount}</div>
-        </div>
-      `;
-      
-      const popup = new maplibregl.Popup({
-        closeButton: true,
-        closeOnClick: true
-      }).setHTML(popupHTML);
-      
-      // Create and add marker to map
-      const newMarker = new maplibregl.Marker({ element: markerElement })
-        .setLngLat([zoneData.longitude, zoneData.latitude])
-        .setPopup(popup)
-        .addTo(this.map);
-        
-      console.log(`✓ Added marker for zone: ${zoneName}`);
-        
-      // Add click handler to zoom into zone
-      markerElement.addEventListener('click', () => {
-        this.map.flyTo({
-          center: [zoneData.longitude, zoneData.latitude],
-          zoom: 13,
-          speed: 1.5,
-          curve: 1,
-          easing(t) {
-            return t;
-          }
-        });
-      });
-      
-      // Store marker for later removal
-      this.markers.push(newMarker);
-    } catch (error) {
-      console.error(`Error creating marker for zone ${zoneName}:`, error);
-    }
-  });
-  
-  console.log(`✅ Created ${this.markers.length} zone markers`);
-  
-  // Adjust map view to show all zones if needed
-  if (zoneMap.size > 0 && this.map) {
-    this.fitMapToMarkers();
-  }
-}
-
-// Function to display ward-level view
-private showWardView(): void {
-  console.log('Starting Ward View creation...');
-  
-  // Check if we have the map and data available
-  if (!this.map) {
-    console.error('❌ Map not initialized!');
-    return;
-  }
-  
-  if (!this.dashboardData?.machines || this.dashboardData.machines.length === 0) {
-    console.warn('⚠️ No machine data available for ward view');
-    return;
-  }
-  
-  // Extract unique wards with their coordinates
-  const wardMap = new Map<string, { 
-    latitude: number, 
-    longitude: number, 
-    machineCount: number,
-    onlineCount: number,
-    offlineCount: number,
-    stockOkCount: number,
-    stockLowCount: number,
-    stockEmptyCount: number
-  }>();
-  
-  // Process all machines to collect ward data
-  this.dashboardData.machines.forEach((machine: { ward: any; wardlatitude: any; wardlongitude: any; status: string; stockStatus: string | any[]; }) => {
-    if (!machine.ward || !machine.wardlatitude || !machine.wardlongitude) {
-      return; // Skip machines without ward data
-    }
-    
-    const wardName = machine.ward;
-    
-    if (!wardMap.has(wardName)) {
-      // Initialize new ward entry
-      wardMap.set(wardName, {
-        latitude: machine.wardlatitude,
-        longitude: machine.wardlongitude,
-        machineCount: 0,
-        onlineCount: 0,
-        offlineCount: 0,
-        stockOkCount: 0,
-        stockLowCount: 0,
-        stockEmptyCount: 0
-      });
-    }
-    
-    // Update ward statistics
-    const wardData = wardMap.get(wardName)!;
-    wardData.machineCount++;
-    
-    // Count online/offline
-    if (machine.status === 'Online') {
-      wardData.onlineCount++;
-    } else {
-      wardData.offlineCount++;
-    }
-    
-    // Count stock status
-    if (machine.stockStatus && machine.stockStatus.length > 0) {
-      const stockStatus = machine.stockStatus[0].SpringStatus;
-      if (stockStatus === 'Ok') {
-        wardData.stockOkCount++;
-      } else if (stockStatus === 'Low Stock') {
-        wardData.stockLowCount++;
-      } else if (stockStatus === 'No Stock') {
-        wardData.stockEmptyCount++;
-      }
-    }
-  });
-  
-  console.log(`✅ Found ${wardMap.size} unique wards`);
-  
-  // Create markers for each ward
-  wardMap.forEach((wardData, wardName) => {
-    if (!wardData.latitude || !wardData.longitude) {
-      console.warn(`Ward ${wardName} has invalid coordinates`);
-      return;
-    }
-    
-    console.log(`Creating marker for ward: ${wardName}`);
-    
-    try {
-      // Create custom marker element
-      const markerElement = document.createElement('div');
-      markerElement.className = 'ward-marker';
-      markerElement.style.width = '45px';
-      markerElement.style.height = '45px';
-      markerElement.style.borderRadius = '50%';
-      markerElement.style.backgroundColor = 'rgba(76, 175, 80, 0.8)';
-      markerElement.style.border = '3px solid #fff';
-      markerElement.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.3)';
-      markerElement.style.display = 'flex';
-      markerElement.style.justifyContent = 'center';
-      markerElement.style.alignItems = 'center';
-      markerElement.style.color = '#fff';
-      markerElement.style.fontWeight = 'bold';
-      markerElement.style.fontSize = '14px';
-      markerElement.innerText = wardName;
-      
-      // Create popup with ward info
-      const popupHTML = `
-        <div class="ward-popup">
-          <h5>Ward ${wardName}</h5>
-          <div><strong>Machines:</strong> ${wardData.machineCount}</div>
-          <div><strong>Online:</strong> ${wardData.onlineCount}</div>
-          <div><strong>Offline:</strong> ${wardData.offlineCount}</div>
-          <div><strong>Stock Status:</strong></div>
-          <div>✅ OK: ${wardData.stockOkCount}</div>
-          <div>⚠️ Low: ${wardData.stockLowCount}</div>
-          <div>❌ Empty: ${wardData.stockEmptyCount}</div>
-        </div>
-      `;
-      
-      const popup = new maplibregl.Popup({
-        closeButton: true,
-        closeOnClick: true
-      }).setHTML(popupHTML);
-      
-      // Create and add marker to map
-      const newMarker = new maplibregl.Marker({ element: markerElement })
-        .setLngLat([wardData.longitude, wardData.latitude])
-        .setPopup(popup)
-        .addTo(this.map);
-      
-      // Add click handler to zoom into ward
-      markerElement.addEventListener('click', () => {
-        this.map.flyTo({
-          center: [wardData.longitude, wardData.latitude],
-          zoom: 14,
-          speed: 1.5,
-          curve: 1,
-          easing(t) {
-            return t;
-          }
-        });
-      });
-      
-      // Store marker for later removal
-      this.markers.push(newMarker);
-    } catch (error) {
-      console.error(`Error creating marker for ward ${wardName}:`, error);
-    }
-  });
-  
-  console.log(`✅ Created ${this.markers.length} ward markers`);
-  
-  // Adjust map view to show all wards if needed
-  if (wardMap.size > 0 && this.map) {
-    this.fitMapToMarkers();
-  }
-}
-
-// Function to display beat-level view
-private showBeatView(): void {
-  console.log('Starting Beat View creation...');
-  
-  // Check if we have the map and data available
-  if (!this.map) {
-    console.error('❌ Map not initialized!');
-    return;
-  }
-  
-  if (!this.dashboardData?.machines || this.dashboardData.machines.length === 0) {
-    console.warn('⚠️ No machine data available for beat view');
-    return;
-  }
-  
-  // Extract unique beats with their coordinates
-  const beatMap = new Map<string, { 
-    latitude: number, 
-    longitude: number, 
-    machineCount: number,
-    onlineCount: number,
-    offlineCount: number,
-    stockOkCount: number,
-    stockLowCount: number,
-    stockEmptyCount: number
-  }>();
-  
-  // Process all machines to collect beat data
-  this.dashboardData.machines.forEach((machine: { beat: any; beatlatitude: any; beatlongitude: any; status: string; stockStatus: string | any[]; }) => {
-    if (!machine.beat || !machine.beatlatitude || !machine.beatlongitude) {
-      return; // Skip machines without beat data
-    }
-    
-    const beatName = machine.beat;
-    
-    if (!beatMap.has(beatName)) {
-      // Initialize new beat entry
-      beatMap.set(beatName, {
-        latitude: machine.beatlatitude,
-        longitude: machine.beatlongitude,
-        machineCount: 0,
-        onlineCount: 0,
-        offlineCount: 0,
-        stockOkCount: 0,
-        stockLowCount: 0,
-        stockEmptyCount: 0
-      });
-    }
-    
-    // Update beat statistics
-    const beatData = beatMap.get(beatName)!;
-    beatData.machineCount++;
-    
-    // Count online/offline
-    if (machine.status === 'Online') {
-      beatData.onlineCount++;
-    } else {
-      beatData.offlineCount++;
-    }
-    
-    // Count stock status
-    if (machine.stockStatus && machine.stockStatus.length > 0) {
-      const stockStatus = machine.stockStatus[0].SpringStatus;
-      if (stockStatus === 'Ok') {
-        beatData.stockOkCount++;
-      } else if (stockStatus === 'Low Stock') {
-        beatData.stockLowCount++;
-      } else if (stockStatus === 'No Stock') {
-        beatData.stockEmptyCount++;
-      }
-    }
-  });
-  
-  console.log(`✅ Found ${beatMap.size} unique beats`);
-  
-  // Create markers for each beat
-  beatMap.forEach((beatData, beatName) => {
-    if (!beatData.latitude || !beatData.longitude) {
-      console.warn(`Beat ${beatName} has invalid coordinates`);
-      return;
-    }
-    
-    console.log(`Creating marker for beat: ${beatName}`);
-    
-    try {
-      // Create custom marker element
-      const markerElement = document.createElement('div');
-      markerElement.className = 'beat-marker';
-      markerElement.style.width = '40px';
-      markerElement.style.height = '40px';
-      markerElement.style.borderRadius = '50%';
-      markerElement.style.backgroundColor = 'rgba(255, 152, 0, 0.8)';
-      markerElement.style.border = '3px solid #fff';
-      markerElement.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.3)';
-      markerElement.style.display = 'flex';
-      markerElement.style.justifyContent = 'center';
-      markerElement.style.alignItems = 'center';
-      markerElement.style.color = '#fff';
-      markerElement.style.fontWeight = 'bold';
-      markerElement.style.fontSize = '13px';
-      markerElement.innerText = beatName;
-      
-      // Create popup with beat info
-      const popupHTML = `
-        <div class="beat-popup">
-          <h5>Beat ${beatName}</h5>
-          <div><strong>Machines:</strong> ${beatData.machineCount}</div>
-          <div><strong>Online:</strong> ${beatData.onlineCount}</div>
-          <div><strong>Offline:</strong> ${beatData.offlineCount}</div>
-          <div><strong>Stock Status:</strong></div>
-          <div>✅ OK: ${beatData.stockOkCount}</div>
-          <div>⚠️ Low: ${beatData.stockLowCount}</div>
-          <div>❌ Empty: ${beatData.stockEmptyCount}</div>
-        </div>
-      `;
-      
-      const popup = new maplibregl.Popup({
-        closeButton: true,
-        closeOnClick: true
-      }).setHTML(popupHTML);
-      
-      // Create and add marker to map
-      const newMarker = new maplibregl.Marker({ element: markerElement })
-        .setLngLat([beatData.longitude, beatData.latitude])
-        .setPopup(popup)
-        .addTo(this.map);
-      
-      // Add click handler to zoom into beat
-      markerElement.addEventListener('click', () => {
-        this.map.flyTo({
-          center: [beatData.longitude, beatData.latitude],
-          zoom: 15,
-          speed: 1.5,
-          curve: 1,
-          easing(t) {
-            return t;
-          }
-        });
-      });
-      
-      // Store marker for later removal
-      this.markers.push(newMarker);
-    } catch (error) {
-      console.error(`Error creating marker for beat ${beatName}:`, error);
-    }
-  });
-  
-  console.log(`✅ Created ${this.markers.length} beat markers`);
-  
-  // Adjust map view to show all beats if needed
-  if (beatMap.size > 0 && this.map) {
-    this.fitMapToMarkers();
-  }
-}
-
-// Helper function to handle auto view based on zoom level
-private handleAutoView(): void {
-  if (!this.map) {
-    console.error('❌ Map not initialized!');
-    return;
-  }
-  
-  const currentZoom = this.map.getZoom();
-  console.log('Auto view - current zoom level:', currentZoom);
-  
-  // Choose view based on zoom level
-  if (currentZoom < 6) {
-    // Very zoomed out - show state level summary (if implemented)
-    this.showZoneView(); // Fallback to zone view
-  } else if (currentZoom < 9) {
-    // Show zone level
-    this.showZoneView();
-  } else if (currentZoom < 12) {
-    // Show ward level
-    this.showWardView();
-  } else if (currentZoom < 15) {
-    // Show beat level
-    this.showBeatView();
-  } else {
-    // Very zoomed in - show individual machines
-    this.updateMap();
-  }
-  
-  // Remove any existing zoom listeners to prevent duplicates
-  // this.map.off('zoom');
-  
-  // Listen for zoom changes to update the view if in auto mode
-  if (this.selectedMapView === 'auto') {
-    this.map.on('zoom', _.debounce(() => {
-      if (this.selectedMapView === 'auto') {
-        console.log('Auto view - zoom changed to:', this.map.getZoom());
-        this.handleAutoView();
-      }
-    }, 300));
-  }
-}
-
-// Helper function to fit map to currently visible markers
-private fitMapToMarkers(): void {
-  if (!this.map) {
-    console.error('❌ Map not initialized!');
-    return;
-  }
-  
-  if (this.markers.length === 0) {
-    console.warn('No markers to fit map to');
-    return;
-  }
-  
-  try {
-    const bounds = new maplibregl.LngLatBounds();
-    
-    this.markers.forEach(marker => {
-      bounds.extend(marker.getLngLat());
-    });
-    
-    this.map.fitBounds(bounds, {
-      padding: 50,
-      maxZoom: 15
-    });
-    
-    console.log('✓ Map fitted to bounds of markers');
-  } catch (error) {
-    console.error('Error fitting map to markers:', error);
-  }
-}
-
-
-// Add this method to load initial data
-private loadInitialData() {
-  const queryParams = {}; // Add any required query parameters
-  
-  this.dataService.getMachineDashboardSummary(queryParams).subscribe({
-    next: (response: any) => {
-      console.log('✅ API Response received:', response);
-      
-      if (response?.code === 200 && response.data) {
-        this.dashboardData = response.data;
-        console.log('✅ Dashboard data loaded with', this.dashboardData.machines?.length || 0, 'machines');
-        
-        // Initialize map with loaded data
-        if (this.map) {
-          console.log('Map already initialized, updating view');
-          this.updateMap();
-        } else {
-          console.log('Waiting for map to initialize');
-        }
-      } else {
-        console.error('❌ Invalid API response format:', response);
-      }
-    },
-    error: (error) => {
-      console.error('❌ Error fetching dashboard data:', error);
-    }
-  });
-}
-
-// If you're using Angular OnChanges lifecycle hook, add this
-ngOnChanges(changes: SimpleChanges) {
-  console.log('Component inputs changed:', changes);
-  
-  // If dashboard data or filters change, update the map
-  if (this.map && this.dashboardData?.machines) {
-    console.log('Inputs changed, updating map view');
-    
-    if (this.selectedMapView) {
-      this.changeMapView(this.selectedMapView);
-    } else {
-      this.updateMap();
-    }
-  }
-}
-
-// Add this to support your structure data transformation
-// Example process method to transform API data into the required format
-private processApiData(apiResponse: any): void {
-  if (!apiResponse?.data?.machines) {
-    console.error('Invalid API response format');
-    return;
-  }
-  
-  // Transform machine data to add location property
-  this.machines = apiResponse.data.machines.map((machine: any) => {
-    // Ensure machine has coordinates
-    if (machine.longitude && machine.latitude) {
-      return {
-        ...machine,
-        location: [machine.longitude, machine.latitude],
-        state: machine.level1,
-        district: machine.level2,
-        // Ensure proper mapping of stock status
-        stockStatus: this.getSimplifiedStockStatus(machine.stockStatus),
-        burnStatus: machine.burningStatus === 'BURNING' ? 2 : 1
-      };
-    }
-    return null;
-  }).filter(Boolean); // Remove null entries
-  
-  console.log(`Processed ${this.machines.length} machines with valid coordinates`);
-}
-
-// Helper to simplify stock status
-private getSimplifiedStockStatus(stockStatus: any[]): string {
-  if (!stockStatus || stockStatus.length === 0) return 'Unknown';
-  
-  // Use the status of the first spring as representative
-  const status = stockStatus[0].SpringStatus;
-  
-  if (status === 'Ok') return 'Ok';
-  if (status === 'Low Stock') return 'Low';
-  if (status === 'No Stock') return 'Empty';
-  
-  return status;
-}
-/*end*/
-
-
-
-
-
 
 
 
@@ -1517,8 +812,436 @@ updateHierarchySelection(key: string, selectedArray: any[]) {
   console.log('Updated hierarchy selection:', JSON.stringify(this.hierarchySelection));
 }
 
-// 4. Improved updateMap function that properly handles all selected options
+/*start radio buttons */
+
+
+changeMapView(viewType: string): void {
+  console.log(`Changing map view to: ${viewType}`);
+  this.selectedMapView = viewType;
+  this.updateMap();
+}
+
+
+
+
+
+
+/*start*/
+
 updateMap(): void {
+  console.log(`🔄 updateMap() called! Current view: ${this.selectedMapView}`);
+
+  // Clear old markers
+  this.markers.forEach(marker => marker.remove());
+  this.markers = [];
+
+  // Get selected filters from hierarchy
+  const selectedStates = this.hierarchySelection.state || [];
+  const selectedDistricts = this.hierarchySelection.district || [];
+  const selectedZones = this.hierarchySelection.zone || [];
+  const selectedWards = this.hierarchySelection.ward || [];
+  const selectedBeats = this.hierarchySelection.beat || [];
+
+  const selectedMachines = this.machineFilter?.value || [];
+  const selectedStockStatuses = this.stockStatusFilter?.value || [];
+  const selectedMachineStatuses = this.machineStatusFilter?.value || [];
+  const selectedBurnStatusesRaw = this.buttonStatusFilter?.value || [];
+
+  // Map burn status labels to numeric values
+  const burnStatusMapping: Record<string, number> = {
+    "Burning": 2,
+    "Idle": 1
+  };
+
+  const selectedBurnStatuses = selectedBurnStatusesRaw
+    .map((status: string) => burnStatusMapping[status])
+    .filter(v => v !== undefined);
+
+  // Filter machines based on ALL selected criteria
+  const filteredMachines = this.machines.filter(machine => {
+    // For each filter type, if no selections are made, don't filter on that criteria
+    // If selections ARE made, machine must match at least one selected value
+    
+    const stateMatch = selectedStates.length === 0 || 
+                      (machine.state && selectedStates.includes(machine.state));
+    const districtMatch = selectedDistricts.length === 0 || 
+                         (machine.district && selectedDistricts.includes(machine.district));
+    const zoneMatch = selectedZones.length === 0 || 
+                     (machine.zone && selectedZones.includes(machine.zone));
+    const wardMatch = selectedWards.length === 0 || 
+                     (machine.ward && selectedWards.includes(machine.ward));
+    const beatMatch = selectedBeats.length === 0 || 
+                     (machine.beat && selectedBeats.includes(machine.beat));
+    const machineMatch = selectedMachines.length === 0 || 
+                        selectedMachines.includes(machine.machineId);
+    const stockMatch = selectedStockStatuses.length === 0 || 
+                      selectedStockStatuses.includes(machine.stockStatus);
+    const statusMatch = selectedMachineStatuses.length === 0 || 
+                        selectedMachineStatuses.includes(machine.status);
+    const burnMatch = selectedBurnStatuses.length === 0 || 
+                      selectedBurnStatuses.includes(machine.burnStatus);
+
+    // Machine matches if it passes ALL filter criteria
+    return stateMatch && districtMatch && zoneMatch && wardMatch && beatMatch && 
+           machineMatch && stockMatch && statusMatch && burnMatch;
+  });
+
+  console.log(`🔍 Filtered ${filteredMachines.length} of ${this.machines.length} machines`);
+
+  if (filteredMachines.length === 0) {
+    console.warn("⚠️ No matching machines found based on filters.");
+    return; // Exit early if no machines match
+  }
+
+  // Handle different view types
+  switch (this.selectedMapView) {
+    case 'zone':
+      this.displayAggregatedView(filteredMachines, 'zone', '#4CAF50'); // Green for zones
+      break;
+    case 'ward':
+      this.displayAggregatedView(filteredMachines, 'ward', '#2196F3'); // Blue for wards
+      break;
+    case 'beat':
+      this.displayAggregatedView(filteredMachines, 'beat', '#FF9800'); // Orange for beats
+      break;
+    default:
+      this.displayMachineView(filteredMachines);
+      break;
+  }
+}
+
+// Generic method to display aggregated views (zone, ward, beat)
+displayAggregatedView(machines: any[], viewType: 'zone' | 'ward' | 'beat', markerColor: string): void {
+  console.log(`📊 Displaying ${viewType.charAt(0).toUpperCase() + viewType.slice(1)} View`);
+
+  const bounds = new maplibregl.LngLatBounds(); // ✅ STEP 1
+
+  
+  // Group machines by the selected view type
+  const groups = this.groupMachinesByProperty(machines, viewType);
+  
+  // Create a marker for each group
+  Object.entries(groups).forEach(([groupName, groupMachines]) => {
+    if (groupName === 'Unknown' || groupName === 'null' || !groupName) {
+      console.warn(`⚠️ Skipping ${viewType} with invalid name: "${groupName}"`);
+      return;
+    }
+    
+    // Find coordinates - try specialized lat/long first, then fallback to averaging machine positions
+    let groupLocation: [number, number];
+    
+    const coordPropertyPrefix = {
+      'zone': 'zone',
+      'ward': 'ward',
+      'beat': 'beat'
+    }[viewType];
+    
+    const latProperty = `${coordPropertyPrefix}latitude`;
+    const longProperty = `${coordPropertyPrefix}longitude`;
+    
+    // Try to use specialized coordinates if available
+    const firstMachineWithCoords = groupMachines.find(m => 
+      m[latProperty] && m[longProperty] && 
+      m[latProperty] !== 0 && m[longProperty] !== 0
+    );
+    
+    if (firstMachineWithCoords) {
+      groupLocation = [
+        Number(firstMachineWithCoords[longProperty]), 
+        Number(firstMachineWithCoords[latProperty])
+      ];
+    } else {
+      // Fallback: Calculate average coordinates of all machines in group
+      const validMachines = groupMachines.filter(m => 
+        m.longitude && m.latitude && 
+        m.longitude !== 0 && m.latitude !== 0
+      );
+      
+      if (validMachines.length === 0) {
+        console.warn(`⚠️ No valid coordinates for ${viewType}: ${groupName}`);
+        return;
+      }
+      
+      const totalLng = validMachines.reduce((sum, m) => sum + Number(m.longitude), 0);
+      const totalLat = validMachines.reduce((sum, m) => sum + Number(m.latitude), 0);
+      
+      groupLocation = [
+        totalLng / validMachines.length, 
+        totalLat / validMachines.length
+      ];
+    }
+    
+    if (!groupLocation || groupLocation[0] === 0 || groupLocation[1] === 0) {
+      console.warn(`⚠️ Invalid coordinates for ${viewType}: ${groupName}`);
+      return;
+    }
+
+    bounds.extend(groupLocation); // ✅ STEP 2
+
+    
+    // Create custom marker element - button style with name
+    const markerElement = document.createElement('div');
+    markerElement.className = `${viewType}-marker`;
+    markerElement.style.backgroundColor = markerColor;
+    markerElement.style.color = 'white';
+    markerElement.style.padding = '8px 12px';
+    markerElement.style.borderRadius = '4px';
+    markerElement.style.fontWeight = 'bold';
+    markerElement.style.textAlign = 'center';
+    markerElement.style.minWidth = '80px';
+    markerElement.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+    markerElement.style.cursor = 'pointer';
+    markerElement.style.display = 'flex';
+    markerElement.style.alignItems = 'center';
+    markerElement.style.justifyContent = 'center';
+    
+    // Add text label - capitalize the first letter of viewType
+    const viewTypeCapitalized = viewType.charAt(0).toUpperCase() + viewType.slice(1);
+    // markerElement.textContent = groupName;
+    markerElement.textContent = `${viewTypeCapitalized}: ${groupName}`;
+
+    
+    // Calculate statistics for this group
+    // const totalMachines = groupMachines.length;
+    // const onlineMachines = groupMachines.filter(m => m.status === 'Online').length;
+    // const offlineMachines = groupMachines.filter(m => m.status === 'Offline').length;
+    // const lowStockMachines = groupMachines.filter(m => 
+    //   m.stockStatus === 'Low Stock' || 
+    //   (m.stockStatus && m.stockStatus.some && m.stockStatus.some((s: any) => s.SpringStatus === 'Low Stock'))
+    // ).length;
+    // const emptyStockMachines = groupMachines.filter(m => 
+    //   m.stockStatus === 'Empty' || 
+    //   (m.stockStatus && m.stockStatus.some && m.stockStatus.some((s: any) => s.SpringStatus === 'Empty'))
+    // ).length;
+
+
+    const installedMachines = groupMachines.length;
+
+const runningMachines = groupMachines.filter(m => m.status === 'Online').length;
+
+const totalCollection = groupMachines.reduce((sum, m) => sum + (m.totalCollection || 0), 0);
+
+const itemsDispensed = groupMachines.reduce((sum, m) => sum + (m.itemsDispensed || 0), 0);
+
+const stockLow = groupMachines.filter(m =>
+  m.stockStatus === 'Low Stock' ||
+  (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Low Stock'))
+).length;
+
+const stockEmpty = groupMachines.filter(m =>
+  m.stockStatus === 'Empty' ||
+  (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Empty'))
+).length;
+
+const stockError = groupMachines.filter(m =>
+  m.stockStatus === 'Error' ||
+  (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Error'))
+).length;
+
+const stockOkay = groupMachines.filter(m =>
+  m.stockStatus === 'Okay' ||
+  (Array.isArray(m.stockStatus) && m.stockStatus.every((s: any) => s.SpringStatus === 'Okay'))
+).length;
+
+const burningIdle = groupMachines.filter(m => m.burnStatus === 1).length;
+const burningEnabled = groupMachines.filter(m => m.burnStatus === 2).length;
+const burningError = groupMachines.filter(m => m.burnStatus === 3).length;
+
+const totalBurningCycle = groupMachines.reduce((sum, m) => sum + (m.burningCycle || 0), 0);
+
+    
+    // Create popup with group info
+    // const popupHTML = `
+    //   <div class="${viewType}-popup">
+    //     <h4>${viewTypeCapitalized}: ${groupName}</h4>
+    //     <div class="${viewType}-stats">
+    //       <div><strong>Total Machines:</strong> ${totalMachines}</div>
+    //       <div><strong>Online:</strong> ${onlineMachines}</div>
+    //       <div><strong>Offline:</strong> ${offlineMachines}</div>
+    //       <div><strong>Low Stock:</strong> ${lowStockMachines}</div>
+    //       <div><strong>Empty Stock:</strong> ${emptyStockMachines}</div>
+    //     </div>
+    //   </div>
+    // `;
+
+
+    const popupHTML = `
+  <div class="${viewType}-popup">
+    <h4>${viewTypeCapitalized}: ${groupName}</h4>
+    <div class="${viewType}-stats">
+      <div><strong>Machines Installed:</strong> ${installedMachines}</div>
+      <div><strong>Machines Running:</strong> ${runningMachines}</div>
+      <div><strong>Total Collection:</strong> ${totalCollection}</div>
+      <div><strong>Items Dispensed:</strong> ${itemsDispensed}</div>
+      <div><strong>Stock Empty:</strong> ${stockEmpty}</div>
+      <div><strong>Stock Low:</strong> ${stockLow}</div>
+      <div><strong>Stock Error:</strong> ${stockError}</div>
+      <div><strong>Stock Okay:</strong> ${stockOkay}</div>
+      <div><strong>Burning Idle:</strong> ${burningIdle}</div>
+      <div><strong>Burning Enabled:</strong> ${burningEnabled}</div>
+      <div><strong>Burning Error:</strong> ${burningError}</div>
+      <div><strong>Total Burning Cycles:</strong> ${totalBurningCycle}</div>
+    </div>
+  </div>
+`;
+
+    
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: true,
+      maxWidth: '300px'
+    }).setHTML(popupHTML);
+    
+    // Create and add marker to map
+    const newMarker = new maplibregl.Marker({ element: markerElement })
+      .setLngLat([groupLocation[0], groupLocation[1]])
+      .setPopup(popup)
+      .addTo(this.map);
+    
+    // Store marker for later removal
+    this.markers.push(newMarker);
+    
+    console.log(`✅ Added ${viewType} marker for: ${groupName} at [${groupLocation}]`);
+  });
+
+  if (!bounds.isEmpty()) {
+    this.map.fitBounds(bounds, { // ✅ STEP 3
+      padding: 50,
+      maxZoom: 10
+    });
+  }
+}
+
+// Helper method to group machines by any property (zone, ward, beat)
+groupMachinesByProperty(machines: any[], property: string): Record<string, any[]> {
+  const groups: Record<string, any[]> = {};
+  
+  machines.forEach(machine => {
+    const propertyMap: Record<string, string> = {
+      'zone': 'zone',
+      'ward': 'ward',
+      'beat': 'beat'
+    };
+    
+    // Get the actual property key from the mapping
+    const propertyKey = propertyMap[property];
+    const propertyValue = machine[propertyKey] || 'Unknown';
+    
+    if (!groups[propertyValue]) {
+      groups[propertyValue] = [];
+    }
+    groups[propertyValue].push(machine);
+  });
+  
+  return groups;
+}
+
+// Renamed from original updateMap to handle machine-level view
+displayMachineView(filteredMachines: any[]): void {
+  console.log("🔍 Displaying Machine View");
+  
+  // Handle overlapping markers
+  const locationMap = new Map<string, number>();
+
+
+
+
+  // Create markers for all filtered machines
+  filteredMachines.forEach(machine => {
+    if (!machine.location && (!machine.longitude || !machine.latitude)) {
+      console.warn(`Machine ${machine.machineId} has no location data`);
+      return;
+    }
+
+    // Use machine.location if available, otherwise use longitude/latitude
+    let lng: number, lat: number;
+    if (machine.location && Array.isArray(machine.location) && machine.location.length >= 2) {
+      lng = Number(machine.location[0]);
+      lat = Number(machine.location[1]);
+    } else {
+      lng = Number(machine.longitude);
+      lat = Number(machine.latitude);
+    }
+    
+    // Skip if coordinates are invalid
+    if (isNaN(lng) || isNaN(lat) || lng === 0 || lat === 0) {
+      console.warn(`Machine ${machine.machineId} has invalid coordinates`);
+      return;
+    }
+
+    const key = `${lng},${lat}`;
+
+    // Handle overlapping markers by slightly offsetting them
+    if (locationMap.has(key)) {
+      const count = locationMap.get(key)! + 1;
+      locationMap.set(key, count);
+
+      const angle = (count * 45) * (Math.PI / 180);
+      const radius = 0.000001 * count;
+      lng += radius * Math.cos(angle);
+      lat += radius * Math.sin(angle);
+    } else {
+      locationMap.set(key, 1);
+    }
+
+    // Set marker icon based on machine status
+    const iconUrl = this.getStockStatusIcon(machine.stockStatus);
+
+    const markerElement = document.createElement('div');
+    markerElement.className = 'custom-marker';
+    markerElement.style.backgroundImage = `url(${iconUrl})`;
+    markerElement.style.width = '40px';
+    markerElement.style.height = '40px';
+    markerElement.style.backgroundSize = 'contain';
+    markerElement.style.backgroundRepeat = 'no-repeat';
+
+    // Zoom on double-click
+    markerElement.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      this.map.flyTo({
+        center: [lng, lat] as [number, number],
+        zoom: 15,
+        speed: 5,
+        curve: 1,
+        easing(t) {
+          return t;
+        }
+      });
+    });
+
+    // Create popup with machine info
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: true
+    }).setHTML(this.generatePopupHTML(machine));
+
+    // Create and add marker to map
+    const newMarker = new maplibregl.Marker({ element: markerElement })
+      .setLngLat([lng, lat])
+      .setPopup(popup)
+      .addTo(this.map);
+
+    // Store marker for later removal
+    this.markers.push(newMarker);
+  });
+  
+  console.log(`✅ Added ${this.markers.length} markers to map`);
+}
+
+
+
+/*end*/
+
+
+
+
+
+
+
+
+
+// 4. Improved updateMap function that properly handles all selected options
+updateMap1(): void {
   console.log("🔄 updateMap() called!");
 
   // Clear old markers
