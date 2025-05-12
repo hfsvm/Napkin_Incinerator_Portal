@@ -236,7 +236,22 @@
       <div class="d-flex justify-content-center flex-wrap gap-2">
         <button class="btn btn-outline-primary" (click)="navigateTo('home')">Home</button>
         <button class="btn btn-outline-primary" (click)="navigateTo('graphs')">Graphs</button>
-        <button class="btn btn-outline-primary" (click)="navigateToZone(1)">Zone 1</button>
+        <!-- <button class="btn btn-outline-primary" (click)="navigateToZone(1)">Zone 1</button> -->
+
+    <!-- Dynamic Zone Buttons -->
+    <ng-container *ngIf="zones1.length > 0; else loadingZones">
+      <button 
+        *ngFor="let zone of zones1" 
+        class="btn btn-outline-primary"
+        (click)="navigateToZone(zone)">
+        {{ zone }}
+      </button>
+    </ng-container>
+    
+    <ng-template #loadingZones>
+      <span class="text-muted">Loading zones...</span>
+    </ng-template>
+  
       </div>
 
 

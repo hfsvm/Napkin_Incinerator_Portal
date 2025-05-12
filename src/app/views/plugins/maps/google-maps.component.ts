@@ -135,6 +135,10 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     selectedMapView: string = 'machine'; // Default view is machine-level
 
   
+    zones1: string[] = [];
+    selectedZone1: string = '';
+  
+    machines1: any[] = [];
 
 
 private autoRefreshSubscription!: Subscription;
@@ -361,10 +365,10 @@ machinesList: any[] = [];
 
 
 
-  navigateTo(destination: string): void {
-    // Empty logic placeholder
-    console.log('Navigating to:', destination);
-  }
+  // navigateTo(destination: string): void {
+  //   // Empty logic placeholder
+  //   console.log('Navigating to:', destination);
+  // }
 
 
   
@@ -408,6 +412,8 @@ machinesList: any[] = [];
           this.projectId = response.data.projects?.[0]?.projectId;
           console.log('📌 Extracted projectId:', this.projectId);
 
+                  // Extract unique zones from the machines array
+                  this.extractUniqueZones();
 
 
       // 🛠 Ensure both values are not accidentally set the same unless it's valid
@@ -559,11 +565,25 @@ manualRefresh(): void {
  
   // New method to initialize the map
   initializeMap(): void {
+
+        // Default coordinates for India
+        let centerCoordinates: [number, number] = [78.9629, 20.5937];
+        let zoomLevel: number = 4.3;
+    
+        // Check if user ID is 90, then show Mumbai map
+        if (this.userId === 90) {
+          centerCoordinates = [72.8777, 19.0760]; // Mumbai coordinates
+          zoomLevel = 10;
+        }
+    
     this.map = new maplibregl.Map({
       container: 'map',
       style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Ldz7Kz6Xwxrw9kq0aYn3',
-      center: [78.9629, 20.5937],
-      zoom: 4.3
+      // center: [78.9629, 20.5937],
+      // zoom: 4.3
+      center: centerCoordinates,
+      zoom: zoomLevel
+
     });
  
     this.map.on('load', () => {
@@ -911,8 +931,8 @@ updateMap(): void {
   }
 }
 
-// Generic method to display aggregated views (zone, ward, beat)
-displayAggregatedView(machines: any[], viewType: 'zone' | 'ward' | 'beat', markerColor: string): void {
+//  work for when we click on radio buttons like zone, ward , beat it will show respective markerpoints along withat zoom to mumbai map
+displayAggregatedView1(machines: any[], viewType: 'zone' | 'ward' | 'beat', markerColor: string): void {
   console.log(`📊 Displaying ${viewType.charAt(0).toUpperCase() + viewType.slice(1)} View`);
 
   const bounds = new maplibregl.LngLatBounds(); // ✅ STEP 1
@@ -1113,6 +1133,172 @@ const totalBurningCycle = groupMachines.reduce((sum, m) => sum + (m.burningCycle
   }
 }
 
+
+
+// Generic method to display aggregated views (zone, ward, beat)
+displayAggregatedView(machines: any[], viewType: 'zone' | 'ward' | 'beat', markerColor: string): void {
+  console.log(`📊 Displaying ${viewType.charAt(0).toUpperCase() + viewType.slice(1)} View`);
+
+  // Remove the bounds related code
+  // const bounds = new maplibregl.LngLatBounds(); // REMOVED
+  
+  // Group machines by the selected view type
+  const groups = this.groupMachinesByProperty(machines, viewType);
+  
+  // Create a marker for each group
+  Object.entries(groups).forEach(([groupName, groupMachines]) => {
+    if (groupName === 'Unknown' || groupName === 'null' || !groupName) {
+      console.warn(`⚠️ Skipping ${viewType} with invalid name: "${groupName}"`);
+      return;
+    }
+    
+    // Find coordinates - try specialized lat/long first, then fallback to averaging machine positions
+    let groupLocation: [number, number];
+    
+    const coordPropertyPrefix = {
+      'zone': 'zone',
+      'ward': 'ward',
+      'beat': 'beat'
+    }[viewType];
+    
+    const latProperty = `${coordPropertyPrefix}latitude`;
+    const longProperty = `${coordPropertyPrefix}longitude`;
+    
+    // Try to use specialized coordinates if available
+    const firstMachineWithCoords = groupMachines.find(m => 
+      m[latProperty] && m[longProperty] && 
+      m[latProperty] !== 0 && m[longProperty] !== 0
+    );
+    
+    if (firstMachineWithCoords) {
+      groupLocation = [
+        Number(firstMachineWithCoords[longProperty]), 
+        Number(firstMachineWithCoords[latProperty])
+      ];
+    } else {
+      // Fallback: Calculate average coordinates of all machines in group
+      const validMachines = groupMachines.filter(m => 
+        m.longitude && m.latitude && 
+        m.longitude !== 0 && m.latitude !== 0
+      );
+      
+      if (validMachines.length === 0) {
+        console.warn(`⚠️ No valid coordinates for ${viewType}: ${groupName}`);
+        return;
+      }
+      
+      const totalLng = validMachines.reduce((sum, m) => sum + Number(m.longitude), 0);
+      const totalLat = validMachines.reduce((sum, m) => sum + Number(m.latitude), 0);
+      
+      groupLocation = [
+        totalLng / validMachines.length, 
+        totalLat / validMachines.length
+      ];
+    }
+    
+    if (!groupLocation || groupLocation[0] === 0 || groupLocation[1] === 0) {
+      console.warn(`⚠️ Invalid coordinates for ${viewType}: ${groupName}`);
+      return;
+    }
+
+    // Remove the bounds extend call
+    // bounds.extend(groupLocation); // REMOVED
+    
+    // Create custom marker element - button style with name
+    const markerElement = document.createElement('div');
+    markerElement.className = `${viewType}-marker`;
+    markerElement.style.backgroundColor = markerColor;
+    markerElement.style.color = 'white';
+    markerElement.style.padding = '8px 12px';
+    markerElement.style.borderRadius = '4px';
+    markerElement.style.fontWeight = 'bold';
+    markerElement.style.textAlign = 'center';
+    markerElement.style.minWidth = '80px';
+    markerElement.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+    markerElement.style.cursor = 'pointer';
+    markerElement.style.display = 'flex';
+    markerElement.style.alignItems = 'center';
+    markerElement.style.justifyContent = 'center';
+    
+    // Add text label - capitalize the first letter of viewType
+    const viewTypeCapitalized = viewType.charAt(0).toUpperCase() + viewType.slice(1);
+    markerElement.textContent = `${viewTypeCapitalized}: ${groupName}`;
+
+    const installedMachines = groupMachines.length;
+    const runningMachines = groupMachines.filter(m => m.status === 'Online').length;
+    const totalCollection = groupMachines.reduce((sum, m) => sum + (m.totalCollection || 0), 0);
+    const itemsDispensed = groupMachines.reduce((sum, m) => sum + (m.itemsDispensed || 0), 0);
+    const stockLow = groupMachines.filter(m =>
+      m.stockStatus === 'Low Stock' ||
+      (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Low Stock'))
+    ).length;
+    const stockEmpty = groupMachines.filter(m =>
+      m.stockStatus === 'Empty' ||
+      (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Empty'))
+    ).length;
+    const stockError = groupMachines.filter(m =>
+      m.stockStatus === 'Error' ||
+      (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Error'))
+    ).length;
+    const stockOkay = groupMachines.filter(m =>
+      m.stockStatus === 'Okay' ||
+      (Array.isArray(m.stockStatus) && m.stockStatus.every((s: any) => s.SpringStatus === 'Okay'))
+    ).length;
+    const burningIdle = groupMachines.filter(m => m.burnStatus === 1).length;
+    const burningEnabled = groupMachines.filter(m => m.burnStatus === 2).length;
+    const burningError = groupMachines.filter(m => m.burnStatus === 3).length;
+    const totalBurningCycle = groupMachines.reduce((sum, m) => sum + (m.burningCycle || 0), 0);
+    
+    const popupHTML = `
+      <div class="${viewType}-popup">
+        <h4>${viewTypeCapitalized}: ${groupName}</h4>
+        <div class="${viewType}-stats">
+          <div><strong>Machines Installed:</strong> ${installedMachines}</div>
+          <div><strong>Machines Running:</strong> ${runningMachines}</div>
+          <div><strong>Total Collection:</strong> ${totalCollection}</div>
+          <div><strong>Items Dispensed:</strong> ${itemsDispensed}</div>
+          <div><strong>Stock Empty:</strong> ${stockEmpty}</div>
+          <div><strong>Stock Low:</strong> ${stockLow}</div>
+          <div><strong>Stock Error:</strong> ${stockError}</div>
+          <div><strong>Stock Okay:</strong> ${stockOkay}</div>
+          <div><strong>Burning Idle:</strong> ${burningIdle}</div>
+          <div><strong>Burning Enabled:</strong> ${burningEnabled}</div>
+          <div><strong>Burning Error:</strong> ${burningError}</div>
+          <div><strong>Total Burning Cycles:</strong> ${totalBurningCycle}</div>
+        </div>
+      </div>
+    `;
+    
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: true,
+      maxWidth: '300px'
+    }).setHTML(popupHTML);
+    
+    // Create and add marker to map
+    const newMarker = new maplibregl.Marker({ element: markerElement })
+      .setLngLat([groupLocation[0], groupLocation[1]])
+      .setPopup(popup)
+      .addTo(this.map);
+    
+    // Store marker for later removal
+    this.markers.push(newMarker);
+    
+    console.log(`✅ Added ${viewType} marker for: ${groupName} at [${groupLocation}]`);
+  });
+
+  // Remove the bounds check and fitBounds call
+  // if (!bounds.isEmpty()) {
+  //   this.map.fitBounds(bounds, {
+  //     padding: 50,
+  //     maxZoom: 10
+  //   });
+  // }
+}
+
+
+
+
 // Helper method to group machines by any property (zone, ward, beat)
 groupMachinesByProperty(machines: any[], property: string): Record<string, any[]> {
   const groups: Record<string, any[]> = {};
@@ -1241,7 +1427,7 @@ displayMachineView(filteredMachines: any[]): void {
 
 
 
-// 4. Improved updateMap function that properly handles all selected options
+// 4. Improved updateMap function that properly handles all selected options and for india map but above one is for mumbai map if client is bmc
 updateMap1(): void {
   console.log("🔄 updateMap() called!");
 
@@ -1498,6 +1684,8 @@ loadMachineData() {
           
           return mappedMachine;
         });
+
+
         
         console.log('🔍 Processed Machines:', this.machines.length);
         
@@ -1520,6 +1708,61 @@ loadMachineData() {
 }
   
   
+
+// extractUniqueZones(): void {
+//   // Extract unique zone names from the machines data
+//   const zoneSet = new Set<string>();
+  
+//   this.machines.forEach(machine => {
+//     if (machine.zone) {
+//       zoneSet.add(machine.zone);
+//     }
+//   });
+  
+//   // Convert Set to array
+//   this.zones1 = Array.from(zoneSet);
+//   console.log('Extracted zonesbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:', this.zones1);
+// }
+
+
+extractUniqueZones(): void {
+  // Initialize an empty Set to store unique zone names
+  const zoneSet = new Set<string>();
+  
+  // Since you're storing response.data in this.hierarchicalData
+  // And response.data.projects in this.fullData
+  
+  if (this.fullData && Array.isArray(this.fullData)) {
+    // Loop through each project
+    this.fullData.forEach((project: any) => {
+      // Check if project has states
+      if (project.states && Array.isArray(project.states)) {
+        // Loop through each state
+        project.states.forEach((state: any) => {
+          // Check if state has districts
+          if (state.districts && Array.isArray(state.districts)) {
+            // Loop through each district
+            state.districts.forEach((district: any) => {
+              // Check if district has zones
+              if (district.zones && Array.isArray(district.zones)) {
+                // Loop through each zone and add its name to our Set
+                district.zones.forEach((zone: any) => {
+                  if (zone.zone) {
+                    zoneSet.add(zone.zone);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+  
+  // Convert the Set to an array
+  this.zones1 = Array.from(zoneSet);
+  console.log('Extracted zones:', this.zones);
+}
 
   getAllSelectedMachines(): string[] {
     const machines: string[] = [];
@@ -2339,9 +2582,31 @@ case 2: burningStatusText = 'Burning'; break;
 
     }
 
-    navigateToZone(zoneId: number) {
-      this.router.navigate(['/zone-dashboard']); // adjust if 'maps' is a lazy-loaded route
+    // navigateToZone(zoneId: number) {
+    //   this.router.navigate(['/zone-dashboard']); // adjust if 'maps' is a lazy-loaded route
+    // }
+
+    navigateTo(route: string): void {
+      this.router.navigate([`/${route}`]);
     }
+  
+    navigateToZone(zoneName: string): void {
+      // Navigate to zone dashboard with the zone name as parameter
+      this.router.navigate(['/zone-dashboard'], { 
+        queryParams: { zone: zoneName } 
+      });
+    }
+    
+
+    // navigateToZone(zoneName: string): void {
+    //   const url = this.router.serializeUrl(
+    //     this.router.createUrlTree(['/zone-dashboard'], {
+    //       queryParams: { zone: zoneName },
+    //     })
+    //   );
+    //   window.open(url, '_blank');
+    // }
+    
     
   }
 

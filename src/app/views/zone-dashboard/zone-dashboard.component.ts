@@ -270,6 +270,8 @@ export class ZoneDashboardComponent implements OnInit, AfterViewInit {
   stockStatus = '0,1,2';
   machineStatus = '0,1,2';
 
+  
+
   beat = '';
   client = '';
   district = '';
@@ -278,10 +280,13 @@ export class ZoneDashboardComponent implements OnInit, AfterViewInit {
   project = '';
   state = '';
   ward = '';
-  zone = 'Zone 1 (South Mumbai)';
+  zone = '';
 
   zoneMarker: any;
 
+
+
+  showNoDataMessage = false;
 
   // Chart references
   @ViewChild('statusChart') statusChartRef!: ElementRef;
@@ -297,6 +302,14 @@ export class ZoneDashboardComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.merchantId = this.commonDataService.merchantId ?? '';
+
+    this.route.queryParams.subscribe(params => {
+      if (params['zone']) {
+        this.zone = params['zone'];
+        console.log('Zone received:', this.zone);
+      }
+    });
+  
 
     this.fetchDashboardData();
     // this.initializeMap();
@@ -326,9 +339,9 @@ export class ZoneDashboardComponent implements OnInit, AfterViewInit {
       burnStatus: "1,2",
       machineStatus: "0,1,2",
       stockStatus: "0,1,2",
-      zone: "Zone 1 (South Mumbai)"
     };
-  
+    if (this.zone) queryParams.zone = this.zone;
+
     if (this.beat) queryParams.beat = this.beat;
     if (this.client) queryParams.client = this.client;
     if (this.district) queryParams.district = this.district;
@@ -344,10 +357,21 @@ export class ZoneDashboardComponent implements OnInit, AfterViewInit {
         if (response?.code === 200 && response.data) {
           this.dashboardData = response.data;
 
+          if (this.dashboardData.machines?.length === 0) {
+            // Show popup if machines array is empty
+            alert('This zone has no data currently'); // Replace with a proper modal/snackbar if using Angular Material
+            return; // Exit early if no machine data
+          }
+    
+    
+
           if (this.map){
               this.updateMap(); // call this here
 
           }
+
+
+
 
           console.log('Dashboard data loaded:', this.dashboardData);
             this.renderCharts();
@@ -617,6 +641,72 @@ initializeMap(): void {
   }
 }
 
+// updateMap(): void {
+//   console.log("🔄 updateMap() called!");
+
+//   if (!this.map) {
+//     console.warn('Map not initialized, cannot update');
+//     return;
+//   }
+
+//   if (!this.dashboardData?.machines?.length) {
+//     console.warn('No machine data available for map');
+//     return;
+//   }
+
+//   const firstMachine = this.dashboardData.machines[0];
+//   const { zonelatitude: lat, zonelongitude: lng, zone } = firstMachine;
+
+//   if (!lat || !lng) {
+//     console.warn('Zone coordinates missing');
+//     return;
+//   }
+
+//   // Check if map is fully loaded
+//   if (!this.map.loaded()) {
+//     console.log('Map not fully loaded, waiting...');
+//     this.map.once('load', () => {
+//       this.updateMapWithCoordinates(lng, lat, zone);
+//     });
+//   } else {
+//     this.updateMapWithCoordinates(lng, lat, zone);
+//   }
+// }
+
+// // Helper method to update map with coordinates
+// private updateMapWithCoordinates(lng: number, lat: number, zone: string): void {
+//   // Center the map
+//   this.map.setCenter([lng, lat]);
+//   this.map.setZoom(13);
+
+//   // Remove existing marker
+//   if (this.zoneMarker) {
+//     this.zoneMarker.remove();
+//   }
+
+//   // Create custom HTML marker element
+//   const markerEl = document.createElement('div');
+//   markerEl.textContent = `${zone}`;
+//   markerEl.style.backgroundColor = '#28a745'; // Bootstrap-style green
+//   markerEl.style.color = '#fff';
+//   markerEl.style.padding = '5px 10px';
+//   markerEl.style.borderRadius = '6px';
+//   markerEl.style.fontSize = '14px';
+//   markerEl.style.fontWeight = 'bold';
+//   markerEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+//   markerEl.style.whiteSpace = 'nowrap';
+//   markerEl.style.cursor = 'pointer';
+
+//   // Add the custom marker
+//   this.zoneMarker = new maplibregl.Marker({ element: markerEl, anchor: 'bottom' })
+//     .setLngLat([lng, lat])
+//     .addTo(this.map);
+
+//   console.log(`📍 Custom zone marker added for ${zone} at [${lng}, ${lat}]`);
+// }
+
+  
+
 updateMap(): void {
   console.log("🔄 updateMap() called!");
 
@@ -630,11 +720,22 @@ updateMap(): void {
     return;
   }
 
-  const firstMachine = this.dashboardData.machines[0];
-  const { zonelatitude: lat, zonelongitude: lng, zone } = firstMachine;
+  // Filter machines by the zone received from routing
+  const zoneSpecificMachines = this.dashboardData.machines.filter(
+    (    machine: { zone: string; }) => machine.zone === this.zone
+  );
+  
+  console.log(`Found ${zoneSpecificMachines.length} machines for zone: ${this.zone}`);
+  
+  // If no machines found for this zone, try with the first machine as fallback
+  const machineToUse = zoneSpecificMachines.length > 0 
+    ? zoneSpecificMachines[0] 
+    : this.dashboardData.machines[0];
+    
+  const { zonelatitude: lat, zonelongitude: lng, zone } = machineToUse;
 
   if (!lat || !lng) {
-    console.warn('Zone coordinates missing');
+    console.warn(`Zone coordinates missing for zone: ${this.zone}`);
     return;
   }
 
@@ -681,7 +782,6 @@ private updateMapWithCoordinates(lng: number, lat: number, zone: string): void {
   console.log(`📍 Custom zone marker added for ${zone} at [${lng}, ${lat}]`);
 }
 
-  
   // This will be implemented later to add markers
   updateMap1(): void {
     console.log("🔄 updateMap() called!");
