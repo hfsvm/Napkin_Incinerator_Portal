@@ -252,6 +252,10 @@ export class ZoneDashboardComponent implements OnInit, AfterViewInit {
   private map!: maplibregl.Map;
   private markers: maplibregl.Marker[] = [];
 
+  goBack(): void {
+    this.location.back(); // Navigates to previous page
+  }
+
   // Dashboard summary data
   dashboardData: any = {};
   

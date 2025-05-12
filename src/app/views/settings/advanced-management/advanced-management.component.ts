@@ -1063,6 +1063,12 @@ submitUpdatedConfig(): void {
     this.activeTab = tab;
     this.selectedMachineId = '';
 
+
+    // to clear the selected fota cilentid,machinename,fota table data when tab is changed
+    this.selectedFotaMachineId = '';
+    this.selectedProjectIdfota = null;
+    this.fotaMachines = [];
+
     //to clear the selected clinet id when tab is changed
     this.selectedProjectId = null;
     this.machineIds = [];

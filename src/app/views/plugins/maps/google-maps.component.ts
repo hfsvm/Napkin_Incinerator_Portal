@@ -514,7 +514,8 @@ checkIfClientIsBMC_Map(): void {
       (this.beatMachineMap[beat] || []).forEach(machine => machinesSet.add(machine));
     });
     // Update machine options but don't set the filter value
-    console.log('📊 Updated available machines based on beats:', Array.from(machinesSet));
+    this.machines = Array.from(machinesSet);
+    console.log('📊 Updated available machines based on beats:',this.machines);
   }
 
 
@@ -2343,19 +2344,6 @@ case 2: burningStatusText = 'Burning'; break;
     }
     
   }
-
-
-
-
-   
-
-
-
-
-
-
-
-
 
 
 

@@ -1085,6 +1085,7 @@ machinesList: any[] = [];
   ) {}
 
   ngOnInit() {
+    
     this.searchText = {
       projects: '',
       machineStatuses: '',
@@ -1104,6 +1105,7 @@ machinesList: any[] = [];
       wards: false,
       beats: false
     };
+
 
     this.loadMachineData();
 

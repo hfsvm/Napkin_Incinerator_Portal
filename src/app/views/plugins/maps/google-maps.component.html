@@ -119,16 +119,14 @@
                 </button>
                 <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]" [id]="'dropdown-' + filter.key">
                   <div *ngIf="['beats', 'wards', 'zones', 'projects'].includes(filter.key)" style="padding: 6px;">
-                    <input type="text" class="form-control" placeholder="Search..."
-                           [(ngModel)]="searchText[filter.key]"
-                           [ngModelOptions]="{standalone: true}"
-                           (click)="$event.stopPropagation()" />
+                    <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchText[filter.key]" (click)="$event.stopPropagation()" />
                   </div>
+         
                   <label class="dropdown-item d-flex align-items-center" style="gap: 6px;">
-                    <input type="checkbox" [checked]="filter.selected.length === filter.options.length && filter.options.length > 0"
-                           (change)="toggleSelectAll(filter.selected, filter.options, filter.key)">
+                    <input type="checkbox" [checked]="filter.selected.length === filter.options.length && filter.options.length > 0" (change)="toggleSelectAll(filter.selected, filter.options, filter.key)">
                     <strong style="margin: 0;">Select All</strong>
                   </label>
+         
                   <label *ngFor="let option of filter.options | filterDropdown: searchText[filter.key]" class="dropdown-item">
                     <input type="checkbox" [checked]="filter.selected.includes(option.ProjectId || option.key || option)"
                            (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option, filter.key)">
@@ -137,6 +135,7 @@
                 </div>
               </div>
             </ng-template>
+
           </form>
          
         </div>
