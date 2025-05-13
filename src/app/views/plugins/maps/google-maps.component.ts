@@ -2596,6 +2596,14 @@ case 2: burningStatusText = 'Burning'; break;
         queryParams: { zone: zoneName } 
       });
     }
+
+    
+    navigateToGraph(graphType: string, zones: string[]): void {
+      // Navigate to zone dashboard with the zone name as parameter
+      this.router.navigate(['/graph-dashboard'], { 
+        queryParams: { zones: zones } 
+      });
+    }
     
 
     // navigateToZone(zoneName: string): void {
