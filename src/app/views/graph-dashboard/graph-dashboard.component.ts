@@ -292,53 +292,77 @@ export class GraphDashboardComponent implements OnInit {
     ];
   }
 
-  renderDonutChart(options: { element: any, data: DonutChartData[], colors: string[] }): void {
-    const { element, data, colors } = options;
-    
-    if (!element || !data || data.length === 0) return;
-    
-    // Chart dimensions
-    const width = 150;
-    const height = 150;
-    const radius = Math.min(width, height) / 2;
-    
-    // Create SVG
-    const svg = d3.select(element)
-      .append('svg')
-      .attr('width', width)
-      .attr('height', height)
-      .append('g')
-      .attr('transform', `translate(${width / 2}, ${height / 2})`);
-    
-    // Color scale with explicit return type
-    const color = d3.scaleOrdinal<string>()
-      .domain(data.map(d => d.name))
-      .range(colors);
-    
-    // Compute the position of each group on the pie
-    const pie = d3.pie<DonutChartData>()
-      .sort(null)
-      .value(d => d.value);
-    
-    const pieData = pie(data);
-    
-    // Build arcs
-    const arc = d3.arc<d3.PieArcDatum<DonutChartData>>()
-      .innerRadius(radius * 0.6)  // Donut hole size
-      .outerRadius(radius * 0.9);
-    
-    // Build the pie chart
-    svg.selectAll('pieces')
-      .data(pieData)
-      .enter()
-      .append('path')
-      .attr('d', arc)
-      .attr('fill', function(d) { 
-        return color(d.data.name); 
-      })
-      .attr('stroke', '#fff')
-      .style('stroke-width', '1px');
-  }
+   renderDonutChart(options: { element: any, data: DonutChartData[], colors: string[] }): void {
+  const { element, data, colors } = options;
+ 
+  if (!element || !data || data.length === 0) return;
+ 
+  const width = 150;
+  const height = 150;
+  const radius = Math.min(width, height) / 2;
+ 
+  // Clear previous chart if any
+  d3.select(element).selectAll('*').remove();
+ 
+  // Create SVG
+  const svg = d3.select(element)
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .append('g')
+    .attr('transform', `translate(${width / 2}, ${height / 2})`);
+ 
+  // Tooltip div (positioned absolutely outside SVG)
+  const tooltip = d3.select(element)
+    .append('div')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.7)')
+    .style('color', '#fff')
+    .style('padding', '4px 8px')
+    .style('border-radius', '4px')
+    .style('pointer-events', 'none')
+    .style('font-size', '12px')
+    .style('display', 'none');
+ 
+  // Color scale
+  const color = d3.scaleOrdinal<string>()
+    .domain(data.map(d => d.name))
+    .range(colors);
+ 
+  const pie = d3.pie<DonutChartData>()
+    .sort(null)
+    .value(d => d.value);
+ 
+  const pieData = pie(data);
+ 
+  const arc = d3.arc<d3.PieArcDatum<DonutChartData>>()
+    .innerRadius(radius * 0.6)
+    .outerRadius(radius * 0.9);
+ 
+  // Build the pie chart
+  svg.selectAll('path')
+    .data(pieData)
+    .enter()
+    .append('path')
+    .attr('d', arc)
+    .attr('fill', d => color(d.data.name))
+    .attr('stroke', '#fff')
+    .style('stroke-width', '1px')
+    .on('mouseover', function (event, d) {
+      tooltip
+        .style('display', 'block')
+        .html(`<strong>${d.data.name}</strong>: ${d.data.value}`);
+    })
+    .on('mousemove', function (event) {
+      tooltip
+        .style('left', (event.offsetX + 10) + 'px')
+        .style('top', (event.offsetY + 10) + 'px');
+    })
+    .on('mouseout', function () {
+      tooltip.style('display', 'none');
+    });
+}
+ 
   
   // Method to change zone
   changeZone(zone: string): void {
