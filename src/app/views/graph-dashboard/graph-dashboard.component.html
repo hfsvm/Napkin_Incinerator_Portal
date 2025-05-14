@@ -2,7 +2,7 @@
 <div class="dashboard-container">
   <!-- Left side card section -->
   <div class="cards-section">
-    <h2 class="zone-title">Zone: {{ zone.split(' ')[1] || zone }}</h2>
+    <!-- <h2 class="zone-title">Zone: {{ zone.split(' ')[1] || zone }}</h2> -->
     
     <!-- Status charts -->
     <div class="charts-row">
@@ -64,7 +64,6 @@
         </div>
       </div>
     </div>
-
     <div class="charts-row">
       <div class="chart-container">
         <div #statusChart class="donut-chart"></div>
@@ -93,6 +92,27 @@
           </div>
         </div>
       </div>
+    </div>
+
+    
+
+    <div class="charts-row">
+      <div class="chart-container">
+        <div #statusChart class="donut-chart"></div>
+        <div class="status-legend">
+          <div class="legend-item">
+            <span class="color-box online"></span>
+            <span>Online</span>
+          </div>
+          <div class="legend-item">
+            <span class="color-box offline"></span>
+            <span>Offline</span>
+          </div>
+        </div>
+      </div>
+      
+      
+     
     </div>
     
     <!-- First row of cards -->

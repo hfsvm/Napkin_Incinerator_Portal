@@ -1,9 +1,14 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef,QueryList } from '@angular/core';
 import * as d3 from 'd3';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataService } from '../../service/data.service';
 import { CommonDataService } from '../../Common/common-data.service';
 import { Location } from '@angular/common';
+import { ViewChildren } from '@angular/core';
+
+
+
+
 
 
 import * as maplibregl from 'maplibre-gl';
@@ -63,8 +68,11 @@ export class GraphDashboardComponent implements OnInit {
   showNoDataMessage = false;
 
   // Chart references
-  @ViewChild('statusChart') statusChartRef!: ElementRef;
+  // @ViewChild('statusChart') statusChartRef!: ElementRef;
   @ViewChild('stockChart') stockChartRef!: ElementRef;
+// @ViewChild('statusChart') statusChartRefs!: QueryList<ElementRef>;
+@ViewChildren('statusChart') statusChartRef!: QueryList<ElementRef>;
+
   // @ViewChild('statusChart') statusChartRef!: QueryList<ElementRef>;
 
   constructor(
@@ -87,16 +95,18 @@ export class GraphDashboardComponent implements OnInit {
     });
   
 
-    this.fetchDashboardData();
+    // this.fetchDashboardData();
     this.getDashboardDataForZones(this.zone);
     // this.getDashboardDataForZones();
-    // this.initializeMap();
+    this.initializeMap();
 
-    // this.updateMap();
+    this.updateMap();
+    this.renderCharts();
   }
 
   
   getDashboardDataForZones(zones: string[]): void {
+    debugger;
     this.zoneSummaries = [];
     zones.forEach(zone => {
       const queryParams: any = {
@@ -137,6 +147,10 @@ export class GraphDashboardComponent implements OnInit {
             console.log('✅ Zone:', this.zoneSummaries);
 
   console.log('this.allZonesDashboardData',this.allZonesDashboardData);
+   if (this.zoneSummaries.length === zones.length) {
+            this.renderCharts();
+          }
+     
             // if (this.map) {
             //   this.updateMap(); // Update map per zone if needed
             // }
@@ -158,106 +172,110 @@ export class GraphDashboardComponent implements OnInit {
 
   
 
-  fetchDashboardData(): void {
-    this.isLoading = true;
-    this.hasError = false;
-    const merchantId = this.commonDataService.merchantId ?? '';
-debugger;
-    const queryParams: any = {
-      merchantId,
-      burnStatus: "1,2",
-      machineStatus: "0,1,2",
-      stockStatus: "0,1,2",
-      zone: "Zone 2 (Central Mumbai)"
-    };
-    if (this.zone) queryParams.zone = this.zone;
+//   fetchDashboardData(): void {
+//     this.isLoading = true;
+//     this.hasError = false;
+//     const merchantId = this.commonDataService.merchantId ?? '';
+// debugger;
+//     const queryParams: any = {
+//       merchantId,
+//       burnStatus: "1,2",
+//       machineStatus: "0,1,2",
+//       stockStatus: "0,1,2",
+//       zone: "Zone 1 (South Mumbai)"
+//     };
+//     if (this.zone) queryParams.zone = this.zone;
 
-    if (this.beat) queryParams.beat = this.beat;
-    if (this.client) queryParams.client = this.client;
-    if (this.district) queryParams.district = this.district;
-    if (this.machineId) queryParams.machineId = this.machineId;
-    if (this.project) queryParams.project = this.project;
-    if (this.state) queryParams.state = this.state;
-    if (this.ward) queryParams.ward = this.ward;
+//     if (this.beat) queryParams.beat = this.beat;
+//     if (this.client) queryParams.client = this.client;
+//     if (this.district) queryParams.district = this.district;
+//     if (this.machineId) queryParams.machineId = this.machineId;
+//     if (this.project) queryParams.project = this.project;
+//     if (this.state) queryParams.state = this.state;
+//     if (this.ward) queryParams.ward = this.ward;
 
-    // this.dataService.getMachineDashboardSummary(queryParams).subscribe({
-    //   next: (response: any) => {
-    //     debugger;
-    //     console.log('✅ API Response:', response);
   
-    //     if (response?.code === 200 && response.data) {
-    //       this.dashboardData = response.data;
+//   }
 
-    //       if (this.dashboardData.machines?.length === 0) {
-    //         this.renderCharts();
-    //         // Show popup if machines array is empty
-    //         alert('This zone has no data currently'); // Replace with a proper modal/snackbar if using Angular Material
-    //         return; // Exit early if no machine data
-    //       }
-    
-    
+  
 
-    //       if (this.map){
-    //           this.updateMap(); // call this here
+//   renderCharts(): void {
+//   // Clear previous charts
+//   this.statusChartRefs.forEach(ref => {
+//     d3.select(ref.nativeElement).selectAll('*').remove();
+//   });
 
-    //       }
+//   // Render one chart per zone
+//   this.zoneSummaries.forEach((zoneSummary, index) => {
+//     const chartElement = this.statusChartRefs.get(index)?.nativeElement;
+//     if (chartElement) {
+//       this.renderDonutChart({
+//         element: chartElement,
+//         data: this.prepareStatusChartData(zoneSummary.zone),
+//         colors: ['#4CAF50', '#F44336']
+//       });
+//     }
+//   });
+// }
 
 
+//   prepareStatusChartData(zone: string): DonutChartData[] {
+//   const summary = this.zoneSummaries.find(z => z.zone === zone); // Find the selected zone
 
+//   if (!summary) {
+//     return []; // Return empty if not found
+//   }
 
-    //       console.log('Dashboard data loaded:', this.dashboardData);
-    //         this.renderCharts();
-    //     } else {
-    //       this.hasError = true;
-    //       this.errorMessage = 'Invalid response format';
-          
-    //     }
-    //     this.isLoading = false;
-    //   },
-    //   error: (error: any) => {
-    //     console.error('Error fetching dashboard data:', error);
-    //     this.hasError = true;
-    //     this.errorMessage = 'Failed to load dashboard data';
-    //     this.isLoading = false;
-    //   }
-    // });
-  }
+//   const online = summary.online || 0;
+//   const offline = summary.offline || 0;
+
+//   return [
+//     { name: 'Online', value: online },
+//     { name: 'Offline', value: offline }
+//   ];
+// }
+
+  // prepareStatusChartData(): DonutChartData[] {
+  //   // const online = this.dashboardData.machinesRunning || 0;
+  //   // const offline = (this.dashboardData.machinesInstalled || 0) - online;
+
+  //   const online = 50;
+  //   const offline = 10;
+  //   return [
+  //     { name: 'Online', value: online },
+  //     { name: 'Offline', value: offline }
+  //   ];
+  // }
 
   renderCharts(): void {
-    // Clear previous charts if they exist
-    if (this.statusChartRef && this.statusChartRef.nativeElement) {
-      d3.select(this.statusChartRef.nativeElement).selectAll('*').remove();
+  // Clear previous charts
+  this.statusChartRef?.toArray().forEach(ref => {
+    d3.select(ref.nativeElement).selectAll('*').remove();
+  });
+
+  // Render one chart per zone
+  this.zoneSummaries.forEach((zoneSummary, index) => {
+    const chartElement = this.statusChartRef?.toArray()[index]?.nativeElement;
+    if (chartElement) {
+      this.renderDonutChart({
+        element: chartElement,
+        data: this.prepareStatusChartData(zoneSummary.zone),
+        colors: ['#4CAF50', '#F44336']
+      });
     }
-    if (this.stockChartRef && this.stockChartRef.nativeElement) {
-      d3.select(this.stockChartRef.nativeElement).selectAll('*').remove();
-    } 
+  });
+}
 
-    // Render status chart (Online/Offline)
-    this.renderDonutChart({
-      element: this.statusChartRef.nativeElement,
-      data: this.prepareStatusChartData(),
-      colors: ['#4CAF50', '#F44336']  // Online, Offline
-    });
-
-    // Render stock chart (Ok/Low/Empty/Unknown)
-    this.renderDonutChart({
-      element: this.stockChartRef.nativeElement,
-      data: this.prepareStockChartData(),
-      colors: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E']  // Ok, Low, Empty, Unknown
-    });
-  }
-
-  prepareStatusChartData(): DonutChartData[] {
-    // const online = this.dashboardData.machinesRunning || 0;
-    // const offline = (this.dashboardData.machinesInstalled || 0) - online;
-
-    const online = 50;
-    const offline = 10;
-    return [
-      { name: 'Online', value: online },
-      { name: 'Offline', value: offline }
-    ];
-  }
+  
+  prepareStatusChartData(zone: string): DonutChartData[] {
+  const summary = this.zoneSummaries.find(z => z.zone === zone);
+  if (!summary) return [];
+  
+  return [
+    { name: 'Online', value: summary.online || 0 },
+    { name: 'Offline', value: summary.offline || 0 }
+  ];
+}
 
   prepareStockChartData(): DonutChartData[] {
     const stockOk = this.dashboardData.stockOk || 0;
@@ -325,7 +343,7 @@ debugger;
   // Method to change zone
   changeZone(zone: string): void {
     this.zone = zone;
-    this.fetchDashboardData();
+    // this.fetchDashboardData();
     // this.getDashboardDataForZones(zone);
   }
   // Initialize the map

@@ -52,6 +52,16 @@
     align-items: center;
     justify-content: center;
   }
+
+  .chart-container:hover {
+  transform: scale(1.05); /* Slightly enlarge the chart on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Make shadow stronger */
+  background-color: #f0f0f0; /* Change background color on hover */
+}
+
+.chart-container:hover .card-value {
+  color: #3498db; /* Change text color on hover */
+}
   
   .donut-chart {
     width: 100%;
@@ -60,6 +70,7 @@
     align-items: center;
     justify-content: center;
   }
+  
   
   .status-legend {
     display: flex;
