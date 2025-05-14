@@ -2599,9 +2599,10 @@ case 2: burningStatusText = 'Burning'; break;
 
     
     navigateToGraph(graphType: string, zones: string[]): void {
+      debugger;
       // Navigate to zone dashboard with the zone name as parameter
       this.router.navigate(['/graph-dashboard'], { 
-        queryParams: { zones: zones } 
+        queryParams: { zone: zones } 
       });
     }
     

@@ -1,231 +1,3 @@
-// import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
-// import * as d3 from 'd3';
-// import { ActivatedRoute, Router } from '@angular/router';
-// import { DataService } from '../../service/data.service';
-// import { CommonDataService } from '../../Common/common-data.service';
-// import { Location } from '@angular/common';
-
-
-// interface DonutChartData {
-//   name: string;
-//   value: number;
-// }
-
-// @Component({
-//   selector: 'app-zone-dashboard',
-//   templateUrl: './zone-dashboard.component.html',
-//   styleUrls: ['./zone-dashboard.component.scss']
-// })
-// export class ZoneDashboardComponent implements OnInit, AfterViewInit {
-//   // Dashboard summary data
-//   dashboardData: any = {};
-  
-//   // // Current zone selection
-//   // selectedZone: string = 'Zone 1 (South Mumbai)';
-  
-//   // Loading state
-//   isLoading: boolean = false;
-  
-//   // Error state
-//   hasError: boolean = false;
-//   errorMessage: string = '';
-
-
-//   burnStatus = '1,2';
-// stockStatus = '0,1,2';
-// machineStatus = '0,1,2';
-
-// beat = '';
-// client = '';
-// district = '';
-// machineId = '';
-// merchantId = 'VIKN250324';
-// project = '';
-// state = '';
-// ward = '';
-// zone = 'Zone 1 (South Mumbai)';
-
-
-//   // Chart references
-//   @ViewChild('statusChart') statusChartRef!: ElementRef;
-//   @ViewChild('stockChart') stockChartRef!: ElementRef;
-
-//   constructor(
-//     private dataService: DataService,
-//     private route: ActivatedRoute,
-//     private router: Router,
-//     private commonDataService: CommonDataService,
-//     private location: Location
-
-//   ) { }
-
-//   ngOnInit(): void {
-//     this.fetchDashboardData();
-//   }
-
-//   ngAfterViewInit(): void {
-//     // Charts will be initialized after data is loaded
-//   }
-
-//   fetchDashboardData(): void {
-//     this.isLoading = true;
-//     this.hasError = false;
-    
-//     const queryParams: any = {
-//       // burnStatus: this.burnStatus,
-//       // stockStatus: this.stockStatus,
-//       // machineStatus: this.machineStatus,
-//       // merchantId: this.merchantId,
-//       // zone: this.zone
-//       burnStatus: "1,2",
-//       machineStatus: "0,1,2",
-//       merchantId: "VIKN250324",
-//       stockStatus: "0,1,2",
-//       zone: "Zone 1 (South Mumbai)"
-
-//     };
-  
-//     if (this.beat) queryParams.beat = this.beat;
-//     if (this.client) queryParams.client = this.client;
-//     if (this.district) queryParams.district = this.district;
-//     if (this.machineId) queryParams.machineId = this.machineId;
-//     if (this.project) queryParams.project = this.project;
-//     if (this.state) queryParams.state = this.state;
-//     if (this.ward) queryParams.ward = this.ward;
-//     debugger;
-
-//     this.dataService.getMachineDashboardSummary(queryParams).subscribe(
-//       (response: any) => {
-//         console.log('✅ API Response:', response);
-  
-//         if (response?.code === 200 && response.data) {
-//               debugger;
-
-//             this.dashboardData = response.data;
-//             console.log('Dashboard data loaded:', this.dashboardData);
-//             setTimeout(() => {
-//               this.renderCharts();
-//             }, 0);
-//           } else {
-//             this.hasError = true;
-//             this.errorMessage = 'Invalid response format';
-//           }
-//           this.isLoading = false;
-//           debugger;
-//         },
-//         error: (error) => {
-//           console.error('Error fetching dashboard data:', error);
-//           this.hasError = true;
-//           this.errorMessage = 'Failed to load dashboard data';
-//           this.isLoading = false;
-//         }
-//       });
-//   }
-
-//   renderCharts(): void {
-//     // Clear previous charts if they exist
-//     if (this.statusChartRef && this.statusChartRef.nativeElement) {
-//       d3.select(this.statusChartRef.nativeElement).selectAll('*').remove();
-//     }
-//     if (this.stockChartRef && this.stockChartRef.nativeElement) {
-//       d3.select(this.stockChartRef.nativeElement).selectAll('*').remove();
-//     } 
-
-//     // Render status chart (Online/Offline)
-//     this.renderDonutChart({
-//       element: this.statusChartRef.nativeElement,
-//       data: this.prepareStatusChartData(),
-//       colors: ['#4CAF50', '#F44336']  // Online, Offline
-//     });
-
-//     // Render stock chart (Ok/Low/Empty/Unknown)
-//     this.renderDonutChart({
-//       element: this.stockChartRef.nativeElement,
-//       data: this.prepareStockChartData(),
-//       colors: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E']  // Ok, Low, Empty, Unknown
-//     });
-//   }
-
-//   prepareStatusChartData(): any[] {
-//     const online = this.dashboardData.machinesRunning || 0;
-//     const offline = (this.dashboardData.machinesInstalled || 0) - online;
-//     return [
-//       { name: 'Online', value: online },
-//       { name: 'Offline', value: offline }
-//     ];
-//   }
-
-//   prepareStockChartData(): any[] {
-//     const stockOk = this.dashboardData.stockOk || 0;
-//     const stockLow = this.dashboardData.stockLow || 0;
-//     const stockEmpty = this.dashboardData.stockEmpty || 0;
-//     const totalStock = stockOk + stockLow + stockEmpty;
-//     const stockUnknown = (this.dashboardData.machinesInstalled || 0) - totalStock;
-    
-//     return [
-//       { name: 'Ok', value: stockOk },
-//       { name: 'Low', value: stockLow },
-//       { name: 'Empty', value: stockEmpty },
-//       { name: 'Unknown', value: stockUnknown > 0 ? stockUnknown : 0 }
-//     ];
-//   }
-
-//   renderDonutChart(options: { element: any, data: DonutChartData[], colors: string[] }): void {
-//     const { element, data, colors } = options;
-    
-//     if (!element || !data || data.length === 0) return;
-    
-//     // Chart dimensions
-//     const width = 150;
-//     const height = 150;
-//     const radius = Math.min(width, height) / 2;
-    
-//     // Create SVG
-//     const svg = d3.select(element)
-//       .append('svg')
-//       .attr('width', width)
-//       .attr('height', height)
-//       .append('g')
-//       .attr('transform', `translate(${width / 2}, ${height / 2})`);
-    
-//     // Color scale with explicit return type
-//     const color = d3.scaleOrdinal<string, string>()
-//       .domain(data.map(d => d.name))
-//       .range(colors);
-    
-//     // Compute the position of each group on the pie
-//     const pie = d3.pie<DonutChartData>()
-//       .sort(null)
-//       .value(d => d.value);
-    
-//     const pieData = pie(data);
-    
-//     // Build arcs
-//     const arc = d3.arc<d3.PieArcDatum<DonutChartData>>()
-//       .innerRadius(radius * 0.6)  // Donut hole size
-//       .outerRadius(radius * 0.9);
-    
-//     // Build the pie chart
-//     svg.selectAll('pieces')
-//       .data(pieData)
-//       .enter()
-//       .append('path')
-//       .attr('d', arc)
-//       .attr('fill', function(d) { 
-//         return color(d.data.name); 
-//       })
-//       .attr('stroke', '#fff')
-//       .style('stroke-width', '1px');
-//   }
-  
-//   // Method to change zone
-//   changeZone(zone: string): void {
-//     this.zone = zone;
-//     this.fetchDashboardData();
-//   }
-// }
-
-
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import * as d3 from 'd3';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -247,7 +19,7 @@ interface DonutChartData {
   templateUrl: './graph-dashboard.component.html',
   styleUrls: ['./graph-dashboard.component.scss']
 })
-export class GraphDashboardComponent implements OnInit, AfterViewInit {
+export class GraphDashboardComponent implements OnInit {
 
   private map!: maplibregl.Map;
   private markers: maplibregl.Marker[] = [];
@@ -269,8 +41,9 @@ export class GraphDashboardComponent implements OnInit, AfterViewInit {
   burnStatus = '1,2';
   stockStatus = '0,1,2';
   machineStatus = '0,1,2';
-
-  
+  allZonesDashboardData: { zone: string, data: any }[] = [];
+  zoneSummaries: any[] = [];
+  chartContainers: any[] = [];
 
   beat = '';
   client = '';
@@ -280,7 +53,8 @@ export class GraphDashboardComponent implements OnInit, AfterViewInit {
   project = '';
   state = '';
   ward = '';
-  zone = '';
+  // zone = '';
+  zone:any;
 
   zoneMarker: any;
 
@@ -291,6 +65,7 @@ export class GraphDashboardComponent implements OnInit, AfterViewInit {
   // Chart references
   @ViewChild('statusChart') statusChartRef!: ElementRef;
   @ViewChild('stockChart') stockChartRef!: ElementRef;
+  // @ViewChild('statusChart') statusChartRef!: QueryList<ElementRef>;
 
   constructor(
     private dataService: DataService,
@@ -301,6 +76,7 @@ export class GraphDashboardComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
+    debugger;
     this.merchantId = this.commonDataService.merchantId ?? '';
 
     this.route.queryParams.subscribe(params => {
@@ -312,22 +88,75 @@ export class GraphDashboardComponent implements OnInit, AfterViewInit {
   
 
     this.fetchDashboardData();
+    this.getDashboardDataForZones(this.zone);
+    // this.getDashboardDataForZones();
     // this.initializeMap();
 
     // this.updateMap();
   }
 
-  ngAfterViewInit(): void {
+  
+  getDashboardDataForZones(zones: string[]): void {
+    this.zoneSummaries = [];
+    zones.forEach(zone => {
+      const queryParams: any = {
+        
+        merchantId: this.merchantId,
+        burnStatus: "1,2",
+        machineStatus: "0,1,2",
+        stockStatus: "0,1,2",
+        zone: zone
+      };
+  
+      this.dataService.getMachineDashboardSummary(queryParams).subscribe({
+        next: (response: any) => {
+          console.log(`✅ Response for ${zone}:`, response);
+  
+          if (response?.code === 200 && response.data) {
+            const dashboardData = response.data;
+            const data = response.data;
 
-    setTimeout(() =>{
-      this.initializeMap();
+  
+            // if (dashboardData.machines?.length === 0) {
+            //   alert(`Zone "${zone}" has no data currently`);
+            //   return;
+            // }
+  
+            // Do something with dashboardData (e.g., push to an array)
 
-    })
+            this.allZonesDashboardData.push({ zone, data: response.data });
+            const zoneSummary = {
+              zone: zone,
+              online: data.machinesRunning || 0,
+              offline: (data.machinesInstalled || 0) - (data.machinesRunning || 0),
+              totalMachines: data.machinesInstalled || 0
+            };
 
-      
+            this.zoneSummaries.push(zoneSummary);
+            console.log('✅ Zone summary:', zoneSummary);
+            console.log('✅ Zone:', this.zoneSummaries);
 
-    // Charts will be initialized after data is loaded
+  console.log('this.allZonesDashboardData',this.allZonesDashboardData);
+            // if (this.map) {
+            //   this.updateMap(); // Update map per zone if needed
+            // }
+  
+            // this.renderCharts();
+          } else {
+            console.error(`Invalid response for zone ${zone}`);
+          }
+        },
+        error: (error: any) => {
+          console.error(`Error fetching data for zone ${zone}:`, error);
+        }
+      });
+    });
   }
+  
+
+
+
+  
 
   fetchDashboardData(): void {
     this.isLoading = true;
@@ -339,6 +168,7 @@ debugger;
       burnStatus: "1,2",
       machineStatus: "0,1,2",
       stockStatus: "0,1,2",
+      zone: "Zone 2 (Central Mumbai)"
     };
     if (this.zone) queryParams.zone = this.zone;
 
@@ -350,47 +180,47 @@ debugger;
     if (this.state) queryParams.state = this.state;
     if (this.ward) queryParams.ward = this.ward;
 
-    this.dataService.getMachineDashboardSummary(queryParams).subscribe({
-      next: (response: any) => {
-        debugger;
-        console.log('✅ API Response:', response);
+    // this.dataService.getMachineDashboardSummary(queryParams).subscribe({
+    //   next: (response: any) => {
+    //     debugger;
+    //     console.log('✅ API Response:', response);
   
-        if (response?.code === 200 && response.data) {
-          this.dashboardData = response.data;
+    //     if (response?.code === 200 && response.data) {
+    //       this.dashboardData = response.data;
 
-          if (this.dashboardData.machines?.length === 0) {
-            this.renderCharts();
-            // Show popup if machines array is empty
-            alert('This zone has no data currently'); // Replace with a proper modal/snackbar if using Angular Material
-            return; // Exit early if no machine data
-          }
+    //       if (this.dashboardData.machines?.length === 0) {
+    //         this.renderCharts();
+    //         // Show popup if machines array is empty
+    //         alert('This zone has no data currently'); // Replace with a proper modal/snackbar if using Angular Material
+    //         return; // Exit early if no machine data
+    //       }
     
     
 
-          if (this.map){
-              this.updateMap(); // call this here
+    //       if (this.map){
+    //           this.updateMap(); // call this here
 
-          }
-
-
+    //       }
 
 
-          console.log('Dashboard data loaded:', this.dashboardData);
-            this.renderCharts();
-        } else {
-          this.hasError = true;
-          this.errorMessage = 'Invalid response format';
+
+
+    //       console.log('Dashboard data loaded:', this.dashboardData);
+    //         this.renderCharts();
+    //     } else {
+    //       this.hasError = true;
+    //       this.errorMessage = 'Invalid response format';
           
-        }
-        this.isLoading = false;
-      },
-      error: (error: any) => {
-        console.error('Error fetching dashboard data:', error);
-        this.hasError = true;
-        this.errorMessage = 'Failed to load dashboard data';
-        this.isLoading = false;
-      }
-    });
+    //     }
+    //     this.isLoading = false;
+    //   },
+    //   error: (error: any) => {
+    //     console.error('Error fetching dashboard data:', error);
+    //     this.hasError = true;
+    //     this.errorMessage = 'Failed to load dashboard data';
+    //     this.isLoading = false;
+    //   }
+    // });
   }
 
   renderCharts(): void {
@@ -496,6 +326,7 @@ debugger;
   changeZone(zone: string): void {
     this.zone = zone;
     this.fetchDashboardData();
+    // this.getDashboardDataForZones(zone);
   }
   // Initialize the map
 //   initializeMap(): void {
@@ -831,33 +662,7 @@ private updateMapWithCoordinates(lng: number, lat: number, zone: string): void {
     }
 
 
-    getZoneWiseOnlineOfflineStats(): { zone: string, online: number, offline: number }[] {
-      debugger;
-      const machines = this.dashboardData?.machines ?? [];
-      const zoneStatsMap: Record<string, { online: number, offline: number }> = {};
-    
-      machines.forEach((machine : any)=> {
-        const zone = machine.zone || 'Unknown';
-        const status = machine.machineStatus; // 1 = online, 0 = offline
-    
-        if (!zoneStatsMap[zone]) {
-          zoneStatsMap[zone] = { online: 0, offline: 0 };
-        }
-    
-        if (status === 1) {
-          zoneStatsMap[zone].online += 1;
-        } else if (status === 0) {
-          zoneStatsMap[zone].offline += 1;
-        }
-      });
-    
-      // Convert map to array for easier use in chart/presentation
-      return Object.keys(zoneStatsMap).map(zone => ({
-        zone,
-        online: zoneStatsMap[zone].online,
-        offline: zoneStatsMap[zone].offline
-      }));
-    }
+  
     
     
 }
