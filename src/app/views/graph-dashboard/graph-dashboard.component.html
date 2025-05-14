@@ -2,7 +2,7 @@
 <div class="dashboard-container">
   <!-- Left side card section -->
   <div class="cards-section">
-    <h2 class="zone-title">Zone: {{ zone.split(' ')[1] || zone }}</h2>
+    <!-- <h2 class="zone-title">Zone: {{ zone.split(' ')[1] || zone }}</h2> -->
     
     <!-- Status charts -->
     <div class="charts-row">
@@ -21,30 +21,102 @@
       </div>
       
       <div class="chart-container">
-        <div #stockChart class="donut-chart"></div>
+        <div #statusChart class="donut-chart"></div>
         <div class="status-legend">
           <div class="legend-item">
-            <span class="color-box ok"></span>
-            <span>Ok</span>
+            <span class="color-box online"></span>
+            <span>Online</span>
           </div>
           <div class="legend-item">
-            <span class="color-box low"></span>
-            <span>Low</span>
-          </div>
-          <div class="legend-item">
-            <span class="color-box empty"></span>
-            <span>Empty</span>
-          </div>
-          <div class="legend-item">
-            <span class="color-box unknown"></span>
-            <span>Unknown</span>
+            <span class="color-box offline"></span>
+            <span>Offline</span>
           </div>
         </div>
       </div>
     </div>
+
+    <div class="charts-row">
+      <div class="chart-container">
+        <div #statusChart class="donut-chart"></div>
+        <div class="status-legend">
+          <div class="legend-item">
+            <span class="color-box online"></span>
+            <span>Online</span>
+          </div>
+          <div class="legend-item">
+            <span class="color-box offline"></span>
+            <span>Offline</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        <div #statusChart class="donut-chart"></div>
+        <div class="status-legend">
+          <div class="legend-item">
+            <span class="color-box online"></span>
+            <span>Online</span>
+          </div>
+          <div class="legend-item">
+            <span class="color-box offline"></span>
+            <span>Offline</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-container">
+        <div #statusChart class="donut-chart"></div>
+        <div class="status-legend">
+          <div class="legend-item">
+            <span class="color-box online"></span>
+            <span>Online</span>
+          </div>
+          <div class="legend-item">
+            <span class="color-box offline"></span>
+            <span>Offline</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        <div #statusChart class="donut-chart"></div>
+        <div class="status-legend">
+          <div class="legend-item">
+            <span class="color-box online"></span>
+            <span>Online</span>
+          </div>
+          <div class="legend-item">
+            <span class="color-box offline"></span>
+            <span>Offline</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <div class="charts-row">
+      <div class="chart-container">
+        <div #statusChart class="donut-chart"></div>
+        <div class="status-legend">
+          <div class="legend-item">
+            <span class="color-box online"></span>
+            <span>Online</span>
+          </div>
+          <div class="legend-item">
+            <span class="color-box offline"></span>
+            <span>Offline</span>
+          </div>
+        </div>
+      </div>
+      
+      
+     
+    </div>
     
     <!-- First row of cards -->
-    <div class="card-row">
+    <!-- <div class="card-row">
       <div class="dashboard-card">
         <div class="card-icon install-icon">
           <i class="fa fa-cogs"></i>
@@ -84,10 +156,10 @@
           <p class="card-label">Items Dispensed</p>
         </div>
       </div>
-    </div>
+    </div> -->
     
     <!-- Second row of cards -->
-    <div class="card-row">
+    <!-- <div class="card-row">
       <div class="dashboard-card">
         <div class="card-icon empty-stock-icon">
           <i class="fa fa-times-circle"></i>
@@ -128,9 +200,9 @@
         </div>
       </div>
     </div>
-    
+     -->
     <!-- Third row of cards -->
-    <div class="card-row">
+    <!-- <div class="card-row">
       <div class="dashboard-card">
         <div class="card-icon idle-icon">
           <i class="fa fa-pause-circle"></i>
@@ -170,7 +242,7 @@
           <p class="card-label">Total Burning Cycle</p>
         </div>
       </div>
-    </div>
+    </div> -->
     <button (click)="goBack()" class="btn btn-primary">
       🏠 Home
     </button>

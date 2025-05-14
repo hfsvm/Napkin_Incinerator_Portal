@@ -520,7 +520,8 @@ checkIfClientIsBMC_Map(): void {
       (this.beatMachineMap[beat] || []).forEach(machine => machinesSet.add(machine));
     });
     // Update machine options but don't set the filter value
-    console.log('📊 Updated available machines based on beats:', Array.from(machinesSet));
+    this.machines = Array.from(machinesSet);
+    console.log('📊 Updated available machines based on beats:',this.machines);
   }
 
 
@@ -2595,6 +2596,15 @@ case 2: burningStatusText = 'Burning'; break;
         queryParams: { zone: zoneName } 
       });
     }
+
+    
+    navigateToGraph(graphType: string, zones: string[]): void {
+      debugger;
+      // Navigate to zone dashboard with the zone name as parameter
+      this.router.navigate(['/graph-dashboard'], { 
+        queryParams: { zone: zones } 
+      });
+    }
     
 
 
@@ -2623,19 +2633,6 @@ case 2: burningStatusText = 'Burning'; break;
 // }
     
   }
-
-
-
-
-   
-
-
-
-
-
-
-
-
 
 
 

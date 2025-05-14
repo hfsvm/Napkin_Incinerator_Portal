@@ -211,6 +211,7 @@ import { MachinedataComponent } from './views/machinedata/machinedata.component'
 import { MachinereportComponent } from './views/machinereport/machinereport.component';
 import { GoogleMapsComponent } from './views/plugins/maps/google-maps.component';
 import { ZoneDashboardComponent } from './views/zone-dashboard/zone-dashboard.component';
+import { GraphDashboardComponent } from './views/graph-dashboard/graph-dashboard.component';
 
 
 
@@ -233,6 +234,13 @@ const routes: Routes = [
     }
   },
 
+  {
+    path: 'graph-dashboard',
+    component: GraphDashboardComponent,
+    data: {
+      title: 'Graph Dashboard'
+    }
+  },
   // {
   //   path: '',
   //   component: ZoneDashboardComponent
