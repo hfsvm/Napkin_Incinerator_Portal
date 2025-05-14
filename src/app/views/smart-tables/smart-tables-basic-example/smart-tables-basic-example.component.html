@@ -141,7 +141,8 @@ Load Report
 
 
 <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
-<div *ngIf="isLoading" class="loading-spinner">Loading...</div>
+<div *ngIf="isLoading" >Loading...</div>
+<div *ngIf="!isLoading">
 <table class="report-summary">
 <tr>
 <td><b>NO. OF MACHINES</b></td>
@@ -170,6 +171,7 @@ Load Report
 <td>{{ reportToPeriod | date: 'dd-MMM-yyyy' }}</td>
 </tr>
 </table>
+</div>
 
 <div class="search-wrapper">
 <label class="search-label">Search:</label>

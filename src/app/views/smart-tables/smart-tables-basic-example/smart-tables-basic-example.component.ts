@@ -71,7 +71,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   refreshCountdown = 0;
   searchQuery: string = '';  // ✅ This is the search input value
  
-  isLoading = false;
+  isLoading: boolean = false;
   summaryType: 'Daily' | 'Totals' = 'Daily';
   errorMessage = '';
  
@@ -1208,14 +1208,8 @@ console.log("API Query Parameters:", queryParams);
 // queryParams.beat,
 
 
-debugger;
-this.dataService.getMachineAndIncineratorTransaction(queryParams
-
-
-
-).subscribe(
+this.dataService.getMachineAndIncineratorTransaction(queryParams).subscribe(
   (response: any) => {
-    debugger
     console.log("✅ API Response Received:", response);
   
     if (response.code === 200 && response.data?.machineDetails) {
@@ -1224,6 +1218,7 @@ this.dataService.getMachineAndIncineratorTransaction(queryParams
       this.reportFromPeriod = response.data.reportFromPeriod || '-';
       this.reportToPeriod = response.data.reportToPeriod || '-';
       this.reportType = response.data.reportType || '-';
+       
  
       console.log("📌 Report Metadata Set:", {
         reportGenerated: this.reportGenerated,
@@ -1231,7 +1226,7 @@ this.dataService.getMachineAndIncineratorTransaction(queryParams
         reportToPeriod: this.reportToPeriod,
         reportType: this.reportType
       });
- 
+ this.isLoading = false;
       this.processResponseData(response.data.machineDetails);
     } else {
       this.filteredData = [];
