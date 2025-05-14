@@ -64,6 +64,7 @@ import { ConfirmDialogComponent } from './views/confirm-dialog/confirm-dialog.co
 import { MachinereportComponent } from './views/machinereport/machinereport.component';
 import { ShareModule } from './share/share.module';
 
+import { GraphDashboardComponent } from './views/graph-dashboard/graph-dashboard.component';
 
 
 
@@ -81,7 +82,7 @@ const APP_CONTAINERS = [
 ];
 
 @NgModule({
-  declarations: [AppComponent, ...APP_CONTAINERS, UserManagementComponent, MachineManagementComponent, AdvancedManagementComponent, ConfirmDialogComponent, MachinereportComponent],
+  declarations: [AppComponent, ...APP_CONTAINERS, UserManagementComponent, MachineManagementComponent, AdvancedManagementComponent, ConfirmDialogComponent, MachinereportComponent,    GraphDashboardComponent],
   imports: [
    
     FormsModule,

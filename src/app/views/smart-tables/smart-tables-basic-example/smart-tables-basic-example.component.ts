@@ -1546,63 +1546,154 @@ XLSX.writeFile(wb, 'Machine_Report.xlsx');
 // this.loadReport();
 // }
  
+
+
+
+// Fix for toggleSummaryType() function
+
+
 toggleSummaryType() {
-this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
+  this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
+  
+  if (this.summaryType === 'Totals') {
+    this.filteredData = []; // ✅ Clear previous totals
+    
+    const uniqueMachineIds = new Set(); // ✅ Track unique machines to prevent duplication
+    let grandTotalQty = 0, grandTotalCash = 0, grandTotalBurnCycles = 0, grandTotalSanNapkins = 0;
+    
+    this.reportsData.forEach((machine, index) => {
+      if (!uniqueMachineIds.has(machine.machineId)) { // ✅ Prevent duplicate machines
+        uniqueMachineIds.add(machine.machineId);
+    
+        // ✅ Extract only the last "Total" row for each machine from API
+        const vendingTotal = machine.transactions.find(txn => txn.date === 'Total') || { qty: 0, cash: '₹ 0.00' };
  
-if (this.summaryType === 'Totals') {
-  this.filteredData = []; // ✅ Clear previous totals
+        // Find the most recent incinerator transaction to get the onTime value
+        const incineratorTxns = machine.transactions.filter(txn => txn.onTime && txn.onTime !== 'Total');
+        const mostRecentIncineratorTxn = incineratorTxns.length > 0 ?  
+          incineratorTxns[incineratorTxns.length - 1] :  
+          { onTime: '-', burnCycles: 0, sanNapkinsBurnt: 0 };
  
-  const uniqueMachineIds = new Set(); // ✅ Track unique machines to prevent duplication
-  let grandTotalQty = 0, grandTotalCash = 0, grandTotalBurnCycles = 0, grandTotalSanNapkins = 0;
- 
-  this.reportsData.forEach((machine, index) => {
-    if (!uniqueMachineIds.has(machine.machineId)) { // ✅ Prevent duplicate machines
-      uniqueMachineIds.add(machine.machineId);
- 
-      // ✅ Extract only the last "Total" row for each machine from API
-      const vendingTotal = machine.transactions.find(txn => txn.date === 'Total') || { qty: 0, cash: '₹ 0.00' };
-      const incineratorTotal = machine.transactions.find(txn => txn.onTime === 'Total') || { burnCycles: 0, sanNapkinsBurnt: 0 };
- 
-      const totalQty = vendingTotal.qty ?? 0;
-      const totalCash = parseFloat((vendingTotal.cash ?? '₹ 0.00').replace(/[₹,]/g, '')) || 0;
-      const totalBurnCycles = incineratorTotal.burnCycles ?? 0;
-      const totalSanNapkins = incineratorTotal.sanNapkinsBurnt ?? 0;
- 
-      // ✅ Update grand totals
-      grandTotalQty += totalQty;
-      grandTotalCash += totalCash;
-      grandTotalBurnCycles += totalBurnCycles;
-      grandTotalSanNapkins += totalSanNapkins;
- 
-      this.filteredData.push({
-        srNo: index + 1,
-        machineId: machine.machineId,
-        machineLocation: machine.machineLocation || '-',
-        address: machine.address || '-',
-        machineType: machine.machineType || 'N/A',
-        reportType:machine.reportType || 'N/A',
-        transactions: [{
-          date: 'Total',
-          qty: totalQty,
-          cash: `₹ ${totalCash.toFixed(2)}`,
-          onTime: '-',
-          burnCycles: totalBurnCycles,
-          sanNapkinsBurnt: totalSanNapkins
-        }]
-      });
-    }
-  });
- 
-  // ✅ Add a final "Grand Total" row
- 
- 
-} else {
-  this.filteredData = [...this.reportsData]; // ✅ Restore "Daily" view
+        const incineratorTotal = machine.transactions.find(txn => txn.onTime === 'Total') || { burnCycles: 0, sanNapkinsBurnt: 0 };
+    
+        const totalQty = vendingTotal.qty ?? 0;
+        const totalCash = parseFloat((vendingTotal.cash ?? '₹ 0.00').replace(/[₹,]/g, '')) || 0;
+        const totalBurnCycles = incineratorTotal.burnCycles ?? 0;
+        const totalSanNapkins = incineratorTotal.sanNapkinsBurnt ?? 0;
+    
+        // ✅ Update grand totals
+        grandTotalQty += totalQty;
+        grandTotalCash += totalCash;
+        grandTotalBurnCycles += totalBurnCycles;
+        grandTotalSanNapkins += totalSanNapkins;
+    
+        this.filteredData.push({
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation || '-',
+          address: machine.address || '-',
+          machineType: machine.machineType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: [{
+            date: 'Total',
+            qty: totalQty,
+            cash: `₹ ${totalCash.toFixed(2)}`,
+            onTime: mostRecentIncineratorTxn.onTime, // This properly assigns the onTime value
+            burnCycles: totalBurnCycles,
+            sanNapkinsBurnt: totalSanNapkins
+          }]
+        });
+      }
+    });
+    
+    // Set grand total values
+    this.grandTotal = {
+      quantity: grandTotalQty,
+      cash: `₹ ${grandTotalCash.toFixed(2)}`,
+      burnCycles: grandTotalBurnCycles,
+      sanNapkinsBurnt: grandTotalSanNapkins
+    };
+    
+  } else {
+    this.filteredData = [...this.reportsData]; // ✅ Restore "Daily" view
+  }
+    
+  this.currentPage = 1; // ✅ Reset pagination
+  this.updatePagination();
 }
+
+
+// toggleSummaryType() {
+// this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
  
-this.currentPage = 1; // ✅ Reset pagination
-this.updatePagination();
-}
+// if (this.summaryType === 'Totals') {
+//   this.filteredData = []; // ✅ Clear previous totals
+ 
+//   const uniqueMachineIds = new Set(); // ✅ Track unique machines to prevent duplication
+//   let grandTotalQty = 0, grandTotalCash = 0, grandTotalBurnCycles = 0, grandTotalSanNapkins = 0;
+ 
+//   this.reportsData.forEach((machine, index) => {
+//     if (!uniqueMachineIds.has(machine.machineId)) { // ✅ Prevent duplicate machines
+//       uniqueMachineIds.add(machine.machineId);
+ 
+//       // ✅ Extract only the last "Total" row for each machine from API
+//       const vendingTotal = machine.transactions.find(txn => txn.date === 'Total') || { qty: 0, cash: '₹ 0.00' };
+
+//               // Find the most recent incinerator transaction to get the onTime value
+//         const incineratorTxns = machine.transactions.filter(txn => txn.onTime && txn.onTime !== 'Total');
+//         const mostRecentIncineratorTxn = incineratorTxns.length > 0 ? 
+//           incineratorTxns[incineratorTxns.length - 1] : 
+//           { onTime: '-', burnCycles: 0, sanNapkinsBurnt: 0 };
+
+//       const incineratorTotal = machine.transactions.find(txn => txn.onTime === 'Total') || { burnCycles: 0, sanNapkinsBurnt: 0 };
+ 
+//       const totalQty = vendingTotal.qty ?? 0;
+//       const totalCash = parseFloat((vendingTotal.cash ?? '₹ 0.00').replace(/[₹,]/g, '')) || 0;
+//       const totalBurnCycles = incineratorTotal.burnCycles ?? 0;
+//       const totalSanNapkins = incineratorTotal.sanNapkinsBurnt ?? 0;
+
+
+
+
+      
+ 
+//       // ✅ Update grand totals
+//       grandTotalQty += totalQty;
+//       grandTotalCash += totalCash;
+//       grandTotalBurnCycles += totalBurnCycles;
+//       grandTotalSanNapkins += totalSanNapkins;
+ 
+//       this.filteredData.push({
+//         srNo: index + 1,
+//         machineId: machine.machineId,
+//         machineLocation: machine.machineLocation || '-',
+//         address: machine.address || '-',
+//         machineType: machine.machineType || 'N/A',
+//         reportType:machine.reportType || 'N/A',
+//         transactions: [{
+//           date: 'Total',
+//           qty: totalQty,
+//           cash: `₹ ${totalCash.toFixed(2)}`,
+//           onTime: mostRecentIncineratorTxn.onTime,
+//           burnCycles: totalBurnCycles,
+//           sanNapkinsBurnt: totalSanNapkins
+//         }]
+//       });
+//     }
+//   });
+ 
+//   // ✅ Add a final "Grand Total" row
+ 
+ 
+// } else {
+//   this.filteredData = [...this.reportsData]; // ✅ Restore "Daily" view
+// }
+ 
+// this.currentPage = 1; // ✅ Reset pagination
+// this.updatePagination();
+// }
+
+
 searchTexts: { [key: string]: string } = {};
  
 // Inside your component.ts

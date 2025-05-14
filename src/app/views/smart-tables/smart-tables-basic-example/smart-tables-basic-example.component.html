@@ -265,7 +265,7 @@ class="search-input">
 
   <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.qty ?? 0 }}</b></td>
   <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.cash ?? '₹ 0' }}</b></td>
-  <td>-</td>
+  <td><b>{{ machine.transactions[0]?.onTime ?? 'o' }}</b></td> 
   <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.burnCycles ?? 0 }}</b></td>
   <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.sanNapkinsBurnt ?? 0 }}</b></td>
 </tr>
