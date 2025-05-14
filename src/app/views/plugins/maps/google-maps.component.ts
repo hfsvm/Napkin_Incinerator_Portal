@@ -1647,11 +1647,11 @@ loadMachineData() {
     queryParams.machineId = [...this.selectedBeats];
   }
 
-  console.log("API Query Parameters:", queryParams);
+  console.log("API Query Parameters for machine dashboard summary---->:", queryParams);
 
   this.dataService.getMachineDashboardSummary(queryParams).subscribe(
     (response: any) => {
-      console.log('✅ API Response:', response);
+      console.log('✅ API Response for machine dashboard summary---->:', response);
 
       if (response?.code === 200 && response.data) {
         // Process machines data
@@ -2597,15 +2597,30 @@ case 2: burningStatusText = 'Burning'; break;
     }
     
 
-    // navigateToZone(zoneName: string): void {
-    //   const url = this.router.serializeUrl(
-    //     this.router.createUrlTree(['/zone-dashboard'], {
-    //       queryParams: { zone: zoneName },
-    //     })
-    //   );
-    //   window.open(url, '_blank');
-    // }
-    
+
+//     // Original navigation method (keep this if you still need it)
+// navigateTo(route: string): void {
+//   this.router.navigate([`/${route}`]);
+// }
+
+// // Updated method to open zone dashboard in a new tab
+// navigateToZone(zoneName: string): void {
+//   // Get the base URL of the current page
+//   const baseUrl = window.location.origin;
+  
+//   // Create the URL with query parameters
+//   const relativePath = this.router.serializeUrl(
+//     this.router.createUrlTree(['/zone-dashboard'], {
+//       queryParams: { zone: zoneName }
+//     })
+//   );
+  
+//   // Combine to create absolute URL
+//   const absoluteUrl = `${baseUrl}${relativePath}`;
+  
+//   // Open in a new tab
+//   window.open(absoluteUrl, '_blank');
+// }
     
   }
 
