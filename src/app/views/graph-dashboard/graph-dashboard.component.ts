@@ -110,7 +110,9 @@ machines: any[] = []; // Will store machine data
 
     this.route.queryParams.subscribe(params => {
       if (params['zone']) {
-        this.zone = params['zone'];
+        const zonesArray = JSON.parse(params['zone']);
+        this.zone = zonesArray;
+ 
         console.log('Zone received:', this.zone);
 
     this.getDashboardDataForZones(this.zone);

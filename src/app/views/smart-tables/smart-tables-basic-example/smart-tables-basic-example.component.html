@@ -229,9 +229,19 @@ class="search-input">
         {{ getSerialNumber(machine) }}
       </td>
       <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">
-        <a [routerLink]="['/machine-report', machine.machineId]">
+        <!-- <a [routerLink]="['/machine-report', machine.machineId]">
           {{ machine.machineId }}
-        </a>
+        </a> -->
+
+
+        <a 
+  [routerLink]="machine.isWorking ? ['/machine-report', machine.machineId] : null"
+  (click)="!machine.isWorking && $event.preventDefault()"
+  [class.disabled-link]="!machine.isWorking"
+>
+  {{ machine.machineId }}
+</a>
+
       </td>
      
      

@@ -443,9 +443,25 @@
       <td>{{ i + 1 }}</td>
       <td>
         <!-- Machine ID as clickable link -->
-        <a [routerLink]="['/machine-report', machine.machineId]" style="color: #007bff; text-decoration: underline; cursor: pointer;">
+        <!-- <a [routerLink]="['/machine-report', machine.machineId]" style="color: #007bff; text-decoration: underline; cursor: pointer;">
+          
           {{ machine.machineId }}
-        </a>
+        </a> -->
+
+
+        <a
+  [routerLink]="machine.isWorking ? ['/machine-report', machine.machineId] : null"
+  (click)="!machine.isWorking && $event.preventDefault()"
+  [ngStyle]="{
+    color: machine.isWorking ? '#007bff' : 'black',
+    textDecoration: 'none',
+    cursor: machine.isWorking ? 'pointer' : 'not-allowed',
+    fontWeight: 'bold'
+  }"
+>
+  {{ machine.machineId }}
+</a>
+
       </td>
       <!-- ✅ MCSRNo -->
       <td>{{ machine.mcSrNo || '' }}</td>

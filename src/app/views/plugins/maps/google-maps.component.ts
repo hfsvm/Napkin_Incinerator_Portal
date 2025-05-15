@@ -2592,36 +2592,36 @@ case 2: burningStatusText = 'Burning'; break;
       this.router.navigate([`/${route}`]);
     }
   
-    // navigateToZone(zoneName: string): void {
-    //   // Navigate to zone dashboard with the zone name as parameter
-    //   this.router.navigate(['/zone-dashboard'], { 
-    //     queryParams: { zone: zoneName } 
-    //   });
-    // }
-
     navigateToZone(zoneName: string): void {
-  const encodedZoneName = encodeURIComponent(zoneName);
-  const fullUrl = `${window.location.origin}/#/zone-dashboard?zone=${encodedZoneName}`;
-  window.open(fullUrl, '_blank');
-}
+      // Navigate to zone dashboard with the zone name as parameter
+      this.router.navigate(['/zone-dashboard'], { 
+        queryParams: { zone: zoneName } 
+      });
+    }
+
+//     navigateToZone(zoneName: string): void {
+//   const encodedZoneName = encodeURIComponent(zoneName);
+//   const fullUrl = `${window.location.origin}/#/zone-dashboard?zone=${encodedZoneName}`;
+//   window.open(fullUrl, '_blank');
+// }
  
 
     
-    // navigateToGraph(graphType: string, zones: string[]): void {
-    //   debugger;
-    //   // Navigate to zone dashboard with the zone name as parameter
-    //   this.router.navigate(['/graph-dashboard'], { 
-    //     queryParams: { zone: zones } 
-    //   });
-    // }
-
-
     navigateToGraph(graphType: string, zones: string[]): void {
-  const encodedZones = zones.map(zone => encodeURIComponent(zone));
-  const queryParam = encodedZones.map(zone => `zone=${zone}`).join('&');
-  const fullUrl = `${window.location.origin}/#/graph-dashboard?${queryParam}`;
-  window.open(fullUrl, '_blank');
-}
+      debugger;
+      // Navigate to zone dashboard with the zone name as parameter
+      this.router.navigate(['/graph-dashboard'], { 
+        queryParams: { zone: zones } 
+      });
+    }
+
+
+//     navigateToGraph(graphType: string, zones: string[]): void {
+//   const encodedZones = zones.map(zone => encodeURIComponent(zone));
+//   const queryParam = encodedZones.map(zone => `zone=${zone}`).join('&');
+//   const fullUrl = `${window.location.origin}/#/graph-dashboard?${queryParam}`;
+//   window.open(fullUrl, '_blank');
+// }
 
 
     /*end*/
