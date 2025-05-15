@@ -2586,26 +2586,82 @@ case 2: burningStatusText = 'Burning'; break;
     //   this.router.navigate(['/zone-dashboard']); // adjust if 'maps' is a lazy-loaded route
     // }
 
+
+    /* working */
     navigateTo(route: string): void {
       this.router.navigate([`/${route}`]);
     }
   
+    // navigateToZone(zoneName: string): void {
+    //   // Navigate to zone dashboard with the zone name as parameter
+    //   this.router.navigate(['/zone-dashboard'], { 
+    //     queryParams: { zone: zoneName } 
+    //   });
+    // }
+
     navigateToZone(zoneName: string): void {
-      // Navigate to zone dashboard with the zone name as parameter
-      this.router.navigate(['/zone-dashboard'], { 
-        queryParams: { zone: zoneName } 
-      });
-    }
+  const encodedZoneName = encodeURIComponent(zoneName);
+  const fullUrl = `${window.location.origin}/#/zone-dashboard?zone=${encodedZoneName}`;
+  window.open(fullUrl, '_blank');
+}
+ 
 
     
+    // navigateToGraph(graphType: string, zones: string[]): void {
+    //   debugger;
+    //   // Navigate to zone dashboard with the zone name as parameter
+    //   this.router.navigate(['/graph-dashboard'], { 
+    //     queryParams: { zone: zones } 
+    //   });
+    // }
+
+
     navigateToGraph(graphType: string, zones: string[]): void {
-      debugger;
-      // Navigate to zone dashboard with the zone name as parameter
-      this.router.navigate(['/graph-dashboard'], { 
-        queryParams: { zone: zones } 
-      });
-    }
-    
+  const encodedZones = zones.map(zone => encodeURIComponent(zone));
+  const queryParam = encodedZones.map(zone => `zone=${zone}`).join('&');
+  const fullUrl = `${window.location.origin}/#/graph-dashboard?${queryParam}`;
+  window.open(fullUrl, '_blank');
+}
+
+
+    /*end*/
+
+
+// // Updated navigation functions for maps.ts
+// navigateTo(route: string): void {
+//   // Get the base URL of your application
+//   const baseUrl = window.location.origin;
+//   // Get merchantId from CommonDataService or sessionStorage
+//   // You may need to inject CommonDataService or use a method to access it
+//   const merchantId = sessionStorage.getItem('merchantId');
+  
+//   // Open the URL in a new tab with merchantId as query parameter
+//   window.open(`${baseUrl}/${route}${merchantId ? '?merchantId=' + merchantId : ''}`, '_blank');
+// }
+
+// navigateToZone(zoneName: string): void {
+//   // Get the base URL of your application
+//   const baseUrl = window.location.origin;
+//   // Get merchantId from sessionStorage
+//   const merchantId = sessionStorage.getItem('merchantId');
+  
+//   // Build URL with zone parameter and merchantId
+//   const merchantIdParam = merchantId ? `&merchantId=${merchantId}` : '';
+//   window.open(`${baseUrl}/zone-dashboard?zone=${encodeURIComponent(zoneName)}${merchantIdParam}`, '_blank');
+// }
+
+// navigateToGraph(graphType: string, zones: string[]): void {
+//   // Get the base URL of your application
+//   const baseUrl = window.location.origin;
+//   // Get merchantId from sessionStorage
+//   const merchantId = sessionStorage.getItem('merchantId');
+  
+//   // Build the URL with query parameters including zones and merchantId
+//   const zonesParam = zones.map(zone => `zone=${encodeURIComponent(zone)}`).join('&');
+//   const merchantIdParam = merchantId ? `&merchantId=${merchantId}` : '';
+//   const url = `${baseUrl}/graph-dashboard?${zonesParam}${merchantIdParam}`;
+//   window.open(url, '_blank');
+// }
 
 
 //     // Original navigation method (keep this if you still need it)

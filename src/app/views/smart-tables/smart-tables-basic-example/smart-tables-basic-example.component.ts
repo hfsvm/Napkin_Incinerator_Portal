@@ -111,6 +111,33 @@ selectedProjectNames: string[] = []; // New property for selected project names
     burnCycles: 0,
     sanNapkinsBurnt: 0
   };
+
+
+
+  // Averages per machine per day
+averages: {
+  quantity: string;
+  cash: string;
+  burnCycles: string;
+  sanNapkinsBurnt: string;
+} = {
+  quantity: '0.00',
+  cash: '₹ 0.00',
+  burnCycles: '0.00',
+  sanNapkinsBurnt: '0.00'
+};
+
+// Metadata for calculation (optional - for debugging)
+calculationMetadata: {
+  numberOfMachines: number;
+  numberOfDays: number;
+  uniqueDates: string[];
+} = {
+  numberOfMachines: 0,
+  numberOfDays: 0,
+  uniqueDates: []
+};
+
  
   // ✅ Pagination
   paginatedData: ReportItem[] = [];
@@ -1259,104 +1286,104 @@ if (this.endDate < this.startDate) {
 }
  
  
-processResponseData(machineDetails: any[]) {
-  debugger;
-let grandTotalQty = 0;
-let grandTotalCash = 0;
-let grandTotalBurnCycles = 0;
-let grandTotalSanNapkins = 0;
+// processResponseData(machineDetails: any[]) {
+//   debugger;
+// let grandTotalQty = 0;
+// let grandTotalCash = 0;
+// let grandTotalBurnCycles = 0;
+// let grandTotalSanNapkins = 0;
  
-// this.reportsData = machineDetails.map((machine, index): ReportItem => {//before i did
-  this.reportsData = machineDetails
-  .filter(machine => (machine.vending && machine.vending.length) || (machine.incinerator && machine.incinerator.length))
-  .map((machine, index): ReportItem => {
+// // this.reportsData = machineDetails.map((machine, index): ReportItem => {//before i did
+//   this.reportsData = machineDetails
+//   .filter(machine => (machine.vending && machine.vending.length) || (machine.incinerator && machine.incinerator.length))
+//   .map((machine, index): ReportItem => {
  
-    let transactionsMap = new Map<string, Transaction>();
+//     let transactionsMap = new Map<string, Transaction>();
  
-    // ✅ Initialize Machine Totals
-    let machineTotalQty = 0;
-    let machineTotalCash = 0;
-    let machineTotalBurnCycles = 0;
-    let machineTotalSanNapkins = 0;
+//     // ✅ Initialize Machine Totals
+//     let machineTotalQty = 0;
+//     let machineTotalCash = 0;
+//     let machineTotalBurnCycles = 0;
+//     let machineTotalSanNapkins = 0;
  
-    // ✅ Handle Vending Transactions (Check for null)
-    (machine.vending || []).forEach((txn: any) => {
-        if (txn.date !== 'Total') {
-            machineTotalQty += txn.quantity ?? 0;
-            machineTotalCash += txn.cashCollected ?? 0;
-        }
-        transactionsMap.set(txn.date, {
-            date: txn.date,
-            qty: txn.quantity ?? 0,
-            cash: `₹ ${txn.cashCollected?.toFixed(2) ?? '0'}`,
-            onTime: '-',
-            burnCycles: 0,
-            sanNapkinsBurnt: 0
-        });
-    });
+//     // ✅ Handle Vending Transactions (Check for null)
+//     (machine.vending || []).forEach((txn: any) => {
+//         if (txn.date !== 'Total') {
+//             machineTotalQty += txn.quantity ?? 0;
+//             machineTotalCash += txn.cashCollected ?? 0;
+//         }
+//         transactionsMap.set(txn.date, {
+//             date: txn.date,
+//             qty: txn.quantity ?? 0,
+//             cash: `₹ ${txn.cashCollected?.toFixed(2) ?? '0'}`,
+//             onTime: '-',
+//             burnCycles: 0,
+//             sanNapkinsBurnt: 0
+//         });
+//     });
  
-    // ✅ Handle Incinerator Transactions (Check for null)
-    (machine.incinerator || []).forEach((txn: any) => {
-        if (txn.onTime !== 'Total') {
-            machineTotalBurnCycles += txn.burnCycles ?? 0;
-            machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
-        }
+//     // ✅ Handle Incinerator Transactions (Check for null)
+//     (machine.incinerator || []).forEach((txn: any) => {
+//         if (txn.onTime !== 'Total') {
+//             machineTotalBurnCycles += txn.burnCycles ?? 0;
+//             machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+//         }
  
-        if (transactionsMap.has(txn.onTime)) {
-            let existingTxn = transactionsMap.get(txn.onTime)!;
-            existingTxn.onTime = txn.onTime ?? '-';
-            existingTxn.burnCycles = txn.burnCycles ?? 0;
-            existingTxn.sanNapkinsBurnt = txn.sanitaryNapkinsBurnt ?? 0;
-        } else {
-            transactionsMap.set(txn.onTime, {
-                date: txn.onTime,
-                qty: 0,
-                cash: '₹ 0',
-                onTime: txn.onTime ?? '-',
-                burnCycles: txn.burnCycles ?? 0,
-                sanNapkinsBurnt: txn.sanitaryNapkinsBurnt ?? 0
-            });
-        }
-    });
+//         if (transactionsMap.has(txn.onTime)) {
+//             let existingTxn = transactionsMap.get(txn.onTime)!;
+//             existingTxn.onTime = txn.onTime ?? '-';
+//             existingTxn.burnCycles = txn.burnCycles ?? 0;
+//             existingTxn.sanNapkinsBurnt = txn.sanitaryNapkinsBurnt ?? 0;
+//         } else {
+//             transactionsMap.set(txn.onTime, {
+//                 date: txn.onTime,
+//                 qty: 0,
+//                 cash: '₹ 0',
+//                 onTime: txn.onTime ?? '-',
+//                 burnCycles: txn.burnCycles ?? 0,
+//                 sanNapkinsBurnt: txn.sanitaryNapkinsBurnt ?? 0
+//             });
+//         }
+//     });
  
-    // ✅ Add Machine's Total Row
-    transactionsMap.set('Total', {
-        date: 'Total',
-        qty: machineTotalQty,
-        cash: `₹ ${machineTotalCash.toFixed(2)}`,
-        onTime: '-',
-        burnCycles: machineTotalBurnCycles,
-        sanNapkinsBurnt: machineTotalSanNapkins
-    });
+//     // ✅ Add Machine's Total Row
+//     transactionsMap.set('Total', {
+//         date: 'Total',
+//         qty: machineTotalQty,
+//         cash: `₹ ${machineTotalCash.toFixed(2)}`,
+//         onTime: '-',
+//         burnCycles: machineTotalBurnCycles,
+//         sanNapkinsBurnt: machineTotalSanNapkins
+//     });
  
-    // ✅ Update Grand Total (Sum of Each Machine's Totals)
-    grandTotalQty += machineTotalQty;
-    grandTotalCash += machineTotalCash;
-    grandTotalBurnCycles += machineTotalBurnCycles;
-    grandTotalSanNapkins += machineTotalSanNapkins;
+//     // ✅ Update Grand Total (Sum of Each Machine's Totals)
+//     grandTotalQty += machineTotalQty;
+//     grandTotalCash += machineTotalCash;
+//     grandTotalBurnCycles += machineTotalBurnCycles;
+//     grandTotalSanNapkins += machineTotalSanNapkins;
  
-    return {
-        srNo: index + 1,
-        machineId: machine.machineId,
-        machineLocation: machine.machineLocation ? machine.machineLocation.trim() : machine.address,
-        address: machine.address || '',
-        machineType: machine.machineType || 'N/A',
-        reportType: machine.reportType || 'N/A',
-        transactions: Array.from(transactionsMap.values())
-    };
-});
+//     return {
+//         srNo: index + 1,
+//         machineId: machine.machineId,
+//         machineLocation: machine.machineLocation ? machine.machineLocation.trim() : machine.address,
+//         address: machine.address || '',
+//         machineType: machine.machineType || 'N/A',
+//         reportType: machine.reportType || 'N/A',
+//         transactions: Array.from(transactionsMap.values())
+//     };
+// });
  
-// ✅ Update Grand Total Correctly
-this.grandTotal = {
-    quantity: grandTotalQty,
-    cash: `₹ ${grandTotalCash.toFixed(2)}`,
-    burnCycles: grandTotalBurnCycles,
-    sanNapkinsBurnt: grandTotalSanNapkins
-};
+// // ✅ Update Grand Total Correctly
+// this.grandTotal = {
+//     quantity: grandTotalQty,
+//     cash: `₹ ${grandTotalCash.toFixed(2)}`,
+//     burnCycles: grandTotalBurnCycles,
+//     sanNapkinsBurnt: grandTotalSanNapkins
+// };
  
-this.filteredData = [...this.reportsData];
-this.updatePagination();
-}
+// this.filteredData = [...this.reportsData];
+// this.updatePagination();
+// }
  
  
 /** ✅ Function to Format Address & Machine Location */
@@ -1547,7 +1574,7 @@ XLSX.writeFile(wb, 'Machine_Report.xlsx');
 // Fix for toggleSummaryType() function
 
 
-toggleSummaryType() {
+toggleSummaryTypeworkingnow() {
   this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
   
   if (this.summaryType === 'Totals') {
@@ -1575,6 +1602,9 @@ toggleSummaryType() {
         const totalCash = parseFloat((vendingTotal.cash ?? '₹ 0.00').replace(/[₹,]/g, '')) || 0;
         const totalBurnCycles = incineratorTotal.burnCycles ?? 0;
         const totalSanNapkins = incineratorTotal.sanNapkinsBurnt ?? 0;
+
+
+
     
         // ✅ Update grand totals
         grandTotalQty += totalQty;
@@ -1619,74 +1649,561 @@ toggleSummaryType() {
 
 
 // toggleSummaryType() {
-// this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
- 
-// if (this.summaryType === 'Totals') {
-//   this.filteredData = []; // ✅ Clear previous totals
- 
-//   const uniqueMachineIds = new Set(); // ✅ Track unique machines to prevent duplication
-//   let grandTotalQty = 0, grandTotalCash = 0, grandTotalBurnCycles = 0, grandTotalSanNapkins = 0;
- 
-//   this.reportsData.forEach((machine, index) => {
-//     if (!uniqueMachineIds.has(machine.machineId)) { // ✅ Prevent duplicate machines
-//       uniqueMachineIds.add(machine.machineId);
- 
-//       // ✅ Extract only the last "Total" row for each machine from API
-//       const vendingTotal = machine.transactions.find(txn => txn.date === 'Total') || { qty: 0, cash: '₹ 0.00' };
-
-//               // Find the most recent incinerator transaction to get the onTime value
+//   this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
+  
+//   if (this.summaryType === 'Totals') {
+//     this.filteredData = []; // ✅ Clear previous totals
+    
+//     const uniqueMachineIds = new Set(); // ✅ Track unique machines to prevent duplication
+//     let grandTotalQty = 0, grandTotalCash = 0, grandTotalBurnCycles = 0, grandTotalSanNapkins = 0;
+    
+//     console.log('Switching to Totals view - processing machines:');
+    
+//     this.reportsData.forEach((machine, index) => {
+//       if (!uniqueMachineIds.has(machine.machineId)) { // ✅ Prevent duplicate machines
+//         uniqueMachineIds.add(machine.machineId);
+        
+//         // ✅ Extract only the last "Total" row for each machine from API
+//         const vendingTotal = machine.transactions.find(txn => txn.date === 'Total') || { qty: 0, cash: '₹ 0.00' };
+        
+//         // Find the most recent incinerator transaction to get the onTime value
 //         const incineratorTxns = machine.transactions.filter(txn => txn.onTime && txn.onTime !== 'Total');
-//         const mostRecentIncineratorTxn = incineratorTxns.length > 0 ? 
-//           incineratorTxns[incineratorTxns.length - 1] : 
-//           { onTime: '-', burnCycles: 0, sanNapkinsBurnt: 0 };
+//         const mostRecentIncineratorTxn = incineratorTxns.length > 0 ?
+//             incineratorTxns[incineratorTxns.length - 1] :
+//             { onTime: '-', burnCycles: 0, sanNapkinsBurnt: 0 };
+        
+//         const incineratorTotal = machine.transactions.find(txn => txn.onTime === 'Total') || { burnCycles: 0, sanNapkinsBurnt: 0 };
+        
+//         // Debug logs for onTime value
+//         console.log(`Machine ID: ${machine.machineId}`);
+//         console.log('  All incinerator transactions:', incineratorTxns.map(txn => ({date: txn.date, onTime: txn.onTime})));
+//         console.log('  Most recent incinerator transaction:', mostRecentIncineratorTxn);
+//         console.log('  onTime value being used:', mostRecentIncineratorTxn.onTime);
+        
+//         const totalQty = vendingTotal.qty ?? 0;
+//         const totalCash = parseFloat((vendingTotal.cash ?? '₹ 0.00').replace(/[₹,]/g, '')) || 0;
+//         const totalBurnCycles = incineratorTotal.burnCycles ?? 0;
+//         const totalSanNapkins = incineratorTotal.sanNapkinsBurnt ?? 0;
+        
+//         // ✅ Update grand totals
+//         grandTotalQty += totalQty;
+//         grandTotalCash += totalCash;
+//         grandTotalBurnCycles += totalBurnCycles;
+//         grandTotalSanNapkins += totalSanNapkins;
+        
+//         this.filteredData.push({
+//           srNo: index + 1,
+//           machineId: machine.machineId,
+//           machineLocation: machine.machineLocation || '-',
+//           address: machine.address || '-',
+//           machineType: machine.machineType || 'N/A',
+//           reportType: machine.reportType || 'N/A',
+//           transactions: [{
+//             date: 'Total',
+//             qty: totalQty,
+//             cash: `₹ ${totalCash.toFixed(2)}`,
+//             onTime: mostRecentIncineratorTxn.onTime, // This is where onTime is assigned
+//             burnCycles: totalBurnCycles,
+//             sanNapkinsBurnt: totalSanNapkins
+//           }]
+//         });
+        
+//         // Debug: log what's actually being added to filteredData
+//         console.log(`  Final onTime added to filteredData: ${mostRecentIncineratorTxn.onTime}`);
+//       }
+//     });
+    
+//     // Set grand total values
+//     this.grandTotal = {
+//       quantity: grandTotalQty,
+//       cash: `₹ ${grandTotalCash.toFixed(2)}`,
+//       burnCycles: grandTotalBurnCycles,
+//       sanNapkinsBurnt: grandTotalSanNapkins
+//     };
+    
+//     // After populating filteredData, check what's actually there
+//     console.log('Final filteredData onTime values:');
+//     this.filteredData.forEach(machine => {
+//       console.log(`Machine: ${machine.machineId}, onTime: ${machine.transactions[0]?.onTime}`);
+//     });
+//   } else {
+//     this.filteredData = [...this.reportsData]; // ✅ Restore "Daily" view
+//     console.log('Switching back to Daily view');
+//   }
+  
+//   this.currentPage = 1; // ✅ Reset pagination
+//   this.updatePagination();
+// }
 
-//       const incineratorTotal = machine.transactions.find(txn => txn.onTime === 'Total') || { burnCycles: 0, sanNapkinsBurnt: 0 };
+
+
+processResponseData1(machineDetails: any[]) { 
+  let grandTotalQty = 0;
+  let grandTotalCash = 0;
+  let grandTotalBurnCycles = 0;
+  let grandTotalSanNapkins = 0;
  
-//       const totalQty = vendingTotal.qty ?? 0;
-//       const totalCash = parseFloat((vendingTotal.cash ?? '₹ 0.00').replace(/[₹,]/g, '')) || 0;
-//       const totalBurnCycles = incineratorTotal.burnCycles ?? 0;
-//       const totalSanNapkins = incineratorTotal.sanNapkinsBurnt ?? 0;
-
-
-
-
+  this.reportsData = machineDetails
+    .filter(machine => (machine.vending && machine.vending.length) || (machine.incinerator && machine.incinerator.length))
+    .map((machine, index): ReportItem => {
+ 
+      let transactionsMap = new Map<string, Transaction>();
+ 
+      // ✅ Initialize Machine Totals
+      let machineTotalQty = 0;
+      let machineTotalCash = 0;
+      let machineTotalBurnCycles = 0;
+      let machineTotalSanNapkins = 0;
+      let machineTotalOnTimeSeconds = 0;
+      let machineTotalOnTimeFormatted = '-';
+ 
+      // ✅ Handle Vending Transactions (Check for null)
+      (machine.vending || []).forEach((txn: any) => {
+          if (txn.date !== 'Total') {
+              machineTotalQty += txn.quantity ?? 0;
+              machineTotalCash += txn.cashCollected ?? 0;
+          }
+          transactionsMap.set(txn.date, {
+              date: txn.date,
+              qty: txn.quantity ?? 0,
+              cash: `₹ ${txn.cashCollected?.toFixed(2) ?? '0'}`,
+              onTime: '-',
+              burnCycles: 0,
+              sanNapkinsBurnt: 0
+          });
+      });
+ 
+      // ✅ Handle Incinerator Transactions (Check for null)
+      (machine.incinerator || []).forEach((txn: any) => {
+          if (txn.onTime !== 'Total') {
+              machineTotalBurnCycles += txn.burnCycles ?? 0;
+              machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+              
+              // Parse and add onTime to total seconds
+              if (txn.onTime && txn.onTime !== '-') {
+                  machineTotalOnTimeSeconds += this.parseTimeToSeconds(txn.onTime);
+              }
+          }
+ 
+          if (transactionsMap.has(txn.onTime)) {
+              let existingTxn = transactionsMap.get(txn.onTime)!;
+              existingTxn.onTime = txn.onTime ?? '-';
+              existingTxn.burnCycles = txn.burnCycles ?? 0;
+              existingTxn.sanNapkinsBurnt = txn.sanitaryNapkinsBurnt ?? 0;
+          } else {
+              transactionsMap.set(txn.onTime, {
+                  date: txn.onTime,
+                  qty: 0,
+                  cash: '₹ 0',
+                  onTime: txn.onTime ?? '-',
+                  burnCycles: txn.burnCycles ?? 0,
+                  sanNapkinsBurnt: txn.sanitaryNapkinsBurnt ?? 0
+              });
+          }
+      });
       
+      // Format machine total onTime
+      if (machineTotalOnTimeSeconds > 0) {
+          machineTotalOnTimeFormatted = this.formatSecondsToTime(machineTotalOnTimeSeconds);
+      }
  
-//       // ✅ Update grand totals
-//       grandTotalQty += totalQty;
-//       grandTotalCash += totalCash;
-//       grandTotalBurnCycles += totalBurnCycles;
-//       grandTotalSanNapkins += totalSanNapkins;
+      // ✅ Add Machine's Total Row
+      transactionsMap.set('Total', {
+          date: 'Total',
+          qty: machineTotalQty,
+          cash: `₹ ${machineTotalCash.toFixed(2)}`,
+          onTime: machineTotalOnTimeFormatted,
+          burnCycles: machineTotalBurnCycles,
+          sanNapkinsBurnt: machineTotalSanNapkins
+      });
  
-//       this.filteredData.push({
-//         srNo: index + 1,
-//         machineId: machine.machineId,
-//         machineLocation: machine.machineLocation || '-',
-//         address: machine.address || '-',
-//         machineType: machine.machineType || 'N/A',
-//         reportType:machine.reportType || 'N/A',
-//         transactions: [{
-//           date: 'Total',
-//           qty: totalQty,
-//           cash: `₹ ${totalCash.toFixed(2)}`,
-//           onTime: mostRecentIncineratorTxn.onTime,
-//           burnCycles: totalBurnCycles,
-//           sanNapkinsBurnt: totalSanNapkins
-//         }]
-//       });
-//     }
-//   });
+      // ✅ Update Grand Total (Sum of Each Machine's Totals)
+      grandTotalQty += machineTotalQty;
+      grandTotalCash += machineTotalCash;
+      grandTotalBurnCycles += machineTotalBurnCycles;
+      grandTotalSanNapkins += machineTotalSanNapkins;
  
-//   // ✅ Add a final "Grand Total" row
+      // Store total onTime in a custom property for later use
+      const result = {
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation ? machine.machineLocation.trim() : machine.address,
+          address: machine.address || '',
+          machineType: machine.machineType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: Array.from(transactionsMap.values())
+      } as ReportItem;
+      
+      // Add the onTime to the result as a custom property
+      (result as any)._totalOnTime = machineTotalOnTimeFormatted;
+      
+      return result;
+  });
  
+  // ✅ Update Grand Total Correctly
+  this.grandTotal = {
+      quantity: grandTotalQty,
+      cash: `₹ ${grandTotalCash.toFixed(2)}`,
+      burnCycles: grandTotalBurnCycles,
+      sanNapkinsBurnt: grandTotalSanNapkins
+  };
  
-// } else {
-//   this.filteredData = [...this.reportsData]; // ✅ Restore "Daily" view
-// }
+  this.filteredData = [...this.reportsData];
+  this.updatePagination();
+}
+
+
+processResponseData(machineDetails: any[]) { 
+  let grandTotalQty = 0;
+  let grandTotalCash = 0;
+  let grandTotalBurnCycles = 0;
+  let grandTotalSanNapkins = 0;
+  
+  // Set to track unique dates across all machines
+  const uniqueDatesSet = new Set<string>();
+  
+  // Count the number of machines (excluding those with no transactions)
+  const machinesWithTransactions = machineDetails.filter(
+    machine => (machine.vending && machine.vending.length) || (machine.incinerator && machine.incinerator.length)
+  );
+  const numberOfMachines = machinesWithTransactions.length;
  
-// this.currentPage = 1; // ✅ Reset pagination
-// this.updatePagination();
-// }
+  this.reportsData = machineDetails
+    .filter(machine => (machine.vending && machine.vending.length) || (machine.incinerator && machine.incinerator.length))
+    .map((machine, index): ReportItem => {
+ 
+      let transactionsMap = new Map<string, Transaction>();
+ 
+      // ✅ Initialize Machine Totals
+      let machineTotalQty = 0;
+      let machineTotalCash = 0;
+      let machineTotalBurnCycles = 0;
+      let machineTotalSanNapkins = 0;
+      let machineTotalOnTimeSeconds = 0;
+      let machineTotalOnTimeFormatted = '-';
+ 
+      // ✅ Handle Vending Transactions (Check for null)
+      (machine.vending || []).forEach((txn: any) => {
+          if (txn.date !== 'Total') {
+              machineTotalQty += txn.quantity ?? 0;
+              machineTotalCash += txn.cashCollected ?? 0;
+              
+              // Add date to unique dates set (only actual dates, not 'Total')
+              uniqueDatesSet.add(txn.date);
+          }
+          transactionsMap.set(txn.date, {
+              date: txn.date,
+              qty: txn.quantity ?? 0,
+              cash: `₹ ${txn.cashCollected?.toFixed(2) ?? '0'}`,
+              onTime: '-',
+              burnCycles: 0,
+              sanNapkinsBurnt: 0
+          });
+      });
+ 
+      // ✅ Handle Incinerator Transactions (Check for null)
+      (machine.incinerator || []).forEach((txn: any) => {
+          if (txn.onTime !== 'Total') {
+              machineTotalBurnCycles += txn.burnCycles ?? 0;
+              machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+              
+              // Add onTime to unique dates set if it's a valid date
+              if (txn.onTime && txn.onTime !== '-') {
+                  uniqueDatesSet.add(txn.onTime);
+                  machineTotalOnTimeSeconds += this.parseTimeToSeconds(txn.onTime);
+              }
+          }
+ 
+          if (transactionsMap.has(txn.onTime)) {
+              let existingTxn = transactionsMap.get(txn.onTime)!;
+              existingTxn.onTime = txn.onTime ?? '-';
+              existingTxn.burnCycles = txn.burnCycles ?? 0;
+              existingTxn.sanNapkinsBurnt = txn.sanitaryNapkinsBurnt ?? 0;
+          } else {
+              transactionsMap.set(txn.onTime, {
+                  date: txn.onTime,
+                  qty: 0,
+                  cash: '₹ 0',
+                  onTime: txn.onTime ?? '-',
+                  burnCycles: txn.burnCycles ?? 0,
+                  sanNapkinsBurnt: txn.sanitaryNapkinsBurnt ?? 0
+              });
+          }
+      });
+      
+      // Format machine total onTime
+      if (machineTotalOnTimeSeconds > 0) {
+          machineTotalOnTimeFormatted = this.formatSecondsToTime(machineTotalOnTimeSeconds);
+      }
+ 
+      // ✅ Add Machine's Total Row
+      transactionsMap.set('Total', {
+          date: 'Total',
+          qty: machineTotalQty,
+          cash: `₹ ${machineTotalCash.toFixed(2)}`,
+          onTime: machineTotalOnTimeFormatted,
+          burnCycles: machineTotalBurnCycles,
+          sanNapkinsBurnt: machineTotalSanNapkins
+      });
+ 
+      // ✅ Update Grand Total (Sum of Each Machine's Totals)
+      grandTotalQty += machineTotalQty;
+      grandTotalCash += machineTotalCash;
+      grandTotalBurnCycles += machineTotalBurnCycles;
+      grandTotalSanNapkins += machineTotalSanNapkins;
+ 
+      // Store total onTime in a custom property for later use
+      const result = {
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation ? machine.machineLocation.trim() : machine.address,
+          address: machine.address || '',
+          machineType: machine.machineType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: Array.from(transactionsMap.values())
+      } as ReportItem;
+      
+      // Add the onTime to the result as a custom property
+      (result as any)._totalOnTime = machineTotalOnTimeFormatted;
+      
+      return result;
+  });
+ 
+  // Remove 'Total' from uniqueDatesSet if it was accidentally added
+  uniqueDatesSet.delete('Total');
+  
+  // Calculate number of unique dates
+  const numberOfDays = Math.max(1, uniqueDatesSet.size); // Ensure we don't divide by zero
+  
+  // Calculate averages per machine per day
+  const averageQty = numberOfMachines && numberOfDays ? grandTotalQty / (numberOfMachines * numberOfDays) : 0;
+  const averageCash = numberOfMachines && numberOfDays ? grandTotalCash / (numberOfMachines * numberOfDays) : 0;
+  const averageBurnCycles = numberOfMachines && numberOfDays ? grandTotalBurnCycles / (numberOfMachines * numberOfDays) : 0;
+  const averageSanNapkins = numberOfMachines && numberOfDays ? grandTotalSanNapkins / (numberOfMachines * numberOfDays) : 0;
+  
+  // ✅ Update Grand Total Correctly
+  this.grandTotal = {
+      quantity: grandTotalQty,
+      cash: `₹ ${grandTotalCash.toFixed(2)}`,
+      burnCycles: grandTotalBurnCycles,
+      sanNapkinsBurnt: grandTotalSanNapkins
+  };
+  
+  // Add averages to the component
+  this.averages = {
+      quantity: averageQty.toFixed(2),
+      cash: `₹ ${averageCash.toFixed(2)}`,
+      burnCycles: averageBurnCycles.toFixed(2),
+      sanNapkinsBurnt: averageSanNapkins.toFixed(2)
+  };
+  
+  // Store the calculation values for debugging/display if needed
+  this.calculationMetadata = {
+    numberOfMachines,
+    numberOfDays,
+    uniqueDates: Array.from(uniqueDatesSet)
+  };
+ 
+  this.filteredData = [...this.reportsData];
+  this.updatePagination();
+}
+
+// Helper method to parse time strings like "0h 12m 26s" to seconds
+parseTimeToSeconds(timeStr: string): number {
+  let totalSeconds = 0;
+  const timeParts = timeStr.split(' ');
+  
+  timeParts.forEach(part => {
+    const numValue = parseInt(part) || 0;
+    if (part.includes('h')) totalSeconds += numValue * 3600;
+    else if (part.includes('m')) totalSeconds += numValue * 60;
+    else if (part.includes('s')) totalSeconds += numValue;
+  });
+  
+  return totalSeconds;
+}
+
+// Helper method to format seconds to "0h 0m 0s" format
+formatSecondsToTime(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  return `${hours}h ${minutes}m ${seconds}s`;
+}
+
+toggleSummaryType1() { 
+  this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
+  
+  if (this.summaryType === 'Totals') {
+    this.filteredData = []; // Clear previous totals
+    const uniqueMachineIds = new Set(); // Track unique machines to prevent duplication
+    let grandTotalQty = 0, grandTotalCash = 0, grandTotalBurnCycles = 0, grandTotalSanNapkins = 0;
+    
+    this.reportsData.forEach((machine, index) => {
+      if (!uniqueMachineIds.has(machine.machineId)) { // Prevent duplicate machines
+        uniqueMachineIds.add(machine.machineId);
+        
+        // Find the total transaction (last item in transactions array)
+        const totalTransaction = machine.transactions.find(t => t.date === 'Total');
+        
+        // Get totals from the total transaction
+        const totalQty = totalTransaction ? totalTransaction.qty : 0;
+        const totalCashStr = totalTransaction ? totalTransaction.cash : '₹ 0';
+        const totalBurnCycles = totalTransaction ? totalTransaction.burnCycles : 0;
+        const totalSanNapkins = totalTransaction ? totalTransaction.sanNapkinsBurnt : 0;
+        
+        // Get the machine's total onTime from our custom property
+        const totalOnTime = (machine as any)._totalOnTime || '-';
+        
+        // Update grand totals
+        grandTotalQty += totalQty;
+        grandTotalCash += parseFloat(totalCashStr.replace('₹ ', '')) || 0;
+        grandTotalBurnCycles += totalBurnCycles;
+        grandTotalSanNapkins += totalSanNapkins;
+        
+        const newMachine = {
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation || '-',
+          address: machine.address || '-',
+          machineType: machine.machineType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: [{
+            date: 'Total',
+            qty: totalQty,
+            cash: totalCashStr,
+            onTime: totalOnTime,
+            burnCycles: totalBurnCycles,
+            sanNapkinsBurnt: totalSanNapkins
+          }]
+        } as ReportItem;
+        
+        // Add our custom property
+        (newMachine as any)._totalOnTime = totalOnTime;
+        
+        this.filteredData.push(newMachine);
+      }
+    });
+    
+    // You can add a final "Grand Total" row here if needed
+    
+  } else {
+    this.filteredData = [...this.reportsData]; // Restore "Daily" view
+  }
+  
+  this.currentPage = 1; // Reset pagination
+  this.updatePagination();
+}
+
+toggleSummaryType() { 
+  this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
+  
+  if (this.summaryType === 'Totals') {
+    this.filteredData = []; // Clear previous totals
+    const uniqueMachineIds = new Set(); // Track unique machines to prevent duplication
+    let grandTotalQty = 0, grandTotalCash = 0, grandTotalBurnCycles = 0, grandTotalSanNapkins = 0;
+    
+    // Set to track unique dates across all machines in Totals view
+    const uniqueDatesSet = new Set<string>();
+    
+    this.reportsData.forEach((machine, index) => {
+      if (!uniqueMachineIds.has(machine.machineId)) { // Prevent duplicate machines
+        uniqueMachineIds.add(machine.machineId);
+        
+        // Find the total transaction (last item in transactions array)
+        const totalTransaction = machine.transactions.find(t => t.date === 'Total');
+        
+        // Get totals from the total transaction
+        const totalQty = totalTransaction ? totalTransaction.qty : 0;
+        const totalCashStr = totalTransaction ? totalTransaction.cash : '₹ 0';
+        const totalBurnCycles = totalTransaction ? totalTransaction.burnCycles : 0;
+        const totalSanNapkins = totalTransaction ? totalTransaction.sanNapkinsBurnt : 0;
+        
+        // Get the machine's total onTime from our custom property
+        const totalOnTime = (machine as any)._totalOnTime || '-';
+        
+        // Update grand totals
+        grandTotalQty += totalQty;
+        grandTotalCash += parseFloat(totalCashStr.replace('₹ ', '')) || 0;
+        grandTotalBurnCycles += totalBurnCycles;
+        grandTotalSanNapkins += totalSanNapkins;
+        
+        // Collect unique dates from this machine's transactions
+        machine.transactions.forEach(txn => {
+          if (txn.date && txn.date !== 'Total' && txn.date !== '-') {
+            uniqueDatesSet.add(txn.date);
+          }
+        });
+        
+        const newMachine = {
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation || '-',
+          address: machine.address || '-',
+          machineType: machine.machineType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: [{
+            date: 'Total',
+            qty: totalQty,
+            cash: totalCashStr,
+            onTime: totalOnTime,
+            burnCycles: totalBurnCycles,
+            sanNapkinsBurnt: totalSanNapkins
+          }]
+        } as ReportItem;
+        
+        // Add our custom property
+        (newMachine as any)._totalOnTime = totalOnTime;
+        
+        this.filteredData.push(newMachine);
+      }
+    });
+    
+    // Calculate number of machines and days
+    const numberOfMachines = uniqueMachineIds.size;
+    const numberOfDays = Math.max(1, uniqueDatesSet.size); // Ensure we don't divide by zero
+    
+    // Calculate averages per machine per day
+    const averageQty = numberOfMachines && numberOfDays ? grandTotalQty / (numberOfMachines * numberOfDays) : 0;
+    const averageCash = numberOfMachines && numberOfDays ? grandTotalCash / (numberOfMachines * numberOfDays) : 0;
+    const averageBurnCycles = numberOfMachines && numberOfDays ? grandTotalBurnCycles / (numberOfMachines * numberOfDays) : 0;
+    const averageSanNapkins = numberOfMachines && numberOfDays ? grandTotalSanNapkins / (numberOfMachines * numberOfDays) : 0;
+    
+    // Update grand total
+    this.grandTotal = {
+      quantity: grandTotalQty,
+      cash: `₹ ${grandTotalCash.toFixed(2)}`,
+      burnCycles: grandTotalBurnCycles,
+      sanNapkinsBurnt: grandTotalSanNapkins
+    };
+    
+    // Update averages
+    this.averages = {
+      quantity: averageQty.toFixed(2),
+      cash: `₹ ${averageCash.toFixed(2)}`,
+      burnCycles: averageBurnCycles.toFixed(2),
+      sanNapkinsBurnt: averageSanNapkins.toFixed(2)
+    };
+    
+    // Update calculation metadata
+    this.calculationMetadata = {
+      numberOfMachines,
+      numberOfDays,
+      uniqueDates: Array.from(uniqueDatesSet)
+    };
+    
+  } else {
+    this.filteredData = [...this.reportsData]; // Restore "Daily" view
+    
+    // No need to recalculate averages here as they were calculated 
+    // in the processResponseData method and should be preserved
+  }
+  
+  this.currentPage = 1; // Reset pagination
+  this.updatePagination();
+}
+
 
 
 searchTexts: { [key: string]: string } = {};

@@ -221,6 +221,8 @@ const routes: Routes = [
     redirectTo: 'login',
     pathMatch: 'full'
   },
+
+  /*working*/
   {
     path: 'standalone-map',
     component: GoogleMapsComponent
@@ -241,10 +243,34 @@ const routes: Routes = [
       title: 'Graph Dashboard'
     }
   },
-  // {
-  //   path: '',
-  //   component: ZoneDashboardComponent
+
+  /*end*/
+
+
+  //   {
+  //   path: 'standalone-map',
+  //   component: GoogleMapsComponent,
+  //   canActivate: [AuthGuard] // Added AuthGuard
   // },
+  // {
+  //   path: 'zone-dashboard',
+  //   component: ZoneDashboardComponent,
+  //   canActivate: [AuthGuard], // Added AuthGuard
+  //   data: {
+  //     title: 'Zone Dashboard'
+  //   }
+  // },
+  // {
+  //   path: 'graph-dashboard',
+  //   component: GraphDashboardComponent,
+  //   canActivate: [AuthGuard], // Added AuthGuard
+  //   data: {
+  //     title: 'Graph Dashboard'
+  //   }
+  // },
+
+
+
 
   {
     path: 'login',
@@ -421,7 +447,7 @@ const routes: Routes = [
     }
   },
   {path: '**', redirectTo: 'login'},
-  { path: '**', redirectTo: 'widget', pathMatch: 'full' }
+  // { path: '**', redirectTo: 'widget', pathMatch: 'full' }
 ];
 
 @NgModule({
@@ -429,7 +455,7 @@ const routes: Routes = [
     RouterModule.forRoot(routes, {
       scrollPositionRestoration: 'top',
       anchorScrolling: 'enabled',
-      initialNavigation: 'enabledBlocking'
+      initialNavigation: 'enabledBlocking' 
       // relativeLinkResolution: 'legacy'
     })
   ],
