@@ -241,9 +241,16 @@ class="search-input">
         <div>Ward: {{ machine.Ward }}</div>
         <div>Beat: {{ machine.Beat }}</div>
       </td>
+
      
       <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.address || '' }}</td>
-      <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.machineType || 'N/A' }}</td>
+      <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">
+        <div>{{ machine.machineType  }}</div>
+        <br>
+        <div>{{ machine.toiletType  }}</div>
+
+      </td>
+
           <!-- <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.toiletType || 'N/A' }}</td> -->
 
    
