@@ -204,6 +204,7 @@ class="search-input">
 <th rowspan="2">MACHINE LOCATION</th>
 <th rowspan="2">ADDRESS</th>
 <th rowspan="2">MACHINE TYPE</th>
+<th rowspan="2">TOILET TYPE</th>
 <th colspan="3">VENDING</th>
 <th colspan="3">INCINERATOR</th>
 </tr>
@@ -235,12 +236,14 @@ class="search-input">
      
      
       <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length" class="machine-location">
-        {{ extractLastTwoWords(machine.address) }}
+        <div>Zone: {{ machine.Zone }}</div>
+        <div>Ward: {{ machine.Ward }}</div>
+        <div>Beat: {{ machine.Beat }}</div>
       </td>
      
       <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.address || '' }}</td>
       <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.machineType || 'N/A' }}</td>
-
+      <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.toiletType || 'N/A' }}</td>
    
       <td>{{ txn.date || '-' }}</td>
       <td>{{ txn.qty ?? 0 }}</td>
@@ -263,6 +266,7 @@ class="search-input">
   <td>{{ extractLastTwoWords(machine.address) }}</td>
   <td>{{ machine.machineLocation }}</td>
   <td>{{ machine.machineType }}</td>
+  <td>{{ machine.toiletType }}</td>
   <td><b></b></td>
 
   <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.qty ?? 0 }}</b></td>

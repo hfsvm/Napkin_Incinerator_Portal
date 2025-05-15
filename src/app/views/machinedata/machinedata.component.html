@@ -290,6 +290,7 @@
   <th (click)="sortData('stockStatus')" style="cursor: pointer;">Stock Status 🔽</th>
   <th (click)="sortData('burningStatus')" style="cursor: pointer;">Burning Status 🔽</th> -->
   <th (click)="sortData('machineId')" style="cursor: pointer; white-space: nowrap;">Machine ID 🔽</th>
+   <th (click)="sortData('mcSrNo')" style="cursor: pointer; white-space: nowrap;">MC SrNo 🔽</th>
   <th (click)="sortData('pcbNo')" style="cursor: pointer; white-space: nowrap;">Pcb No 🔽</th>
   <th (click)="sortData('address')" style="cursor: pointer; white-space: nowrap;">Location Name 🔽</th>
   <th (click)="sortData('address')" style="cursor: pointer; white-space: nowrap;">Location Address 🔽</th>
@@ -321,6 +322,16 @@
       class="form-control form-control-sm"
       placeholder="machine id"
       [(ngModel)]="columnFilters['Machine ID']"
+      (ngModelChange)="applyFiltersAndSort()"
+    />
+  </th>
+
+  <th>
+    <input
+      type="text"
+      class="form-control form-control-sm"
+      placeholder="mc srNo"
+      [(ngModel)]="columnFilters['MC SRNo']"
       (ngModelChange)="applyFiltersAndSort()"
     />
   </th>
@@ -436,18 +447,23 @@
           {{ machine.machineId }}
         </a>
       </td>
+      <!-- ✅ MCSRNo -->
+      <td>{{ machine.mcSrNo || '' }}</td>
   
       <!-- ✅ PCB NO -->
-      <td>{{ machine.pcbNo }}</td>
+      <td>{{ machine.pcbNo || ''}}</td>
   
       <!-- ✅ Location Name -->
       <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-        {{ getLastPartAfterLastComma(machine.address) || 'No Address' }}
+        <!-- {{ getLastPartAfterLastComma(machine.address) || 'No Address' }} -->
+         <div>Zone: {{ machine.zone }}</div>
+        <div>Ward: {{ machine.ward }}</div>
+        <div>Beat: {{ machine.beat }}</div>
       </td> 
 
       <!-- ✅ Location Address -->
       <td>{{ machine.address || '' }}</td>
-      <td>{{ machine.uid || ''}}</td>
+      <td>{{ machine.uid || 'N/A'}}</td>
       <td>{{ machine.machineType }}</td>
       
   
@@ -561,24 +577,4 @@
  
  
   </div>
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
  

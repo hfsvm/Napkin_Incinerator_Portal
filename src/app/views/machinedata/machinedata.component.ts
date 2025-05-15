@@ -1051,7 +1051,8 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   dashboardData: any = {};
   columnFilters: any = {
     'Machine ID': '',
-    "pcbNo": '',
+    'mcSrNo': '',
+    'pcbNo': '',
     'Location Name': '',
     'Location Address': '',
     'UID': '',
@@ -2020,6 +2021,7 @@ toggleSelectAll(selectedArray: any[], options: any[], key: string) {
   // ✅ Reset search filters
   this.columnFilters = {
     'Machine ID': '',
+    'mcSrNo': '',
     'pcbNo': '', 
     'Location Name': '',
     'Location Address': '',
@@ -2102,8 +2104,9 @@ debugger;
           if (response?.code === 200 && response.data) {
             this.machines = response.data.machines.map((machine: any) => ({
               ...machine,
-              pcbNo: machine.pcbNo === response.data.machines[0].pcbNo ? '' : machine.pcbNo,
-              uid: machine.uid ===response.data.machines[0].uid ? 'N/A' : machine.uid,
+              // mcSrNo: machine.mcSrNo === response.data.machines[0].mcSrNo ? '' : machine.mcSrNo,
+              // pcbNo: machine.pcbNo === response.data.machines[0].pcbNo ? '' : machine.pcbNo,
+              // uid: machine.uid ===response.data.machines[0].uid ? 'N/A' : machine.uid,
  
               status: machine.status === 'Online' ? '1' : '2',
               stockStatus: machine.stockStatus?.length > 0
@@ -2215,6 +2218,7 @@ formatText(text: string | null): string {
         machine.machineId.includes(this.searchQuery) ||
         machine.uid?.includes(this.searchQuery) ||
         machine.pcbNo?.includes(this.searchQuery) ||
+         machine.mcSrNo?.includes(this.searchQuery) ||
         machine.machineType?.includes(this.searchQuery) ||
         machine.status?.includes(this.searchQuery) ||
         machine.stockStatus?.includes(this.searchQuery) ||
@@ -2296,6 +2300,7 @@ formatText(text: string | null): string {
 
   applyFiltersAndSort() {
     this.filteredMachines = this.machines.filter(machine => {
+      const mcSrNo = machine.mcSrNo?.toLowerCase() || '';
       const pcbNo = machine.pcbNo?.toLowerCase() || '';
       const locationAddress = machine.address?.toLowerCase() || '';
       const locationName = this.getLastPartAfterLastComma(machine.address || '').toLowerCase();
@@ -2303,6 +2308,7 @@ formatText(text: string | null): string {
   
       return (
         (!this.columnFilters['Machine ID'] || machine.machineId.toLowerCase().includes(this.columnFilters['Machine ID'].toLowerCase())) &&
+        (!this.columnFilters['mcSrNo'] || mcSrNo.toLowerCase().includes(this.columnFilters['mcSrNo'].toLowerCase())) &&
         (!this.columnFilters['PcbNO'] || pcbNo.toLowerCase().includes(this.columnFilters['PcbNO'].toLowerCase())) &&
         (!this.columnFilters['Machine Type'] || machine.machineType.toLowerCase().includes(this.columnFilters['Machine Type'].toLowerCase())) &&
         (!this.columnFilters['Status'] || (machine.status === '1' ? 'Online' : 'Offline').toLowerCase().includes(this.columnFilters['Status'].toLowerCase())) &&
