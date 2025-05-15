@@ -529,7 +529,7 @@ debugger;
         container: 'map',
         style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Ldz7Kz6Xwxrw9kq0aYn3',
         center: [72.8777, 19.0760], // Mumbai coordinates
-        zoom: 11
+        zoom: 10.5
       });
       
       // Add navigation controls

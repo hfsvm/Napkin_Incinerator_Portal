@@ -222,100 +222,111 @@ class="search-input">
 <tbody>
 <ng-container *ngFor="let machine of paginatedData">
 <ng-container *ngIf="summaryType === 'Daily'">
+  <!-- For each machine, we'll create separate rows for vending and incinerator data -->
   <ng-container *ngFor="let txn of machine.transactions; let txnIndex = index">
-    <tr>
-     
-      <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">
-        {{ getSerialNumber(machine) }}
-      </td>
-      <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">
-        <!-- <a [routerLink]="['/machine-report', machine.machineId]">
-          {{ machine.machineId }}
-        </a> -->
-
-
-        <a 
-  [routerLink]="machine.isWorking ? ['/machine-report', machine.machineId] : null"
-  (click)="!machine.isWorking && $event.preventDefault()"
-  [class.disabled-link]="!machine.isWorking"
->
-  {{ machine.machineId }}
-</a>
-
-      </td>
-     
-     
-     
-      <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length" class="machine-location">
-        <div>Zone: {{ machine.Zone }}</div>
-        <div>Ward: {{ machine.Ward }}</div>
-        <div>Beat: {{ machine.Beat }}</div>
-      </td>
-
-     
-      <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.address || '' }}</td>
-      <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">
-        <div>{{ machine.machineType  }}</div>
-        <br>
-        <div>{{ machine.toiletType  }}</div>
-
-      </td>
-
-          <!-- <td *ngIf="txnIndex === 0" [attr.rowspan]="machine.transactions.length">{{ machine.toiletType || 'N/A' }}</td> -->
-
-   
-      <td>{{ txn.date || '-' }}</td>
-      <td>{{ txn.qty ?? 0 }}</td>
-      <td>{{ txn.cash ?? '₹ 0' }}</td>
-      <td>{{ txn.onTime || '-' }}</td>
-      <td>{{ txn.burnCycles ?? 0 }}</td>
-      <td>{{ txn.sanNapkinsBurnt ?? 0 }}</td>
-    </tr>
+    <!-- Handle all rows including Total in the same structure -->
+    <ng-container *ngIf="txn.date !== 'Total'">
+      <!-- Vending row -->
+      <tr>
+        <!-- These cells span both vending and incinerator rows -->
+        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1">
+          {{ getSerialNumber(machine) }}
+        </td>
+        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1">
+          <a 
+            [routerLink]="machine.isWorking ? ['/machine-report', machine.machineId] : null"
+            (click)="!machine.isWorking && $event.preventDefault()"
+            [class.disabled-link]="!machine.isWorking"
+          >
+            {{ machine.machineId }}
+          </a>
+        </td>
+        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1" class="machine-location">
+          <div>Zone: {{ machine.Zone }}</div>
+          <div>Ward: {{ machine.Ward }}</div>
+          <div>Beat: {{ machine.Beat }}</div>
+        </td>
+        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1">{{ machine.address || '' }}</td>
+        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1">
+          <div>{{ machine.machineType }}</div>
+          <br>
+          <div>{{ machine.toiletType }}</div>
+        </td>
+        
+        <!-- Vending specific data -->
+        <td>{{ txn.date || '-' }}</td>
+        <td>{{ txn.qty ?? 0 }}</td>
+        <td>{{ txn.cash ?? '₹ 0' }}</td>
+        <td>-</td> <!-- Empty cell for ON TIME -->
+        <td>0</td> <!-- Empty cell for BURN CYCLES -->
+        <td>0</td> <!-- Empty cell for SAN NAPKINS BURNT -->
+      </tr>
+      
+      <!-- Incinerator row -->
+      <tr>
+        <!-- Incinerator specific data - note the date field shows the onTime value -->
+        <td>{{ txn.onTime !== '-' ? txn.onTime : '-' }}</td>
+        <td>0</td> <!-- Empty cell for QTY -->
+        <td>₹ 0</td> <!-- Empty cell for CASH -->
+        <td>
+          <!-- Display onTime -->
+          <ng-container *ngIf="txn.onTime !== '-'">
+            <div>{{ txn.onTime }}</div>
+            <div *ngIf="txn.onTimeAvgPerDay !== '-'">{{ txn.onTimeAvgPerDay }}</div>
+          </ng-container>
+          <ng-container *ngIf="txn.onTime === '-'">-</ng-container>
+        </td>
+        <td>{{ txn.burnCycles ?? 0 }}</td>
+        <td>{{ txn.sanNapkinsBurnt ?? 0 }}</td>
+      </tr>
+    </ng-container>
+  </ng-container>
+  
+  <!-- Handle Total row separately but within the machine's group -->
+  <ng-container *ngFor="let txn of machine.transactions">
+    <ng-container *ngIf="txn.date === 'Total'">
+      <tr class="total-row">
+        <!-- The "Total" text goes in the DATE column - other columns are filled with actual data -->
+        <td>Total</td>
+        <td>{{ txn.qty ?? 0 }}</td>
+        <td>{{ txn.cash ?? '₹ 0' }}</td>
+        <td>{{ txn.onTime !== '-' ? txn.onTime : '-' }}</td>
+        <td>{{ txn.burnCycles ?? 0 }}</td>
+        <td>{{ txn.sanNapkinsBurnt ?? 0 }}</td>
+      </tr>
+    </ng-container>
   </ng-container>
 </ng-container>
+
 <tr *ngIf="summaryType === 'Totals'">
   <td>{{ machine.srNo }}</td>
- 
   <td>
     <a [routerLink]="['/machine-report', machine.machineId]">
       {{ machine.machineId }}
     </a>
   </td>
-
   <td>{{ extractLastTwoWords(machine.address) }}</td>
   <td>{{ machine.machineLocation }}</td>
   <td>{{ machine.machineType }}</td>
-  <!-- <td>{{ machine.toiletType }}</td> -->
   <td><b></b></td>
-
-  <!-- <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.qty ?? 0 }}</b></td>
-  <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.cash ?? '₹ 0' }}</b></td>
-  <td><b>{{ machine.transactions[0]?.onTime ?? '-' }}</b></td> 
-
-  <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.burnCycles ?? 0 }}</b></td>
-  <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.sanNapkinsBurnt ?? 0 }}</b></td> -->
   <td><b>{{ machine.transactions?.[0]?.qty ?? 0 }}</b></td>
   <td><b>{{ machine.transactions?.[0]?.cash ?? '₹ 0' }}</b></td>
-  <td><b>{{ machine['_totalOnTime'] ?? '-' }}</b></td>
-
+  <td>
+    <!-- Only show the total onTime (not the average per day) in the Totals view -->
+    <div><b>{{ machine['_totalOnTime'] ?? '-' }}</b></div>
+  </td>
   <td><b>{{ machine.transactions?.[0]?.burnCycles ?? 0 }}</b></td>
   <td><b>{{ machine.transactions?.[0]?.sanNapkinsBurnt ?? 0 }}</b></td>
-
 </tr>
-
-
-
-
-
-
 </ng-container>
+
 
 <tr class="grand-total-row">
 <td colspan="5"><b>Grand Total</b></td>
 <td><b>Total</b></td>
 <td><b>{{ grandTotal.quantity }}</b></td>
 <td><b>{{ grandTotal.cash }}</b></td>
-<td>---</td>
+<td>-</td>
 <td><b>{{ grandTotal.burnCycles }}</b></td>
 <td><b>{{ grandTotal.sanNapkinsBurnt }}</b></td>
 </tr>
@@ -325,7 +336,7 @@ class="search-input">
   <td><b>Avg</b></td>
   <td><b>{{ averages.quantity }}</b></td>
   <td><b>{{ averages.cash }}</b></td>
-  <td>---</td>
+  <td>-</td>
   <td><b>{{ averages.burnCycles }}</b></td>
   <td><b>{{ averages.sanNapkinsBurnt }}</b></td>
 </tr>
