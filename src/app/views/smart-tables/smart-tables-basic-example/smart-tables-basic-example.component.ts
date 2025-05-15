@@ -15,11 +15,7 @@ interface Transaction {
 interface ReportItem {
   reportType: string;
   machineType: string;
-  toiletType: string;
   srNo: number;
-  Zone: string;
-  Ward: string;
-  Beat: string;
   machineId: string;
   machineLocation: string;
   address: string;
@@ -170,10 +166,7 @@ calculationMetadata: {
     burnStatuses: '',
     zones: '',
     wards: '',
-    beats: '',
-    Zone: '',
-    Ward: '',
-    Beat: ''
+    beats: ''
   };
   machineStatuses = [
     { key: '1', value: 'Online' },
@@ -984,8 +977,7 @@ updatePagination(): void {
           machine.machineId?.toString().toLowerCase() ?? '',
           machine.machineLocation?.toString().toLowerCase() ?? '',
           machine.address?.toString().toLowerCase() ?? '',
-          machine.machineType?.toString().toLowerCase() ?? '',
-          machine.toiletType?.toString().toLowerCase() ?? ''
+          machine.machineType?.toString().toLowerCase() ?? ''
         ].some(value => value.includes(query));
 
         const filteredTransactions = machine.transactions?.filter(txn =>
@@ -1076,8 +1068,7 @@ private itemMatchesSearch(item: ReportItem, query: string): boolean {
     (item.machineId?.toString().toLowerCase() || '').includes(query) ||
     (item.machineLocation?.toLowerCase() || '').includes(query) ||
     (item.address?.toLowerCase() || '').includes(query) ||
-    (item.machineType?.toLowerCase() || '').includes(query)||
-    (item.toiletType?.toLowerCase() || '').includes(query)
+    (item.machineType?.toLowerCase() || '').includes(query)
   ) {
     return true;
   }
@@ -1254,7 +1245,6 @@ this.dataService.getMachineAndIncineratorTransaction(queryParams).subscribe(
       this.reportFromPeriod = response.data.reportFromPeriod || '-';
       this.reportToPeriod = response.data.reportToPeriod || '-';
       this.reportType = response.data.reportType || '-';
-      
        
  
       console.log("📌 Report Metadata Set:", {
@@ -1372,20 +1362,16 @@ if (this.endDate < this.startDate) {
 //     grandTotalBurnCycles += machineTotalBurnCycles;
 //     grandTotalSanNapkins += machineTotalSanNapkins;
  
-    return {
-        srNo: index + 1,
-        machineId: machine.machineId,
-        machineLocation: machine.machineLocation ? machine.machineLocation.trim() : machine.address,
-        address: machine.address || '',
-        machineType: machine.machineType || 'N/A',
-         Zone: machine.Zone || 'N/A',
-         Ward: machine.Ward || 'N/A',
-         Beat: machine.Beat || 'N/A',
-         toiletType: machine.toiletType || 'N/A',
-        reportType: machine.reportType || 'N/A',
-        transactions: Array.from(transactionsMap.values())
-    };
-});
+//     return {
+//         srNo: index + 1,
+//         machineId: machine.machineId,
+//         machineLocation: machine.machineLocation ? machine.machineLocation.trim() : machine.address,
+//         address: machine.address || '',
+//         machineType: machine.machineType || 'N/A',
+//         reportType: machine.reportType || 'N/A',
+//         transactions: Array.from(transactionsMap.values())
+//     };
+// });
  
 // // ✅ Update Grand Total Correctly
 // this.grandTotal = {
@@ -1632,10 +1618,6 @@ toggleSummaryTypeworkingnow() {
           machineLocation: machine.machineLocation || '-',
           address: machine.address || '-',
           machineType: machine.machineType || 'N/A',
-          Zone: machine.Zone || 'N/A',
-          Ward: machine.Ward || 'N/A',
-          Beat: machine.Beat || 'N/A',
-           toiletType: machine.toiletType || 'N/A',
           reportType: machine.reportType || 'N/A',
           transactions: [{
             date: 'Total',
@@ -2262,5 +2244,3 @@ return selectedArray.length === fullList.length && fullList.length > 0;
  
  
 }
- 
- 
