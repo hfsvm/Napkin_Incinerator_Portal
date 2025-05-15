@@ -269,11 +269,19 @@ class="search-input">
   <td>{{ machine.toiletType }}</td>
   <td><b></b></td>
 
-  <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.qty ?? 0 }}</b></td>
+  <!-- <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.qty ?? 0 }}</b></td>
   <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.cash ?? '₹ 0' }}</b></td>
-  <td><b>{{ machine.transactions[0]?.onTime ?? 'o' }}</b></td> 
+  <td><b>{{ machine.transactions[0]?.onTime ?? '-' }}</b></td> 
+
   <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.burnCycles ?? 0 }}</b></td>
-  <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.sanNapkinsBurnt ?? 0 }}</b></td>
+  <td><b>{{ machine.transactions?.[machine.transactions.length - 1]?.sanNapkinsBurnt ?? 0 }}</b></td> -->
+  <td><b>{{ machine.transactions?.[0]?.qty ?? 0 }}</b></td>
+  <td><b>{{ machine.transactions?.[0]?.cash ?? '₹ 0' }}</b></td>
+  <td><b>{{ machine['_totalOnTime'] ?? '-' }}</b></td>
+
+  <td><b>{{ machine.transactions?.[0]?.burnCycles ?? 0 }}</b></td>
+  <td><b>{{ machine.transactions?.[0]?.sanNapkinsBurnt ?? 0 }}</b></td>
+
 </tr>
 
 
@@ -289,10 +297,21 @@ class="search-input">
 <td><b>Total</b></td>
 <td><b>{{ grandTotal.quantity }}</b></td>
 <td><b>{{ grandTotal.cash }}</b></td>
-<td>-</td>
+<td>---</td>
 <td><b>{{ grandTotal.burnCycles }}</b></td>
 <td><b>{{ grandTotal.sanNapkinsBurnt }}</b></td>
 </tr>
+
+<tr class="average-row">
+  <td colspan="5"><b>Average (per machine per day)</b></td>
+  <td><b>Avg</b></td>
+  <td><b>{{ averages.quantity }}</b></td>
+  <td><b>{{ averages.cash }}</b></td>
+  <td>---</td>
+  <td><b>{{ averages.burnCycles }}</b></td>
+  <td><b>{{ averages.sanNapkinsBurnt }}</b></td>
+</tr>
+
 </tbody>
 </table>
 <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">

@@ -501,3 +501,44 @@ label,
   text-align: right;
  
 }
+
+
+
+
+.average-row {
+  background-color: #e6f7ff; /* Light blue background to distinguish from grand total */
+  font-weight: bold;
+  font-style: italic;
+  border-top: 1px solid #ccc;
+}
+
+/* Optional: Add a tooltip to explain the average calculation */
+.average-row td:first-child {
+  position: relative;
+}
+
+.average-row td:first-child::after {
+  content: "Calculated as: Total / (Number of Machines × Number of Days)";
+  visibility: hidden;
+  width: 300px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -150px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 0.8em;
+}
+
+.average-row td:first-child:hover::after {
+  visibility: visible;
+  opacity: 1;
+}
