@@ -304,3 +304,25 @@
     animation: fadeIn 0.5s ease-in-out;
   }
   
+
+  .refresh-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+  
+  .timer-label {
+    font-weight: 500;
+  }
+  
+  .timer-value {
+    font-family: monospace;
+    font-weight: bold;
+    color: #2196F3;
+    background: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+}
