@@ -5,13 +5,8 @@ import { DataService } from '../../service/data.service';
 import { CommonDataService } from '../../Common/common-data.service';
 import { Location } from '@angular/common';
 import { ViewChildren } from '@angular/core';
-
 import { FormsModule } from '@angular/forms';
-
-
-
-
-
+import { interval, Subscription, timer } from 'rxjs';
 import * as maplibregl from 'maplibre-gl';
 
 
@@ -26,6 +21,12 @@ interface DonutChartData {
   styleUrls: ['./graph-dashboard.component.scss']
 })
 export class GraphDashboardComponent implements OnInit,AfterViewInit {
+
+  private refreshIntervalMs = 120000; // 2 minutes in milliseconds
+  timeUntilRefresh = this.refreshIntervalMs / 1000; // in seconds
+  timerDisplay = '02:00';
+  private refreshSubscription!: Subscription;
+  private timerSubscription!: Subscription;
 
   private map!: maplibregl.Map;
   private markers: maplibregl.Marker[] = [];
@@ -66,7 +67,7 @@ export class GraphDashboardComponent implements OnInit,AfterViewInit {
 
   zoneMarker: any;
 
-
+zonesArray: any[] = [];
 
   showNoDataMessage = false;
 
@@ -102,43 +103,6 @@ machines: any[] = []; // Will store machine data
 //   this.initializeMap();
 // }
 
-
-
-  ngOnInit(): void {
-    debugger;
-    this.merchantId = this.commonDataService.merchantId ?? '';
-
-    this.route.queryParams.subscribe(params => {
-      if (params['zone']) {
-        const zonesArray = JSON.parse(params['zone']);
-        this.zone = zonesArray;
- 
-        console.log('Zone received:', this.zone);
-
-    this.getDashboardDataForZones(this.zone);
-
-      // Add radio button listeners if needed
-  this.setupViewSelectionHandlers();
-
-      this.fetchMachineDashboardData();
-
-  
-  // Default to machine view
-  this.selectedMapView = 'machine';
-
-
-      }
-    });
-  
-
-    // this.fetchDashboardData();
-    // this.getDashboardDataForZones(this.zone);
-    // // this.getDashboardDataForZones();
-    // // this.initializeMap();
-
-    // this.updateMap();
-    // this.renderCharts();
-  }
 
 
     ngAfterViewInit(): void {
@@ -214,6 +178,85 @@ machines: any[] = []; // Will store machine data
     });
   }
   
+ngOnInit(): void {
+    debugger;
+    this.merchantId = this.commonDataService.merchantId ?? '';
+
+    this.route.queryParams.subscribe(params => {
+      if (params['zone']) {
+        const zonesArray = JSON.parse(params['zone']);
+        this.zone = zonesArray;
+        console.log('Zone received:', this.zone);
+
+        this.getDashboardDataForZones(this.zone);
+        this.setupViewSelectionHandlers();
+        this.fetchMachineDashboardData();
+        this.selectedMapView = 'machine';
+      }
+    });
+
+    // Set up auto-refresh
+    this.setupAutoRefresh();
+  }
+
+  ngOnDestroy(): void {
+    this.cleanupSubscriptions();
+    // ... (keep existing cleanup code)
+  }
+
+  private setupAutoRefresh(): void {
+    // Clear any existing subscriptions
+    this.cleanupSubscriptions();
+
+    // Set up data refresh every 2 minutes
+    this.refreshSubscription = interval(this.refreshIntervalMs).subscribe(() => {
+      console.log('Auto-refreshing dashboard data...');
+      if (this.zone) {
+        this.getDashboardDataForZones(this.zone);
+        this.fetchMachineDashboardData();
+      }
+    });
+
+    // Start countdown timer
+    this.startCountdownTimer();
+  }
+
+  private startCountdownTimer(): void {
+    // Reset timer
+    this.timeUntilRefresh = this.refreshIntervalMs / 1000;
+    this.updateTimerDisplay();
+
+    // Update timer every second
+    this.timerSubscription = timer(0, 1000).subscribe(() => {
+      this.timeUntilRefresh--;
+      this.updateTimerDisplay();
+
+      // When timer reaches 0, trigger refresh and reset
+      if (this.timeUntilRefresh <= 0) {
+        this.timeUntilRefresh = this.refreshIntervalMs / 1000;
+        if (this.zone) {
+          this.getDashboardDataForZones(this.zone);
+          this.fetchMachineDashboardData();
+        }
+      }
+    });
+  }
+
+  private updateTimerDisplay(): void {
+    const minutes = Math.floor(this.timeUntilRefresh / 60);
+    const seconds = Math.floor(this.timeUntilRefresh % 60);
+    this.timerDisplay = 
+      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  private cleanupSubscriptions(): void {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+    }
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
+    }
+  }
 
 
   getDashboardDataForZones(zones: string[]): void {
@@ -304,30 +347,30 @@ machines: any[] = []; // Will store machine data
 
 
 
-  fetchDashboardData(): void {
-    this.isLoading = true;
-    this.hasError = false;
-    const merchantId = this.commonDataService.merchantId ?? '';
-debugger;
-    const queryParams: any = {
-      merchantId,
-      burnStatus: "1,2",
-      machineStatus: "0,1,2",
-      stockStatus: "0,1,2",
-      zone: "Zone 1 (South Mumbai)"
-    };
-    if (this.zone) queryParams.zone = this.zone;
+//   fetchDashboardData(): void {
+//     this.isLoading = true;
+//     this.hasError = false;
+//     const merchantId = this.commonDataService.merchantId ?? '';
+// debugger;
+//     const queryParams: any = {
+//       merchantId,
+//       burnStatus: "1,2",
+//       machineStatus: "0,1,2",
+//       stockStatus: "0,1,2",
+//       zone: "Zone 1 (South Mumbai)"
+//     };
+//     if (this.zone) queryParams.zone = this.zone;
 
-    if (this.beat) queryParams.beat = this.beat;
-    if (this.client) queryParams.client = this.client;
-    if (this.district) queryParams.district = this.district;
-    if (this.machineId) queryParams.machineId = this.machineId;
-    if (this.project) queryParams.project = this.project;
-    if (this.state) queryParams.state = this.state;
-    if (this.ward) queryParams.ward = this.ward;
+//     if (this.beat) queryParams.beat = this.beat;
+//     if (this.client) queryParams.client = this.client;
+//     if (this.district) queryParams.district = this.district;
+//     if (this.machineId) queryParams.machineId = this.machineId;
+//     if (this.project) queryParams.project = this.project;
+//     if (this.state) queryParams.state = this.state;
+//     if (this.ward) queryParams.ward = this.ward;
 
   
-  }
+//   }
 
   
 
@@ -437,11 +480,11 @@ debugger;
 }
  
   
-  // Method to change zone
-  changeZone(zone: string): void {
-    this.zone = zone;
-    this.getDashboardDataForZones([zone]);
-  }
+  // // Method to change zone
+  // changeZone(zone: string): void {
+  //   this.zone = zone;
+  //   this.getDashboardDataForZones([zone]);
+  // }
 
 
 
@@ -1038,331 +1081,6 @@ generatePopupHTML(machine: any): string {
 /*end*/
 
 
-
-
-
-
-
-
-
-
-
-
-
-// // Method to update map based on selected view
-// updateMap(): void {
-//   console.log(`🔄 updateMapView() called! Current view: ${this.selectedMapView}`);
-  
-//   if (!this.map) {
-//     console.warn('Map not initialized, cannot update view');
-//     return;
-//   }
-  
-//   // Clear existing markers
-//   this.markers.forEach(marker => marker.remove());
-//   this.markers = [];
-  
-//   // If zone marker exists, remove it too
-//   if (this.zoneMarker) {
-//     this.zoneMarker.remove();
-//     this.zoneMarker = null;
-//   }
-  
-//   // Get the machines data to display
-//   // For demo, we'll use dashboardData.machines if available
-//   let machinesToDisplay: any[] = [];
-  
-//   if (this.dashboardData?.machines?.length) {
-//     machinesToDisplay = this.dashboardData.machines;
-//   } else if (this.allZonesDashboardData?.length) {
-//     // Combine machines from all zones
-//     this.allZonesDashboardData.forEach(zoneData => {
-//       if (zoneData.data?.machines?.length) {
-//         machinesToDisplay = [...machinesToDisplay, ...zoneData.data.machines];
-//       }
-//     });
-//   } 
-  
-//   if (machinesToDisplay.length === 0) {
-//     console.warn('No machine data available for map');
-//     return;
-//   }
-  
-//   this.machines = machinesToDisplay;
-  
-//   // Handle different view types
-//   switch (this.selectedMapView) {
-//     case 'zone':
-//       this.displayAggregatedView(this.machines, 'zone', '#4CAF50'); // Green for zones
-//       break;
-//     case 'ward':
-//       this.displayAggregatedView(this.machines, 'ward', '#2196F3'); // Blue for wards
-//       break;
-//     case 'beat':
-//       this.displayAggregatedView(this.machines, 'beat', '#FF9800'); // Orange for beats
-//       break;
-//     default:
-//       this.displayMachineView(this.machines);
-//       break;
-//   }
-// }
-
-// // Method to display machine-level view
-// displayMachineView(machines: any[]): void {
-//   console.log("🔍 Displaying Machine View");
-  
-//   // Handle overlapping markers
-//   const locationMap = new Map<string, number>();
-  
-//   // Create markers for all machines
-//   machines.forEach(machine => {
-//     if (!machine.location && (!machine.longitude || !machine.latitude)) {
-//       console.warn(`Machine ${machine.machineId} has no location data`);
-//       return;
-//     }
-
-//     // Use machine.location if available, otherwise use longitude/latitude
-//     let lng: number, lat: number;
-//     if (machine.location && Array.isArray(machine.location) && machine.location.length >= 2) {
-//       lng = Number(machine.location[0]);
-//       lat = Number(machine.location[1]);
-//     } else {
-//       lng = Number(machine.longitude);
-//       lat = Number(machine.latitude);
-//     }
-    
-//     // Skip if coordinates are invalid
-//     if (isNaN(lng) || isNaN(lat) || lng === 0 || lat === 0) {
-//       console.warn(`Machine ${machine.machineId} has invalid coordinates`);
-//       return;
-//     }
-
-//     const key = `${lng},${lat}`;
-
-//     // Handle overlapping markers by slightly offsetting them
-//     if (locationMap.has(key)) {
-//       const count = locationMap.get(key)! + 1;
-//       locationMap.set(key, count);
-
-//       const angle = (count * 45) * (Math.PI / 180);
-//       const radius = 0.0001 * count;
-//       lng += radius * Math.cos(angle);
-//       lat += radius * Math.sin(angle);
-//     } else {
-//       locationMap.set(key, 1);
-//     }
-
-//     // Create marker element
-//     const markerElement = document.createElement('div');
-//     markerElement.className = 'custom-marker';
-//     markerElement.style.backgroundColor = this.getMachineStatusColor(machine.status);
-//     markerElement.style.width = '15px';
-//     markerElement.style.height = '15px';
-//     markerElement.style.borderRadius = '50%';
-//     markerElement.style.border = '2px solid white';
-//     markerElement.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-
-//     // Create popup with machine info
-//     const popup = new maplibregl.Popup({
-//       closeButton: false,
-//       closeOnClick: true
-//     }).setHTML(this.generateMachinePopupHTML(machine));
-
-//     // Create and add marker to map
-//     const newMarker = new maplibregl.Marker({ element: markerElement })
-//       .setLngLat([lng, lat])
-//       .setPopup(popup)
-//       .addTo(this.map);
-
-//     // Store marker for later removal
-//     this.markers.push(newMarker);
-//   });
-  
-//   console.log(`✅ Added ${this.markers.length} markers to map`);
-// }
-
-// // Helper method to get color based on machine status
-// getMachineStatusColor(status: string): string {
-//   switch (status) {
-//     case 'Online':
-//       return '#4CAF50'; // Green
-//     case 'Offline':
-//       return '#F44336'; // Red
-//     case 'Warning':
-//       return '#FF9800'; // Orange
-//     default:
-//       return '#9E9E9E'; // Grey
-//   }
-// }
-
-// // Method to generate HTML content for machine popup
-// generateMachinePopupHTML(machine: any): string {
-//   return `
-//     <div class="machine-popup">
-//       <h5 class="popup-title">Machine ID: ${machine.machineId || 'Unknown'}</h5>
-//       <div class="popup-content">
-//         <p><strong>Status:</strong> ${machine.status || 'Unknown'}</p>
-//         <p><strong>Stock Status:</strong> ${machine.stockStatus || 'Unknown'}</p>
-//         <p><strong>Zone:</strong> ${machine.zone || 'Unknown'}</p>
-//         <p><strong>Ward:</strong> ${machine.ward || 'Unknown'}</p>
-//         <p><strong>Beat:</strong> ${machine.beat || 'Unknown'}</p>
-//       </div>
-//     </div>
-//   `;
-// }
-
-// // Generic method to display aggregated views (zone, ward, beat)
-// displayAggregatedView(machines: any[], viewType: 'zone' | 'ward' | 'beat', markerColor: string): void {
-//   console.log(`📊 Displaying ${viewType.charAt(0).toUpperCase() + viewType.slice(1)} View`);
-  
-//   // Group machines by the selected view type
-//   const groups = this.groupMachinesByProperty(machines, viewType);
-  
-//   // Create a marker for each group
-//   Object.entries(groups).forEach(([groupName, groupMachines]) => {
-//     if (groupName === 'Unknown' || groupName === 'null' || !groupName) {
-//       console.warn(`⚠️ Skipping ${viewType} with invalid name: "${groupName}"`);
-//       return;
-//     }
-    
-//     // Find coordinates - try specialized lat/long first, then fallback to averaging machine positions
-//     let groupLocation: [number, number];
-    
-//     const coordPropertyPrefix = {
-//       'zone': 'zone',
-//       'ward': 'ward',
-//       'beat': 'beat'
-//     }[viewType];
-    
-//     const latProperty = `${coordPropertyPrefix}latitude`;
-//     const longProperty = `${coordPropertyPrefix}longitude`;
-    
-//     // Try to use specialized coordinates if available
-//     const firstMachineWithCoords = groupMachines.find(m => 
-//       m[latProperty] && m[longProperty] && 
-//       m[latProperty] !== 0 && m[longProperty] !== 0
-//     );
-    
-//     if (firstMachineWithCoords) {
-//       groupLocation = [
-//         Number(firstMachineWithCoords[longProperty]), 
-//         Number(firstMachineWithCoords[latProperty])
-//       ];
-//     } else {
-//       // Fallback: Calculate average coordinates of all machines in group
-//       const validMachines = groupMachines.filter(m => 
-//         m.longitude && m.latitude && 
-//         m.longitude !== 0 && m.latitude !== 0
-//       );
-      
-//       if (validMachines.length === 0) {
-//         console.warn(`⚠️ No valid coordinates for ${viewType}: ${groupName}`);
-//         return;
-//       }
-      
-//       const totalLng = validMachines.reduce((sum, m) => sum + Number(m.longitude), 0);
-//       const totalLat = validMachines.reduce((sum, m) => sum + Number(m.latitude), 0);
-      
-//       groupLocation = [
-//         totalLng / validMachines.length, 
-//         totalLat / validMachines.length
-//       ];
-//     }
-    
-//     if (!groupLocation || groupLocation[0] === 0 || groupLocation[1] === 0) {
-//       console.warn(`⚠️ Invalid coordinates for ${viewType}: ${groupName}`);
-//       return;
-//     }
-    
-//     // Create custom marker element - button style with name
-//     const markerElement = document.createElement('div');
-//     markerElement.className = `${viewType}-marker`;
-//     markerElement.style.backgroundColor = markerColor;
-//     markerElement.style.color = 'white';
-//     markerElement.style.padding = '8px 12px';
-//     markerElement.style.borderRadius = '4px';
-//     markerElement.style.fontWeight = 'bold';
-//     markerElement.style.textAlign = 'center';
-//     markerElement.style.minWidth = '80px';
-//     markerElement.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-//     markerElement.style.cursor = 'pointer';
-//     markerElement.style.display = 'flex';
-//     markerElement.style.alignItems = 'center';
-//     markerElement.style.justifyContent = 'center';
-    
-//     // Add text label - capitalize the first letter of viewType
-//     const viewTypeCapitalized = viewType.charAt(0).toUpperCase() + viewType.slice(1);
-//     markerElement.textContent = `${viewTypeCapitalized}: ${groupName}`;
-
-//     // Calculate statistics for this group
-//     const installedMachines = groupMachines.length;
-//     const runningMachines = groupMachines.filter(m => m.status === 'Online').length;
-//     const stockLow = groupMachines.filter(m =>
-//       m.stockStatus === 'Low Stock' ||
-//       (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Low Stock'))
-//     ).length;
-//     const stockEmpty = groupMachines.filter(m =>
-//       m.stockStatus === 'Empty' ||
-//       (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Empty'))
-//     ).length;
-    
-//     // Create popup with group info
-//     const popupHTML = `
-//       <div class="${viewType}-popup">
-//         <h4>${viewTypeCapitalized}: ${groupName}</h4>
-//         <div class="${viewType}-stats">
-//           <div><strong>Machines Installed:</strong> ${installedMachines}</div>
-//           <div><strong>Machines Running:</strong> ${runningMachines}</div>
-//           <div><strong>Stock Empty:</strong> ${stockEmpty}</div>
-//           <div><strong>Stock Low:</strong> ${stockLow}</div>
-//         </div>
-//       </div>
-//     `;
-    
-//     const popup = new maplibregl.Popup({
-//       closeButton: false,
-//       closeOnClick: true,
-//       maxWidth: '300px'
-//     }).setHTML(popupHTML);
-    
-//     // Create and add marker to map
-//     const newMarker = new maplibregl.Marker({ element: markerElement })
-//       .setLngLat([groupLocation[0], groupLocation[1]])
-//       .setPopup(popup)
-//       .addTo(this.map);
-    
-//     // Store marker for later removal
-//     this.markers.push(newMarker);
-    
-//     console.log(`✅ Added ${viewType} marker for: ${groupName} at [${groupLocation}]`);
-//   });
-// }
-
-// // Helper method to group machines by any property (zone, ward, beat)
-// groupMachinesByProperty(machines: any[], property: string): Record<string, any[]> {
-//   const groups: Record<string, any[]> = {};
-  
-//   machines.forEach(machine => {
-//     const propertyMap: Record<string, string> = {
-//       'zone': 'zone',
-//       'ward': 'ward',
-//       'beat': 'beat'
-//     };
-    
-//     // Get the actual property key from the mapping
-//     const propertyKey = propertyMap[property];
-//     const propertyValue = machine[propertyKey] || 'Unknown';
-    
-//     if (!groups[propertyValue]) {
-//       groups[propertyValue] = [];
-//     }
-//     groups[propertyValue].push(machine);
-//   });
-  
-//   return groups;
-// }
-
-
   updateMapmain(): void {
     console.log("🔄 updateMap() called!");
 
@@ -1442,142 +1160,5 @@ generatePopupHTML(machine: any): string {
     this.zoneMarker = new maplibregl.Marker({ element: markerEl, anchor: 'bottom' })
       .setLngLat([lng, lat])
       .addTo(this.map);
-
-    console.log(`📍 Custom zone marker added for ${zone} at [${lng}, ${lat}]`);
-  }
-
-
-initializeMap1(): void {
-  console.log('🗺️ Initializing map...');
-  
-  // Check if map element exists in DOM
-  const mapElement = document.getElementById('map');
-  if (!mapElement) {
-    console.error('Map container element not found, will retry...');
-    // Try again in a moment if element not found (might not be rendered yet)
-    // setTimeout(() => this.initializeMap(), 100);
-    return;
-  }
-
-  // Check if map is already initialized
-  if (this.map) {
-    console.log('Map already initialized, resizing...');
-    this.map.resize();
-    return;
-  }
-
-  try {
-    // Create a new map instance
-    this.map = new maplibregl.Map({
-      container: 'map',
-      style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Ldz7Kz6Xwxrw9kq0aYn3',
-      center: [72.8777, 19.0760], // Mumbai coordinates
-      zoom: 11
-    });
-
-    // Add navigation controls
-    this.map.addControl(new maplibregl.NavigationControl(), 'top-right');
-    
-    // Wait for map to load
-    this.map.on('load', () => {
-      console.log('Map loaded successfully');
-      this.map.resize();
-      
-      // Update map with data if available
-      if (this.dashboardData?.machines?.length) {
-        this.updateMap();
-      }
-    });
-
-    // Add error handling
-    this.map.on('error', (e) => {
-      console.error('Map error:', e);
-    });
-  } catch (error) {
-    console.error('Error initializing map:', error);
-  }
-}
-
-  
-
-updateMap1(): void {
-  console.log("🔄 updateMap() called!");
-
-  if (!this.map) {
-    console.warn('Map not initialized, cannot update');
-    return;
-  }
-
-  if (!this.dashboardData?.machines?.length) {
-    console.warn('No machine data available for map');
-    return;
-  }
-
-  // Filter machines by the zone received from routing
-  const zoneSpecificMachines = this.dashboardData.machines.filter(
-    (    machine: { zone: string; }) => machine.zone === this.zone
-  );
-  
-  console.log(`Found ${zoneSpecificMachines.length} machines for zone: ${this.zone}`);
-  
-  // If no machines found for this zone, try with the first machine as fallback
-  const machineToUse = zoneSpecificMachines.length > 0 
-    ? zoneSpecificMachines[0] 
-    : this.dashboardData.machines[0];
-    
-  const { zonelatitude: lat, zonelongitude: lng, zone } = machineToUse;
-
-  if (!lat || !lng) {
-    console.warn(`Zone coordinates missing for zone: ${this.zone}`);
-    return;
-  }
-
-  // Check if map is fully loaded
-  if (!this.map.loaded()) {
-    console.log('Map not fully loaded, waiting...');
-    this.map.once('load', () => {
-      this.updateMapWithCoordinates(lng, lat, zone);
-    });
-  } else {
-    this.updateMapWithCoordinates(lng, lat, zone);
-  }
-}
-
-// Helper method to update map with coordinates
-private updateMapWithCoordinates1(lng: number, lat: number, zone: string): void {
-  // Center the map
-  this.map.setCenter([lng, lat]);
-  this.map.setZoom(13);
-
-  // Remove existing marker
-  if (this.zoneMarker) {
-    this.zoneMarker.remove();
-  }
-
-  // Create custom HTML marker element
-  const markerEl = document.createElement('div');
-  markerEl.textContent = `${zone}`;
-  markerEl.style.backgroundColor = '#28a745'; // Bootstrap-style green
-  markerEl.style.color = '#fff';
-  markerEl.style.padding = '5px 10px';
-  markerEl.style.borderRadius = '6px';
-  markerEl.style.fontSize = '14px';
-  markerEl.style.fontWeight = 'bold';
-  markerEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
-  markerEl.style.whiteSpace = 'nowrap';
-  markerEl.style.cursor = 'pointer';
-
-  // Add the custom marker
-  this.zoneMarker = new maplibregl.Marker({ element: markerEl, anchor: 'bottom' })
-    .setLngLat([lng, lat])
-    .addTo(this.map);
-
-  console.log(`📍 Custom zone marker added for ${zone} at [${lng}, ${lat}]`);
-}
-
-
-
-  
-    
-    
+  }   
 }
