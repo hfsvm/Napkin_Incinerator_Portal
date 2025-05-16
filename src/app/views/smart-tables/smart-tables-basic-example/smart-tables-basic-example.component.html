@@ -312,7 +312,9 @@ class="search-input">
   <td>{{ extractLastTwoWords(machine.address) }}</td>
   <td>{{ machine.machineLocation }}</td>
   <td>{{ machine.machineType }}</td>
+  <td>{{ machine.toiletType }}</td>
   <td><b></b></td>
+  
   <td><b>{{ machine.transactions?.[0]?.qty ?? 0 }}</b></td>
   <td><b>{{ machine.transactions?.[0]?.cash ?? '₹ 0' }}</b></td>
   <td>

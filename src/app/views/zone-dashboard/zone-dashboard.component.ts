@@ -29,7 +29,7 @@ export class ZoneDashboardComponent implements OnInit, OnDestroy, AfterViewInit 
 timeUntilRefresh = this.refreshIntervalMs / 1000; // in seconds
 timerDisplay = '02:00';
 private timerSubscription!: Subscription;
-  selectedMapView: string = 'zone';
+  selectedMapView: string = 'machine';
   dashboardData: any = {};
   isLoading: boolean = false;
   hasError: boolean = false;

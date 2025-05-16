@@ -4,28 +4,47 @@
 }
 
 
+  
+  // .cards-section {
+  //   flex: 0.6;
+  //   background-color: #f8f9fa;
+  //   border-radius: 10px;
+  //   padding: 20px;
+  //   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  // }
+  
+  // .map-section {
+  //   flex: 1.4;
+  //   background-color: #f8f9fa;
+  //   border-radius: 10px;
+  //   min-height: 700px;
+  //   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  // }
+
 .dashboard-container {
     display: flex;
     margin: 20px;
     gap: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
-  
+
   .cards-section {
-    flex: 0.6;
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .map-section {
-    flex: 1.4;
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    min-height: 700px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
+  flex: 0.2; /* Decrease width of cards */
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.map-section {
+  flex:  2.8; /* Increase width of map */
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  min-height: 700px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+
   
   .zone-title {
     font-size: 24px;
@@ -326,3 +345,37 @@
     border: 1px solid #ddd;
   }
 }
+
+
+
+
+
+  .refresh-timer {
+  font-size: 14px;
+  color: #666;
+  margin: 10px 0;
+  text-align: left;
+}
+.refresh-circle {
+  position: absolute;
+  top: 20px;
+  left: 25px; /* Moved from right to left */
+
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: linear-gradient(110deg, #4CAF50, #81C784);
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.refresh-circle .time {
+  text-align: center;
+}
+
