@@ -66,7 +66,7 @@ import { ShareModule } from './share/share.module';
 
 import { GraphDashboardComponent } from './views/graph-dashboard/graph-dashboard.component';
 
-
+import { ZoneDashboardComponent } from './views/zone-dashboard/zone-dashboard.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -82,7 +82,7 @@ const APP_CONTAINERS = [
 ];
 
 @NgModule({
-  declarations: [AppComponent, ...APP_CONTAINERS, UserManagementComponent, MachineManagementComponent, AdvancedManagementComponent, ConfirmDialogComponent, MachinereportComponent,    GraphDashboardComponent],
+  declarations: [AppComponent, ...APP_CONTAINERS, UserManagementComponent, MachineManagementComponent, AdvancedManagementComponent, ConfirmDialogComponent, MachinereportComponent,    GraphDashboardComponent,ZoneDashboardComponent],
   imports: [
    
     FormsModule,

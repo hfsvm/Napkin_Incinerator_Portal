@@ -313,7 +313,12 @@ class="search-input">
   <td><b>{{ machine.transactions?.[0]?.cash ?? '₹ 0' }}</b></td>
   <td>
     <!-- Only show the total onTime (not the average per day) in the Totals view -->
+    <!-- <div><b>{{ machine['_totalOnTime'] ?? '-' }}</b></div> -->
+
+        <!-- Show both total onTime and average per day in the Totals view -->
     <div><b>{{ machine['_totalOnTime'] ?? '-' }}</b></div>
+    <div *ngIf="machine['_avgOnTimePerDay'] !== '-'"><b>{{ machine['_avgOnTimePerDay'] }}</b></div>
+
   </td>
   <td><b>{{ machine.transactions?.[0]?.burnCycles ?? 0 }}</b></td>
   <td><b>{{ machine.transactions?.[0]?.sanNapkinsBurnt ?? 0 }}</b></td>
