@@ -761,7 +761,7 @@ ngOnDestroy(): void {
       { name: 'Ok', value: stockOk },
       { name: 'Low', value: stockLow },
       { name: 'Empty', value: stockEmpty },
-      { name: 'Unknown', value: stockUnknown > 0 ? stockUnknown : 0 }
+      //{ name: 'Unknown', value: stockUnknown > 0 ? stockUnknown : 0 }
     ];
   }
 
@@ -770,8 +770,8 @@ ngOnDestroy(): void {
     
     if (!element || !data || data.length === 0) return;
     
-    const width = 150;
-    const height = 150;
+    const width = 100;
+    const height = 100;
     const radius = Math.min(width, height) / 2;
     
     const svg = d3.select(element)

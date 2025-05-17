@@ -6,6 +6,8 @@ import { DashboardRefreshService } from '../../../service/dashboard-refresh.serv
 import { ChartType, registerables } from 'chart.js';
 import Chart from 'chart.js/auto';
 
+
+
 Chart.register(...registerables);
 
 @Component({
@@ -154,13 +156,13 @@ debugger;
   }
 
   updateMachineChart(): void {
-    this.initializeChart('canvasDoughnut', 'doughnut', ['Online', 'Offline'], [this.activeMachines, this.inactiveMachines], ['#4CAF50', '#D32F2F'], 'chartDoughnut');
+    this.initializeChart('canvasDoughnut', 'pie', ['Online', 'Offline'], [this.activeMachines, this.inactiveMachines], ['#4CAF50', '#D32F2F'], 'chartDoughnut');
   }
 
   updateStockChart(): void {
     this.initializeChart(
       'canvasStock',
-      'pie',
+      'doughnut',
       ['Full Stock', 'Low Stock', 'Empty Stock'],
       [this.okStock, this.lowStock, this.emptyStock],
       ['#4CAF50', '#FFC107', '#D32F2F'],
@@ -168,46 +170,49 @@ debugger;
     );
   }
 
-  initializeChart(canvasId: string, chartType: ChartType, labels: string[], data: number[], colors: string[], chartRef: 'chartDoughnut' | 'chartStock'): void {
-    setTimeout(() => {
-      const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-      if (!canvas) {
-        console.warn(`⚠️ Canvas ID '${canvasId}' not found! Skipping chart initialization.`);
-        return;
-      }
+ initializeChart(canvasId: string, chartType: ChartType, labels: string[], data: number[], colors: string[], chartRef: 'chartDoughnut' | 'chartStock'): void {
+  setTimeout(() => {
+    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+    if (!canvas) {
+      console.warn(`⚠️ Canvas ID '${canvasId}' not found! Skipping chart initialization.`);
+      return;
+    }
 
-      if (this[chartRef]) {
-        this[chartRef].destroy();
-      }
+    if (this[chartRef]) {
+      this[chartRef].destroy();
+    }
 
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
 
-      this[chartRef] = new Chart(canvas, {
-        type: chartType,
-        data: {
-          labels,
-          datasets: [{
-            data,
-            backgroundColor: colors
-          }]
-        },
-        options: {
-          responsive: false,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'bottom',
-              labels: {
-                usePointStyle: true,
-                pointStyle: 'circle',
-                padding: 20
-              }
+    this[chartRef] = new Chart(canvas, {
+      type: chartType,
+      data: {
+        labels,
+        
+        datasets: [{
+          data,
+          backgroundColor: colors
+        }]
+      },
+      options: {
+        responsive: false,
+        maintainAspectRatio: false,
+        plugins: {
+
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              pointStyle: 'circle',
+              padding: 20
             }
           }
         }
-      });
-    }, 500);
-  }
+        
+      }
+    });
+  }, 500);
+}
 }
