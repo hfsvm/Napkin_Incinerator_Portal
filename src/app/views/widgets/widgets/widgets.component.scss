@@ -1,160 +1,3 @@
-// // ✅ Card container (Responsive + Hover + Fixed Spacing)
-// .card-container {
-//   background-color: #64B5F6;
-//   color: #FFFFFF;
-//   padding: 8px;
-//   height: 120px;
-//   display: flex;
-//   align-items: center;
-//   border-radius: 12px;
-//   box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
-//   position: relative;
-//   width: 100%;
-//   max-width: 320px;
-//   transition: all 0.3s ease-in-out;
-
-//   &:hover {
-//     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.25);
-//     transform: translateY(-3px);
-//   }
-
-//   &.active {
-//     background-color: #A5D6A7;
-//   }
-
-//   &.napkins {
-//     background-color: #FFCC80;
-//   }
-
-//   &.inactive {
-//     background-color: #E57373;
-//   }
-// }
-
-// // ✅ Ensure icon stays fixed at the left
-// .logo-border {
-//   min-width: 50px;
-//   height: 50px;
-//   border: 3px solid white;
-//   border-radius: 50%;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   background-color: rgba(255, 255, 255, 0.2);
-//   flex-shrink: 0;
-//   position: absolute;
-//   left: 15px; 
-//   top: 50%;
-//   transform: translateY(-50%);
-// }
-
-// // ✅ Keep icon size uniform
-// .logo-border img {
-//   width: 26px;
-//   height: 26px;
-// }
-
-// // ✅ Fix text alignment & force equal spacing
-// .card-content {
-//   display: flex;
-//   align-items: center;
-//   justify-content: flex-start;
-//   flex: 1;
-//   padding-left: 70px; // 🔹 Ensures all text starts after the same space
-// }
-
-// // ✅ Ensure all cards have same spacing between icon & text
-// .card-text {
-//   display: flex;
-//   flex-direction: column;
-//   text-align: left;
-//   min-width: 150px; // 🔹 Forces text area to be the same width in all cards
-//   word-wrap: break-word;
-// }
-
-// // ✅ Ensuring title and value align properly
-// .card-title {
-//   font-size: 16px;
-  
-//   color: #000000;
-//   white-space: normal;
-//   padding-top: 5px;
-//   padding-top: 20px;
-// }
-
-// .card-value {
-//   font-size: 24px;
- 
-//   margin-top: 3px;
-//   color: #000000;
-// }
-
-// // ✅ RESPONSIVENESS: Adjust layout for small screens
-// @media (max-width: 1200px) { // 🔹 For medium screens like tablets
-//   .card-container {
-//     max-width: 280px;
-//   }
-// }
-
-// @media (max-width: 768px) { // 🔹 For mobile screens
-//   .card-container {
-//     max-width: 100%;
-//     height: 110px;
-//   }
-
-//   .card-content {
-//     padding-left: 65px;
-//   }
-
-//   .logo-border {
-//     width: 40px;
-//     height: 40px;
-//   }
-
-//   .logo-border img {
-//     width: 22px;
-//     height: 22px;
-//   }
-
-//   .card-title {
-//     font-size: 14px;
-//   }
-
-//   .card-value {
-//     font-size: 20px;
-//   }
-// }
-// // ✅ Ensure the chart cards match the width of the top cards
-// .chart-card {
-//   width: 800px !important; // 🔹 Matches the width of the top cards
-//   height: 500px !important; // 🔹 Increased height to fit larger charts
-//   margin: 20px;
-//   box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
-//   border-radius: 12px;
-//   display: flex;
-//   flex-direction: column;
-//   justify-content: center;
-//   align-items: center;
-// }
-
-// // ✅ Keep the charts centered inside their cards
-// .chart-body {
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   width: 100%;
-//   height: 100%;
-// }
-
-// // ✅ Ensure charts remain large & fill their container properly
-// canvas {
-//   width: 90% !important; // 🔹 Makes charts fill most of the card width
-//   height: 90% !important; // 🔹 Makes charts take up most of the height
-//   max-width: 600px; // 🔹 Prevents excessive stretching
-//   max-height: 400px;
-// }
-// ✅ Card container (Responsive + Hover + Fixed Spacing)
-
 
 .card-container {
   background-color: #64B5F6;
@@ -190,8 +33,8 @@
  
 // ✅ Ensure icon stays fixed at the left
 .logo-border {
-  min-width: 50px;
-  height: 50px;
+  min-width: 40px;
+  height: 40px;
   border: 3px solid white;
   border-radius: 50%;
   display: flex;
@@ -217,7 +60,7 @@
   align-items: center;
   justify-content: flex-start;
   flex: 1;
-  padding-left: 70px; // 🔹 Ensures all text starts after the same space
+  padding-left: 55px; // 🔹 Ensures all text starts after the same space
 }
  
 // ✅ Ensure all cards have same spacing between icon & text
@@ -227,11 +70,12 @@
   text-align: left;
   min-width: 150px; // 🔹 Forces text area to be the same width in all cards
   word-wrap: break-word;
+  
 }
- 
+
 // ✅ Ensuring title and value align properly
 .card-title {
-  font-size: 16px;
+  font-size: 14px;
  
   color: #000000;
   white-space: normal;
@@ -240,7 +84,7 @@
 }
  
 .card-value {
-  font-size: 24px;
+  font-size: 20px;
  
   margin-top: 3px;
   color: #000000;
@@ -259,6 +103,13 @@
     height: 110px;
   }
  
+  /* ✅ For large screens like desktops */
+@media (min-width: 1201px) {
+  .card-container {
+    max-width: 400px; /* or any size you want for large screens */
+    height: 200px;    /* adjust height if needed */
+  }
+}
   .card-content {
     padding-left: 65px;
   }
@@ -293,8 +144,7 @@
 }
  
 .chart-card {
-  width: 545px;
-  height: 400px;
+ 
   margin-top: 30px;
 }
  
@@ -343,3 +193,4 @@ canvas {
   text-align: right;
  
 }
+

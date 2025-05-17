@@ -1,124 +1,101 @@
-<c-row>
-  <c-col md="3" sm="6">
-    <c-widget-stat-c class="card-container">
-      <ng-template cTemplateId="widgetIconTemplate">
-        <div class="logo-border">
-          <img src="https://img.icons8.com/ios/50/FFFFFF/vending-machine.png" alt="vending-machine" />
+<div class="container">
+    <!-- First Card Row - Machines Stats -->
+    <div class="row clearfix mb-2">  <!-- Changed mb-4 to mb-2 -->
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="form-group">
+                <div class="card-container">
+                    <div class="logo-border">
+                        <img src="https://img.icons8.com/ios/50/FFFFFF/vending-machine.png" alt="vending-machine" />
+                    </div>
+                    <div class="card-content">
+                        <div class="card-text">
+                            <span class="card-title">Total Machines</span>
+                            <span class="card-value">{{ totalMachines }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-content">
-          <div class="card-text">
-            <span class="card-title">Total Machines</span>
-            <span class="card-value">{{ totalMachines }}</span>
-          </div>
+
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="form-group">
+                <div class="card-container active">
+                    <div class="logo-border">
+                        <img src="https://img.icons8.com/ios/50/FFFFFF/gears.png" alt="active-machines" />
+                    </div>
+                    <div class="card-content">
+                        <div class="card-text">
+                            <span class="card-title">Active Machines</span>
+                            <span class="card-value">{{ activeMachines }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </ng-template>
-    </c-widget-stat-c>
-  </c-col>
-
-  <c-col md="3" sm="6">
-    <c-widget-stat-c class="card-container active">
-      <ng-template cTemplateId="widgetIconTemplate">
-        <div class="logo-border">
-          <img src="https://img.icons8.com/ios/50/FFFFFF/gears.png" alt="active-machines" />
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="form-group">
+                <div class="card-container inactive">
+                    <div class="logo-border">
+                        <img src="https://img.icons8.com/ios-filled/50/FFFFFF/recycle-bin.png" alt="inactive-machines" />
+                    </div>
+                    <div class="card-content">
+                        <div class="card-text">
+                            <span class="card-title">Total Burning Cycles</span>
+                            <span class="card-value">{{ totalburningcycles }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-content">
-          <div class="card-text">
-            <span class="card-title">Active Machines</span>
-            <span class="card-value">{{ activeMachines }}</span>
-          </div>
+
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="form-group">
+                <div class="card-container napkins">
+                    <div class="logo-border">
+                        <img src="assets/img/icon/pad1.png" alt="napkin-dispenser"/>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-text">
+                            <span class="card-title">Napkins Dispensed</span>
+                            <span class="card-value">{{ napkinsDispensed }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </ng-template>
-    </c-widget-stat-c>
-  </c-col>
-  
-  <c-col md="3" sm="6">
-    <c-widget-stat-c class="card-container inactive">
-      <ng-template cTemplateId="widgetIconTemplate">
-        <div class="logo-border">
-          <img src="https://img.icons8.com/ios/50/FFFFFF/shutdown.png" alt="inactive-machines" />
+    </div>
+
+    <!-- Status Reports with Charts Section -->
+    <div class="refresh-circle">
+        <span class="time">{{ formattedRefreshTime }}</span>
+    </div>
+
+    <div class="row clearfix mt-2">  <!-- Changed mt-4 to mt-2 -->
+        <div class="col-lg-6 col-md-12 mb-3">  <!-- Changed mb-4 to mb-3 -->
+            <div class="form-group">
+                <c-card class="chart-card">
+                    <c-card-header style="height:60px;background-color:#e6f2f4;">
+                        <h2 style="padding:5px; font-size:15px;">Machine Status</h2>
+                    </c-card-header>
+                    <c-card-body style="display:flex; justify-content:center; align-items:center;">
+                        <canvas id="canvasDoughnut" width="350" height="230" style="display:block;"></canvas>
+                    </c-card-body>
+                </c-card>
+            </div>
         </div>
-        <div class="card-content">
-          <div class="card-text">
-            <span class="card-title">Inactive Machines</span>
-            <span class="card-value">{{ inactiveMachines }}</span>
-          </div>
+        
+        <div class="col-lg-6 col-md-12 mb-3">  <!-- Changed mb-4 to mb-3 -->
+            <div class="form-group">
+                <c-card class="chart-card">
+                    <c-card-header style=" height:60px; background-color:#e6f2f4;">
+                        <h2 style="padding:5px; font-size:15px;">Stock Status</h2>
+                    </c-card-header>
+                    <c-card-body style="display:flex; justify-content:center; align-items:center;">
+                        <canvas id="canvasStock" width="350" height="230" style="display:block;"></canvas>
+                    </c-card-body>
+                </c-card>
+            </div>
         </div>
-      </ng-template>
-    </c-widget-stat-c>
-  </c-col>
-
-  <c-col md="3" sm="6">
-    <c-widget-stat-c class="card-container napkins">
-      <ng-template cTemplateId="widgetIconTemplate">
-        <div class="logo-border">
-          <img src="assets/img/icon/pad1.png" alt="napkin-dispenser"/>  <!-- Updated Icon -->
-        </div>
-        <div class="card-content">
-          <div class="card-text">
-            <span class="card-title">Napkins Dispensed</span>
-            <span class="card-value">{{ napkinsDispensed }}</span>
-          </div>
-        </div>
-      </ng-template>
-    </c-widget-stat-c>
-  </c-col>
-</c-row>
-<!-- 
-<c-row class="mt-2">  
- 
-    <c-col xs="12" md="6" class="d-flex justify-content-center mb-3"> 
-      <c-card style="width:550px; height:400px; margin:10px;"> 
-        <c-card-header style="background-color:#e6f2f4; padding-left: 0; padding-right: 0;">
-          <h2 style="font-size:20px; margin-left: 0;">Machine Status</h2> 
-        </c-card-header>
-        <c-card-body style="display:flex; justify-content:center; align-items:center; padding-left: 0; padding-right: 0;">
-          <canvas id="canvasDoughnut" style="width:350px; height:230px; display:block; margin-left: 0;"></canvas>
-        </c-card-body>
-      </c-card>
-    </c-col>
-
-  
-
-  <c-col xs="12" md="6" class="d-flex justify-content-center mb-3"> 
-    <c-card style="width:550px; height:400px; margin:10px;"> 
-      <c-card-header style="background-color:#e6f2f4;">
-        <h2 style="padding:8px; font-size:20px;">Stock Status</h2>
-      </c-card-header>
-      <c-card-body style="display:flex; justify-content:center; align-items:center;">
-        <canvas id="canvasStock" style="width:350px; height:230px; display:block;"></canvas>
-      </c-card-body>
-    </c-card>
-  </c-col>
-</c-row> -->
-<!-- Status Reports with Canvas-based Charts (Updated) -->
-<div class="refresh-circle">
-  <span class="time">{{ formattedRefreshTime }}</span>
-</div>
-
-
-
-<div class="chart-row mt-2">
-  <div>
-  <c-card class="chart-card">  <!-- Reduced width, height, and margin -->
-      <c-card-header style="background-color:#e6f2f4;">
-        <h2 style="padding:8px; font-size:20px;">Machine Status</h2> <!-- Smaller font -->
-      </c-card-header>
-      <c-card-body style="display:flex; justify-content:center; align-items:center;">
-        <canvas id="canvasDoughnut" width="350" height="230" style="display:block;"></canvas>
-
-      </c-card-body>
-    </c-card>
-  </div>
- 
-  <div>
-    <c-card class="chart-card">
-      <c-card-header style="background-color:#e6f2f4;">
-        <h2 style="padding:8px; font-size:20px;">Stock Status</h2>
-      </c-card-header>
-      <c-card-body style="display:flex; justify-content:center; align-items:center;">
-        <canvas id="canvasStock" width="350" height="230" style="display:block;"></canvas>
-
-      </c-card-body>
-    </c-card>
-  </div>
+    </div>
 </div>
