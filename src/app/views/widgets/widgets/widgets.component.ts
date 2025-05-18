@@ -1,46 +1,44 @@
-import { Component, AfterContentInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  AfterContentInit,
+  OnDestroy,
+  ViewEncapsulation,
+  ElementRef,
+  ViewChild
+} from '@angular/core';
 import { Subscription } from 'rxjs';
+import * as d3 from 'd3';
 import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
 import { DashboardRefreshService } from '../../../service/dashboard-refresh.service';
-import { ChartType, registerables } from 'chart.js';
-import Chart from 'chart.js/auto';
-
-
-
-Chart.register(...registerables);
 
 @Component({
   selector: 'app-widgets',
   templateUrl: './widgets.component.html',
   styleUrls: ['./widgets.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.Default
+  encapsulation: ViewEncapsulation.None
 })
 export class WidgetsComponent implements AfterContentInit, OnDestroy {
-  // All your existing variables...
+  @ViewChild('machineChart') machineChartRef!: ElementRef;
+  @ViewChild('stockChart') stockChartRef!: ElementRef;
+
   totalMachines = 0;
   activeMachines = 0;
   inactiveMachines = 0;
-  totalburningcycles = 0;
   napkinsDispensed = 0;
   okStock = 0;
   lowStock = 0;
   emptyStock = 0;
-  unknownStock = 0;
+  totalburningcycles = 0;
   totalCollection = 0;
 
-  chartDoughnut!: Chart;
-  chartStock!: Chart;
   merchantId: string | null = null;
   refreshCountdown = 0;
-  private refreshInterval = 120; // refresh interval in seconds
+  private refreshInterval = 120;
   private countdownInterval!: any;
-  
   private refreshSubscription!: Subscription;
 
   constructor(
-    private changeDetectorRef: ChangeDetectorRef,
     private dataService: DataService,
     private commonDataService: CommonDataService,
     private dashboardRefreshService: DashboardRefreshService
@@ -50,68 +48,36 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     this.merchantId = this.commonDataService.merchantId;
     if (this.merchantId) {
       this.fetchDashboardData();
-  
-      // Start countdown timer
       this.startRefreshCountdown();
-  
       this.refreshSubscription = this.dashboardRefreshService.refresh$.subscribe(() => {
         this.fetchDashboardData();
         this.resetRefreshCountdown();
       });
-  
-    } else {
-      console.error('❌ No Merchant ID Found! Redirecting to login...');
     }
   }
-  
 
+  ngOnDestroy(): void {
+    if (this.refreshSubscription) this.refreshSubscription.unsubscribe();
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+  }
 
   startRefreshCountdown(): void {
     this.refreshCountdown = this.refreshInterval;
     this.countdownInterval = setInterval(() => {
       this.refreshCountdown--;
-      if (this.refreshCountdown <= 0) {
-        this.refreshCountdown = this.refreshInterval;
-      }
+      if (this.refreshCountdown <= 0) this.refreshCountdown = this.refreshInterval;
     }, 1000);
   }
-  get formattedRefreshTime(): string {
-    const minutes = Math.floor(this.refreshCountdown / 60).toString().padStart(1, '0');
-    const seconds = (this.refreshCountdown % 60).toString().padStart(2, '0');
-    return `${minutes}:${seconds}`;
-  }
-  
+
   resetRefreshCountdown(): void {
     this.refreshCountdown = this.refreshInterval;
   }
-  
-  ngOnDestroy(): void {
-    if (this.refreshSubscription) {
-      this.refreshSubscription.unsubscribe();
-    }
-  
-    // Clear countdown interval
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-    }
-  }
-  
-  
 
   fetchDashboardData(): void {
     if (!this.merchantId) return;
 
     const userDetails = this.commonDataService.userDetails;
-    console.log('🔍 Debugging userDetails:', userDetails);
-
-    if (!userDetails) {
-      console.error('❌ No User Details Found! API request may be incomplete.');
-      return;
-    }
-
-    console.log('📌 Extracted projectId:', userDetails.projectId);
-    console.log('📌 Extracted ClientId:', userDetails.clientId);
-    
+    if (!userDetails) return;
 
     const queryParams: any = {
       merchantId: this.merchantId,
@@ -122,24 +88,27 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
       level2: userDetails.district?.join(',') || '',
       level3: userDetails.companyName?.[0]?.ClientId || '',
       machineId: userDetails.machineId?.join(',') || '',
-      client:userDetails.clientId,
+      client: userDetails.clientId,
       project: userDetails.projectId
     };
-debugger;
-    const apiUrl = `${this.dataService.url1}/getMachineDashboardSummary?${new URLSearchParams(queryParams).toString()}`;
-    console.log('📡 Final API URL:', apiUrl);
-debugger;
+
     this.dataService.getMachineDashboardSummary(queryParams).subscribe({
       next: (response) => {
-        console.log('✅ API Response:', response);
-
         if (response.code === 200 && response.data) {
-          const { machinesInstalled = 0, machinesRunning = 0,totalBurningCycles = 0, totalCollection = 0, itemsDispensed = 0, stockEmpty = 0, stockLow = 0 } = response.data;
+          const {
+            machinesInstalled = 0,
+            machinesRunning = 0,
+            totalBurningCycles = 0,
+            totalCollection = 0,
+            itemsDispensed = 0,
+            stockEmpty = 0,
+            stockLow = 0
+          } = response.data;
 
           this.totalMachines = machinesInstalled;
           this.activeMachines = machinesRunning;
-          this.totalburningcycles =totalBurningCycles;
           this.inactiveMachines = machinesInstalled - machinesRunning;
+          this.totalburningcycles = totalBurningCycles;
           this.totalCollection = totalCollection;
           this.napkinsDispensed = itemsDispensed;
           this.emptyStock = stockEmpty;
@@ -148,71 +117,145 @@ debugger;
 
           this.updateMachineChart();
           this.updateStockChart();
-          this.changeDetectorRef.detectChanges();
         }
-      },
-      error: (error) => console.error('❌ Error fetching dashboard data:', error)
+      }
     });
   }
 
   updateMachineChart(): void {
-    this.initializeChart('canvasDoughnut', 'pie', ['Online', 'Offline'], [this.activeMachines, this.inactiveMachines], ['#4CAF50', '#D32F2F'], 'chartDoughnut');
+    const data = [
+      { label: 'Online', value: this.activeMachines, color: '#4CAF50' },
+      { label: 'Offline', value: this.inactiveMachines, color: '#D32F2F' }
+    ];
+    this.drawD3PieChart(this.machineChartRef.nativeElement, data,0);
   }
 
   updateStockChart(): void {
-    this.initializeChart(
-      'canvasStock',
-      'doughnut',
-      ['Full Stock', 'Low Stock', 'Empty Stock'],
-      [this.okStock, this.lowStock, this.emptyStock],
-      ['#4CAF50', '#FFC107', '#D32F2F'],
-      'chartStock'
-    );
+    const data = [
+      { label: 'Full Stock', value: this.okStock, color: '#4CAF50' },
+      { label: 'Low Stock', value: this.lowStock, color: '#FFC107' },
+      { label: 'Empty Stock', value: this.emptyStock, color: '#D32F2F' }
+    ];
+    this.drawD3PieChart(this.stockChartRef.nativeElement, data,50);
   }
 
- initializeChart(canvasId: string, chartType: ChartType, labels: string[], data: number[], colors: string[], chartRef: 'chartDoughnut' | 'chartStock'): void {
-  setTimeout(() => {
-    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-    if (!canvas) {
-      console.warn(`⚠️ Canvas ID '${canvasId}' not found! Skipping chart initialization.`);
-      return;
-    }
+ drawD3PieChart(
+  container: HTMLElement,
+  data: { label: string; value: number; color: string }[],
+  innerRadius: number = 0 // default 0 for full pie
+): void {
+  // Clear container
+  d3.select(container).selectAll('*').remove();
 
-    if (this[chartRef]) {
-      this[chartRef].destroy();
-    }
+  // Ensure container has relative position
+  d3.select(container).style('position', 'relative');
 
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+  const width = 300;
+  const height = 230;
+  const radius = Math.min(width, height) / 2;
 
-    this[chartRef] = new Chart(canvas, {
-      type: chartType,
-      data: {
-        labels,
-        
-        datasets: [{
-          data,
-          backgroundColor: colors
-        }]
-      },
-      options: {
-        responsive: false,
-        maintainAspectRatio: false,
-        plugins: {
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .style('display', 'block')
+    .style('margin', '0 auto')
+    .append('g')
+    .attr('transform', `translate(${width / 2}, ${height / 2})`);
 
-          legend: {
-            display: true,
-            position: 'bottom',
-            labels: {
-              usePointStyle: true,
-              pointStyle: 'circle',
-              padding: 20
-            }
-          }
-        }
-        
-      }
+  const pie = d3.pie<any>()
+    .value(d => d.value)
+    .sort(null);
+
+  const arc = d3.arc<any>()
+    .innerRadius(innerRadius)
+    .outerRadius(radius);
+
+  const arcs = svg.selectAll('arc')
+    .data(pie(data))
+    .enter()
+    .append('g')
+    .attr('class', 'arc');
+
+  const tooltip = d3.select(container)
+    .append('div')
+    .style('position', 'absolute')
+    .style('z-index', '1000')
+    .style('background', 'rgba(0,0,0,0.7)')
+    .style('color', '#fff')
+    .style('padding', '4px 8px')
+    .style('border-radius', '4px')
+    .style('pointer-events', 'none')
+    .style('font-size', '12px')
+    .style('display', 'none');
+
+  // Draw pie slices with tooltip behavior
+  arcs.append('path')
+    .attr('d', arc)
+    .attr('fill', d => d.data.color)
+    .on('mouseover', function (event, d) {
+      tooltip
+        .style('display', 'block')
+        .html(`<strong>${d.data.label}</strong>: ${d.data.value}`);
+    })
+    .on('mousemove', function (event) {
+      const bounds = container.getBoundingClientRect();
+      tooltip
+        .style('left', `${event.clientX - bounds.left + 10}px`)
+        .style('top', `${event.clientY - bounds.top - 28}px`);
+    })
+    .on('mouseout', function () {
+      tooltip.style('display', 'none');
     });
-  }, 500);
+
+  // Add percentage text inside slices
+  const total = d3.sum(data, d => d.value);
+
+  arcs.append('text')
+  .attr('transform', d => `translate(${arc.centroid(d)})`)
+  .attr('text-anchor', 'middle')
+  .attr('dy', '0.35em')
+  .style('font-size', '12px')
+  .style('fill', '#fff')
+  .text(d => {
+    const percent = total === 0 ? 0 : (d.data.value / total) * 100;
+    return percent > 0 ? `${percent.toFixed(1)}%` : null; // 👈 Only show if > 0
+  });
+
+
+  // Draw legend
+  const legend = d3.select(container)
+    .append('div')
+    .attr('class', 'd3-legend')
+    .style('display', 'flex')
+    .style('justify-content', 'center')
+    .style('flex-wrap', 'wrap')
+    .style('margin-top', '15px');
+
+  data.forEach(d => {
+    const item = legend.append('div')
+      .style('display', 'flex')
+      .style('align-items', 'center')
+      .style('margin', '0 10px');
+
+
+      item.append('div')
+  .style('width', '14px')
+  .style('height', '14px')
+  .style('background-color', d.color)
+  .style('margin-right', '6px')
+  .style('border-radius', '50%');  // ← Circle
+
+    item.append('span')
+      .text(d.label)
+      .style('font-size', '13px')
+      .style('color', '#333');
+  });
 }
+
+
+
+
+
+
 }
