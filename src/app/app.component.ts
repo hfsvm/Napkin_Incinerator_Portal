@@ -12,7 +12,7 @@ import { DashboardRefreshService } from './service/dashboard-refresh.service';
   template: '<router-outlet></router-outlet>',
 })
 export class AppComponent implements OnInit {
-  title = 'MAMA Merchant Portal';
+  title = 'REALZEST VENDCON PORTAL';
 
   constructor(
     private router: Router,
