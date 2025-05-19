@@ -4,17 +4,32 @@
 }
 
 
-
+  
+  // .cards-section {
+  //   flex: 0.6;
+  //   background-color: #f8f9fa;
+  //   border-radius: 10px;
+  //   padding: 20px;
+  //   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  // }
+  
+  // .map-section {
+  //   flex: 1.4;
+  //   background-color: #f8f9fa;
+  //   border-radius: 10px;
+  //   min-height: 700px;
+  //   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  // }
 
 .dashboard-container {
     display: flex;
-    margin: 10px;
+    margin: 20px;
     gap: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   .cards-section {
-  flex: 0.1; /* Decrease width of cards */
+  flex: 0.2; /* Decrease width of cards */
   background-color: #f8f9fa;
   border-radius: 10px;
   padding: 20px;
@@ -32,23 +47,23 @@
 
   
   .zone-title {
-    font-size: 14px;
+    font-size: 24px;
     margin-bottom: 20px;
     color: #333;
     text-align: center;
   }
   
-  // .charts-row {
-  //   display: flex;
-  //   justify-content: space-between;
-  //   margin-bottom: 20px;
-  // }
+  .charts-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
   
   .chart-container {
-    width: 100%;
+    width: 48%;
     background-color: white;
     border-radius: 8px;
-    padding: 10px;
+    padding: 15px;
     height: 200px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -58,34 +73,33 @@
   }
   
   .donut-chart {
-    width: 80%;
-    height: 100px;
+    width: 100%;
+    height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   
   .status-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: auto;
+  }
   
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2px;  /* Reduced from 15px */
-  margin-top: auto;
-  font-size: 8px;  /* Added to reduce text size */
-}
-
-.legend-item {
-  display: flex;
-  margin-right: 1px;  /* Reduced spacing between items */
-  margin-bottom: 1px;  /* Reduced vertical spacing */
-}
-
-.color-box {
-  width: 8px;  /* Reduced color box size */
-  height: 8px;  /* Reduced color box size */
-  margin-right: 4px;  /* Reduced spacing between box and text */
-  border-radius: 2px;
-}
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+  }
+  
+  .color-box {
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    border-radius: 3px;
+  }
   
   .online { background-color: #4CAF50; }
   .offline { background-color: #F44336; }
@@ -96,34 +110,23 @@
   
   .card-row {
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 15px;
+    margin-bottom: 15px;
   }
   
-//   .dashboard-card {
-//   margin: 0 10px; /* Horizontal spacing */
-//   padding: 10px;
-//   /* Ensure there's no unintended vertical spacing */
-// }
-
-// .card-row + .card-row {
-//   margin-top: 10px; /* If you're using top margin between rows */
-// }
-
-
   .dashboard-card {
     flex: 1;
     background-color: white;
     border-radius: 8px;
-    padding: 13px;
+    padding: 15px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
   }
   
   .card-icon {
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -151,18 +154,16 @@
   }
   
   .card-value {
-    font-size: 9px;
+    font-size: 24px;
     font-weight: bold;
     margin: 0;
     color: #333;
   }
   
   .card-label {
-    flex: 1;
-    font-weight: bold;
     margin: 5px 0 0;
     color: #666;
-    font-size: 8px;
+    font-size: 14px;
   }
   
   .loading-overlay {
@@ -360,13 +361,13 @@
   top: 20px;
   left: 25px; /* Moved from right to left */
 
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   background: linear-gradient(110deg, #4CAF50, #81C784);
   color: white;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
