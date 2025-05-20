@@ -1,105 +1,113 @@
-#map {
+
+body, html {
+  overflow-x: hidden;
   width: 100%;
-  height: 400px; /* or 100vh or any fixed height */
+  margin: 0;
+  padding: 0;
 }
 
+.dashboard-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  margin: 1px;
+  gap: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-  
-  // .cards-section {
-  //   flex: 0.6;
-  //   background-color: #f8f9fa;
-  //   border-radius: 10px;
-  //   padding: 20px;
-  //   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  // }
-  
-  // .map-section {
-  //   flex: 1.4;
-  //   background-color: #f8f9fa;
-  //   border-radius: 10px;
-  //   min-height: 700px;
-  //   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  // }
-
-.dashboard-container {
-    display: flex;
-    margin: 20px;
-    gap: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-
-  .cards-section {
-  flex: 0.2; /* Decrease width of cards */
-  background-color: #f8f9fa;
+.cards-section {
+  flex: 1.1;
+  background-color: #f8f1f1;
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .map-section {
-  flex:  2.8; /* Increase width of map */
+  flex: 1.9;
   background-color: #f8f9fa;
   border-radius: 10px;
   min-height: 700px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
+#map {
+  width: 100%;
+  height: 650px;
+}
 
-  
   .zone-title {
-    font-size: 24px;
+    font-size: 14px;
     margin-bottom: 20px;
     color: #333;
     text-align: center;
   }
   
+  // .charts-row {
+  //   display: flex;
+  //   flex-wrap: wrap;
+  //   justify-content: center;
+  //   gap: 1px;
+  //   margin-bottom: 20px;
+  // }
   .charts-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
-  .chart-container {
-    width: 48%;
-    background-color: white;
-    border-radius: 8px;
-    padding: 15px;
-    height: 200px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .donut-chart {
-    width: 100%;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .status-legend {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin-top: auto;
-  }
-  
-  .legend-item {
-    display: flex;
-    align-items: center;
-    margin-right: 15px;
-  }
-  
-  .color-box {
-    width: 15px;
-    height: 15px;
-    margin-right: 5px;
-    border-radius: 3px;
-  }
+  display: flex;
+  flex-wrap: wrap; /* Optional: allows them to wrap on small screens */
+  justify-content: flex-start;
+  gap: 16px; /* spacing between charts */
+}
+
+/* Ensures each chart card fits side by side */
+.charts-row .mb-4 {
+  width: 210px; /* or 180px to match .chart-container */
+}
+
+
+.chart-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 8px; /* Reduced padding */
+  height: 200px; /* Decreased total height */
+  width: 210px;  /* Slightly reduced width */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; /* More even space usage */
+}
+
+.donut-chart {
+  width: 90%; /* Slightly smaller chart */
+  height: 120px; /* Decreased height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  font-size: 8px;
+  margin-bottom: 2px; /* Reduce extra space at bottom */
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 1px 4px;
+}
+
+.color-box {
+  width: 8px;
+  height: 8px;
+  margin-right: 3px;
+  border-radius: 2px;
+}
   
   .online { background-color: #4CAF50; }
   .offline { background-color: #F44336; }
@@ -108,64 +116,211 @@
   .empty { background-color: #F44336; }
   .unknown { background-color: #9E9E9E; }
   
-  .card-row {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 15px;
-  }
   
-  .dashboard-card {
-    flex: 1;
-    background-color: white;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-  }
+//   .dashboard-card {
+//   margin: 0 10px; /* Horizontal spacing */
+//   padding: 10px;
+//   /* Ensure there's no unintended vertical spacing */
+// }
+
+// .card-row + .card-row {
+//   margin-top: 10px; /* If you're using top margin between rows */
+// }
+
+// .card-row {
+//     display: flex;
+//     gap: 10px;
+//     margin-bottom: 10px;
+//   }
   
-  .card-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 15px;
-    color: white;
-    font-size: 20px;
-  }
+//   .dashboard-card {
+//     flex: 1;
+//     background-color: white;
+//     border-radius: 8px;
+//     padding: 13px;
+//     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+//     display: flex;
+//     align-items: center;
+//   }
   
-  .install-icon { background-color: #4CAF50; }
-  .running-icon { background-color: #2196F3; }
-  .collection-icon { background-color: #673AB7; }
-  .dispensed-icon { background-color: #009688; }
-  .empty-stock-icon { background-color: #F44336; }
-  .low-stock-icon { background-color: #FFC107; }
-  .error-icon { background-color: #FF5722; }
-  .ok-icon { background-color: #4CAF50; }
-  .idle-icon { background-color: #607D8B; }
-  .enabled-icon { background-color: #E91E63; }
-  .burning-error-icon { background-color: #FF5722; }
-  .cycle-icon { background-color: #3F51B5; }
+//   .card-icon {
+//     width: 30px;
+//     height: 30px;
+//     border-radius: 50%;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     margin-right: 15px;
+//     color: white;
+//     font-size: 20px;
+//   }
   
-  .card-content {
-    flex: 1;
-  }
+//   .install-icon { background-color: #4CAF50; }
+//   .running-icon { background-color: #2196F3; }
+//   .collection-icon { background-color: #673AB7; }
+//   .dispensed-icon { background-color: #009688; }
+//   .empty-stock-icon { background-color: #F44336; }
+//   .low-stock-icon { background-color: #FFC107; }
+//   .error-icon { background-color: #FF5722; }
+//   .ok-icon { background-color: #4CAF50; }
+//   .idle-icon { background-color: #607D8B; }
+//   .enabled-icon { background-color: #E91E63; }
+//   .burning-error-icon { background-color: #FF5722; }
+//   .cycle-icon { background-color: #3F51B5; }
   
-  .card-value {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 0;
-    color: #333;
-  }
+//   .card-content {
+//     flex: 1;
+//   }
   
-  .card-label {
-    margin: 5px 0 0;
-    color: #666;
-    font-size: 14px;
-  }
+//   .card-value {
+//     font-size: 9px;
+//     font-weight: bold;
+//     margin: 0;
+//     color: #333;
+//   }
   
+//   .card-label {
+//     flex: 1;
+//     font-weight: bold;
+//     margin: 5px 0 0;
+//     color: #666;
+//     font-size: 8px;
+//   }
+  
+
+
+.card-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dashboard-card {
+  flex: 1;
+  min-width: 130px;
+  max-width: 150px;
+  background-color: #d5d3d3;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.card-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+}
+
+/* Colors */
+.install-icon { background-color: #4CAF50; }
+.running-icon { background-color: #2196F3; }
+.collection-icon { background-color: #673AB7; }
+.dispensed-icon { background-color: #009688; }
+.empty-stock-icon { background-color: #F44336; }
+.low-stock-icon { background-color: #FFC107; color: #000; }
+.error-icon { background-color: #FF5722; }
+.ok-icon { background-color: #4CAF50; }
+.idle-icon { background-color: #607D8B; }
+.enabled-icon { background-color: #E91E63; }
+.burning-error-icon { background-color: #FF5722; }
+.cycle-icon { background-color: #3F51B5; }
+
+.card-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  height: 24px; /* same as icon height to center-align */
+}
+
+.card-label {
+  font-size: 13px;
+  color: #555;
+  text-align: center;
+  font-weight: 700;
+}
+
+// .card-row {
+//   display: flex;
+//   gap: 10px;
+//   margin-bottom: 10px;
+//   flex-wrap: wrap;
+// }
+
+// .dashboard-card {
+//   flex: 1;
+//   background-color: #f5f5f5; /* light grey */
+//   border-radius: 10px;
+//   padding: 15px;
+//   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   text-align: center;
+//   min-width: 150px;
+// }
+
+// .card-icon {
+//   width: 40px;
+//   height: 40px;
+//   border-radius: 50%;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   color: white;
+//   font-size: 20px;
+//   margin-bottom: 10px;
+// }
+
+// .install-icon { background-color: #4CAF50; }
+// .running-icon { background-color: #2196F3; }
+// .collection-icon { background-color: #673AB7; }
+// .dispensed-icon { background-color: #009688; }
+// .empty-stock-icon { background-color: #F44336; }
+// .low-stock-icon { background-color: #FFC107; }
+// .error-icon { background-color: #FF5722; }
+// .ok-icon { background-color: #4CAF50; }
+// .idle-icon { background-color: #607D8B; }
+// .enabled-icon { background-color: #E91E63; }
+// .burning-error-icon { background-color: #FF5722; }
+// .cycle-icon { background-color: #3F51B5; }
+
+
+//   .card-content {
+//     flex: 1;
+//   }
+
+// .card-value {
+//   font-size: 16px;
+//   font-weight: bold;
+//   color: #333;
+//   margin: 5px 0;
+// }
+
+// .card-label {
+//   font-size: 12px;
+//   color: #666;
+// }
+
   .loading-overlay {
     position: fixed;
     top: 0;
@@ -225,6 +380,11 @@
     .cards-section, .map-section {
       width: 100%;
     }
+
+      .w-60 {
+    width: 100%;
+  }
+
   }
   
   @media (max-width: 768px) {
@@ -361,13 +521,13 @@
   top: 20px;
   left: 25px; /* Moved from right to left */
 
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: linear-gradient(110deg, #4CAF50, #81C784);
   color: white;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;

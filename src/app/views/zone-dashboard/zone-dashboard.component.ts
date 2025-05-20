@@ -281,7 +281,7 @@ ngOnDestroy(): void {
         container: 'map',
         style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Ldz7Kz6Xwxrw9kq0aYn3',
         center: [72.8777, 19.0760],
-        zoom: 11
+        zoom: 12
       });
 
       this.map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -731,13 +731,15 @@ ngOnDestroy(): void {
     this.renderDonutChart({
       element: this.statusChartRef.nativeElement,
       data: this.prepareStatusChartData(),
-      colors: ['#4CAF50', '#F44336']
+      colors: ['#4CAF50', '#F44336'],
+      isDonut: false // 👈 Render as pie chart
     });
 
     this.renderDonutChart({
       element: this.stockChartRef.nativeElement,
       data: this.prepareStockChartData(),
-      colors: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E']
+      colors: ['#4CAF50', '#FFC107', '#F44336', '#9E9E9E'],
+      isDonut: true // 👈 Render as pie chart
     });
   }
 
@@ -761,51 +763,50 @@ ngOnDestroy(): void {
       { name: 'Ok', value: stockOk },
       { name: 'Low', value: stockLow },
       { name: 'Empty', value: stockEmpty },
-      { name: 'Unknown', value: stockUnknown > 0 ? stockUnknown : 0 }
+      //{ name: 'Unknown', value: stockUnknown > 0 ? stockUnknown : 0 }
     ];
   }
 
-  renderDonutChart(options: { element: any, data: DonutChartData[], colors: string[] }): void {
-    const { element, data, colors } = options;
-    
-    if (!element || !data || data.length === 0) return;
-    
-    const width = 150;
-    const height = 150;
-    const radius = Math.min(width, height) / 2;
-    
-    const svg = d3.select(element)
-      .append('svg')
-      .attr('width', width)
-      .attr('height', height)
-      .append('g')
-      .attr('transform', `translate(${width / 2}, ${height / 2})`);
-    
-    const color = d3.scaleOrdinal<string>()
-      .domain(data.map(d => d.name))
-      .range(colors);
-    
-    const pie = d3.pie<DonutChartData>()
-      .sort(null)
-      .value(d => d.value);
-    
-    const pieData = pie(data);
-    
-    const arc = d3.arc<d3.PieArcDatum<DonutChartData>>()
-      .innerRadius(radius * 0.6)
-      .outerRadius(radius * 0.9);
-    
-    svg.selectAll('pieces')
-      .data(pieData)
-      .enter()
-      .append('path')
-      .attr('d', arc)
-      .attr('fill', function(d) { 
-        return color(d.data.name); 
-      })
-      .attr('stroke', '#fff')
-      .style('stroke-width', '1px');
-  }
+ renderDonutChart(options: { element: any, data: DonutChartData[], colors: string[], isDonut?: boolean }): void {
+  const { element, data, colors, isDonut = true } = options;
+  
+  if (!element || !data || data.length === 0) return;
+
+  const width = 130;
+  const height = 130;
+  const radius = Math.min(width, height) / 2;
+
+  const svg = d3.select(element)
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .append('g')
+    .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+  const color = d3.scaleOrdinal<string>()
+    .domain(data.map(d => d.name))
+    .range(colors);
+
+  const pie = d3.pie<DonutChartData>()
+    .sort(null)
+    .value(d => d.value);
+
+  const pieData = pie(data);
+
+  const arc = d3.arc<d3.PieArcDatum<DonutChartData>>()
+    .innerRadius(isDonut ? radius * 0.6 : 0)  // 👈 key difference
+    .outerRadius(radius * 0.9);
+
+  svg.selectAll('pieces')
+    .data(pieData)
+    .enter()
+    .append('path')
+    .attr('d', arc)
+    .attr('fill', d => color(d.data.name))
+    .attr('stroke', '#fff')
+    .style('stroke-width', '1px');
+}
+
 
   // Helper Methods
   getStockStatusNumber(stockStatus: any): number {

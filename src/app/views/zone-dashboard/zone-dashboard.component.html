@@ -1,326 +1,228 @@
-<!-- <div class="refresh-timer-container">
-  <div class="refresh-timer">
-    <span class="timer-value">{{ timerDisplay }}</span>
-  </div>
-</div> -->
-
-  <div class="refresh-circle">
+<!-- Timer Display -->
+<div class="refresh-circle">
   <span class="time">{{ timerDisplay }}</span>
 </div>
 
-<div class="dashboard-container">
-  <!-- Left side card section -->
-  <div class="cards-section">
+<div class="dashboard-wrapper d-flex">
+  <!-- Left Section: Cards and Charts -->
+  <div class="cards-section pe-3">
     <h2 class="zone-title">Zone: {{ zone.split(' ')[1] || zone }}</h2>
+
+    <!-- Charts Section -->
     
-    <!-- Status charts -->
-    <div class="charts-row">
-      <div class="chart-container">
+      <!-- Status Chart -->
+       <div class="row mt-2">
+       
+      <div class="col-lg-6 col-md-12 mb-3">
         <div #statusChart class="donut-chart"></div>
-        <div class="status-legend">
-          <div class="legend-item">
-            <span class="color-box online"></span>
-            <span>Online</span>
-          </div>
-          <div class="legend-item">
-            <span class="color-box offline"></span>
-            <span>Offline</span>
+        <div class="status-legend mt-3">
+          <div class="d-flex flex-wrap justify-content-center">
+            <div class="legend-item d-flex align-items-center me-3 mb-2">
+              <span class="color-box online me-2"></span>
+              <span>Online</span>
+            </div>
+            <div class="legend-item d-flex align-items-center me-3 mb-2">
+              <span class="color-box offline me-2"></span>
+              <span>Offline</span>
+            </div>
           </div>
         </div>
-      </div>
       
-      <div class="chart-container">
+      </div>
+
+      <!-- Stock Chart -->
+
+      <div class="col-lg-6 col-md-12 mb-3">
+        
         <div #stockChart class="donut-chart"></div>
-        <div class="status-legend">
-          <div class="legend-item">
-            <span class="color-box ok"></span>
-            <span>Ok</span>
-          </div>
-          <div class="legend-item">
-            <span class="color-box low"></span>
-            <span>Low</span>
-          </div>
-          <div class="legend-item">
-            <span class="color-box empty"></span>
-            <span>Empty</span>
-          </div>
-          <div class="legend-item">
-            <span class="color-box unknown"></span>
-            <span>Unknown</span>
+        <div class="status-legend mt-3">
+          <div class="d-flex flex-wrap justify-content-center">
+            <div class="legend-item d-flex align-items-center me-3 mb-2">
+              <span class="color-box ok me-2"></span>
+              <span>Ok</span>
+            </div>
+            <div class="legend-item d-flex align-items-center me-3 mb-2">
+              <span class="color-box low me-2"></span>
+              <span>Low</span>
+            </div>
+            <div class="legend-item d-flex align-items-center me-3 mb-2">
+              <span class="color-box empty me-2"></span>
+              <span>Empty</span>
+            </div>
+            <div class="legend-item d-flex align-items-center me-3 mb-2">
+              <span class="color-box unknown me-2"></span>
+              <span>Unknown</span>
+            </div>
           </div>
         </div>
-      </div>
+     
     </div>
-    
-    <!-- First row of cards -->
+    </div>
+
+    <!-- First Row -->
     <div class="card-row">
       <div class="dashboard-card">
-        <div class="card-icon install-icon">
-          <i class="fa fa-cogs"></i>
+        <div class="card-top">
+          <div class="card-icon install-icon">
+            <i class="fa fa-cogs"></i>
+          </div>
+          <div class="card-value">{{ dashboardData.machinesInstalled || 0 }}</div>
         </div>
-        <div class="card-content">
-          <h3 class="card-value">{{ dashboardData.machinesInstalled || 0 }}</h3>
-          <p class="card-label">Machines Installed</p>
-        </div>
+        <p class="card-label">Machines Installed</p>
       </div>
-      
+
       <div class="dashboard-card">
-        <div class="card-icon running-icon">
-          <i class="fa fa-play-circle"></i>
+        <div class="card-top">
+          <div class="card-icon running-icon">
+            <i class="fa fa-play-circle"></i>
+          </div>
+          <div class="card-value">{{ dashboardData.machinesRunning || 0 }}</div>
         </div>
-        <div class="card-content">
-          <h3 class="card-value">{{ dashboardData.machinesRunning || 0 }}</h3>
-          <p class="card-label">Machines Running</p>
-        </div>
+        <p class="card-label">Machines Running</p>
       </div>
-      
+
       <div class="dashboard-card">
-        <div class="card-icon collection-icon">
-          <i class="fa fa-inr"></i>
+        <div class="card-top">
+          <div class="card-icon collection-icon">
+            <i class="fa fa-inr"></i>
+          </div>
+          <div class="card-value">{{ dashboardData.totalCollection || 0 }}</div>
         </div>
-        <div class="card-content">
-          <h3 class="card-value">{{ dashboardData.totalCollection || 0 }}</h3>
-          <p class="card-label">Total Collection</p>
-        </div>
-      </div>
-      
-      <div class="dashboard-card">
-        <div class="card-icon dispensed-icon">
-          <i class="fa fa-shopping-bag"></i>
-        </div>
-        <div class="card-content">
-          <h3 class="card-value">{{ dashboardData.itemsDispensed || 0 }}</h3>
-          <p class="card-label">Items Dispensed</p>
-        </div>
+        <p class="card-label">Total Collection</p>
       </div>
     </div>
-    
-    <!-- Second row of cards -->
+
+    <!-- Second Row -->
     <div class="card-row">
       <div class="dashboard-card">
-        <div class="card-icon empty-stock-icon">
-          <i class="fa fa-times-circle"></i>
+        <div class="card-top">
+          <div class="card-icon dispensed-icon">
+            <i class="fa fa-shopping-bag"></i>
+          </div>
+          <div class="card-value">{{ dashboardData.itemsDispensed || 0 }}</div>
         </div>
-        <div class="card-content">
-          <h3 class="card-value">{{ dashboardData.stockEmpty || 0 }}</h3>
-          <p class="card-label">Stock Empty</p>
-        </div>
+        <p class="card-label">Items Dispensed</p>
       </div>
-      
+
       <div class="dashboard-card">
-        <div class="card-icon low-stock-icon">
-          <i class="fa fa-exclamation-triangle"></i>
+        <div class="card-top">
+          <div class="card-icon empty-stock-icon">
+            <i class="fa fa-times-circle"></i>
+          </div>
+          <div class="card-value">{{ dashboardData.stockEmpty || 0 }}</div>
         </div>
-        <div class="card-content">
-          <h3 class="card-value">{{ dashboardData.stockLow || 0 }}</h3>
-          <p class="card-label">Stock Low</p>
-        </div>
+        <p class="card-label">Stock Empty</p>
       </div>
-      
+
       <div class="dashboard-card">
-        <div class="card-icon error-icon">
-          <i class="fa fa-bug"></i>
+        <div class="card-top">
+          <div class="card-icon low-stock-icon">
+            <i class="fa fa-exclamation-triangle"></i>
+          </div>
+          <div class="card-value">{{ dashboardData.stockLow || 0 }}</div>
         </div>
-        <div class="card-content">
-          <h3 class="card-value">0</h3>
-          <p class="card-label">Stock Error</p>
-        </div>
-      </div>
-      
-      <div class="dashboard-card">
-        <div class="card-icon ok-icon">
-          <i class="fa fa-check-circle"></i>
-        </div>
-        <div class="card-content">
-          <h3 class="card-value">{{ dashboardData.stockOk || 0 }}</h3>
-          <p class="card-label">Stock Okay</p>
-        </div>
+        <p class="card-label">Stock Low</p>
       </div>
     </div>
-    
-    <!-- Third row of cards -->
+
+    <!-- Third Row -->
     <div class="card-row">
       <div class="dashboard-card">
-        <div class="card-icon idle-icon">
-          <i class="fa fa-pause-circle"></i>
+        <div class="card-top">
+          <div class="card-icon error-icon">
+            <i class="fa fa-bug"></i>
+          </div>
+          <div class="card-value">0</div>
         </div>
-        <div class="card-content">
-          <h3 class="card-value">0</h3>
-          <p class="card-label">Burning Idle</p>
-        </div>
+        <p class="card-label">Stock Error</p>
       </div>
-      
+
       <div class="dashboard-card">
-        <div class="card-icon enabled-icon">
-          <i class="fa fa-fire"></i>
+        <div class="card-top">
+          <div class="card-icon ok-icon">
+            <i class="fa fa-check-circle"></i>
+          </div>
+          <div class="card-value">{{ dashboardData.stockOk || 0 }}</div>
         </div>
-        <div class="card-content">
-          <h3 class="card-value">{{ dashboardData.burningEnabled || 0 }}</h3>
-          <p class="card-label">Burning Enabled</p>
-        </div>
+        <p class="card-label">Stock Okay</p>
       </div>
-      
+
       <div class="dashboard-card">
-        <div class="card-icon burning-error-icon">
-          <i class="fa fa-exclamation-circle"></i>
+        <div class="card-top">
+          <div class="card-icon idle-icon">
+            <i class="fa fa-pause-circle"></i>
+          </div>
+          <div class="card-value">0</div>
         </div>
-        <div class="card-content">
-          <h3 class="card-value">0</h3>
-          <p class="card-label">Burning Error</p>
-        </div>
-      </div>
-      
-      <div class="dashboard-card">
-        <div class="card-icon cycle-icon">
-          <i class="fa fa-sync"></i>
-        </div>
-        <div class="card-content">
-          <h3 class="card-value">{{ dashboardData.totalBurningCycles || 0 }}</h3>
-          <p class="card-label">Total Burning Cycle</p>
-        </div>
+        <p class="card-label">Burning Idle</p>
       </div>
     </div>
-    <button (click)="goBack()" class="btn btn-primary">
-      🏠 Home
-    </button>
+
+    <!-- Fourth Row -->
+    <div class="card-row">
+      <div class="dashboard-card">
+        <div class="card-top">
+          <div class="card-icon enabled-icon">
+            <i class="fa fa-fire"></i>
+          </div>
+          <div class="card-value">{{ dashboardData.burningEnabled || 0 }}</div>
+        </div>
+        <p class="card-label">Burning Enabled</p>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-top">
+          <div class="card-icon burning-error-icon">
+            <i class="fa fa-exclamation-circle"></i>
+          </div>
+          <div class="card-value">0</div>
+        </div>
+        <p class="card-label">Burning Error</p>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-top">
+          <div class="card-icon cycle-icon">
+            <i class="fa fa-sync"></i>
+          </div>
+          <div class="card-value">{{ dashboardData.totalBurningCycles || 0 }}</div>
+        </div>
+        <p class="card-label">Total Burning Cycle</p>
+      </div>
+    </div>
   </div>
- 
-  
-  <!-- Right side map section -->
-  <div class="map-section">
+
+  <!-- Right Section: Map -->
+  <div class="map-section w-60">
     <div class="map-container shadow-lg rounded">
       <div id="map" style="width: 100%; height: 650px;"></div>
-</div>
-<div class="map-controls bg-white p-3 mt-3 rounded shadow">
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="radio" name="mapViewOptions" id="radioMachine" value="machine"
-           [(ngModel)]="selectedMapView" (change)="changeMapView('machine')">
-    <label class="form-check-label" for="radioMachine">Machines</label>
-  </div>
-  
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="radio" name="mapViewOptions" id="radioZone" value="zone"
-           [(ngModel)]="selectedMapView" (change)="changeMapView('zone')">
-    <label class="form-check-label" for="radioZone">Zone</label>
-  </div>
-  
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="radio" name="mapViewOptions" id="radioWard" value="ward"
-           [(ngModel)]="selectedMapView" (change)="changeMapView('ward')">
-    <label class="form-check-label" for="radioWard">Ward</label>
-  </div>
-  
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="radio" name="mapViewOptions" id="radioBeat" value="beat"
-           [(ngModel)]="selectedMapView" (change)="changeMapView('beat')">
-    <label class="form-check-label" for="radioBeat">Beat</label>
-  </div>
-</div>
-  
-  <!-- Loading spinner -->
-  <!-- <div class="loading-overlay" *ngIf="isLoading">
-    <div class="spinner"></div>
-  </div> -->
-  
-  <!-- Error message -->
-  <!-- <div class="error-message" *ngIf="hasError">
-    <p>{{ errorMessage }}</p>
-    <button (click)="fetchDashboardData()">Retry</button>
-  </div> -->
-</div>
-
-
-
-
-<!-- <div class="p-4">
-  <h2 class="text-2xl font-bold text-center mb-4">Zone: 1</h2>
-
-  <div class="grid grid-cols-2 gap-4">
-    <div>
-      <canvas baseChart
-        [data]="onlineOfflineData"
-        [options]="chartOptions"
-        chartType="doughnut">
-      </canvas>
     </div>
-    <div>
-      <canvas baseChart
-        [data]="stockStatusData"
-        [options]="chartOptions"
-        chartType="doughnut">
-      </canvas>
-    </div>
-  </div>
 
-  <div class="grid grid-cols-4 gap-4 mt-6">
-    <div *ngFor="let item of metrics" class="bg-gray-100 p-3 text-center rounded shadow">
-      <div class="text-xl font-semibold">{{ item.value }}</div>
-      <div class="text-sm">{{ item.label }}</div>
-    </div>
-  </div>
-</div> -->
-
-<!-- <div class="chart-row mt-2">
-  <div>
-  <c-card class="chart-card"> 
-      <c-card-header style="background-color:#e6f2f4;">
-        <h2 style="padding:8px; font-size:20px;">Machine Status</h2> 
-      </c-card-header>
-      <c-card-body style="display:flex; justify-content:center; align-items:center;">
-        <canvas id="canvasDoughnut" width="350" height="230" style="display:block;"></canvas>
-
-      </c-card-body>
-    </c-card>
-  </div>
- 
-  <div>
-    <c-card class="chart-card">
-      <c-card-header style="background-color:#e6f2f4;">
-        <h2 style="padding:8px; font-size:20px;">Stock Status</h2>
-      </c-card-header>
-      <c-card-body style="display:flex; justify-content:center; align-items:center;">
-        <canvas id="canvasStock" width="350" height="230" style="display:block;"></canvas>
-
-      </c-card-body>
-    </c-card>
-  </div>
-</div>
-
-
-<div class="dashboard-page">
-  <div class="dashboard-grid">
-    <div class="left-panel">
-    </div>
-    
-    <div class="right-panel">
-      <div class="map-container">
+    <!-- Map View Controls -->
+    <div class="map-controls bg-white p-3 mt-3 rounded shadow">
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioMachine" value="machine"
+               [(ngModel)]="selectedMapView" (change)="changeMapView('machine')">
+        <label class="form-check-label" for="radioMachine">Machines</label>
       </div>
-      
-      <div class="map-controls">
-        <div class="radio-group">
-          <label class="radio-option">
-            <input type="radio" name="mapType" value="auto" checked>
-            <span>Auto</span>
-          </label>
-          
-          <label class="radio-option">
-            <input type="radio" name="mapType" value="zone">
-            <span>Zone</span>
-          </label>
-          
-          <label class="radio-option">
-            <input type="radio" name="mapType" value="ward">
-            <span>Ward</span>
-          </label>
-          
-          <label class="radio-option">
-            <input type="radio" name="mapType" value="beat">
-            <span>Beat</span>
-          </label>
-          
-          <label class="radio-option">
-            <input type="radio" name="mapType" value="machine"> -->
 
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioZone" value="zone"
+               [(ngModel)]="selectedMapView" (change)="changeMapView('zone')">
+        <label class="form-check-label" for="radioZone">Zone</label>
+      </div>
 
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioWard" value="ward"
+               [(ngModel)]="selectedMapView" (change)="changeMapView('ward')">
+        <label class="form-check-label" for="radioWard">Ward</label>
+      </div>
 
-
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="mapViewOptions" id="radioBeat" value="beat"
+               [(ngModel)]="selectedMapView" (change)="changeMapView('beat')">
+        <label class="form-check-label" for="radioBeat">Beat</label>
+      </div>
+    </div>
+  </div>
+</div>
