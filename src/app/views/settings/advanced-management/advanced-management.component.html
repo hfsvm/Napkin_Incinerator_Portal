@@ -636,6 +636,7 @@
             </td>
             <td>{{ machine.machineid }}</td>
             <td>{{ machine.uid }}</td>
+            <td>{{ machine.pcbNumber }}</td>
             <td>{{ machine.installedStatus }}</td>
             <td>
               <select class="form-select" [(ngModel)]="machine.selectedUpdatedVersion">
@@ -754,6 +755,21 @@
           <input type="text" class="form-control" [(ngModel)]="uid" />
         </div>
       </div>
+      
+      <!-- New Row for PCB No and MC SR No -->
+<div class="row">
+  <!-- PCB No Input -->
+  <div class="col-md-6 mb-3">
+    <label class="form-label">PCB No</label>
+    <input type="text" class="form-control" [(ngModel)]="pcbNo" />
+  </div>
+
+  <!-- MC SR No Input -->
+  <div class="col-md-6 mb-3">
+    <label class="form-label">MC SR No</label>
+    <input type="text" class="form-control" [(ngModel)]="mcSrNo" />
+  </div>
+</div>
  
       <!-- Installed Date Input -->
       <div class="col-md-2 mb-2">

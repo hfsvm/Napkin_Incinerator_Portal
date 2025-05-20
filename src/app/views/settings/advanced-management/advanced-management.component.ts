@@ -28,6 +28,8 @@ export class AdvancedManagementComponent implements OnInit {
   selectedMachineInstalledId: string = '';
 installedStatus: string = ''; // Installed status (1 or 0)
 uid: string = '';
+pcbNo: string = '';
+mcSrNo: string = '';
   schedulerHour: number | null = null;
   schedulerMinute: number | null = null;
   merchantId: string = '';
@@ -829,7 +831,8 @@ submitUpdatedConfig(): void {
   }
   
   onSubmitMachineInstalled(): void {
-    if (!this.selectedMachineId || !this.installedStatus || !this.uid) {
+    
+    if (!this.selectedMachineId || !this.installedStatus || !this.uid ) {
       this.showNotification('⚠️ Please fill all fields.', 'error');
       return;
     }
@@ -838,6 +841,8 @@ submitUpdatedConfig(): void {
       machineId: this.selectedMachineId,
       machineInfo: {
         uid: this.uid,
+        pcbNo: this.pcbNo,
+        mcSrNo: this.mcSrNo,
         installed: Number(this.installedStatus),
         installedDate: this.installedDate.toString()
         
@@ -1115,6 +1120,8 @@ submitUpdatedConfig(): void {
     this.selectedMachineInstalledId = '';
     this.installedStatus = '';
     this.uid = '';
+    this.pcbNo = '';
+    this.mcSrNo = '';
     this.notificationMessage = '';
     this.notificationType = '';
     this.selectedFotaMachineId = '';
