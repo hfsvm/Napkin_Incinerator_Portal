@@ -587,11 +587,11 @@ manualRefresh(): void {
     });
  
     this.map.on('load', () => {
-      this.map.resize();
+      this.map.resize();      
       this.updateMap();
       console.log('Map bounds:', this.map.getBounds());
     });
- 
+    this.map.setPadding({ right: 400, top: 50 });
     this.map.on('moveend', () => this.updateMap());
     this.map.on('zoomend', () => this.updateMap());
   }

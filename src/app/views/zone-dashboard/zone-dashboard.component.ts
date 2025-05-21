@@ -377,6 +377,7 @@ ngOnDestroy(): void {
     
     this.map.setCenter([lng, lat]);
     this.map.setZoom(11);
+    this.map.setPadding({ right: 400, top: 300 });
     
     const markerEl = document.createElement('div');
     markerEl.textContent = `${zone}`;
@@ -452,6 +453,7 @@ ngOnDestroy(): void {
     if (firstMachine.zonelatitude && firstMachine.zonelongitude) {
       this.map.setCenter([firstMachine.zonelongitude, firstMachine.zonelatitude]);
       this.map.setZoom(11);
+      this.map.setPadding({ right: 400, top: 300 });
     }
     
     uniqueWards.forEach(wardName => {
@@ -547,6 +549,7 @@ ngOnDestroy(): void {
     if (firstMachine.zonelatitude && firstMachine.zonelongitude) {
       this.map.setCenter([firstMachine.zonelongitude, firstMachine.zonelatitude]);
       this.map.setZoom(11);
+      this.map.setPadding({ right: 400, top: 300 });
     }
     
     uniqueBeats.forEach(beatName => {
@@ -646,6 +649,7 @@ ngOnDestroy(): void {
     if (firstMachine.zonelatitude && firstMachine.zonelongitude) {
       this.map.setCenter([firstMachine.zonelongitude, firstMachine.zonelatitude]);
       this.map.setZoom(11);
+      this.map.setPadding({ right: 400, top: 300 });
     }
     
     const locationMap = new Map<string, number>();
