@@ -1,78 +1,88 @@
 <div class="container">
-    <!-- First Card Row - Machines Stats -->
-    <div class="row clearfix mb-2">  <!-- Changed mb-4 to mb-2 -->
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="form-group">
-                <div class="card-container">
-                    <div class="logo-border">
-                        <img src="https://img.icons8.com/ios/50/FFFFFF/vending-machine.png" alt="vending-machine" />
-                    </div>
-                    <div class="card-content">
-                        <div class="card-text">
-                            <span class="card-title">Total Machines</span>
-                            <span class="card-value">{{ totalMachines }}</span>
-                        </div>
-                    </div>
-                </div>
+  <!-- First Card Row - Machines Stats -->
+  <div class="row clearfix mb-2">
+    <!-- Changed mb-4 to mb-2 -->
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="form-group">
+        <div class="card-container">
+          <div class="logo-border">
+            <img
+              src="https://img.icons8.com/ios/50/FFFFFF/vending-machine.png"
+              alt="vending-machine"
+            />
+          </div>
+          <div class="card-content">
+            <div class="card-text">
+              <span class="card-title">Total Machines</span>
+              <span class="card-value">{{ totalMachines }}</span>
             </div>
+          </div>
         </div>
-
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="form-group">
-                <div class="card-container active">
-                    <div class="logo-border">
-                        <img src="https://img.icons8.com/ios/50/FFFFFF/gears.png" alt="active-machines" />
-                    </div>
-                    <div class="card-content">
-                        <div class="card-text">
-                            <span class="card-title">Active Machines</span>
-                            <span class="card-value">{{ activeMachines }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="form-group">
-                <div class="card-container inactive">
-                    <div class="logo-border">
-                        <img src="https://img.icons8.com/ios-filled/50/FFFFFF/recycle-bin.png" alt="inactive-machines" />
-                    </div>
-                    <div class="card-content">
-                        <div class="card-text">
-                            <span class="card-title">Total Burning Cycles</span>
-                            <span class="card-value">{{ totalburningcycles }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="form-group">
-                <div class="card-container napkins">
-                    <div class="logo-border">
-                        <img src="assets/img/icon/pad1.png" alt="napkin-dispenser"/>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-text">
-                            <span class="card-title">Napkins Dispensed</span>
-                            <span class="card-value">{{ napkinsDispensed }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <!-- Status Reports with Charts Section -->
-    <!-- <div class="refresh-circle">
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="form-group">
+        <div class="card-container active">
+          <div class="logo-border">
+            <img
+              src="https://img.icons8.com/ios/50/FFFFFF/gears.png"
+              alt="active-machines"
+            />
+          </div>
+          <div class="card-content">
+            <div class="card-text">
+              <span class="card-title">Active Machines</span>
+              <span class="card-value">{{ activeMachines }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="form-group">
+        <div class="card-container inactive">
+          <div class="logo-border">
+            <img
+              src="https://img.icons8.com/ios-filled/50/FFFFFF/recycle-bin.png"
+              alt="inactive-machines"
+            />
+          </div>
+          <div class="card-content">
+            <div class="card-text">
+              <span class="card-title">Total Burning Cycles</span>
+              <span class="card-value">{{ totalburningcycles }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="form-group">
+        <div class="card-container napkins">
+          <div class="logo-border">
+            <img src="assets/img/icon/pad1.png" alt="napkin-dispenser" />
+          </div>
+          <div class="card-content">
+            <div class="card-text">
+              <span class="card-title">Napkins Dispensed</span>
+              <span class="card-value">{{ napkinsDispensed }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Reports with Charts Section -->
+  <!-- <div class="refresh-circle">
         <span class="time">{{ formattedRefreshTime }}</span>
     </div> -->
 
-   <div class="row mt-2">
-  <!-- Machine Status Pie Chart -->
+  <div class="row mt-2">
+    <!-- Machine Status Pie Chart -->
     <div class="col-lg-6 col-md-12 mb-3">
       <div class="card h-100">
         <div class="card-header bg-light">
@@ -95,8 +105,5 @@
         </div>
       </div>
     </div>
-
-
-</div>
-
+  </div>
 </div>

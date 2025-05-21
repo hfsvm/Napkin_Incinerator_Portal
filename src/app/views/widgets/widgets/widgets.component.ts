@@ -4,7 +4,7 @@ import {
   OnDestroy,
   ViewEncapsulation,
   ElementRef,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import * as d3 from 'd3';
@@ -16,7 +16,7 @@ import { DashboardRefreshService } from '../../../service/dashboard-refresh.serv
   selector: 'app-widgets',
   templateUrl: './widgets.component.html',
   styleUrls: ['./widgets.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
 })
 export class WidgetsComponent implements AfterContentInit, OnDestroy {
   @ViewChild('machineChart') machineChartRef!: ElementRef;
@@ -49,10 +49,11 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     if (this.merchantId) {
       this.fetchDashboardData();
       this.startRefreshCountdown();
-      this.refreshSubscription = this.dashboardRefreshService.refresh$.subscribe(() => {
-        this.fetchDashboardData();
-        this.resetRefreshCountdown();
-      });
+      this.refreshSubscription =
+        this.dashboardRefreshService.refresh$.subscribe(() => {
+          this.fetchDashboardData();
+          this.resetRefreshCountdown();
+        });
     }
   }
 
@@ -65,7 +66,8 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     this.refreshCountdown = this.refreshInterval;
     this.countdownInterval = setInterval(() => {
       this.refreshCountdown--;
-      if (this.refreshCountdown <= 0) this.refreshCountdown = this.refreshInterval;
+      if (this.refreshCountdown <= 0)
+        this.refreshCountdown = this.refreshInterval;
     }, 1000);
   }
 
@@ -89,7 +91,7 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
       level3: userDetails.companyName?.[0]?.ClientId || '',
       machineId: userDetails.machineId?.join(',') || '',
       client: userDetails.clientId,
-      project: userDetails.projectId
+      project: userDetails.projectId,
     };
 
     this.dataService.getMachineDashboardSummary(queryParams).subscribe({
@@ -102,7 +104,7 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
             totalCollection = 0,
             itemsDispensed = 0,
             stockEmpty = 0,
-            stockLow = 0
+            stockLow = 0,
           } = response.data;
 
           this.totalMachines = machinesInstalled;
@@ -118,144 +120,159 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
           this.updateMachineChart();
           this.updateStockChart();
         }
-      }
+      },
     });
   }
 
   updateMachineChart(): void {
     const data = [
       { label: 'Online', value: this.activeMachines, color: '#4CAF50' },
-      { label: 'Offline', value: this.inactiveMachines, color: '#D32F2F' }
+      { label: 'Offline', value: this.inactiveMachines, color: '#D32F2F' },
     ];
-    this.drawD3PieChart(this.machineChartRef.nativeElement, data,0);
+    this.drawD3PieChart(this.machineChartRef.nativeElement, data, 0);
   }
 
   updateStockChart(): void {
     const data = [
       { label: 'Full Stock', value: this.okStock, color: '#4CAF50' },
       { label: 'Low Stock', value: this.lowStock, color: '#FFC107' },
-      { label: 'Empty Stock', value: this.emptyStock, color: '#D32F2F' }
+      { label: 'Empty Stock', value: this.emptyStock, color: '#D32F2F' },
     ];
-    this.drawD3PieChart(this.stockChartRef.nativeElement, data,50);
+    this.drawD3PieChart(this.stockChartRef.nativeElement, data, 50);
   }
 
- drawD3PieChart(
-  container: HTMLElement,
-  data: { label: string; value: number; color: string }[],
-  innerRadius: number = 0 // default 0 for full pie
-): void {
-  // Clear container
-  d3.select(container).selectAll('*').remove();
+  drawD3PieChart(
+    container: HTMLElement,
+    data: { label: string; value: number; color: string }[],
+    marginOffset: number // controls donut hole size
+  ): void {
+    // Clear previous chart
+    d3.select(container).selectAll('*').remove();
 
-  // Ensure container has relative position
-  d3.select(container).style('position', 'relative');
+    const width = 400;
+    const height = 400;
+    const radius = Math.min(width, height) / 2.5;
 
-  const width = 300;
-  const height = 230;
-  const radius = Math.min(width, height) / 2;
+    const svg = d3
+      .select(container)
+      .append('svg')
+      .attr('width', width)
+      .attr('height', height)
+      .append('g')
+      .attr('transform', `translate(${width / 2}, ${height / 2})`);
 
-  const svg = d3.select(container)
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height)
-    .style('display', 'block')
-    .style('margin', '0 auto')
-    .append('g')
-    .attr('transform', `translate(${width / 2}, ${height / 2})`);
+    const pie = d3.pie<any>().value((d: any) => d.value);
 
-  const pie = d3.pie<any>()
-    .value(d => d.value)
-    .sort(null);
+    // Main arc for drawing slices
+    const arc = d3
+      .arc<any>()
+      .innerRadius(marginOffset)
+      .outerRadius(radius - 15);
 
-  const arc = d3.arc<any>()
-    .innerRadius(innerRadius)
-    .outerRadius(radius);
+    // Outer arc for placing labels outside
+    const outerArc = d3
+      .arc<any>()
+      .innerRadius(radius * 0.9)
+      .outerRadius(radius * 0.9);
 
-  const arcs = svg.selectAll('arc')
-    .data(pie(data))
-    .enter()
-    .append('g')
-    .attr('class', 'arc');
+    // Custom arc for reducing the starting point of arrow line
+    const labelLineStartArc = d3
+      .arc<any>()
+      .innerRadius((radius + marginOffset) / 2) // midway between outer and inner
+      .outerRadius((radius + marginOffset) / 2);
 
-  const tooltip = d3.select(container)
-    .append('div')
-    .style('position', 'absolute')
-    .style('z-index', '1000')
-    .style('background', 'rgba(0,0,0,0.7)')
-    .style('color', '#fff')
-    .style('padding', '4px 8px')
-    .style('border-radius', '4px')
-    .style('pointer-events', 'none')
-    .style('font-size', '12px')
-    .style('display', 'none');
+    const total = data.reduce((sum, d) => sum + d.value, 0);
+    const pieData = pie(data);
 
-  // Draw pie slices with tooltip behavior
-  arcs.append('path')
-    .attr('d', arc)
-    .attr('fill', d => d.data.color)
-    .on('mouseover', function (event, d) {
-      tooltip
-        .style('display', 'block')
-        .html(`<strong>${d.data.label}</strong>: ${d.data.value}`);
-    })
-    .on('mousemove', function (event) {
-      const bounds = container.getBoundingClientRect();
-      tooltip
-        .style('left', `${event.clientX - bounds.left + 10}px`)
-        .style('top', `${event.clientY - bounds.top - 28}px`);
-    })
-    .on('mouseout', function () {
-      tooltip.style('display', 'none');
+    const arcs = svg.selectAll('arc').data(pieData).enter().append('g');
+
+    // Draw pie slices
+    arcs
+      .append('path')
+      .attr('d', arc)
+      .attr('fill', (d: any) => d.data.color);
+
+    // Labels and connecting lines
+    arcs.each(function (d: any) {
+      const group = d3.select(this);
+      const percent = total === 0 ? 0 : (d.data.value / total) * 100;
+
+      if (percent <= 0) return;
+
+      const labelText = `${percent.toFixed(1)}%`;
+
+      const centroid = labelLineStartArc.centroid(d); // reduced starting point
+      const outerCentroid = outerArc.centroid(d);
+      const midAngle = (d.startAngle + d.endAngle) / 2;
+      const direction = midAngle < Math.PI ? 1 : -1;
+
+      if (percent > 5) {
+        group
+          .append('text')
+          .attr('transform', `translate(${centroid})`)
+          .attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'middle')
+          .text(labelText)
+          .style('font-size', '12px')
+          .style('fill', '#000')
+          .style('font-weight', 'bold');
+      } else {
+        const labelPos = [
+          outerCentroid[0] + 20 * direction,
+          outerCentroid[1] - 20,
+        ];
+
+        group
+          .append('polyline')
+          .attr('points', [centroid, outerCentroid, labelPos].join(' '))
+          .attr('stroke', '#000')
+          .attr('fill', 'none')
+          .attr('stroke-width', 1);
+
+        group
+          .append('text')
+          .attr('transform', `translate(${labelPos})`)
+          .attr('text-anchor', direction === 1 ? 'start' : 'end')
+          .attr('alignment-baseline', 'middle')
+          .attr('dy', '-0.5em')
+          .text(labelText)
+          .style('font-size', '12px')
+          .style('fill', '#000')
+          .style('font-weight', 'bold');
+      }
     });
 
-  // Add percentage text inside slices
-  const total = d3.sum(data, d => d.value);
-
-  arcs.append('text')
-  .attr('transform', d => `translate(${arc.centroid(d)})`)
-  .attr('text-anchor', 'middle')
-  .attr('dy', '0.35em')
-  .style('font-size', '12px')
-  .style('fill', '#fff')
-  .text(d => {
-    const percent = total === 0 ? 0 : (d.data.value / total) * 100;
-    return percent > 0 ? `${percent.toFixed(1)}%` : null; // 👈 Only show if > 0
-  });
-
-
-  // Draw legend
-  const legend = d3.select(container)
-    .append('div')
-    .attr('class', 'd3-legend')
-    .style('display', 'flex')
-    .style('justify-content', 'center')
-    .style('flex-wrap', 'wrap')
-    .style('margin-top', '15px');
-
-  data.forEach(d => {
-    const item = legend.append('div')
+    // Color legend below the chart
+    const legend = d3
+      .select(container)
+      .append('div')
+      .attr('class', 'd3-legend')
       .style('display', 'flex')
-      .style('align-items', 'center')
-      .style('margin', '0 10px');
+      .style('justify-content', 'center')
+      .style('flex-wrap', 'wrap')
+      .style('margin-top', '10px')
+      .style('gap', '12px');
 
+    data.forEach((d) => {
+      const item = legend
+        .append('div')
+        .style('display', 'flex')
+        .style('align-items', 'center')
+        .style('margin', '0 8px');
 
-      item.append('div')
-  .style('width', '14px')
-  .style('height', '14px')
-  .style('background-color', d.color)
-  .style('margin-right', '6px')
-  .style('border-radius', '50%');  // ← Circle
+      item
+        .append('div')
+        .style('width', '14px')
+        .style('height', '14px')
+        .style('background-color', d.color)
+        .style('margin-right', '6px')
+        .style('border-radius', '50%');
 
-    item.append('span')
-      .text(d.label)
-      .style('font-size', '13px')
-      .style('color', '#333');
-  });
-}
-
-
-
-
-
-
+      item
+        .append('span')
+        .text(d.label)
+        .style('font-size', '13px')
+        .style('color', '#333');
+    });
+  }
 }
