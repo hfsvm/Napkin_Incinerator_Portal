@@ -1231,12 +1231,14 @@ submitUpdatedConfig(): void {
   }
  
   dropdownOpen = false;
+  dropdownOpenMachine = false;
 machineSearchTerm = '';
  
  
 selectMachine(id: string) {
   this.selectedMachineId = id;
   this.dropdownOpen = false;
+  this.dropdownOpenMachine = false;
   this.onMachineChange();
  
 }

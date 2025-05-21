@@ -1151,12 +1151,14 @@ this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe({
       this.projects = this.fullData.map((p: any) => ({
         ProjectId: p.projectId,
         projectname: p.projectName
+
       }));
- 
- 
-     
- 
-   
+      
+      
+
+
+      this.selectedProjects = this.projects.map(p => p.ProjectId);
+      this.rebuildFilterChain('projects');
       console.log("Hierarchy Data: ", this.fullData);
     }
   },
@@ -1165,6 +1167,7 @@ this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe({
   }
 });
 }
+
  
 // // Handle dropdown toggling
 // toggleDropdown(key: string) {
@@ -1624,6 +1627,7 @@ filterStates() {
       }
     });
   });
+  this.selectedZones = [...this.zones];
 }
  
 filterWards() {
@@ -1648,6 +1652,7 @@ filterWards() {
       }
     });
   });
+  this.selectedWards = [...this.wards];
 }
  
 filterSubZones() {
@@ -1676,6 +1681,7 @@ filterSubZones() {
       }
     });
   });
+  this.selectedSubZones = [...this.subZones];
 }
  
 filterWardList() {
@@ -1708,6 +1714,7 @@ filterWardList() {
       }
     });
   });
+  this.selectedWardList = [...this.wardList];
 }
  
 filterBeatList() {
@@ -1744,6 +1751,7 @@ filterBeatList() {
       }
     });
   });
+  this.selectedBeatList = [...this.beatList];
 }
  
 filterMachines() {

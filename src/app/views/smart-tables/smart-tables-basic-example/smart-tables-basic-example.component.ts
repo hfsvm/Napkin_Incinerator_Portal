@@ -414,6 +414,8 @@ debugger;
 // Check if selected project (client) is BMC
 const selectedProject = this.fullData.find(p => p.projectName.toLowerCase().includes('bmc'));
 this.isBmcClient = !!selectedProject;
+this.selectedProjects = this.projects.map(p => p.ProjectId);
+this.rebuildFilterChain('projects');
       
 
 
@@ -573,7 +575,7 @@ filterStates() {
       }
     });
   });
- 
+ this.selectedZones = [...this.zones];
  // this.filterWards();
 }
  
@@ -593,7 +595,7 @@ filterWards() {
       }
     });
   });
- 
+ this.selectedWards = [...this.wards];
  // this.filterSubZones();
 }
  
@@ -617,7 +619,7 @@ filterSubZones() {
       }
     });
   });
- 
+ this.selectedSubZones = [...this.subZones];
  // this.filterWardList();
 }
  
@@ -645,7 +647,7 @@ filterWardList() {
       }
     });
   });
- 
+  this.selectedWardList = [...this.wardList];
   // this.filterBeatList();
 }
  
@@ -678,7 +680,7 @@ filterBeatList() {
       }
     });
   });
- 
+ this.selectedBeatList = [...this.beatList];
   // this.filterMachines(); // Optional next step
 }
  
@@ -1478,17 +1480,23 @@ getLastTwoParts(address: string | null): string {
  
  
 exportToExcel() {
-const table = document.querySelector('.report-table') as HTMLTableElement;
-if (!table) {
-  console.error("Table not found!");
-  return;
-}
- 
-const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(table);
-const wb: XLSX.WorkBook = XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(wb, ws, "Machine Report");
- 
-XLSX.writeFile(wb, 'Machine_Report.xlsx');
+  // Assume 'filteredData' is the array that holds all filtered rows
+  const filteredData = this.filteredData; // replace with your actual data variable
+
+  if (!filteredData || filteredData.length === 0) {
+    console.error("No data to export!");
+    return;
+  }
+
+  // Convert JSON to worksheet
+  const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
+
+  // Create workbook and append worksheet
+  const wb: XLSX.WorkBook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Machine Report");
+
+  // Save to file
+  XLSX.writeFile(wb, 'Machine_Report.xlsx');
 }
  
  
