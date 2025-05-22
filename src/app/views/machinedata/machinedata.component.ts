@@ -1932,6 +1932,9 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     this.selectedWards = []; // Clear selected wards (districts)
     this.selectedBeats = []; // Clear selected beats (machines)
     this.selectedProjects = []; // Clear selected projects
+    this.selectedSubZones = []; // Clear selected Zones
+    this.selectedWardList = []; // Clear selected wards
+    this.selectedBeatList = []; // Clear selected beats
 
     // ✅ Reset search filters
     this.columnFilters = {
