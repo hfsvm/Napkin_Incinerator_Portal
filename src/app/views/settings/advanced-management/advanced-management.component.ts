@@ -1055,6 +1055,7 @@ submitUpdatedConfig(): void {
     
     this.selectedClientId = '';
     this.selectedMachineId = '';
+    this.selectedMachineIdPricing = '';
   }
   // switchTab(tabName: string):void {
   //   this.currentTab = tabName;
