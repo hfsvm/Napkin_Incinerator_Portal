@@ -1,9 +1,3 @@
-
-
-
-
-
-
 <div class="refresh-circle">
   <span class="time">{{ formattedRefreshTime }}</span>
 </div>
@@ -11,97 +5,188 @@
 <div class="filter-container">
   <form>
     <div class="row align-items-center">
-      
-      
-          <!-- Row 1: First 6 filters -->
+      <!-- Row 1: First 6 filters -->
 
-          
-          <div class="row filter">
-            <div class="col" *ngFor="let filter of [
-              { name: 'Client Name', key: 'projects', selected: selectedProjects, options: projects },
-              { name: 'State', key: 'zones', selected: selectedZones, options: zones },
-              { name: 'District', key: 'wards', selected: selectedWards, options: wards },
-              { name: 'Zone', key: 'selectedSubZones', selected: selectedSubZones, options: subZones },
+      <div class="row filter">
+        <div
+          class="col"
+          *ngFor="
+            let filter of [
+              {
+                name: 'Client Name',
+                key: 'projects',
+                selected: selectedProjects,
+                options: projects
+              },
+              {
+                name: 'State',
+                key: 'zones',
+                selected: selectedZones,
+                options: zones
+              },
+              {
+                name: 'District',
+                key: 'wards',
+                selected: selectedWards,
+                options: wards
+              },
+              {
+                name: 'Zone',
+                key: 'selectedSubZones',
+                selected: selectedSubZones,
+                options: subZones
+              }
+            ]
+          "
+        >
+          <ng-container
+            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"
+          ></ng-container>
+        </div>
+      </div>
 
-            ]">
-              <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"></ng-container>
-            </div>
-          </div>
-      
-          <!-- Row 2: Remaining 4 filters -->
-          <div class="row filter mt-3">
-            <div class="col" *ngFor="let filter of [
-              { name: 'Ward', key: 'selectedWardList', selected: selectedWardList, options: wardList },
-              { name: 'Beat', key: 'selectedBeatList', selected: selectedBeatList, options: beatList },
-              { name: 'Machines', key: 'beats', selected: selectedBeats, options: beats },
-            ]">
-              <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"></ng-container>
-            </div>
-            <div class="col">
-              <label>Start Date:</label>
+      <!-- Row 2: Remaining 4 filters -->
+      <div class="row filter mt-3">
+        <div
+          class="col"
+          *ngFor="
+            let filter of [
+              {
+                name: 'Ward',
+                key: 'selectedWardList',
+                selected: selectedWardList,
+                options: wardList
+              },
+              {
+                name: 'Beat',
+                key: 'selectedBeatList',
+                selected: selectedBeatList,
+                options: beatList
+              },
+              {
+                name: 'Machines',
+                key: 'beats',
+                selected: selectedBeats,
+                options: beats
+              }
+            ]
+          "
+        >
+          <ng-container
+            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"
+          ></ng-container>
+        </div>
+        <div class="col">
+          <label>Start Date:</label>
+          <input
+            type="date"
+            [(ngModel)]="startDate"
+            name="startDate"
+            class="form-control"
+            [max]="endDate"
+            (change)="onStartDateChange()"
+          />
+        </div>
+
+        <div class="col">
+          <label>End Date:</label>
+          <input
+            type="date"
+            [(ngModel)]="endDate"
+            name="endDate"
+            class="form-control"
+            [min]="startDate"
+            (change)="onEndDateChange()"
+          />
+        </div>
+      </div>
+
+      <!-- Dropdown Template -->
+      <ng-template #dropdownTemplate let-filter>
+        <label>{{ filter.name }}</label>
+        <div class="dropdown">
+          <button
+            class="btn btn-light dropdown-toggle w-100"
+            type="button"
+            [disabled]="
+              (filter.key === 'zones' && disabledStates) ||
+              (filter.key === 'wards' && disabledDistricts)
+            "
+            (click)="toggleDropdown(filter.key)"
+          >
+            {{
+              filter.selected.length
+                ? "Selected (" + filter.selected.length + ")"
+                : filter.name
+            }}
+          </button>
+          <div
+            class="dropdown-menu show"
+            *ngIf="dropdownOpen[filter.key]"
+            [id]="'dropdown-' + filter.key"
+          >
+            <div
+              *ngIf="
+                ['beats', 'wards', 'zones', 'projects'].includes(filter.key)
+              "
+              style="padding: 6px"
+            >
               <input
-                type="date"
-                [(ngModel)]="startDate"
-                name="startDate"
+                type="text"
                 class="form-control"
-                [max]="endDate"
-                (change)="onStartDateChange()" />
-              </div>
-              
-              <div class="col">
-              <label>End Date:</label>
-              <input
-                type="date"
-                [(ngModel)]="endDate"
-                name="endDate"
-                class="form-control"
-                [min]="startDate"
-                (change)="onEndDateChange()" />
-              </div>
-          </div>
-        
-      
-        <!-- Dropdown Template -->
-        <ng-template #dropdownTemplate let-filter>
-          <label>{{ filter.name }}</label>
-          <div class="dropdown">
-            <button 
-            class="btn btn-light dropdown-toggle w-100" 
-            type="button" 
-            [disabled]="(filter.key === 'zones' && disabledStates) || (filter.key === 'wards' && disabledDistricts)" 
-            (click)="toggleDropdown(filter.key)">
-                        {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : filter.name }}
-            </button>
-            <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]" [id]="'dropdown-' + filter.key">
-              <div *ngIf="['beats', 'wards', 'zones', 'projects'].includes(filter.key)" style="padding: 6px;">
-                <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchText[filter.key]" [ngModelOptions]="{standalone: true}" (click)="$event.stopPropagation()" />
-
-              </div>
-      
-              <label class="dropdown-item d-flex align-items-center" style="gap: 6px;">
-                <input type="checkbox" [checked]="filter.selected.length === filter.options.length && filter.options.length > 0" (change)="toggleSelectAll(filter.selected, filter.options, filter.key)">
-                <strong style="margin: 0;">Select All</strong>
-              </label>
-      
-              <label *ngFor="let option of filter.options | filterDropdown: searchText[filter.key]" class="dropdown-item">
-                <input type="checkbox" [checked]="filter.selected.includes(option.ProjectId || option.key || option)" 
-                       (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option, filter.key)">
-                {{ option.projectname || option.value || option }}
-              </label>
+                placeholder="Search..."
+                [(ngModel)]="searchText[filter.key]"
+                [ngModelOptions]="{ standalone: true }"
+                (click)="$event.stopPropagation()"
+              />
             </div>
+
+            <label
+              class="dropdown-item d-flex align-items-center"
+              style="gap: 6px"
+            >
+              <input
+                type="checkbox"
+                [checked]="
+                  filter.selected.length === filter.options.length &&
+                  filter.options.length > 0
+                "
+                (change)="
+                  toggleSelectAll(filter.selected, filter.options, filter.key)
+                "
+              />
+              <strong style="margin: 0">Select All</strong>
+            </label>
+
+            <label
+              *ngFor="
+                let option of filter.options
+                  | filterDropdown : searchText[filter.key]
+              "
+              class="dropdown-item"
+            >
+              <input
+                type="checkbox"
+                [checked]="
+                  filter.selected.includes(
+                    option.ProjectId || option.key || option
+                  )
+                "
+                (change)="
+                  toggleSelection(
+                    filter.selected,
+                    option.ProjectId || option.key || option,
+                    filter.key
+                  )
+                "
+              />
+              {{ option.projectname || option.value || option }}
+            </label>
           </div>
-        </ng-template>
-      
+        </div>
+      </ng-template>
 
-
-
-
-
-
-
-
-
-<!-- <div class="col">
+      <!-- <div class="col">
 <label>Start Date:</label>
 <input
   type="date"
@@ -123,275 +208,338 @@
   (change)="onEndDateChange()" />
 </div> -->
 
+      <div class="col-12 d-flex justify-content-between mt-2">
+        <button type="button" class="btn btn-sm" (click)="toggleSummaryType()">
+          {{ summaryType === "Daily" ? "Switch to Totals" : "Switch to Daily" }}
+        </button>
 
-<div class="col-12 d-flex justify-content-between mt-2">
-
-  <button type="button" class="btn btn-sm " (click)="toggleSummaryType()" >
-    {{ summaryType === 'Daily' ? 'Switch to Totals' : 'Switch to Daily' }}
-  </button>
-
- 
-<button type="button" class="btn btn-sm " (click)="loadReport()">
-Load Report
-</button>
-
+        <button type="button" class="btn btn-sm" (click)="loadReport()">
+          Load Report
+        </button>
+      </div>
+    </div>
+  </form>
 </div>
-</div>
-</form>
-</div>
-
-
 
 <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
-<div *ngIf="isLoading" >Loading...</div>
+<div *ngIf="isLoading">
+  <!-- Loading... -->
+  To view detailed reports, please click on "Load Report."
+</div>
 <div *ngIf="!isLoading">
-<table class="report-summary">
-<tr>
-<td><b>NO. OF MACHINES</b></td>
-<td>{{ reportsData.length }}</td>
-<td><b>REPORT TYPE</b></td>
-<td>{{ reportType }}</td>
-</tr>
+  <table class="report-summary">
+    <tr>
+      <td><b>NO. OF MACHINES</b></td>
+      <td>{{ reportsData.length }}</td>
+      <td><b>REPORT TYPE</b></td>
+      <td>{{ reportType }}</td>
+    </tr>
 
-<tr>
-<td><b>STATE</b></td>
-<td>All</td>
-<td><b>DISTRICT</b></td>
-<td>All</td>
-</tr>
+    <tr>
+      <td><b>STATE</b></td>
+      <td>All</td>
+      <td><b>DISTRICT</b></td>
+      <td>All</td>
+    </tr>
 
-<tr>
-<td><b>REPORT GENERATED</b></td>
-<td>{{ reportGenerated | date: 'dd-MMM-yyyy' }}</td>
-<td><b>TIME</b></td>
-<td>{{ reportGenerated | date: 'h:mm a' }}</td>
-</tr>
-<tr>
-<td><b>REPORT PERIOD</b></td>
-<td>{{ reportFromPeriod | date: 'dd-MMM-yyyy' }}</td>
-<td><b>TO</b></td>
-<td>{{ reportToPeriod | date: 'dd-MMM-yyyy' }}</td>
-</tr>
-</table>
+    <tr>
+      <td><b>REPORT GENERATED</b></td>
+      <td>{{ reportGenerated | date : "dd-MMM-yyyy" }}</td>
+      <td><b>TIME</b></td>
+      <td>{{ reportGenerated | date : "h:mm a" }}</td>
+    </tr>
+    <tr>
+      <td><b>REPORT PERIOD</b></td>
+      <td>{{ reportFromPeriod | date : "dd-MMM-yyyy" }}</td>
+      <td><b>TO</b></td>
+      <td>{{ reportToPeriod | date : "dd-MMM-yyyy" }}</td>
+    </tr>
+  </table>
 </div>
 
 <div class="search-wrapper">
-<label class="search-label">Search:</label>
-<div class="search-container">
-<input
-type="text"
-[value]="searchQuery"
-(input)="setSearchQuery($event.target.value)"
-placeholder="Search"
-class="search-input">
-<button class="search-button">
-<i class="fa fa-search"></i>
-</button>
+  <label class="search-label">Search:</label>
+  <div class="search-container">
+    <input
+      type="text"
+      [value]="searchQuery"
+      (input)="setSearchQuery($event.target.value)"
+      placeholder="Search"
+      class="search-input"
+    />
+    <button class="search-button">
+      <i class="fa fa-search"></i>
+    </button>
+  </div>
 </div>
-</div>
-
 
 <div class="report-container">
-
-<div class="d-flex justify-content-end mb-2">
-
-<button class="btn  btn-sm" (click)="exportToExcel()">⬇ Export to Excel</button>
-</div>
-<table class="report-table full-width" border="1">
-<thead class="headers">
-<tr>
-<th rowspan="2">SR. NO.</th>
-<th rowspan="2">MACHINE ID</th>
-<th rowspan="2">MACHINE LOCATION</th>
-<th rowspan="2">ADDRESS</th>
-<th rowspan="2">MACHINE TYPE</th>
-<th rowspan="2">TOILET TYPE</th>
-<!-- <th rowspan="2">TOILET TYPE</th> -->
-<th colspan="3">VENDING</th>
-<th colspan="3">INCINERATOR</th>
-</tr>
-<tr>
-<th>DATE</th>
-<th>QTY</th>      
-<th>CASH</th>
-<th>ON TIME</th>
-<th>BURN CYCLES</th>
-<th>SAN NAPKINS BURNT</th>
-</tr>
-</thead>
-
-<tbody>
-<ng-container *ngFor="let machine of paginatedData">
-<ng-container *ngIf="summaryType === 'Daily'">
-  <!-- For each machine, we'll create separate rows for vending and incinerator data -->
-  <ng-container *ngFor="let txn of machine.transactions; let txnIndex = index">
-    <!-- Handle all rows including Total in the same structure -->
-    <ng-container *ngIf="txn.date !== 'Total'">
-      <!-- Vending row -->
+  <div class="d-flex justify-content-end mb-2">
+    <button class="btn btn-sm" (click)="exportToExcel()">
+      ⬇ Export to Excel
+    </button>
+  </div>
+  <table class="report-table full-width" border="1">
+    <thead class="headers">
       <tr>
-        <!-- These cells span both vending and incinerator rows -->
-        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1">
-          {{ getSerialNumber(machine) }}
-        </td>
-        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1">
-          <a 
-            [routerLink]="machine.isWorking ? ['/machine-report', machine.machineId] : null"
-            (click)="!machine.isWorking && $event.preventDefault()"
-            [class.disabled-link]="!machine.isWorking"
+        <th rowspan="2">SR. NO.</th>
+        <th rowspan="2">MACHINE ID</th>
+        <th rowspan="2">MACHINE LOCATION</th>
+        <th rowspan="2">ADDRESS</th>
+        <th rowspan="2">MACHINE TYPE</th>
+        <th rowspan="2">TOILET TYPE</th>
+        <!-- <th rowspan="2">TOILET TYPE</th> -->
+        <th colspan="3">VENDING</th>
+        <th colspan="3">INCINERATOR</th>
+      </tr>
+      <tr>
+        <th>DATE</th>
+        <th>QTY</th>
+        <th>CASH</th>
+        <th>ON TIME</th>
+        <th>BURN CYCLES</th>
+        <th>SAN NAPKINS BURNT</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <ng-container *ngFor="let machine of paginatedData">
+        <ng-container *ngIf="summaryType === 'Daily'">
+          <!-- For each machine, we'll create separate rows for vending and incinerator data -->
+          <ng-container
+            *ngFor="let txn of machine.transactions; let txnIndex = index"
           >
-            {{ machine.machineId }}
-          </a>
-        </td>
-        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1" class="machine-location">
-          <div>Zone: {{ machine.Zone }}</div>
-          <div>Ward: {{ machine.Ward }}</div>
-          <div>Beat: {{ machine.Beat }}</div>
-        </td>
-        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1">{{ machine.address || '' }}</td>
-       
-        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1">
-          {{ machine.machineType }}
-        </td>
+            <!-- Handle all rows including Total in the same structure -->
+            <ng-container *ngIf="txn.date !== 'Total'">
+              <!-- Vending row -->
+              <tr>
+                <!-- These cells span both vending and incinerator rows -->
+                <td
+                  *ngIf="txnIndex === 0"
+                  [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1"
+                >
+                  {{ getSerialNumber(machine) }}
+                </td>
+                <td
+                  *ngIf="txnIndex === 0"
+                  [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1"
+                >
+                  <a
+                    [routerLink]="
+                      machine.isWorking
+                        ? ['/machine-report', machine.machineId]
+                        : null
+                    "
+                    (click)="!machine.isWorking && $event.preventDefault()"
+                    [class.disabled-link]="!machine.isWorking"
+                  >
+                    {{ machine.machineId }}
+                  </a>
+                </td>
+                <td
+                  *ngIf="txnIndex === 0"
+                  [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1"
+                  class="machine-location"
+                >
+                  <div>Zone: {{ machine.Zone }}</div>
+                  <div>Ward: {{ machine.Ward }}</div>
+                  <div>Beat: {{ machine.Beat }}</div>
+                </td>
+                <td
+                  *ngIf="txnIndex === 0"
+                  [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1"
+                >
+                  {{ machine.address || "" }}
+                </td>
 
-        <td *ngIf="txnIndex === 0" [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1">
-          {{ machine.toiletType }}
-        </td>
-        
-        <!-- Vending specific data -->
-        <td>{{ txn.date || '-' }}</td>
-        <td>{{ txn.qty ?? 0 }}</td>
-        <td>{{ txn.cash ?? '₹ 0' }}</td>
-        <td>-</td> <!-- Empty cell for ON TIME -->
-        <td>0</td> <!-- Empty cell for BURN CYCLES -->
-        <td>0</td> <!-- Empty cell for SAN NAPKINS BURNT -->
-      </tr>
-      
-      <!-- Incinerator row -->
-      <tr>
-        <!-- Incinerator specific data - note the date field shows the onTime value -->
-        <td>{{ txn.onTime !== '-' ? txn.onTime : '-' }}</td>
-        <td>0</td> <!-- Empty cell for QTY -->
-        <td>₹ 0</td> <!-- Empty cell for CASH -->
-        <td>
-          <!-- Display onTime -->
-          <ng-container *ngIf="txn.onTime !== '-'">
-            <div>{{ txn.onTime }}</div>
-            <div *ngIf="txn.onTimeAvgPerDay !== '-'">{{ txn.onTimeAvgPerDay }}</div>
+                <td
+                  *ngIf="txnIndex === 0"
+                  [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1"
+                >
+                  {{ machine.machineType }}
+                </td>
+
+                <td
+                  *ngIf="txnIndex === 0"
+                  [attr.rowspan]="(machine.transactions.length - 1) * 2 + 1"
+                >
+                  {{ machine.toiletType }}
+                </td>
+
+                <!-- Vending specific data -->
+                <td>{{ txn.date || "-" }}</td>
+                <td>{{ txn.qty ?? 0 }}</td>
+                <td>{{ txn.cash ?? "₹ 0" }}</td>
+                <td>-</td>
+                <!-- Empty cell for ON TIME -->
+                <td>0</td>
+                <!-- Empty cell for BURN CYCLES -->
+                <td>0</td>
+                <!-- Empty cell for SAN NAPKINS BURNT -->
+              </tr>
+
+              <!-- Incinerator row -->
+              <tr>
+                <!-- Incinerator specific data - note the date field shows the onTime value -->
+                <td>{{ txn.onTime !== "-" ? txn.onTime : "-" }}</td>
+                <td>0</td>
+                <!-- Empty cell for QTY -->
+                <td>₹ 0</td>
+                <!-- Empty cell for CASH -->
+                <td>
+                  <!-- Display onTime -->
+                  <ng-container *ngIf="txn.onTime !== '-'">
+                    <div>{{ txn.onTime }}</div>
+                    <div *ngIf="txn.onTimeAvgPerDay !== '-'">
+                      {{ txn.onTimeAvgPerDay }}
+                    </div>
+                  </ng-container>
+                  <ng-container *ngIf="txn.onTime === '-'">-</ng-container>
+                </td>
+                <td>{{ txn.burnCycles ?? 0 }}</td>
+                <td>{{ txn.sanNapkinsBurnt ?? 0 }}</td>
+              </tr>
+            </ng-container>
           </ng-container>
-          <ng-container *ngIf="txn.onTime === '-'">-</ng-container>
+
+          <!-- Handle Total row separately but within the machine's group -->
+          <ng-container *ngFor="let txn of machine.transactions">
+            <ng-container *ngIf="txn.date === 'Total'">
+              <tr class="total-row">
+                <!-- The "Total" text goes in the DATE column - other columns are filled with actual data -->
+                <td>Total</td>
+                <td>{{ txn.qty ?? 0 }}</td>
+                <td>{{ txn.cash ?? "₹ 0" }}</td>
+                <td>{{ txn.onTime !== "-" ? txn.onTime : "-" }}</td>
+                <td>{{ txn.burnCycles ?? 0 }}</td>
+                <td>{{ txn.sanNapkinsBurnt ?? 0 }}</td>
+              </tr>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+
+        <tr *ngIf="summaryType === 'Totals'">
+          <td>{{ machine.srNo }}</td>
+          <td>
+            <a [routerLink]="['/machine-report', machine.machineId]">
+              {{ machine.machineId }}
+            </a>
+          </td>
+          <td>{{ extractLastTwoWords(machine.address) }}</td>
+          <td>{{ machine.machineLocation }}</td>
+          <td>{{ machine.machineType }}</td>
+          <td>{{ machine.toiletType }}</td>
+          <td><b></b></td>
+
+          <td>
+            <b>{{ machine.transactions?.[0]?.qty ?? 0 }}</b>
+          </td>
+          <td>
+            <b>{{ machine.transactions?.[0]?.cash ?? '₹ 0' }}</b>
+          </td>
+          <td>
+            <!-- Only show the total onTime (not the average per day) in the Totals view -->
+            <!-- <div><b>{{ machine['_totalOnTime'] ?? '-' }}</b></div> -->
+
+            <!-- Show both total onTime and average per day in the Totals view -->
+            <div>
+              <b>{{ machine["_totalOnTime"] ?? "-" }}</b>
+            </div>
+            <div *ngIf="machine['_avgOnTimePerDay'] !== '-'">
+              <b>{{ machine["_avgOnTimePerDay"] }}</b>
+            </div>
+          </td>
+          <td>
+            <b>{{ machine.transactions?.[0]?.burnCycles ?? 0 }}</b>
+          </td>
+          <td>
+            <b>{{ machine.transactions?.[0]?.sanNapkinsBurnt ?? 0 }}</b>
+          </td>
+        </tr>
+      </ng-container>
+
+      <tr class="grand-total-row">
+        <td colspan="6"><b>Grand Total</b></td>
+        <td><b>Total</b></td>
+        <td>
+          <b>{{ grandTotal.quantity }}</b>
         </td>
-        <td>{{ txn.burnCycles ?? 0 }}</td>
-        <td>{{ txn.sanNapkinsBurnt ?? 0 }}</td>
+        <td>
+          <b>{{ grandTotal.cash }}</b>
+        </td>
+        <td>-</td>
+        <td>
+          <b>{{ grandTotal.burnCycles }}</b>
+        </td>
+        <td>
+          <b>{{ grandTotal.sanNapkinsBurnt }}</b>
+        </td>
       </tr>
-    </ng-container>
-  </ng-container>
-  
-  <!-- Handle Total row separately but within the machine's group -->
-  <ng-container *ngFor="let txn of machine.transactions">
-    <ng-container *ngIf="txn.date === 'Total'">
-      <tr class="total-row">
-        <!-- The "Total" text goes in the DATE column - other columns are filled with actual data -->
-        <td>Total</td>
-        <td>{{ txn.qty ?? 0 }}</td>
-        <td>{{ txn.cash ?? '₹ 0' }}</td>
-        <td>{{ txn.onTime !== '-' ? txn.onTime : '-' }}</td>
-        <td>{{ txn.burnCycles ?? 0 }}</td>
-        <td>{{ txn.sanNapkinsBurnt ?? 0 }}</td>
+
+      <tr class="average-row">
+        <td colspan="6"><b>Average (per machine per day)</b></td>
+        <td><b>Avg</b></td>
+        <td>
+          <b>{{ averages.quantity }}</b>
+        </td>
+        <td>
+          <b>{{ averages.cash }}</b>
+        </td>
+        <td>-</td>
+        <td>
+          <b>{{ averages.burnCycles }}</b>
+        </td>
+        <td>
+          <b>{{ averages.sanNapkinsBurnt }}</b>
+        </td>
       </tr>
-    </ng-container>
-  </ng-container>
-</ng-container>
+    </tbody>
+  </table>
+  <div
+    class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3"
+  >
+    <!-- Items per page -->
+    <div class="d-flex align-items-center gap-2">
+      <label class="mb-0 fw-bold text-dark" style="font-size: 1rem"
+        >Items per page:</label
+      >
+      <div class="position-relative" style="min-width: 100px">
+        <select
+          class="form-select form-select-lg custom-select"
+          [(ngModel)]="itemsPerPage"
+          (change)="onPageChange(1)"
+        >
+          <option *ngFor="let option of [10, 20, 50, 100]" [value]="option">
+            {{ option }}
+          </option>
+        </select>
+        <span class="dropdown-icon"></span>
+      </div>
+    </div>
 
-<tr *ngIf="summaryType === 'Totals'">
-  <td>{{ machine.srNo }}</td>
-  <td>
-    <a [routerLink]="['/machine-report', machine.machineId]">
-      {{ machine.machineId }}
-    </a>
-  </td>
-  <td>{{ extractLastTwoWords(machine.address) }}</td>
-  <td>{{ machine.machineLocation }}</td>
-  <td>{{ machine.machineType }}</td>
-  <td>{{ machine.toiletType }}</td>
-  <td><b></b></td>
-  
-  <td><b>{{ machine.transactions?.[0]?.qty ?? 0 }}</b></td>
-  <td><b>{{ machine.transactions?.[0]?.cash ?? '₹ 0' }}</b></td>
-  <td>
-    <!-- Only show the total onTime (not the average per day) in the Totals view -->
-    <!-- <div><b>{{ machine['_totalOnTime'] ?? '-' }}</b></div> -->
+    <!-- Pagination controls -->
+    <div class="d-flex align-items-center gap-2">
+      <button
+        class="btn btn-lg pagination-btn"
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        title="Previous Page"
+      >
+        ‹
+      </button>
 
-        <!-- Show both total onTime and average per day in the Totals view -->
-    <div><b>{{ machine['_totalOnTime'] ?? '-' }}</b></div>
-    <div *ngIf="machine['_avgOnTimePerDay'] !== '-'"><b>{{ machine['_avgOnTimePerDay'] }}</b></div>
+      <span class="fw-bold text-dark" style="font-size: 1.1rem">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
 
-  </td>
-  <td><b>{{ machine.transactions?.[0]?.burnCycles ?? 0 }}</b></td>
-  <td><b>{{ machine.transactions?.[0]?.sanNapkinsBurnt ?? 0 }}</b></td>
-</tr>
-</ng-container>
-
-
-<tr class="grand-total-row">
-<td colspan="6"><b>Grand Total</b></td>
-<td><b>Total</b></td>
-<td><b>{{ grandTotal.quantity }}</b></td>
-<td><b>{{ grandTotal.cash }}</b></td>
-<td>-</td>
-<td><b>{{ grandTotal.burnCycles }}</b></td>
-<td><b>{{ grandTotal.sanNapkinsBurnt }}</b></td>
-</tr>
-
-<tr class="average-row">
-  <td colspan="6"><b>Average (per machine per day)</b></td>
-  <td><b>Avg</b></td>
-  <td><b>{{ averages.quantity }}</b></td>
-  <td><b>{{ averages.cash }}</b></td>
-  <td>-</td>
-  <td><b>{{ averages.burnCycles }}</b></td>
-  <td><b>{{ averages.sanNapkinsBurnt }}</b></td>
-</tr>
-
-</tbody>
-</table>
-<div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
-
-<!-- Items per page -->
-<div class="d-flex align-items-center gap-2">
-<label class="mb-0 fw-bold text-dark" style="font-size: 1rem;">Items per page:</label>
-<div class="position-relative" style="min-width: 100px;">
-<select class="form-select form-select-lg custom-select"
-        [(ngModel)]="itemsPerPage"
-        (change)="onPageChange(1)"
-        name="itemsPerPage">
-  <option *ngFor="let option of [10, 20, 50, 100]" [value]="option">{{ option }}</option>
-</select>
-<span class="dropdown-icon"></span>
+      <button
+        class="btn btn-lg pagination-btn"
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        title="Next Page"
+      >
+        ›
+      </button>
+    </div>
+  </div>
 </div>
-</div>
-
-<!-- Pagination controls (Styled) -->
-<div class="d-flex align-items-center gap-2">
-
-<button class="btn btn-lg pagination-btn"
-      (click)="onPageChange(currentPage - 1)"
-      [disabled]="isLoading || currentPage <= 1"
-      title="Previous Page">
-‹
-</button>
-
-<span class="fw-bold text-dark" style="font-size: 1.1rem;">
-Page {{ currentPage }} of {{ totalPages }}
-</span>
-
-<button class="btn btn-lg pagination-btn"
-      (click)="onPageChange(currentPage + 1)"
-      [disabled]="isLoading || currentPage >= totalPages"
-      title="Next Page">
-›
-</button>
-
-</div>
-</div>
-
-
