@@ -1458,23 +1458,17 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   }
 
   exportToExcel() {
-    // Assume 'filteredData' is the array that holds all filtered rows
-    const filteredData = this.filteredData; // replace with your actual data variable
-
-    if (!filteredData || filteredData.length === 0) {
-      console.error('No data to export!');
-      return;
-    }
-
-    // Convert JSON to worksheet
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
-
-    // Create workbook and append worksheet
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Machine Report');
-
-    // Save to file
-    XLSX.writeFile(wb, 'Machine_Report.xlsx');
+    const table = document.querySelector('.report-table') as HTMLTableElement;
+if (!table) {
+  console.error("Table not found!");
+  return;
+}
+ 
+const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(table);
+const wb: XLSX.WorkBook = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, "Machine Report");
+ 
+XLSX.writeFile(wb, 'Machine_Report.xlsx');
   }
 
   // toggleProjectSelection(project: string) {
