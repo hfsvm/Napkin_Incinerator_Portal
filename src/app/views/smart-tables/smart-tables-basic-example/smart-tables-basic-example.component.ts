@@ -88,6 +88,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   searchQuery: string = ''; // ✅ This is the search input value
 
   isLoading: boolean = false;
+  showInitialMessage: boolean = true;
   summaryType: 'Daily' | 'Totals' = 'Daily';
   errorMessage = '';
 
@@ -381,7 +382,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   }
 
   loadHierarchicalData(): void {
-    this.isLoading = true;
+    // this.isLoading = true;
     this.errorMessage = '';
 
     console.log(
@@ -1200,6 +1201,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   }
 
   loadReport() {
+    this.showInitialMessage = false;
     this.isLoading = true;
     this.errorMessage = '';
 

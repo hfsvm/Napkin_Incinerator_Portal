@@ -2236,8 +2236,11 @@ export class MachinedataComponent implements OnInit, OnDestroy {
       const mcSrNo = machine.mcSrNo?.toLowerCase() || '';
       const pcbNo = machine.pcbNo?.toLowerCase() || '';
       const locationAddress = machine.address?.toLowerCase() || '';
+      // const locationName = this.getLastPartAfterLastComma(
+      //   machine.address || ''
+      // ).toLowerCase();
       const locationName = this.getLastPartAfterLastComma(
-        machine.address || ''
+        machine.zone + machine.ward + machine.beat || ''
       ).toLowerCase();
       const uid = machine.uid?.toLowerCase() || '';
 

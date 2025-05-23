@@ -207,6 +207,9 @@
   [min]="startDate"
   (change)="onEndDateChange()" />
 </div> -->
+      <div *ngIf="showInitialMessage" class="error-message">
+        To view detailed reports, please click on "Load Report."
+      </div>
 
       <div class="col-12 d-flex justify-content-between mt-2">
         <button type="button" class="btn btn-sm" (click)="toggleSummaryType()">
@@ -222,10 +225,7 @@
 </div>
 
 <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
-<div *ngIf="isLoading">
-  <!-- Loading... -->
-  To view detailed reports, please click on "Load Report."
-</div>
+<div *ngIf="isLoading">Loading...</div>
 <div *ngIf="!isLoading">
   <table class="report-summary">
     <tr>
