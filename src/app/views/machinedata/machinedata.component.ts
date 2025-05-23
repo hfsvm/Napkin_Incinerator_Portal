@@ -1925,7 +1925,7 @@ export class MachinedataComponent implements OnInit, OnDestroy {
 
   clearFilters() {
     // Reset selected filters
-    this.selectedMachineStatuses = ['1', '2']; // Reset machine statuses to default (Online, Offline)
+    this.selectedMachineStatuses = []; // Reset machine statuses to default (Online, Offline)
     this.selectedStockStatuses = []; // Clear stock statuses
     this.selectedBurnStatuses = []; // Clear burn statuses
     this.selectedZones = []; // Clear selected zones (states)

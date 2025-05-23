@@ -743,7 +743,7 @@
         <!-- Installed Dropdown -->
         <div class="col-md-6 mb-3">
           <label class="form-label">Installed</label>
-          <select class="form-select" [(ngModel)]="installedStatus">
+          <select class="form-select" [(ngModel)]="installedStatus" (change)="onInstalledChange()">
             <option value="1">Yes</option>
             <option value="0">No</option>
           </select>
@@ -752,7 +752,7 @@
         <!-- UID Input -->
         <div class="col-md-6 mb-3">
           <label class="form-label">UID</label>
-          <input type="text" class="form-control" [(ngModel)]="uid" />
+          <input type="text" [disabled]="isInstalled" class="form-control" [(ngModel)]="uid" />
         </div>
       </div>
       
@@ -761,20 +761,20 @@
   <!-- PCB No Input -->
   <div class="col-md-6 mb-3">
     <label class="form-label">PCB No</label>
-    <input type="text" class="form-control" [(ngModel)]="pcbNo" />
+    <input type="text" [disabled]="isInstalled" class="form-control" [(ngModel)]="pcbNo" />
   </div>
 
   <!-- MC SR No Input -->
   <div class="col-md-6 mb-3">
     <label class="form-label">MC SR No</label>
-    <input type="text" class="form-control" [(ngModel)]="mcSrNo" />
+    <input type="text" [disabled]="isInstalled" class="form-control" [(ngModel)]="mcSrNo" />
   </div>
 </div>
  
       <!-- Installed Date Input -->
       <div class="col-md-2 mb-2">
         <label class="form-label">Installed Date </label>
-        <input type="datetime-local" class="form-control" [(ngModel)]="installedDate" (ngModelChange)="onDateChange($event)"/>
+        <input type="datetime-local" [disabled]="isInstalled" class="form-control" [(ngModel)]="installedDate" (ngModelChange)="onDateChange($event)"/>
           </div>
 
       <!-- <div class="col-md-2 mb-2">

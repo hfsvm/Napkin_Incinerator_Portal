@@ -26,7 +26,8 @@ export class AdvancedManagementComponent implements OnInit {
   selectedFotaRows: Set<string> = new Set(); // store selected machineids
   selectedVersion: string = '';
   selectedMachineInstalledId: string = '';
-installedStatus: string = ''; // Installed status (1 or 0)
+installedStatus: string = '1'; // Installed status (1 or 0)
+isInstalled: boolean = false;
 uid: string = '';
 pcbNo: string = '';
 mcSrNo: string = '';
@@ -832,10 +833,14 @@ submitUpdatedConfig(): void {
   
   onSubmitMachineInstalled(): void {
     
-    if (!this.selectedMachineId || !this.installedStatus || !this.uid ) {
-      this.showNotification('⚠️ Please fill all fields.', 'error');
-      return;
-    }
+    if (
+  !this.selectedMachineId ||
+  !this.installedStatus ||
+  (this.installedStatus === 'Yes' && !this.uid)
+) {
+  this.showNotification('⚠️ Please fill all required fields.', 'error');
+  return;
+}
     const machineOnboardingPayload = {
     
       machineId: this.selectedMachineId,
@@ -1267,14 +1272,35 @@ toggleDropdownPricing(event: MouseEvent): void {
 }
  
 // Handle selecting a machine
- 
+ onInstalledChange(): void {
+  this.isInstalled = this.installedStatus === '0';
+
+  if (this.isInstalled) {
+    this.uid = '';
+    this.pcbNo = '';
+    this.mcSrNo = '';
+    this.installedDate = '';
+  }
+}
  
 // Close dropdown when clicking outside
 @HostListener('document:click', ['$event'])
 onClickOutside(event: MouseEvent): void {
   const clickedInside = (event.target as HTMLElement).closest('.form-select');
+  
+  // Close pricing dropdown if clicked outside
   if (!clickedInside && this.dropdownOpenPricing) {
     this.dropdownOpenPricing = false;
+  }
+
+  // Close machine dropdown if clicked outside
+  if (!clickedInside && this.dropdownOpenMachine) {
+    this.dropdownOpenMachine = false;
+  }
+
+  // Close general dropdown if clicked outside
+  if (!clickedInside && this.dropdownOpen) {
+    this.dropdownOpen = false;
   }
 }
 toggleDropdown(event: MouseEvent): void {

@@ -708,6 +708,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
         }
       });
     });
+    this.selectedBeats = [...this.beats];
   }
 
   clearDependentSelections(key: string) {
