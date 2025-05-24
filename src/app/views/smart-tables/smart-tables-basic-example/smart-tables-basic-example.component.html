@@ -186,27 +186,6 @@
         </div>
       </ng-template>
 
-      <!-- <div class="col">
-<label>Start Date:</label>
-<input
-  type="date"
-  [(ngModel)]="startDate"
-  name="startDate"
-  class="form-control"
-  [max]="endDate"
-  (change)="onStartDateChange()" />
-</div>
-
-<div class="col">
-<label>End Date:</label>
-<input
-  type="date"
-  [(ngModel)]="endDate"
-  name="endDate"
-  class="form-control"
-  [min]="startDate"
-  (change)="onEndDateChange()" />
-</div> -->
       <div *ngIf="showInitialMessage" class="error-message">
         To view detailed reports, please click on "Load Report."
       </div>
@@ -432,10 +411,10 @@
           <td><b></b></td>
 
           <td>
-            <b>{{ machine.transactions?.[0]?.qty ?? 0 }}</b>
+            <b>{{ getTotalQty(machine) }}</b>
           </td>
           <td>
-            <b>{{ machine.transactions?.[0]?.cash ?? '₹ 0' }}</b>
+            <b>{{ getTotalCash(machine) }}</b>
           </td>
           <td>
             <!-- Only show the total onTime (not the average per day) in the Totals view -->
@@ -450,10 +429,10 @@
             </div>
           </td>
           <td>
-            <b>{{ machine.transactions?.[0]?.burnCycles ?? 0 }}</b>
+            <b>{{ getTotalBurnCycles(machine) }}</b>
           </td>
           <td>
-            <b>{{ machine.transactions?.[0]?.sanNapkinsBurnt ?? 0 }}</b>
+            <b>{{ getTotalSanNapkinsBurnt(machine) }}</b>
           </td>
         </tr>
       </ng-container>
