@@ -1,151 +1,3 @@
-<!--
-<div class="container-fluid">
- 
-  <div class="d-flex justify-content-end mb-3">
-    <button class="btn btn-primary" (click)="refreshData()">🔄 Refresh Data</button>
-  </div>
- 
- 
-  <div class="row">
-    <div class="col-md-3" *ngFor="let card of [
-      { title: 'Machines Installed', value: dashboardData.machinesInstalled, color: 'info', icon: '🖥️' },
-      { title: 'Machines Running', value: dashboardData.machinesRunning, color: 'success', icon: '✅' },
-      { title: 'Stock Empty', value: dashboardData.stockEmpty, color: 'danger', icon: '⚠️' },
-      { title: 'Stock Low', value: dashboardData.stockLow, color: 'warning', icon: '📉' },
-      { title: 'Burning Enabled', value: dashboardData.burningEnabled, color: 'primary', icon: '🔥' },
-      { title: 'Total Burning Cycles', value: dashboardData.totalBurningCycles, color: 'dark', icon: '♻️' },
-      { title: 'Total Collection', value: '₹ ' + dashboardData.totalCollection, color: 'info', icon: '💰' },
-      { title: 'Items Dispensed', value: dashboardData.itemsDispensed, color: 'info', icon: '🛒' }
-    ]">
-      <div class="card text-white bg-{{ card.color }} mb-3">
-        <div class="card-body d-flex align-items-center justify-content-center">
-          <h2 class="me-2">{{ card.icon }}</h2>
-          <div>
-            <h5 class="card-title">{{ card.title }}</h5>
-            <p class="card-text">{{ card.value }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
- 
- 
-  <div class="card mb-3">
-    <div class="card-header">
-      <h3>Filters</h3>
-    </div>
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-2" *ngFor="let filter of [
-          { name: 'Machine Status', key: 'machineStatuses', selected: selectedMachineStatuses, options: machineStatuses },
-          { name: 'Stock Status', key: 'stockStatuses', selected: selectedStockStatuses, options: stockStatuses },
-          { name: 'Burn Status', key: 'burnStatuses', selected: selectedBurnStatuses, options: burnStatuses },
-          { name: 'Zone', key: 'zones', selected: selectedZones, options: zones },
-          { name: 'Ward', key: 'wards', selected: selectedWards, options: wards },
-          { name: 'Beat', key: 'beats', selected: selectedBeats, options: beats }
-        ]">
-          <label>{{ filter.name }}</label>
-          <div class="dropdown">
-            <button class="btn btn-light dropdown-toggle w-100" type="button" (click)="toggleDropdown(filter.key)">
-              {{ filter.selected.length ? 'Selected (' + filter.selected.length + ')' : 'Select ' + filter.name }}
-            </button>
-            <div class="dropdown-menu show" *ngIf="dropdownOpen[filter.key]">
-              <label *ngFor="let option of filter.options" class="dropdown-item">
-                <input type="checkbox"
-       [checked]="filter.selected.includes(option.key || option)"
-       (change)="toggleSelection(filter.selected, option.key || option, filter.key)">
- 
-                {{ option.value || option }}
-              </label>
-            </div>
-           
-           
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
- 
-  <div class="card p-3">
-    <h3>Machine Report</h3>
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Sr. No.</th>
-          <th>Machine ID</th>
-          <th>Status</th>
-          <th>Stock Status</th>
-          <th>Burning Status</th>
-          <th>Info</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let machine of filteredMachines; let i = index">
-          <td>{{ i + 1 }}</td>
-          <td>{{ machine.machineId }}</td>
-         
-         
-          <td [ngClass]="{'text-success': machine.status === '1', 'text-danger': machine.status !== '1'}">
-            {{ machine.status === '1' ? 'Online ' : 'Offline ' }}
-          </td>
- 
-         
-          <td [ngClass]="{
-  'text-danger': machine.stockStatus === 'Empty',
-  'text-warning': machine.stockStatus === 'Low',
-  'text-success': machine.stockStatus === 'Full'
-}">
-  {{ machine.stockStatus }}
-</td>
- 
-         
-     
-         
- 
-       
-          <td [ngClass]="{'text-warning': machine.burningStatus === '2', 'text-black': machine.burningStatus !== '2'}">
-            {{ machine.burningStatus === '2' ? ' 🔥' : 'Idle ⏳' }}
-          </td>
- 
-          <td>
-            <button class="btn btn-info btn-sm" (mouseenter)="showInfo(machine.machineId)" (mouseleave)="hideInfo()">View</button>
-            <div *ngIf="hoveredMachineId === machine.machineId" class="tooltip-info">
-              <strong>Stock Status:</strong> {{ machine.stockStatus }}<br>
-              <strong>Dispensed:</strong> {{ machine.itemsDispensed }}<br>
-              <strong>IMSI:</strong> {{ machine.imsi }}<br>
-              <strong>RSSI:</strong> {{ machine.rssi }}
-            </div>
-          </td>
-         
-         
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div> -->
-<!-- Dashboard Summary Cards -->
-
-<!--<td [ngClass]="{'text-warning': machine.burningStatus === '2', 'text-black': machine.burningStatus !== '2'}">
-  {{ machine.burningStatus === '2' ? ' 🔥' : 'Idle ⏳' }}
-</td>
- 
-<td>
-  <button class="btn btn-info btn-sm" (mouseenter)="showInfo(machine.machineId)" (mouseleave)="hideInfo()">View</button>
-  <div *ngIf="hoveredMachineId === machine.machineId" class="tooltip-info">
-    <strong>Stock Status:</strong> {{ machine.stockStatus }}<br>
-    <strong>Dispensed:</strong> {{ machine.itemsDispensed }}<br>
-    <strong>IMSI:</strong> {{ machine.imsi }}<br>
-    <strong>RSSI:</strong> {{ machine.rssi }}
-  </div>
-</td>
- 
- 
-</tr>
-</tbody>
-</table>
-</div>
-</div> -->
-
 <!-- Dashboard Summary Cards -->
 <div class="refresh-circle">
   <span class="time">{{ formattedRefreshTime }}</span>
@@ -379,7 +231,11 @@
         <button
           class="btn btn-light dropdown-toggle w-100"
           type="button"
-          (click)="toggleDropdown(filter.key)"
+          [disabled]="shouldDisableFilter(filter.name)"
+          [class.disabled]="shouldDisableFilter(filter.name)"
+          (click)="
+            !shouldDisableFilter(filter.name) && toggleDropdown(filter.key)
+          "
         >
           {{
             filter.selected.length
@@ -389,7 +245,7 @@
         </button>
         <div
           class="dropdown-menu show"
-          *ngIf="dropdownOpen[filter.key]"
+          *ngIf="dropdownOpen[filter.key] && !shouldDisableFilter(filter.name)"
           [id]="'dropdown-' + filter.key"
         >
           <div
