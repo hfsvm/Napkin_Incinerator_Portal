@@ -117,6 +117,17 @@ table, th, td {
         /* Optional: Adjust max-width if needed */
 }
  
+
+
+
+/* ✅ Increase width of the DATE column (7th column in both thead and tbody) */
+table.report-table th:nth-child(7),
+table.report-table td:nth-child(7) {
+  min-width: 150px; /* or any value you prefer */
+  max-width: 200px;
+  white-space: nowrap;
+}
+
  
 /* ✅ Alternate Row Colors */
 tr:nth-child(even) {
