@@ -84,8 +84,8 @@ onSubmit(): void {
   };
   this.errorMessage = '';
  
-  if (this.loginForm.invalid) {
-    const controls = this.loginForm.controls;
+  const controls = this.loginForm.controls;
+  if (this.loginForm.invalid) {   
  
     if (controls['email'].hasError('required')) {
       setTimeout(() => {
@@ -125,6 +125,14 @@ onSubmit(): void {
  
     return;
   }
+
+  if (controls['captcha'].value !== this.captchaCode) {      
+        this.fieldErrors.captcha = '❌ Invalid CAPTCHA. Please match the code exactly.';
+        this.loadCaptcha(); // ✅ Load new captcha after server says wrong
+        return;
+   } 
+  
+
  
   const { email, password, merchantId, captcha } = this.loginForm.value;
  

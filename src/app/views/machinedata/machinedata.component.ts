@@ -395,27 +395,31 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   // }
 
   // Improved filter functions to handle the empty arrays correctly
+  // Updated updateHierarchySelection method - fix the mapping between the keys and the hierarchy
   updateHierarchySelection(key: string, selectedArray: any[]) {
+    debugger;
     switch (key) {
       case 'projects':
         this.hierarchySelection.project = [...selectedArray];
         break;
       case 'zones':
+      case 'state':
         this.hierarchySelection.state = [...selectedArray];
         break;
       case 'wards':
+      case 'district':
         this.hierarchySelection.district = [...selectedArray];
         break;
       case 'selectedSubZones':
+      case 'zone':
         this.hierarchySelection.zone = [...selectedArray];
         break;
       case 'selectedWardList':
+      case 'ward':
         this.hierarchySelection.ward = [...selectedArray];
         break;
       case 'selectedBeatList':
-        this.hierarchySelection.beat = [...selectedArray];
-        break;
-      case 'beats':
+      case 'beat':
         this.hierarchySelection.beat = [...selectedArray];
         break;
     }
