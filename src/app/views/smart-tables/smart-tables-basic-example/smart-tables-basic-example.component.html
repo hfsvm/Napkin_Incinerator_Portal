@@ -330,9 +330,18 @@
         <tr *ngIf="summaryType === 'Totals'">
           <td>{{ machine.srNo }}</td>
           <td>
-            <a [routerLink]="['/machine-report', machine.machineId]">
+            <!-- <a [routerLink]="['/machine-report', machine.machineId]">
               {{ machine.machineId }}
-            </a>
+            </a> -->
+
+                    <a
+          [routerLink]="machine.isWorking ? ['/machine-report', machine.machineId] : null"
+          (click)="!machine.isWorking && $event.preventDefault()"
+          [class.disabled-link]="!machine.isWorking"
+        >
+          {{ machine.machineId }}
+        </a>
+
           </td>
           <td>{{ extractLastTwoWords(machine.address) }}</td>
           <td>{{ machine.machineLocation }}</td>
