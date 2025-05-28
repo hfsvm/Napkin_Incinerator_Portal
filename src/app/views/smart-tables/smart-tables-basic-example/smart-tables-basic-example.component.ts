@@ -3282,12 +3282,12 @@ processResponseData(
         });
 
         // Initialize default values
-        let qty: any = '-';
-        let cash: string = '-';
-        let onTime: string = '-';
+        let qty: any = '0';
+        let cash: string = '₹0';
+        let onTime: string = '0m';
         let onTimeAvgPerDay: string = '-';
-        let burnCycles: any = '-';
-        let sanNapkinsBurnt: any = '-';
+        let burnCycles: any = '0';
+        let sanNapkinsBurnt: any = '0';
 
         // If vending data exists for this date, use it
         if (vendingData) {
