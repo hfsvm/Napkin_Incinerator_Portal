@@ -249,7 +249,17 @@
           [id]="'dropdown-' + filter.key"
         >
           <div
-            *ngIf="['beats', 'wards', 'zones', 'projects'].includes(filter.key)"
+            *ngIf="
+              [
+                'projects',
+                'zones',
+                'wards',
+                'selectedSubZones',
+                'selectedWardList',
+                'selectedBeatList',
+                'beats'
+              ].includes(filter.key)
+            "
             style="padding: 6px"
           >
             <input

@@ -924,6 +924,13 @@ export class MachinedataComponent implements OnInit, OnDestroy {
       project: userDetails.projectId,
     };
     debugger;
+    if (this.selectedWardList.length > 0) {
+      queryParams.ward = [...this.selectedWardList];
+    }
+
+    if (this.selectedSubZones.length > 0) {
+      queryParams.zone = [...this.selectedSubZones];
+    }
     if (this.selectedBeats.length > 0) {
       queryParams.machineId = [...this.selectedBeats];
     }
