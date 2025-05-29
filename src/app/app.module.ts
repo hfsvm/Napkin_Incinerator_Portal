@@ -1,7 +1,10 @@
 import { NgModule } from '@angular/core';
 
-
-import { HashLocationStrategy, LocationStrategy, PathLocationStrategy } from '@angular/common';
+import {
+  HashLocationStrategy,
+  LocationStrategy,
+  PathLocationStrategy,
+} from '@angular/common';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -46,8 +49,6 @@ import {
   SidebarModule,
   TabsModule,
   UtilitiesModule,
- 
-  
 } from '@coreui/angular-pro';
 
 import { IconModule, IconSetService } from '@coreui/icons-angular';
@@ -67,6 +68,7 @@ import { ShareModule } from './share/share.module';
 import { GraphDashboardComponent } from './views/graph-dashboard/graph-dashboard.component';
 
 import { ZoneDashboardComponent } from './views/zone-dashboard/zone-dashboard.component';
+import { ConfigureMachinesComponent } from './views/settings/configure-machines/configure-machines.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -78,13 +80,22 @@ const APP_CONTAINERS = [
   DefaultHeaderComponent,
   DefaultLayoutComponent,
   EmailLayoutComponent,
-
 ];
 
 @NgModule({
-  declarations: [AppComponent, ...APP_CONTAINERS, UserManagementComponent, MachineManagementComponent, AdvancedManagementComponent, ConfirmDialogComponent, MachinereportComponent,    GraphDashboardComponent,ZoneDashboardComponent],
+  declarations: [
+    AppComponent,
+    ...APP_CONTAINERS,
+    UserManagementComponent,
+    MachineManagementComponent,
+    AdvancedManagementComponent,
+    ConfigureMachinesComponent,
+    ConfirmDialogComponent,
+    MachinereportComponent,
+    GraphDashboardComponent,
+    ZoneDashboardComponent,
+  ],
   imports: [
-   
     FormsModule,
 
     BrowserModule,
@@ -114,27 +125,29 @@ const APP_CONTAINERS = [
     BadgeModule,
     ListGroupModule,
     CardModule,
-    BrowserModule, HttpClientModule,  GoogleMapsModule,FormsModule, FormsModule,  
-    ReactiveFormsModule,PagesModule,  
-
+    BrowserModule,
+    HttpClientModule,
+    GoogleMapsModule,
+    FormsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    PagesModule,
   ],
   providers: [
     {
       provide: LocationStrategy,
       useClass: HashLocationStrategy,
-    
     },
     {
       provide: PERFECT_SCROLLBAR_CONFIG,
       useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG,
     },
-   
+
     DataService,
-   
+
     IconSetService,
-    Title
+    Title,
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {
-}
+export class AppModule {}

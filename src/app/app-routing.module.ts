@@ -11,7 +11,7 @@
 // import { VideosComponent } from './views/videos/videos.component';
 //  import { UserManagementComponent } from './views/settings/user-management/user-management.component';
 //  import { MachineManagementComponent } from './views/settings/machine-management/machine-management.component';
- 
+
 // import { AdvancedManagementComponent } from './views/settings/advanced-management/advanced-management.component';
 // import { MachinedataComponent } from './views/machinedata/machinedata.component';
 
@@ -21,7 +21,7 @@
 //     redirectTo: 'login',
 //     pathMatch: 'full'
 //   },
-  
+
 //   {
 //     path: 'login',
 //     component: LoginComponent,
@@ -31,7 +31,6 @@
 
 //     { path: 'dashboard', component: WidgetsComponent, canActivate: [AuthGuard] },
 //     { path: 'dashboard', component: VideosComponent, canActivate: [AuthGuard] },
-
 
 //   {
 //     path: 'apps/email',
@@ -57,13 +56,13 @@
 //         loadChildren: () =>
 //           import('./views/machinedata/machinedata.module').then((m) => m.MachinedataModule)
 //       },
-   
+
 //       {
 //         path: 'videos',
 //         loadChildren: () =>
 //           import('./views/videos/videos.module').then((m) => m.VideosModule)
 //       },
-  
+
 //       {
 //         path: 'theme',
 //         loadChildren: () =>
@@ -141,7 +140,7 @@
 //           }
 //         ]
 //       }
-    
+
 //     ]
 //   },
 //   { path: 'machinedata', component: MachinedataComponent },
@@ -203,49 +202,47 @@ import { RegisterComponent } from './views/pages/register/register.component';
 import { WidgetsComponent } from './views/widgets/widgets/widgets.component';
 import { AuthGuard } from './guards/auth.guard';
 import { VideosComponent } from './views/videos/videos.component';
- import { UserManagementComponent } from './views/settings/user-management/user-management.component';
- import { MachineManagementComponent } from './views/settings/machine-management/machine-management.component';
- 
+import { UserManagementComponent } from './views/settings/user-management/user-management.component';
+import { MachineManagementComponent } from './views/settings/machine-management/machine-management.component';
+
 import { AdvancedManagementComponent } from './views/settings/advanced-management/advanced-management.component';
+import { ConfigureMachinesComponent } from './views/settings/configure-machines/configure-machines.component';
 import { MachinedataComponent } from './views/machinedata/machinedata.component';
 import { MachinereportComponent } from './views/machinereport/machinereport.component';
 import { GoogleMapsComponent } from './views/plugins/maps/google-maps.component';
 import { ZoneDashboardComponent } from './views/zone-dashboard/zone-dashboard.component';
 import { GraphDashboardComponent } from './views/graph-dashboard/graph-dashboard.component';
 
-
-
 const routes: Routes = [
   {
     path: '',
     redirectTo: 'login',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   /*working*/
   {
     path: 'standalone-map',
-    component: GoogleMapsComponent
+    component: GoogleMapsComponent,
   },
 
   {
     path: 'zone-dashboard',
     component: ZoneDashboardComponent,
     data: {
-      title: 'Zone Dashboard'
-    }
+      title: 'Zone Dashboard',
+    },
   },
 
   {
     path: 'graph-dashboard',
     component: GraphDashboardComponent,
     data: {
-      title: 'Graph Dashboard'
-    }
+      title: 'Graph Dashboard',
+    },
   },
 
   /*end*/
-
 
   //   {
   //   path: 'standalone-map',
@@ -269,30 +266,26 @@ const routes: Routes = [
   //   }
   // },
 
-
-
-
   {
     path: 'login',
     component: LoginComponent,
     data: {
-      title: 'Login Page'
-    }},
+      title: 'Login Page',
+    },
+  },
 
-    // {
-    //   path: 'zone/:id',
-    //   component: ZoneDashboardComponent,
-    //   data: {
-    //     title: 'Zone Dashboard'
-    //   }
-    // },
-  
+  // {
+  //   path: 'zone/:id',
+  //   component: ZoneDashboardComponent,
+  //   data: {
+  //     title: 'Zone Dashboard'
+  //   }
+  // },
 
-    // { path: 'dashboard', component: WidgetsComponent, canActivate: [AuthGuard] },
-    // { path: 'dashboard', component: VideosComponent, canActivate: [AuthGuard] },
-    
-    // other routes...
+  // { path: 'dashboard', component: WidgetsComponent, canActivate: [AuthGuard] },
+  // { path: 'dashboard', component: VideosComponent, canActivate: [AuthGuard] },
 
+  // other routes...
 
   {
     path: 'apps/email',
@@ -302,94 +295,92 @@ const routes: Routes = [
       {
         path: '',
         loadChildren: () =>
-          import('./views/apps/email/email.module').then((m) => m.EmailModule)
+          import('./views/apps/email/email.module').then((m) => m.EmailModule),
       },
-    ]
+    ],
   },
   {
     path: '',
     component: DefaultLayoutComponent,
     data: {
-      title: ''
+      title: '',
     },
     children: [
       {
         path: 'machinedata',
         loadChildren: () =>
-          import('./views/machinedata/machinedata.module').then((m) => m.MachinedataModule),
-        
+          import('./views/machinedata/machinedata.module').then(
+            (m) => m.MachinedataModule
+          ),
       },
 
-    
-    
-      
-   
       {
         path: 'videos',
         loadChildren: () =>
-          import('./views/videos/videos.module').then((m) => m.VideosModule)
+          import('./views/videos/videos.module').then((m) => m.VideosModule),
       },
       { path: 'machine-report/:machineId', component: MachinereportComponent },
       {
         path: 'theme',
         loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
       },
-
-
-
 
       {
         path: 'base',
         loadChildren: () =>
-          import('./views/base/base.module').then((m) => m.BaseModule)
+          import('./views/base/base.module').then((m) => m.BaseModule),
       },
       {
         path: 'buttons',
         loadChildren: () =>
-          import('./views/buttons/buttons.module').then((m) => m.ButtonsModule)
+          import('./views/buttons/buttons.module').then((m) => m.ButtonsModule),
       },
       {
         path: 'forms',
         loadChildren: () =>
-          import('./views/forms/forms.module').then((m) => m.CoreUIFormsModule)
+          import('./views/forms/forms.module').then((m) => m.CoreUIFormsModule),
       },
       {
         path: 'icons',
         loadChildren: () =>
-          import('./views/icons/icons.module').then((m) => m.IconsModule)
+          import('./views/icons/icons.module').then((m) => m.IconsModule),
       },
       {
         path: 'notifications',
         loadChildren: () =>
-          import('./views/notifications/notifications.module').then((m) => m.NotificationsModule)
+          import('./views/notifications/notifications.module').then(
+            (m) => m.NotificationsModule
+          ),
       },
       {
         path: 'widgets',
         loadChildren: () =>
           import('./views/widgets/widgets.module').then((m) => m.WidgetsModule),
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'smart-table',
         loadChildren: () =>
-          import('./views/smart-tables/smart-tables.module').then((m) => m.SmartTablesModule)
+          import('./views/smart-tables/smart-tables.module').then(
+            (m) => m.SmartTablesModule
+          ),
       },
 
       {
         path: 'plugins',
         loadChildren: () =>
-          import('./views/plugins/plugins.module').then((m) => m.PluginsModule)
+          import('./views/plugins/plugins.module').then((m) => m.PluginsModule),
       },
       {
         path: 'pages',
         loadChildren: () =>
-          import('./views/pages/pages.module').then((m) => m.PagesModule)
+          import('./views/pages/pages.module').then((m) => m.PagesModule),
       },
       {
         path: 'apps',
         loadChildren: () =>
-          import('./views/apps/apps.module').then((m) => m.AppsModule)
+          import('./views/apps/apps.module').then((m) => m.AppsModule),
       },
       {
         path: 'settings',
@@ -398,55 +389,57 @@ const routes: Routes = [
           {
             path: 'user-management',
             component: UserManagementComponent,
-            data: { title: 'User Management' }
+            data: { title: 'User Management' },
           },
           {
             path: 'machine-management',
             component: MachineManagementComponent,
-            data: { title: 'Machine Management' }
+            data: { title: 'Machine Management' },
           },
           {
             path: 'advanced-management',
             component: AdvancedManagementComponent,
-            data: { title: '' }
-          }
-        ]
-      }
-    
-    ]
+            data: { title: '' },
+          },
+          {
+            path: 'configure-machines',
+            component: ConfigureMachinesComponent,
+            data: { title: 'Configured Machines' },
+          },
+        ],
+      },
+    ],
   },
-  
-
 
   {
     path: '404',
     component: Page404Component,
     data: {
-      title: 'Page 404'
-    }
+      title: 'Page 404',
+    },
   },
   {
     path: '500',
     component: Page500Component,
     data: {
-      title: 'Page 500'
-    }
+      title: 'Page 500',
+    },
   },
   {
     path: 'login',
     component: LoginComponent,
     data: {
-      title: 'Login Page'
-    }
+      title: 'Login Page',
+    },
   },
   {
     path: 'register',
     component: RegisterComponent,
     data: {
-      title: 'Register Page'
-    }
+      title: 'Register Page',
+    },
   },
-  {path: '**', redirectTo: 'login'},
+  { path: '**', redirectTo: 'login' },
   // { path: '**', redirectTo: 'widget', pathMatch: 'full' }
 ];
 
@@ -455,11 +448,10 @@ const routes: Routes = [
     RouterModule.forRoot(routes, {
       scrollPositionRestoration: 'top',
       anchorScrolling: 'enabled',
-      initialNavigation: 'enabledBlocking' 
+      initialNavigation: 'enabledBlocking',
       // relativeLinkResolution: 'legacy'
-    })
+    }),
   ],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule {
-}
+export class AppRoutingModule {}

@@ -9,45 +9,36 @@ export const navItems: INavData[] = [
     //   // color: 'info',
     //   // text: 'NEW'
     // },
-  
   },
-  
 
-  { name: 'Machine Data',
+  {
+    name: 'Machine Data',
     url: '/machinedata',
-     iconComponent: { name: 'cil-spreadsheet' },
-     },
+    iconComponent: { name: 'cil-spreadsheet' },
+  },
   {
     name: 'Reports',
     url: '/smart-table',
-    iconComponent: { name: 'cil-grid'},
-   
+    iconComponent: { name: 'cil-grid' },
   },
- 
-
 
   // {
   //   name: 'Machine Map',
   //   iconComponent: { name: 'cil-LocationPin' },
   //   url: '/plugins/google-maps',
-    
 
   // },
   {
     name: 'Machine Map',
     url: '/standalone-map',
     iconComponent: { name: 'cil-location-pin' },
-    attributes: { target: '_blank' }  // Add target="_blank" to open in a new tab
+    attributes: { target: '_blank' }, // Add target="_blank" to open in a new tab
   },
-  
-  
-  
-  
-  
+
   {
     name: 'Video library',
     iconComponent: { name: 'cil-star' },
-    url: 'videos'
+    url: 'videos',
   },
   {
     name: 'Settings',
@@ -56,33 +47,37 @@ export const navItems: INavData[] = [
     children: [
       {
         name: 'User Management',
-        url: '/settings/user-management'
+        url: '/settings/user-management',
       },
       {
         name: 'Machine Management',
-        url: '/settings/machine-management'
+        url: '/settings/machine-management',
       },
       {
         name: 'Advanced Configurations',
-        url: '/settings/advanced-management'
-      }
-    ]
-  }
+        url: '/settings/advanced-management',
+      },
+      {
+        name: 'Configure Machines',
+        url: '/settings/configure-machines',
+      },
+    ],
+  },
 
   // {
   //   // title: true,
   //   // name: 'Extras'
   // },
   // {
-    // name: 'Pages',
-    // url: '/login',
-    // iconComponent: { name: 'cil-star' },
+  // name: 'Pages',
+  // url: '/login',
+  // iconComponent: { name: 'cil-star' },
   //   children: [
   //     {
   //       name: 'Login',
   //       url: '/login'
   //     },
-      
+
   //     {
   //       name: 'Register',
   //       url: '/register'
