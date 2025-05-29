@@ -163,6 +163,8 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   statesList: any[] = [];
   districtsList: any[] = [];
   machinesList: any[] = [];
+hasZoneWardBeatStructure: boolean = false;
+availableHierarchyLevels: string[] = [];
 
   constructor(
     private dataService: DataService,
@@ -171,80 +173,387 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     private dashboardRefreshService: DashboardRefreshService
   ) {}
 
+  // ngOnInit() {
+  //   this.searchText = {
+  //     projects: '',
+  //     machineStatuses: '',
+  //     stockStatuses: '',
+  //     burnStatuses: '',
+  //     zones: '',
+  //     wards: '',
+  //     beats: '',
+  //   };
+
+  //   this.dropdownOpen = {
+  //     projects: false,
+  //     machineStatuses: false,
+  //     stockStatuses: false,
+  //     burnStatuses: false,
+  //     zones: false,
+  //     wards: false,
+  //     beats: false,
+  //   };
+
+  //   // this.loadMachineData();
+  //   this.initialLoadMachineData();
+
+  //   this.hierarchySelection = {
+  //     state: [],
+  //     district: [],
+  //     zone: [],
+  //     ward: [],
+  //     beat: [],
+  //     project: [],
+  //   };
+
+  //   // Subscribe to dashboard refresh
+  //   this.refreshSubscription = this.dashboardRefreshService.refresh$.subscribe(
+  //     () => {
+  //       this.refreshDashboard();
+  //     }
+  //   );
+
+  //   // Start auto-refresh functionality
+  //   this.startAutoRefresh();
+
+  //   // Start the countdown
+  //   this.startRefreshCountdown(); // <-- Start the countdown here
+
+  //   // Load machine data and user roles
+  //   document.addEventListener('click', this.handleClickOutside.bind(this));
+  //   this.loadUserRole();
+
+  //   const merchantId = this.commonDataService.merchantId || '';
+  //   const userId = this.commonDataService.userId || 0;
+
+  //   this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe({
+  //     next: (response) => {
+  //       if (response?.code === 200 && response?.data) {
+  //         this.fullData = response.data.projects;
+  //         // this.projects = this.fullData; // Assign projects to options
+
+  //         this.projects = this.fullData.map((p: any) => ({
+  //           ProjectId: p.projectId,
+  //           projectname: p.projectName,
+  //         }));
+
+  //         this.selectedProjects = this.projects.map((p) => p.ProjectId);
+  //         this.rebuildFilterChain('projects');
+  //         console.log('Hierarchy Data: ', this.fullData);
+  //       }
+  //     },
+  //     error: (error) => {
+  //       console.error('Error fetching hierarchy data: ', error);
+  //     },
+  //   });
+  // }
+
+
   ngOnInit() {
-    this.searchText = {
-      projects: '',
-      machineStatuses: '',
-      stockStatuses: '',
-      burnStatuses: '',
-      zones: '',
-      wards: '',
-      beats: '',
-    };
+  this.searchText = {
+    projects: '',
+    machineStatuses: '',
+    stockStatuses: '',
+    burnStatuses: '',
+    zones: '',
+    wards: '',
+    selectedSubZones: '',
+    selectedWardList: '',
+    selectedBeatList: '',
+    beats: '',
+  };
 
-    this.dropdownOpen = {
-      projects: false,
-      machineStatuses: false,
-      stockStatuses: false,
-      burnStatuses: false,
-      zones: false,
-      wards: false,
-      beats: false,
-    };
+  this.dropdownOpen = {
+    projects: false,
+    machineStatuses: false,
+    stockStatuses: false,
+    burnStatuses: false,
+    zones: false,
+    wards: false,
+    selectedSubZones: false,
+    selectedWardList: false,
+    selectedBeatList: false,
+    beats: false,
+  };
 
-    // this.loadMachineData();
-    this.initialLoadMachineData();
+  this.hierarchySelection = {
+    state: [],
+    district: [],
+    zone: [],
+    ward: [],
+    beat: [],
+    project: [],
+  };
 
-    this.hierarchySelection = {
-      state: [],
-      district: [],
-      zone: [],
-      ward: [],
-      beat: [],
-      project: [],
-    };
 
-    // Subscribe to dashboard refresh
-    this.refreshSubscription = this.dashboardRefreshService.refresh$.subscribe(
-      () => {
-        this.refreshDashboard();
+      this.initialLoadMachineData();
+
+  // Subscribe to dashboard refresh
+  this.refreshSubscription = this.dashboardRefreshService.refresh$.subscribe(
+    () => {
+      this.refreshDashboard();
+    }
+  );
+
+  this.startAutoRefresh();
+  this.startRefreshCountdown();
+  document.addEventListener('click', this.handleClickOutside.bind(this));
+  this.loadUserRole();
+
+  const merchantId = this.commonDataService.merchantId || '';
+  const userId = this.commonDataService.userId || 0;
+
+  this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe({
+    next: (response) => {
+      if (response?.code === 200 && response?.data) {
+        this.fullData = response.data.projects;
+        
+        this.projects = this.fullData.map((p: any) => ({
+          ProjectId: p.projectId,
+          projectname: p.projectName,
+        }));
+
+        this.selectedProjects = this.projects.map((p) => p.ProjectId);
+        
+        // Analyze the data structure to determine available hierarchy levels
+        this.analyzeDataStructure();
+        
+        this.rebuildFilterChain('projects');
+        console.log('Hierarchy Data: ', this.fullData);
+        console.log('Available Hierarchy Levels:', this.availableHierarchyLevels);
       }
-    );
+    },
+    error: (error) => {
+      console.error('Error fetching hierarchy data: ', error);
+    },
+  });
+}
 
-    // Start auto-refresh functionality
-    this.startAutoRefresh();
+// New method to analyze data structure and determine available hierarchy levels
+analyzeDataStructure() {
+  this.availableHierarchyLevels = ['projects', 'zones', 'wards']; // Always have these basic levels
+  this.hasZoneWardBeatStructure = false;
 
-    // Start the countdown
-    this.startRefreshCountdown(); // <-- Start the countdown here
-
-    // Load machine data and user roles
-    document.addEventListener('click', this.handleClickOutside.bind(this));
-    this.loadUserRole();
-
-    const merchantId = this.commonDataService.merchantId || '';
-    const userId = this.commonDataService.userId || 0;
-
-    this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe({
-      next: (response) => {
-        if (response?.code === 200 && response?.data) {
-          this.fullData = response.data.projects;
-          // this.projects = this.fullData; // Assign projects to options
-
-          this.projects = this.fullData.map((p: any) => ({
-            ProjectId: p.projectId,
-            projectname: p.projectName,
-          }));
-
-          this.selectedProjects = this.projects.map((p) => p.ProjectId);
-          this.rebuildFilterChain('projects');
-          console.log('Hierarchy Data: ', this.fullData);
+  // Check if any project has the zone->ward->beat structure
+  for (const project of this.fullData) {
+    if (project.states) {
+      for (const state of project.states) {
+        if (state.districts) {
+          for (const district of state.districts) {
+            // Check if district has zones array and it's not empty
+            if (district.zones && Array.isArray(district.zones) && district.zones.length > 0) {
+              // Check if zones have wards
+              for (const zone of district.zones) {
+                if (zone.wards && Array.isArray(zone.wards) && zone.wards.length > 0) {
+                  this.hasZoneWardBeatStructure = true;
+                  this.availableHierarchyLevels.push('selectedSubZones', 'selectedWardList');
+                  
+                  // Check if wards have beats
+                  for (const ward of zone.wards) {
+                    if (ward.beats && Array.isArray(ward.beats) && ward.beats.length > 0) {
+                      this.availableHierarchyLevels.push('selectedBeatList');
+                      break;
+                    }
+                  }
+                  break;
+                }
+              }
+              if (this.hasZoneWardBeatStructure) break;
+            }
+          }
+          if (this.hasZoneWardBeatStructure) break;
         }
-      },
-      error: (error) => {
-        console.error('Error fetching hierarchy data: ', error);
-      },
+      }
+      if (this.hasZoneWardBeatStructure) break;
+    }
+  }
+
+  // Always add beats/machines at the end
+  this.availableHierarchyLevels.push('beats');
+  
+  // Remove duplicates
+  this.availableHierarchyLevels = [...new Set(this.availableHierarchyLevels)];
+}
+
+// Method to check if a filter should be visible
+shouldShowFilter(filterKey: string): boolean {
+  return this.availableHierarchyLevels.includes(filterKey);
+}
+
+// Modified shouldDisableFilter method to handle dynamic structure
+shouldDisableFilter(filterName: string): boolean {
+  // First check if the filter should be shown at all
+  const filterKeyMap: { [key: string]: string } = {
+    'Client Name': 'projects',
+    'State': 'zones',
+    'District': 'wards',
+    'Zone': 'selectedSubZones',
+    'Ward': 'selectedWardList',
+    'Beat': 'selectedBeatList',
+    'Machines': 'beats'
+  };
+
+  const filterKey = filterKeyMap[filterName];
+  if (filterKey && !this.shouldShowFilter(filterKey)) {
+    return true; // Hide the filter
+  }
+
+  // Original disable logic
+  switch (filterName) {
+    case 'State':
+      return this.selectedProjects.length === 0;
+    case 'District':
+      return this.selectedZones.length === 0;
+    case 'Zone':
+      return !this.hasZoneWardBeatStructure || this.selectedWards.length === 0;
+    case 'Ward':
+      return !this.hasZoneWardBeatStructure || this.selectedSubZones.length === 0;
+    case 'Beat':
+      return !this.hasZoneWardBeatStructure || this.selectedWardList.length === 0;
+    case 'Machines':
+      if (this.hasZoneWardBeatStructure) {
+        return this.selectedBeatList.length === 0;
+      } else {
+        // For simple structure (state->district->machines)
+        return this.selectedWards.length === 0;
+      }
+    default:
+      return false;
+  }
+}
+
+// Modified filterMachines method to handle both structures
+filterMachines() {
+  this.beats = [];
+  this.selectedBeats = [];
+
+  if (this.hasZoneWardBeatStructure) {
+    // Handle zone->ward->beat->machines structure
+    if (this.selectedBeatList.length === 0) {
+      return;
+    }
+
+    this.selectedProjects.forEach((pid) => {
+      const project = this.fullData.find((p) => p.projectId === pid);
+      if (!project || !project.states) return;
+
+      project.states.forEach((stateobj: any) => {
+        if (this.selectedZones.includes(stateobj.state)) {
+          if (!stateobj.districts) return;
+
+          stateobj.districts.forEach((districtobj: any) => {
+            if (this.selectedWards.includes(districtobj.district)) {
+              if (!districtobj.zones) return;
+
+              districtobj.zones.forEach((zoneobj: any) => {
+                if (this.selectedSubZones.includes(zoneobj.zone)) {
+                  if (!zoneobj.wards) return;
+
+                  zoneobj.wards.forEach((wardobj: any) => {
+                    if (this.selectedWardList.includes(wardobj.ward)) {
+                      if (!wardobj.beats) return;
+
+                      wardobj.beats.forEach((beatobj: any) => {
+                        if (this.selectedBeatList.includes(beatobj.beat)) {
+                          if (beatobj.machines && Array.isArray(beatobj.machines)) {
+                            this.beats.push(...beatobj.machines);
+                          }
+                        }
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    });
+  } else {
+    // Handle simple state->district->machines structure
+    if (this.selectedWards.length === 0) {
+      return;
+    }
+
+    this.selectedProjects.forEach((pid) => {
+      const project = this.fullData.find((p) => p.projectId === pid);
+      if (!project || !project.states) return;
+
+      project.states.forEach((stateobj: any) => {
+        if (this.selectedZones.includes(stateobj.state)) {
+          if (!stateobj.districts) return;
+
+          stateobj.districts.forEach((districtobj: any) => {
+            if (this.selectedWards.includes(districtobj.district)) {
+              // Directly get machines from district level
+              if (districtobj.machines && Array.isArray(districtobj.machines)) {
+                this.beats.push(...districtobj.machines);
+              }
+            }
+          });
+        }
+      });
     });
   }
+
+  this.selectedBeats = [...this.beats];
+  console.log('Updated selectedBeats:', this.selectedBeats);
+}
+
+// Modified rebuildFilterChain to handle dynamic structure
+rebuildFilterChain(startKey: string) {
+  switch (startKey) {
+    case 'projects':
+      this.filterStates();
+      this.filterWards();
+      if (this.hasZoneWardBeatStructure) {
+        this.filterSubZones();
+        this.filterWardList();
+        this.filterBeatList();
+      }
+      this.filterMachines();
+      break;
+    case 'zones':
+    case 'state':
+      this.filterWards();
+      if (this.hasZoneWardBeatStructure) {
+        this.filterSubZones();
+        this.filterWardList();
+        this.filterBeatList();
+      }
+      this.filterMachines();
+      break;
+    case 'wards':
+    case 'district':
+      if (this.hasZoneWardBeatStructure) {
+        this.filterSubZones();
+        this.filterWardList();
+        this.filterBeatList();
+      }
+      this.filterMachines();
+      break;
+    case 'selectedSubZones':
+    case 'zone':
+      if (this.hasZoneWardBeatStructure) {
+        this.filterWardList();
+        this.filterBeatList();
+      }
+      this.filterMachines();
+      break;
+    case 'selectedWardList':
+    case 'ward':
+      if (this.hasZoneWardBeatStructure) {
+        this.filterBeatList();
+      }
+      this.filterMachines();
+      break;
+    case 'selectedBeatList':
+    case 'beat':
+      this.filterMachines();
+      break;
+  }
+}
+
 
   toggleDropdown(key: string) {
     // Close all other dropdowns
@@ -364,38 +673,6 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Updated updateHierarchySelection method - fix the mapping between the keys and the hierarchy
-  // updateHierarchySelection(key: string, selectedArray: any[]) {
-  //   debugger;
-  //   switch (key) {
-  //     case 'projects':
-  //       this.hierarchySelection.project = [...selectedArray];
-  //       break;
-  //     case 'zones':
-  //     case 'state':
-  //       this.hierarchySelection.state = [...selectedArray];
-  //       break;
-  //     case 'wards':
-  //     case 'district':
-  //       this.hierarchySelection.district = [...selectedArray];
-  //       break;
-  //     case 'selectedSubZones':
-  //     case 'zone':
-  //       this.hierarchySelection.zone = [...selectedArray];
-  //       break;
-  //     case 'selectedWardList':
-  //     case 'ward':
-  //       this.hierarchySelection.ward = [...selectedArray];
-  //       break;
-  //     case 'selectedBeatList':
-  //     case 'beat':
-  //       this.hierarchySelection.beat = [...selectedArray];
-  //       break;
-  //   }
-  // }
-
-  // Improved filter functions to handle the empty arrays correctly
-  // Updated updateHierarchySelection method - fix the mapping between the keys and the hierarchy
   updateHierarchySelection(key: string, selectedArray: any[]) {
     debugger;
     switch (key) {
@@ -570,129 +847,130 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     this.selectedBeatList = [...this.beatList];
   }
 
-  filterMachines() {
-    this.beats = [];
-    this.selectedBeats = [];
+  // filterMachines() {
+  //   this.beats = [];
+  //   this.selectedBeats = [];
 
-    if (this.selectedBeatList.length === 0) {
-      // If no beatList selected, clear the machines
-      return;
-    }
+  //   if (this.selectedBeatList.length === 0) {
+  //     // If no beatList selected, clear the machines
+  //     return;
+  //   }
 
-    this.selectedProjects.forEach((pid) => {
-      const project = this.fullData.find((p) => p.projectId === pid);
-      if (!project || !project.states) {
-        console.warn(`Project with ID ${pid} not found or has no states`);
-        return;
-      }
+  //   this.selectedProjects.forEach((pid) => {
+  //     const project = this.fullData.find((p) => p.projectId === pid);
+  //     if (!project || !project.states) {
+  //       console.warn(`Project with ID ${pid} not found or has no states`);
+  //       return;
+  //     }
 
-      project.states.forEach((stateobj: any) => {
-        if (this.selectedZones.includes(stateobj.state)) {
-          if (!stateobj.districts) {
-            console.warn(`State ${stateobj.state} has no districts`);
-            return;
-          }
+  //     project.states.forEach((stateobj: any) => {
+  //       if (this.selectedZones.includes(stateobj.state)) {
+  //         if (!stateobj.districts) {
+  //           console.warn(`State ${stateobj.state} has no districts`);
+  //           return;
+  //         }
 
-          stateobj.districts.forEach((districtobj: any) => {
-            if (this.selectedWards.includes(districtobj.district)) {
-              if (!districtobj.zones) {
-                console.warn(`District ${districtobj.district} has no zones`);
-                return;
-              }
+  //         stateobj.districts.forEach((districtobj: any) => {
+  //           if (this.selectedWards.includes(districtobj.district)) {
+  //             if (!districtobj.zones) {
+  //               console.warn(`District ${districtobj.district} has no zones`);
+  //               return;
+  //             }
 
-              districtobj.zones.forEach((zoneobj: any) => {
-                if (this.selectedSubZones.includes(zoneobj.zone)) {
-                  if (!zoneobj.wards) {
-                    console.warn(`Zone ${zoneobj.zone} has no wards`);
-                    return;
-                  }
+  //             districtobj.zones.forEach((zoneobj: any) => {
+  //               if (this.selectedSubZones.includes(zoneobj.zone)) {
+  //                 if (!zoneobj.wards) {
+  //                   console.warn(`Zone ${zoneobj.zone} has no wards`);
+  //                   return;
+  //                 }
 
-                  zoneobj.wards.forEach((wardobj: any) => {
-                    if (this.selectedWardList.includes(wardobj.ward)) {
-                      if (!wardobj.beats) {
-                        console.warn(`Ward ${wardobj.ward} has no beats`);
-                        return;
-                      }
+  //                 zoneobj.wards.forEach((wardobj: any) => {
+  //                   if (this.selectedWardList.includes(wardobj.ward)) {
+  //                     if (!wardobj.beats) {
+  //                       console.warn(`Ward ${wardobj.ward} has no beats`);
+  //                       return;
+  //                     }
 
-                      wardobj.beats.forEach((beatobj: any) => {
-                        if (this.selectedBeatList.includes(beatobj.beat)) {
-                          if (
-                            beatobj.machines &&
-                            Array.isArray(beatobj.machines)
-                          ) {
-                            console.log(
-                              `Adding machines from beat ${beatobj.beat}:`,
-                              beatobj.machines
-                            );
-                            this.beats.push(...beatobj.machines);
-                          } else {
-                            console.warn(
-                              `Beat ${beatobj.beat} has no machines or machines is not an array`
-                            );
-                          }
-                        }
-                      });
-                    }
-                  });
-                }
-              });
-            }
-          });
-        }
-      });
-    });
+  //                     wardobj.beats.forEach((beatobj: any) => {
+  //                       if (this.selectedBeatList.includes(beatobj.beat)) {
+  //                         if (
+  //                           beatobj.machines &&
+  //                           Array.isArray(beatobj.machines)
+  //                         ) {
+  //                           console.log(
+  //                             `Adding machines from beat ${beatobj.beat}:`,
+  //                             beatobj.machines
+  //                           );
+  //                           this.beats.push(...beatobj.machines);
+  //                         } else {
+  //                           console.warn(
+  //                             `Beat ${beatobj.beat} has no machines or machines is not an array`
+  //                           );
+  //                         }
+  //                       }
+  //                     });
+  //                   }
+  //                 });
+  //               }
+  //             });
+  //           }
+  //         });
+  //       }
+  //     });
+  //   });
 
-    // Update selectedBeats with the contents of beats
-    this.selectedBeats = [...this.beats];
-    console.log('Updated selectedBeats:', this.selectedBeats);
-  }
+  //   // Update selectedBeats with the contents of beats
+  //   this.selectedBeats = [...this.beats];
+  //   console.log('Updated selectedBeats:', this.selectedBeats);
+  // }
 
-  // New method to rebuild the entire filter chain when selections change
-  rebuildFilterChain(startKey: string) {
-    // Determine where to start rebuilding based on the changed key
-    switch (startKey) {
-      case 'projects':
-        this.filterStates();
-        this.filterWards();
-        this.filterSubZones();
-        this.filterWardList();
-        this.filterBeatList();
-        this.filterMachines();
-        break;
-      case 'zones':
-      case 'state':
-        this.filterWards();
-        this.filterSubZones();
-        this.filterWardList();
-        this.filterBeatList();
-        this.filterMachines();
-        break;
-      case 'wards':
-      case 'district':
-        this.filterSubZones();
-        this.filterWardList();
-        this.filterBeatList();
-        this.filterMachines();
-        break;
-      case 'selectedSubZones':
-      case 'zone':
-        this.filterWardList();
-        this.filterBeatList();
-        this.filterMachines();
-        break;
-      case 'selectedWardList':
-      case 'ward':
-        this.filterBeatList();
-        this.filterMachines();
-        break;
-      case 'selectedBeatList':
-      case 'beat':
-        this.filterMachines();
-        break;
-    }
-  }
+  // rebuildFilterChain(startKey: string) {
+  //   // Determine where to start rebuilding based on the changed key
+  //   switch (startKey) {
+  //     case 'projects':
+  //       this.filterStates();
+  //       this.filterWards();
+  //       this.filterSubZones();
+  //       this.filterWardList();
+  //       this.filterBeatList();
+  //       this.filterMachines();
+  //       break;
+  //     case 'zones':
+  //     case 'state':
+  //       this.filterWards();
+  //       this.filterSubZones();
+  //       this.filterWardList();
+  //       this.filterBeatList();
+  //       this.filterMachines();
+  //       break;
+  //     case 'wards':
+  //     case 'district':
+  //       this.filterSubZones();
+  //       this.filterWardList();
+  //       this.filterBeatList();
+  //       this.filterMachines();
+  //       break;
+  //     case 'selectedSubZones':
+  //     case 'zone':
+  //       this.filterWardList();
+  //       this.filterBeatList();
+  //       this.filterMachines();
+  //       break;
+  //     case 'selectedWardList':
+  //     case 'ward':
+  //       this.filterBeatList();
+  //       this.filterMachines();
+  //       break;
+  //     case 'selectedBeatList':
+  //     case 'beat':
+  //       this.filterMachines();
+  //       break;
+  //   }
+  // }
 
   // Fix the toggleSelectAll method to properly update hierarchy and refresh data
+  
+  
   toggleSelectAll(selectedArray: any[], options: any[], key: string) {
     debugger;
     // Toggle select all logic
@@ -1345,46 +1623,46 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     return 'N/A';
   }
 
-  shouldDisableFilter(filterName: string): boolean {
-    switch (this.roleName) {
-      case 'Client':
-        return filterName === 'Client Name';
-      case 'State User':
-        return filterName === 'Client Name' || filterName === 'State';
-      case 'District User':
-        return (
-          filterName === 'Client Name' ||
-          filterName === 'State' ||
-          filterName === 'District'
-        );
-      case 'Zone User':
-        return (
-          filterName === 'Client Name' ||
-          filterName === 'State' ||
-          filterName === 'District' ||
-          filterName === 'Zone'
-        );
-      case 'Ward User':
-        return (
-          filterName === 'Client Name' ||
-          filterName === 'State' ||
-          filterName === 'District' ||
-          filterName === 'Zone' ||
-          filterName === 'Ward'
-        );
-      case 'Beat User':
-        return (
-          filterName === 'Client Name' ||
-          filterName === 'State' ||
-          filterName === 'District' ||
-          filterName === 'Zone' ||
-          filterName === 'Ward' ||
-          filterName === 'Beat'
-        );
-      default:
-        return false;
-    }
-  }
+  // shouldDisableFilter(filterName: string): boolean {
+  //   switch (this.roleName) {
+  //     case 'Client':
+  //       return filterName === 'Client Name';
+  //     case 'State User':
+  //       return filterName === 'Client Name' || filterName === 'State';
+  //     case 'District User':
+  //       return (
+  //         filterName === 'Client Name' ||
+  //         filterName === 'State' ||
+  //         filterName === 'District'
+  //       );
+  //     case 'Zone User':
+  //       return (
+  //         filterName === 'Client Name' ||
+  //         filterName === 'State' ||
+  //         filterName === 'District' ||
+  //         filterName === 'Zone'
+  //       );
+  //     case 'Ward User':
+  //       return (
+  //         filterName === 'Client Name' ||
+  //         filterName === 'State' ||
+  //         filterName === 'District' ||
+  //         filterName === 'Zone' ||
+  //         filterName === 'Ward'
+  //       );
+  //     case 'Beat User':
+  //       return (
+  //         filterName === 'Client Name' ||
+  //         filterName === 'State' ||
+  //         filterName === 'District' ||
+  //         filterName === 'Zone' ||
+  //         filterName === 'Ward' ||
+  //         filterName === 'Beat'
+  //       );
+  //     default:
+  //       return false;
+  //   }
+  // }
 
   // initializeDefaultSelections() {
   //   // Set default status filters

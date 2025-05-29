@@ -131,9 +131,9 @@
       🔄 Refresh Data
     </button>
   </div>
-  <div class="card-body">
+<div class="card-body">
     <div class="container">
-      <!-- Row 1: First 6 filters -->
+      <!-- Row 1: First 6 filters (including conditional ones) -->
       <div class="row filter">
         <div
           class="col"
@@ -143,49 +143,57 @@
                 name: 'Client Name',
                 key: 'projects',
                 selected: selectedProjects,
-                options: projects
+                options: projects,
+                show: true
               },
               {
                 name: 'Machine Status',
                 key: 'machineStatuses',
                 selected: selectedMachineStatuses,
-                options: machineStatuses
+                options: machineStatuses,
+                show: true
               },
               {
                 name: 'Stock Status',
                 key: 'stockStatuses',
                 selected: selectedStockStatuses,
-                options: stockStatuses
+                options: stockStatuses,
+                show: true
               },
               {
                 name: 'Burn Status',
                 key: 'burnStatuses',
                 selected: selectedBurnStatuses,
-                options: burnStatuses
+                options: burnStatuses,
+                show: true
               },
               {
                 name: 'State',
                 key: 'zones',
                 selected: selectedZones,
-                options: zones
+                options: zones,
+                show: true
               },
               {
                 name: 'District',
                 key: 'wards',
                 selected: selectedWards,
-                options: wards
+                options: wards,
+                show: true
               }
             ]
           "
         >
           <ng-container
-            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"
+            *ngIf="filter.show"
+            [ngTemplateOutlet]="dropdownTemplate"
+            [ngTemplateOutletContext]="{ $implicit: filter }"
           ></ng-container>
         </div>
       </div>
 
-      <!-- Row 2: Remaining 4 filters -->
-      <div class="row filter mt-3">
+      <!-- Row 2: Hierarchical filters (conditionally shown) -->
+      <div class="row filter mt-3" *ngIf="hasZoneWardBeatStructure">
         <div
           class="col"
           *ngFor="
@@ -194,33 +202,61 @@
                 name: 'Zone',
                 key: 'selectedSubZones',
                 selected: selectedSubZones,
-                options: subZones
+                options: subZones,
+                show: shouldShowFilter('selectedSubZones')
               },
               {
                 name: 'Ward',
                 key: 'selectedWardList',
                 selected: selectedWardList,
-                options: wardList
+                options: wardList,
+                show: shouldShowFilter('selectedWardList')
               },
               {
                 name: 'Beat',
                 key: 'selectedBeatList',
                 selected: selectedBeatList,
-                options: beatList
+                options: beatList,
+                show: shouldShowFilter('selectedBeatList')
               },
               {
                 name: 'Machines',
                 key: 'beats',
                 selected: selectedBeats,
-                options: beats
+                options: beats,
+                show: shouldShowFilter('beats')
               }
             ]
           "
         >
           <ng-container
-            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"
+            *ngIf="filter.show"
+            [ngTemplateOutlet]="dropdownTemplate"
+            [ngTemplateOutletContext]="{ $implicit: filter }"
           ></ng-container>
         </div>
+      </div>
+
+      <!-- Row 3: Machines filter for simple structure (state->district->machines) -->
+      <div class="row filter mt-3" *ngIf="!hasZoneWardBeatStructure">
+        <div class="col">
+          <ng-container
+            [ngTemplateOutlet]="dropdownTemplate"
+            [ngTemplateOutletContext]="{
+              $implicit: {
+                name: 'Machines',
+                key: 'beats',
+                selected: selectedBeats,
+                options: beats,
+                show: true
+              }
+            }"
+          ></ng-container>
+        </div>
+        <!-- Empty columns to maintain grid structure -->
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
       </div>
     </div>
 
