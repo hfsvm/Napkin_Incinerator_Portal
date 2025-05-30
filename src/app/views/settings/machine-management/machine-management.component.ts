@@ -355,6 +355,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service'; // Import service for dynamic user details
 import { FormControl, FormArray } from '@angular/forms';
+import { Router } from '@angular/router';
+
 
 
 
@@ -389,6 +391,7 @@ isEditingTechnical = false;
     console.log("Form save function called!");
   }
   constructor(
+    private router: Router,
     private fb: FormBuilder, 
     private dataService: DataService, 
     private commonDataService: CommonDataService, // Inject the service to fetch user details dynamically
@@ -399,6 +402,13 @@ isEditingTechnical = false;
   originalMachines: any[] = []; // Backup for filtering
   
   ngOnInit(): void {
+
+    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
+      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
+     
+      this.router.navigate(['/login']);
+    }
+
 
     this.machines = this.commonDataService.userDetails.machineId;
     this.originalMachines = [...this.machines]; // Create a copy for filtering

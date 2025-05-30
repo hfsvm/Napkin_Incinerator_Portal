@@ -122,11 +122,13 @@ export class LoginComponent implements OnInit {
     }
 
     if (controls['captcha'].value !== this.captchaCode) {
-      this.fieldErrors.captcha =
-        '❌ Invalid CAPTCHA. Please match the code exactly.';
-      this.loadCaptcha(); // ✅ Load new captcha after server says wrong
-      return;
-    }
+  setTimeout(() => {
+    this.fieldErrors.captcha = '❌ Invalid CAPTCHA. Please match the code exactly.';
+  });
+  this.loadCaptcha();
+  return;
+} 
+
 
     const { email, password, merchantId, captcha } = this.loginForm.value;
 
