@@ -194,32 +194,41 @@
                 name: 'Zone',
                 key: 'selectedSubZones',
                 selected: selectedSubZones,
-                options: subZones
+                options: subZones,
+                show: checkIfDistrictsHaveZones()
               },
               {
                 name: 'Ward',
                 key: 'selectedWardList',
                 selected: selectedWardList,
-                options: wardList
+                options: wardList,
+                show: checkIfDistrictsHaveZones()
               },
               {
                 name: 'Beat',
                 key: 'selectedBeatList',
                 selected: selectedBeatList,
-                options: beatList
+                options: beatList,
+                show: checkIfDistrictsHaveZones()
               },
               {
                 name: 'Machines',
                 key: 'beats',
                 selected: selectedBeats,
-                options: beats
+                options: beats,
+                show: true
               }
             ]
           "
         >
-          <ng-container
-            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"
-          ></ng-container>
+          <ng-container *ngIf="filter.show">
+            <ng-container
+              *ngTemplateOutlet="
+                dropdownTemplate;
+                context: { $implicit: filter }
+              "
+            ></ng-container>
+          </ng-container>
         </div>
       </div>
     </div>
