@@ -75,125 +75,77 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     this.refreshCountdown = this.refreshInterval;
   }
 
-  // fetchDashboardData(): void {
-  //   debugger;
-  //   if (!this.merchantId) return;
-
-  //   const userDetails = this.commonDataService.userDetails;
-  //   if (!userDetails) return;
-
-  //   const queryParams: any = {
-  //     merchantId: this.merchantId,
-  //     machineStatus: ['1', '2'],
-  //     stockStatus: ['0', '1', '2'],
-  //     burnStatus: ['1', '2'],
-  //     level1: userDetails.state?.join(',') || '',
-  //     level2: userDetails.district?.join(',') || '',
-  //     level3: userDetails.companyName?.[0]?.ClientId || '',
-  //     machineId: userDetails.machineId?.join(',') || '',
-  //     client: userDetails.clientId,
-  //     project: userDetails.projectId,
-  //     zone: userDetails.zone?.join(',') || '',
-  //     ward: userDetails.ward?.join(',') || '',
-  //     beat: userDetails.beat?.join(',') || '',
-  //   };
-
-  //   this.dataService.getMachineDashboardSummary(queryParams).subscribe({
-  //     next: (response) => {
-  //       if (response.code === 200 && response.data) {
-  //         const {
-  //           machinesInstalled = 0,
-  //           machinesRunning = 0,
-  //           totalBurningCycles = 0,
-  //           totalCollection = 0,
-  //           itemsDispensed = 0,
-  //           stockEmpty = 0,
-  //           stockLow = 0,
-  //         } = response.data;
-
-  //         this.totalMachines = machinesInstalled;
-  //         this.activeMachines = machinesRunning;
-  //         this.inactiveMachines = machinesInstalled - machinesRunning;
-  //         this.totalburningcycles = totalBurningCycles;
-  //         this.totalCollection = totalCollection;
-  //         this.napkinsDispensed = itemsDispensed;
-  //         this.emptyStock = stockEmpty;
-  //         this.lowStock = stockLow;
-  //         this.okStock = machinesInstalled - (stockEmpty + stockLow);
-
-  //         this.updateMachineChart();
-  //         this.updateStockChart();
-  //       }
-  //     },
-  //   });
-  // }
-
   fetchDashboardData(): void {
     debugger;
     if (!this.merchantId) return;
 
     const userDetails = this.commonDataService.userDetails;
-    if (!userDetails) return;
+    if (!userDetails || !Array.isArray(userDetails.clients)) return;
+    const states: string[] = [];
+    const districts: string[] = [];
+    const zones: string[] = [];
+    const wards: string[] = [];
+    const beats: string[] = [];
+    const machines: string[] = [];
+    const clientIds: string[] = [];
+    const projectIds: string[] = [];
 
-    // Extract states, districts, zones, wards, and beats from the nested structure
-    const states =
-      userDetails.projects?.flatMap((project: { states: any[] }) =>
-        project.states?.map((state: { state: any }) => state.state)
-      ) || [];
+    userDetails.clients?.forEach((client: any) => {
+      if (client.clientId) {
+        clientIds.push(client.clientId.toString());
+      }
 
-    const districts =
-      userDetails.projects?.flatMap((project: { states: any[] }) =>
-        project.states?.flatMap((state: { districts: any[] }) =>
-          state.districts?.map(
-            (district: { district: any }) => district.district
-          )
-        )
-      ) || [];
+      client.projects?.forEach((project: any) => {
+        if (project.projectId) {
+          projectIds.push(project.projectId.toString());
+        }
 
-    const zones =
-      userDetails.projects?.flatMap((project: { states: any[] }) =>
-        project.states?.flatMap((state: { districts: any[] }) =>
-          state.districts?.flatMap((district: { zones: any[] }) =>
-            district.zones?.map((zone: { zone: any }) => zone.zone)
-          )
-        )
-      ) || [];
+        project.states?.forEach((state: any) => {
+          if (state.state) {
+            states.push(state.state);
+          }
 
-    const wards =
-      userDetails.projects?.flatMap((project: { states: any[] }) =>
-        project.states?.flatMap((state: { districts: any[] }) =>
-          state.districts?.flatMap((district: { zones: any[] }) =>
-            district.zones?.flatMap((zone: { wards: any[] }) =>
-              zone.wards?.map((ward: { ward: any }) => ward.ward)
-            )
-          )
-        )
-      ) || [];
+          state.districts?.forEach((district: any) => {
+            if (district.district) {
+              districts.push(district.district);
+            }
 
-    const beats =
-      userDetails.projects?.flatMap((project: { states: any[] }) =>
-        project.states?.flatMap((state: { districts: any[] }) =>
-          state.districts?.flatMap((district: { zones: any[] }) =>
-            district.zones?.flatMap((zone: { wards: any[] }) =>
-              zone.wards?.flatMap((ward: { beats: any[] }) =>
-                ward.beats?.map((beat: { beat: any }) => beat.beat)
-              )
-            )
-          )
-        )
-      ) || [];
+            district.zones?.forEach((zone: any) => {
+              if (zone.zone) {
+                zones.push(zone.zone);
+              }
+
+              zone.wards?.forEach((ward: any) => {
+                if (ward.ward) {
+                  wards.push(ward.ward);
+                }
+
+                ward.beats?.forEach((beat: any) => {
+                  if (beat.beat) {
+                    beats.push(beat.beat);
+                  }
+
+                  if (Array.isArray(beat.machines)) {
+                    machines.push(...beat.machines);
+                  }
+                });
+              });
+            });
+          });
+        });
+      });
+    });
 
     const queryParams: any = {
       merchantId: this.merchantId,
       machineStatus: ['1', '2'],
       stockStatus: ['0', '1', '2'],
       burnStatus: ['1', '2'],
-      level1: states.join(','),
-      level2: districts.join(','),
-      level3: userDetails.companyName?.[0]?.ClientId || '',
-      machineId: userDetails.machines?.join(',') || '',
-      client: userDetails.clientId,
-      project: userDetails.projectId,
+      state: states.join(','),
+      district: districts.join(','),
+      // machineId: machines.join(','),
+      client: clientIds.join(','),
+      project: projectIds.join(','),
       zone: zones.join(','),
       ward: wards.join(','),
       beat: beats.join(','),

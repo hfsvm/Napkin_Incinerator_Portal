@@ -5,7 +5,6 @@ import * as XLSX from 'xlsx';
 import { Subscription, interval } from 'rxjs';
 import { format, eachDayOfInterval, parseISO } from 'date-fns';
 
-
 interface Transaction {
   date: string;
   qty: number;
@@ -261,7 +260,6 @@ export class SmartTablesBasicExampleComponent implements OnInit {
 
   allDates: string[] = [];
 
-
   constructor(
     private dataService: DataService,
     private commonDataService: CommonDataService,
@@ -282,6 +280,8 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     }
 
     this.setDefaultDates();
+    this.selectedProjects = this.projects.map((p) => p.ProjectId);
+
     // this.fetchUserDetails(); // ✅ Fetch User Details First
     // this.loadCommonData();
 
@@ -299,8 +299,6 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     this.updatePagination();
   }
 
-
-  
   getTotalCash(machine: any): number {
     debugger;
     if (!machine.transactions || machine.transactions.length === 0) {
@@ -475,28 +473,28 @@ export class SmartTablesBasicExampleComponent implements OnInit {
           if (response?.code === 200 && response.data) {
             console.log('✅✅✅✅✅✅Hierarchy API Response:', response);
             debugger;
-            this.hierarchicalData = response.data;
-            this.fullData = response.data.projects;
+            // Collect all projects from all clients
+            const allProjects =
+              response.data.clients?.flatMap(
+                (client: any) => client.projects || []
+              ) || [];
+
+            this.fullData = allProjects;
+            console.log('fullData =', this.fullData);
 
             this.projects = this.fullData.map((p: any) => ({
               ProjectId: p.projectId,
               projectname: p.projectName,
             }));
 
-            // this.clientId = response.data.clientId;
-            // this.projectId = response.data.projects?.[0]?.projectId;
-            // console.log('📌 Extracted projectId:', this.projectId);
+            console.log('projects =', this.projects);
 
-            // Check if selected project (client) is BMC
-            const selectedProject = this.fullData.find((p) =>
-              p.projectName.toLowerCase().includes('bmc')
-            );
-            this.isBmcClient = !!selectedProject;
             this.selectedProjects = this.projects.map((p) => p.ProjectId);
+            // this.isBmcClient = !!selectedProject;
             this.rebuildFilterChain('projects');
+            console.log('Hierarchy Data: ', this.fullData);
 
             //this.processHierarchicalData();
-            // this.loadMachineData(); // Load machine data after hierarchy is processed
           } else {
             console.warn('⚠️ No valid hierarchy data received.');
             this.isLoading = false;
@@ -513,47 +511,126 @@ export class SmartTablesBasicExampleComponent implements OnInit {
       );
   }
 
+  // filterStates() {
+  //   this.zones = [];
+  //   this.selectedZones = [];
+
+  //   if (this.selectedProjects.length === 0) {
+  //     // If no projects selected, clear all dependent filters
+  //     this.clearDependentSelections('project');
+  //     return;
+  //   }
+
+  //   this.selectedProjects.forEach((pid) => {
+  //     const project = this.fullData.find((p) => p.projectId === pid);
+  //     project?.states?.forEach((stateobj: any) => {
+  //       if (!this.zones.includes(stateobj.state)) {
+  //         this.zones.push(stateobj.state);
+  //       }
+  //     });
+  //   });
+  //   this.selectedZones = [...this.zones];
+  // }
   filterStates() {
     this.zones = [];
     this.selectedZones = [];
 
-    this.selectedProjects.forEach((pid) => {
-      const project = this.fullData.find((p) => p.projectId === pid);
-      project?.states?.forEach((stateobj: any) => {
-        if (!this.zones.includes(stateobj.state)) {
-          this.zones.push(stateobj.state);
-        }
+    if (this.selectedProjects.length === 0) {
+      // If no projects selected, get all states from all projects
+      this.fullData.forEach((project) => {
+        project?.states?.forEach((stateobj: any) => {
+          if (!this.zones.includes(stateobj.state)) {
+            this.zones.push(stateobj.state);
+          }
+        });
       });
-    });
+    } else {
+      // If projects are selected, only get states from selected projects
+      this.selectedProjects.forEach((pid) => {
+        const project = this.fullData.find((p) => p.projectId === pid);
+        project?.states?.forEach((stateobj: any) => {
+          if (!this.zones.includes(stateobj.state)) {
+            this.zones.push(stateobj.state);
+          }
+        });
+      });
+    }
+
+    // Select all by default
     this.selectedZones = [...this.zones];
-    // this.filterWards();
+    this.updateHierarchySelection('zones', this.selectedZones);
   }
+
+  // filterWards() {
+  //   this.wards = [];
+  //   this.selectedWards = [];
+
+  //   if (this.selectedZones.length === 0) {
+  //     // If no zones selected, clear all dependent filters
+  //     this.clearDependentSelections('zones');
+  //     return;
+  //   }
+
+  //   this.selectedProjects.forEach((pid) => {
+  //     const project = this.fullData.find((p) => p.projectId === pid);
+  //     project?.states?.forEach((stateobj: any) => {
+  //       if (this.selectedZones.includes(stateobj.state)) {
+  //         stateobj.districts?.forEach((districtobj: any) => {
+  //           if (!this.wards.includes(districtobj.district)) {
+  //             this.wards.push(districtobj.district);
+  //           }
+  //         });
+  //       }
+  //     });
+  //   });
+  //   this.selectedWards = [...this.wards];
+  // }
 
   filterWards() {
     this.wards = [];
     this.selectedWards = [];
 
-    this.selectedProjects.forEach((pid) => {
-      const project = this.fullData.find((p) => p.projectId === pid);
-      project?.states?.forEach((stateobj: any) => {
-        if (this.selectedZones.includes(stateobj.state)) {
+    if (this.selectedZones.length === 0) {
+      // If no zones selected, get all districts from all states
+      this.fullData.forEach((project) => {
+        project?.states?.forEach((stateobj: any) => {
           stateobj.districts?.forEach((districtobj: any) => {
-            if (
-              !this.wards.find((w: any) => w.district === districtobj.district)
-            ) {
+            if (!this.wards.includes(districtobj.district)) {
               this.wards.push(districtobj.district);
             }
           });
-        }
+        });
       });
-    });
+    } else {
+      // If zones are selected, only get districts from selected zones
+      this.selectedProjects.forEach((pid) => {
+        const project = this.fullData.find((p) => p.projectId === pid);
+        project?.states?.forEach((stateobj: any) => {
+          if (this.selectedZones.includes(stateobj.state)) {
+            stateobj.districts?.forEach((districtobj: any) => {
+              if (!this.wards.includes(districtobj.district)) {
+                this.wards.push(districtobj.district);
+              }
+            });
+          }
+        });
+      });
+    }
+
+    // Select all by default
     this.selectedWards = [...this.wards];
-    // this.filterSubZones();
+    this.updateHierarchySelection('wards', this.selectedWards);
   }
 
   filterSubZones() {
     this.subZones = [];
     this.selectedSubZones = [];
+
+    if (this.selectedWards.length === 0) {
+      // If no wards selected, clear all dependent filters
+      this.clearDependentSelections('wards');
+      return;
+    }
 
     this.selectedProjects.forEach((pid) => {
       const project = this.fullData.find((p) => p.projectId === pid);
@@ -563,7 +640,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
             if (this.selectedWards.includes(districtobj.district)) {
               districtobj.zones?.forEach((zoneobj: any) => {
                 if (!this.subZones.includes(zoneobj.zone)) {
-                  this.subZones.push(zoneobj.zone); // Push plain string value
+                  this.subZones.push(zoneobj.zone);
                 }
               });
             }
@@ -572,7 +649,6 @@ export class SmartTablesBasicExampleComponent implements OnInit {
       });
     });
     this.selectedSubZones = [...this.subZones];
-    // this.filterWardList();
   }
 
   filterWardList() {
@@ -1059,7 +1135,13 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     this.errorMessage = '';
 
     const merchantId = this.commonDataService.merchantId ?? '';
-    const userDetails = this.commonDataService.userDetails;
+    const userDetailsList = this.commonDataService.userDetails.clients || [];
+
+    // 🔁 Collect all clientIds and projectIds
+    const clientIds = userDetailsList.map((c: any) => c.clientId);
+    const projectIds = userDetailsList.flatMap(
+      (c: any) => c.projects?.map((p: any) => p.projectId) || []
+    );
 
     const queryParams: any = {
       merchantId,
@@ -1085,12 +1167,14 @@ export class SmartTablesBasicExampleComponent implements OnInit {
         this.hierarchySelection.beat?.length > 0
           ? [...this.hierarchySelection.beat]
           : [],
-      client: userDetails.clientId,
-      project: userDetails.projectId,
+      client: clientIds,
+      project:
+        this.hierarchySelection.project?.length > 0
+          ? [...this.hierarchySelection.project]
+          : [],
     };
 
-    // Include machine selection if available
-    if (this.selectedBeats?.length > 0) {
+    if (this.selectedBeats.length > 0) {
       queryParams.machineId = [...this.selectedBeats];
     }
 
@@ -1117,6 +1201,8 @@ export class SmartTablesBasicExampleComponent implements OnInit {
           this.processResponseData(response.data.machineDetails);
         } else {
           this.filteredData = [];
+          this.isLoading = false;
+
           this.errorMessage = 'No data available for the selected filters.';
         }
       },
@@ -1124,10 +1210,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
         this.handleError(error); // Handle the error by showing popup messages
       }
     );
-
-    
   }
-
 
   machineFilterTouched = false;
   onMachineSelectionChange(selected: string[]) {
@@ -1491,8 +1574,8 @@ export class SmartTablesBasicExampleComponent implements OnInit {
 
     return { totalTime, avgPerDay };
   }
-// working correctly but showing dates which are in response 
-  processResponseDataw1(
+
+  processResponseDatac(
     machineDetails: any[],
     startDate?: string,
     endDate?: string
@@ -1797,1770 +1880,1872 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     this.updatePagination();
   }
 
+  processResponseData2(
+    machineDetails: any[],
+    startDate?: string,
+    endDate?: string
+  ): void {
+    let grandTotalQty = 0;
+    let grandTotalCash = 0;
+    let grandTotalBurnCycles = 0;
+    let grandTotalSanNapkins = 0;
 
-// working showing all dates from start date to end date but page is loading is heavy
-processResponseData(
-  machineDetails: any[],
-  startDate?: string,
-  endDate?: string
-): void {
-  let grandTotalQty = 0;
-  let grandTotalCash = 0;
-  let grandTotalBurnCycles = 0;
-  let grandTotalSanNapkins = 0;
+    // Count the number of machines (excluding those with no transactions)
+    const machinesWithTransactions = machineDetails.filter(
+      (machine) =>
+        (machine.vending && machine.vending.length) ||
+        (machine.incinerator && machine.incinerator.length)
+    );
+    const numberOfMachines = machinesWithTransactions.length;
 
-  // Count the number of machines (excluding those with no transactions)
-  const machinesWithTransactions = machineDetails.filter(
-    (machine) =>
-      (machine.vending && machine.vending.length) ||
-      (machine.incinerator && machine.incinerator.length)
-  );
-  const numberOfMachines = machinesWithTransactions.length;
+    // ✅ Generate all dates between start and end date
+    const generateDateRange = (start: string, end: string): string[] => {
+      const dates: string[] = [];
+      const startDate = new Date(start);
+      const endDate = new Date(end);
 
-  // ✅ FIXED Date conversion helper functions with proper timezone handling
-  const dateConversionCache = new Map<string, string>();
-  
-  // Clear any existing cache
-  dateConversionCache.clear();
-  
-  const convertServiceDateToStandard = (serviceDate: string): string => {
-    // Check cache first
-    if (dateConversionCache.has(serviceDate)) {
-      return dateConversionCache.get(serviceDate)!;
-    }
-    
-    // Convert "17-May-2025" to "2025-05-17"
-    try {
-      // Parse the date string manually to avoid timezone issues
-      const parts = serviceDate.split('-');
-      if (parts.length !== 3) {
-        console.error('Invalid service date format:', serviceDate);
-        dateConversionCache.set(serviceDate, serviceDate);
-        return serviceDate;
-      }
-      
-      const day = parts[0].padStart(2, '0');
-      const monthStr = parts[1];
-      const year = parts[2];
-      
-      // Convert month name to number
-      const monthMap: { [key: string]: string } = {
-        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
-        'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
-        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
-      };
-      
-      const month = monthMap[monthStr];
-      if (!month) {
-        console.error('Invalid month in service date:', serviceDate);
-        dateConversionCache.set(serviceDate, serviceDate);
-        return serviceDate;
-      }
-      
-      const standardDate = `${year}-${month}-${day}`;
-      console.log(`✅ Date conversion: ${serviceDate} -> ${standardDate}`);
-      dateConversionCache.set(serviceDate, standardDate);
-      return standardDate;
-      
-    } catch (error) {
-      console.error('Error converting service date:', serviceDate, error);
-      dateConversionCache.set(serviceDate, serviceDate);
-      return serviceDate;
-    }
-  };
-
-  const convertStandardToServiceDate = (standardDate: string): string => {
-    // Check cache first (reverse lookup)
-    const cacheKey = `reverse_${standardDate}`;
-    if (dateConversionCache.has(cacheKey)) {
-      return dateConversionCache.get(cacheKey)!;
-    }
-    
-    // Convert "2025-05-17" to "17-May-2025" for display
-    try {
-      const parts = standardDate.split('-');
-      if (parts.length !== 3) {
-        console.error('Invalid standard date format:', standardDate);
-        dateConversionCache.set(cacheKey, standardDate);
-        return standardDate;
-      }
-      
-      const year = parts[0];
-      const month = parts[1];
-      const day = parts[2];
-      
-      // Convert month number to name
-      const monthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ];
-      
-      const monthIndex = parseInt(month, 10) - 1;
-      if (monthIndex < 0 || monthIndex > 11) {
-        console.error('Invalid month in standard date:', standardDate);
-        dateConversionCache.set(cacheKey, standardDate);
-        return standardDate;
-      }
-      
-      const monthName = monthNames[monthIndex];
-      const serviceDate = `${parseInt(day, 10)}-${monthName}-${year}`;
-      console.log(`✅ Reverse date conversion: ${standardDate} -> ${serviceDate}`);
-      dateConversionCache.set(cacheKey, serviceDate);
-      return serviceDate;
-      
-    } catch (error) {
-      console.error('Error converting standard date:', standardDate, error);
-      dateConversionCache.set(cacheKey, standardDate);
-      return standardDate;
-    }
-  };
-
-  // ✅ FIXED Generate all dates between start and end date
-  const generateDateRange = (start: string, end: string): string[] => {
-    const dates: string[] = [];
-    
-    try {
-      // Parse dates manually to avoid timezone issues
-      const startParts = start.split(/[-\s]/); // Split on dash or space
-      const endParts = end.split(/[-\s]/); // Split on dash or space
-      
-      // Create dates at noon to avoid timezone issues
-      const startDate = new Date(
-        parseInt(startParts[0]), 
-        parseInt(startParts[1]) - 1, 
-        parseInt(startParts[2]), 
-        12, 0, 0
-      );
-      const endDate = new Date(
-        parseInt(endParts[0]), 
-        parseInt(endParts[1]) - 1, 
-        parseInt(endParts[2]), 
-        12, 0, 0
-      );
-      
       // Ensure valid dates
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         console.error('Invalid date range:', { start, end });
         return [];
       }
-      
+
       const currentDate = new Date(startDate);
       while (currentDate <= endDate) {
-        // Format date as YYYY-MM-DD
-        const year = currentDate.getFullYear();
-        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        const day = currentDate.getDate().toString().padStart(2, '0');
-        const formattedDate = `${year}-${month}-${day}`;
+        // Format date as YYYY-MM-DD to match your data format
+        const formattedDate = currentDate.toISOString().split('T')[0];
         dates.push(formattedDate);
         currentDate.setDate(currentDate.getDate() + 1);
       }
-      
-      console.log(`✅ Generated date range from ${start} to ${end}:`, dates);
+
       return dates;
-      
-    } catch (error) {
-      console.error('Error generating date range:', error);
-      return [];
+    };
+
+    // Get date range from report periods or parameters
+    let allDatesList: string[] = [];
+
+    if (
+      this.reportFromPeriod &&
+      this.reportToPeriod &&
+      this.reportFromPeriod !== '-' &&
+      this.reportToPeriod !== '-'
+    ) {
+      const fromDate = this.reportFromPeriod.split(' ')[0]; // Extract date part
+      const toDate = this.reportToPeriod.split(' ')[0]; // Extract date part
+      allDatesList = generateDateRange(fromDate, toDate);
+    } else if (startDate && endDate) {
+      allDatesList = generateDateRange(startDate, endDate);
     }
-  };
 
-  // Get date range from report periods or parameters
-  let allDatesList: string[] = [];
-  
-  if (this.reportFromPeriod && this.reportToPeriod && 
-      this.reportFromPeriod !== '-' && this.reportToPeriod !== '-') {
-    const fromDate = this.reportFromPeriod.split(' ')[0]; // Extract date part
-    const toDate = this.reportToPeriod.split(' ')[0]; // Extract date part
-    allDatesList = generateDateRange(fromDate, toDate);
-  } else if (startDate && endDate) {
-    allDatesList = generateDateRange(startDate, endDate);
-  }
+    this.reportsData = machineDetails
+      .filter(
+        (machine) =>
+          (machine.vending && machine.vending.length) ||
+          (machine.incinerator && machine.incinerator.length)
+      )
+      .map((machine, index): ReportItem => {
+        let transactionsMap = new Map<string, Transaction>();
 
-  // ✅ Pre-process all unique dates from the service response to avoid repeated conversions
-  const allServiceDates = new Set<string>();
-  machineDetails.forEach(machine => {
-    // Collect all vending dates
-    (machine.vending || []).forEach((txn: any) => {
-      if (txn.date && txn.date !== 'Total') {
-        allServiceDates.add(txn.date);
-      }
-    });
-    // Collect all incinerator dates
-    (machine.incinerator || []).forEach((txn: any) => {
-      if (txn.date && txn.date !== 'Total') {
-        allServiceDates.add(txn.date);
-      }
-    });
-  });
+        // ✅ Initialize Machine Totals
+        let machineTotalQty = 0;
+        let machineTotalCash = 0;
+        let machineTotalBurnCycles = 0;
+        let machineTotalSanNapkins = 0;
+        let machineTotalOnTimeSeconds = 0;
+        let machineTotalOnTimeFormatted = '-';
+        let machineTotalOnTimeAvgPerDay = '-';
 
-  // Convert all unique service dates to standard format once
-  console.log('🔄 Pre-converting all unique service dates:', Array.from(allServiceDates));
-  allServiceDates.forEach(serviceDate => {
-    convertServiceDateToStandard(serviceDate); // This will cache the conversion
-  });
+        // ✅ FIXED: First collect all existing dates from actual data
+        const existingDates = new Set<string>();
 
-  console.log('📅 Date conversion cache populated:', dateConversionCache.size, 'entries');
-
-  this.reportsData = machineDetails
-    .filter(
-      (machine) =>
-        (machine.vending && machine.vending.length) ||
-        (machine.incinerator && machine.incinerator.length)
-    )
-    .map((machine, index): ReportItem => {
-      let transactionsMap = new Map<string, Transaction>();
-
-      // ✅ Initialize Machine Totals
-      let machineTotalQty = 0;
-      let machineTotalCash = 0;
-      let machineTotalBurnCycles = 0;
-      let machineTotalSanNapkins = 0;
-      let machineTotalOnTimeSeconds = 0;
-      let machineTotalOnTimeFormatted = '-';
-      let machineTotalOnTimeAvgPerDay = '-';
-
-      // ✅ Create maps for faster lookup of transaction data by date (using YYYY-MM-DD format)
-      const vendingDataMap = new Map<string, any>();
-      const incineratorDataMap = new Map<string, any>();
-
-      // ✅ Populate vending data map and calculate totals
-      (machine.vending || []).forEach((txn: any) => {
-        if (txn.date && txn.date !== 'Total') {
-          // Convert service date format to standard format for mapping
-          const standardDate = convertServiceDateToStandard(txn.date);
-          vendingDataMap.set(standardDate, { ...txn, originalDate: txn.date });
-          machineTotalQty += txn.quantity ?? 0;
-          machineTotalCash += txn.cashCollected ?? 0;
-          
-          console.log(`📌 Vending data mapped: ${txn.date} -> ${standardDate}`, txn);
-        }
-      });
-
-      // ✅ Populate incinerator data map and calculate totals
-      (machine.incinerator || []).forEach((txn: any) => {
-        if (txn.date && txn.date !== 'Total') {
-          // Convert service date format to standard format for mapping
-          const standardDate = convertServiceDateToStandard(txn.date);
-          incineratorDataMap.set(standardDate, { ...txn, originalDate: txn.date });
-          machineTotalBurnCycles += txn.burnCycles ?? 0;
-          machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
-
-          // Parse the onTime string to extract total time and average per day
-          const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
-
-          // Store the last valid onTime to use for machine total
-          if (totalTime && totalTime !== '-') {
-            machineTotalOnTimeFormatted = totalTime;
+        // Collect dates from vending data
+        (machine.vending || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            existingDates.add(txn.date);
           }
-
-          // Store the last valid avgPerDay to use for machine total
-          if (avgPerDay && avgPerDay !== '-') {
-            machineTotalOnTimeAvgPerDay = avgPerDay;
-          }
-          
-          console.log(`📌 Incinerator data mapped: ${txn.date} -> ${standardDate}`, txn);
-        }
-      });
-
-      console.log(`🔍 Machine ${machine.machineId} data maps:`, {
-        vendingDates: Array.from(vendingDataMap.keys()),
-        incineratorDates: Array.from(incineratorDataMap.keys())
-      });
-
-      // ✅ Generate transaction entries for ALL dates in the range
-      allDatesList.forEach(date => {
-        const vendingData = vendingDataMap.get(date);
-        const incineratorData = incineratorDataMap.get(date);
-
-        console.log(`📊 Processing date ${date}:`, {
-          hasVendingData: !!vendingData,
-          hasIncineratorData: !!incineratorData,
-          vendingData: vendingData,
-          incineratorData: incineratorData
         });
 
-        // Initialize default values
-        let qty: any = '0';
-        let cash: string = '₹0';
-        let onTime: string = '0m';
-        let onTimeAvgPerDay: string = '-';
-        let burnCycles: any = '0';
-        let sanNapkinsBurnt: any = '0';
-
-        // If vending data exists for this date, use it
-        if (vendingData) {
-          qty = vendingData.quantity ?? 0;
-          cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
-          console.log(`✅ Found vending data for ${date}:`, { qty, cash });
-        }
-
-        // If incinerator data exists for this date, use it
-        if (incineratorData) {
-          const { totalTime, avgPerDay } = this.parseOnTimeString(incineratorData.onTime);
-          onTime = totalTime ?? '-';
-          onTimeAvgPerDay = avgPerDay ?? '-';
-          burnCycles = incineratorData.burnCycles ?? 0;
-          sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
-          console.log(`✅ Found incinerator data for ${date}:`, { onTime, burnCycles, sanNapkinsBurnt });
-        }
-
-        // Add transaction for this date (display date in service format for consistency)
-        const displayDate = convertStandardToServiceDate(date);
-        transactionsMap.set(date, {
-          date: displayDate, // Display in original format (DD-MMM-YYYY)
-          qty: qty,
-          cash: cash,
-          onTime: onTime,
-          onTimeAvgPerDay: onTimeAvgPerDay,
-          burnCycles: burnCycles,
-          sanNapkinsBurnt: sanNapkinsBurnt,
-        });
-      });
-
-      // ✅ Add Machine's Total Row
-      transactionsMap.set('Total', {
-        date: 'Total',
-        qty: machineTotalQty,
-        cash: `₹ ${machineTotalCash.toFixed(2)}`,
-        onTime: machineTotalOnTimeFormatted,
-        onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
-        burnCycles: machineTotalBurnCycles,
-        sanNapkinsBurnt: machineTotalSanNapkins,
-      });
-
-      // ✅ Update Grand Total (Sum of Each Machine's Totals)
-      grandTotalQty += machineTotalQty;
-      grandTotalCash += machineTotalCash;
-      grandTotalBurnCycles += machineTotalBurnCycles;
-      grandTotalSanNapkins += machineTotalSanNapkins;
-
-      // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
-      const sortedTransactions = Array.from(transactionsMap.values()).sort((a, b) => {
-        if (a.date === 'Total') return 1;
-        if (b.date === 'Total') return -1;
-        
-        // Convert display dates back to standard format for sorting
-        const dateA = convertServiceDateToStandard(a.date);
-        const dateB = convertServiceDateToStandard(b.date);
-        return new Date(dateA).getTime() - new Date(dateB).getTime();
-      });
-
-      console.log(`📋 Machine ${machine.machineId} final transactions:`, sortedTransactions);
-
-      // Store total onTime in a custom property for later use
-      const result = {
-        srNo: index + 1,
-        machineId: machine.machineId,
-        machineLocation: machine.machineLocation
-          ? machine.machineLocation.trim()
-          : machine.address,
-        address: machine.address || '',
-        machineType: machine.machineType || 'N/A',
-        Zone: machine.Zone || 'N/A',
-        Ward: machine.Ward || 'N/A',
-        Beat: machine.Beat || 'N/A',
-        toiletType: machine.toiletType || 'N/A',
-        reportType: machine.reportType || 'N/A',
-        transactions: sortedTransactions, // Use sorted transactions
-      } as ReportItem;
-
-      // Add the onTime to the result as custom properties
-      (result as any)._totalOnTime = machineTotalOnTimeFormatted;
-      (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
-
-      return result;
-    });
-
-  // ✅ FIXED Calculate number of days between start date and end date
-  let numberOfDays = 1; // Default to 1 to avoid division by zero
-
-  // Define our helper function for calculating days between dates
-  const calculateDaysBetween = (
-    startDate: string,
-    endDate: string
-  ): number => {
-    try {
-      // Parse dates manually to avoid timezone issues
-      const startParts = startDate.split(/[-\s]/);
-      const endParts = endDate.split(/[-\s]/);
-      
-      // Create dates at noon to avoid timezone issues
-      const start = new Date(
-        parseInt(startParts[0]), 
-        parseInt(startParts[1]) - 1, 
-        parseInt(startParts[2]), 
-        12, 0, 0
-      );
-      const end = new Date(
-        parseInt(endParts[0]), 
-        parseInt(endParts[1]) - 1, 
-        parseInt(endParts[2]), 
-        12, 0, 0
-      );
-
-      // Check if dates are valid
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        console.error('Invalid date format in calculateDaysBetween:', {
-          startDate,
-          endDate,
-        });
-        return 1; // Return default
-      }
-
-      // Calculate difference in milliseconds and convert to days
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      // Add 1 to include both the start and end dates
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-      console.log(`✅ Days between ${startDate} and ${endDate}: ${diffDays}`);
-      return diffDays > 0 ? diffDays : 1; // Ensure at least 1 day
-    } catch (error) {
-      console.error('Error in calculateDaysBetween:', error);
-      return 1; // Return default on error
-    }
-  };
-
-  // Check if we have the top-level report period data
-  if (
-    this.reportFromPeriod &&
-    this.reportToPeriod &&
-    this.reportFromPeriod !== '-' &&
-    this.reportToPeriod !== '-'
-  ) {
-    try {
-      // Use the top-level reportFromPeriod and reportToPeriod
-      const fromPeriodStr = this.reportFromPeriod;
-      const toPeriodStr = this.reportToPeriod;
-
-      numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
-      console.log(
-        `Using top-level report date range: ${fromPeriodStr} to ${toPeriodStr}`
-      );
-      console.log(`Number of days in report: ${numberOfDays}`);
-    } catch (error) {
-      console.error(
-        'Error calculating date difference from top-level report periods:',
-        error
-      );
-    }
-  }
-  // Fallback: Check if we have report period data in machineDetails
-  else if (machineDetails && machineDetails.length > 0) {
-    // Find first machine with valid report period data
-    const machineWithReportPeriod = machineDetails.find(
-      (machine) => machine.reportFromPeriod && machine.reportToPeriod
-    );
-
-    if (machineWithReportPeriod) {
-      try {
-        // Extract date strings
-        const fromPeriodStr = machineWithReportPeriod.reportFromPeriod;
-        const toPeriodStr = machineWithReportPeriod.reportToPeriod;
-
-        numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
-        console.log(
-          `Using machine report date range: ${fromPeriodStr} to ${toPeriodStr}`
-        );
-        console.log(`Number of days in report: ${numberOfDays}`);
-      } catch (error) {
-        console.error(
-          'Error calculating date difference from machine report periods:',
-          error
-        );
-      }
-    }
-  }
-
-  // If we still have default numberOfDays, try using startDate and endDate parameters
-  if (numberOfDays === 1 && startDate && endDate) {
-    try {
-      numberOfDays = calculateDaysBetween(startDate, endDate);
-      console.log(`Date parameter range: ${startDate} to ${endDate}`);
-      console.log(`Number of days from parameters: ${numberOfDays}`);
-    } catch (error) {
-      console.error(
-        'Error calculating date difference from parameters:',
-        error
-      );
-    }
-  }
-
-  // Final safety check - ensure we have at least 1 day
-  numberOfDays = Math.max(1, numberOfDays);
-
-  // FIX: Calculate averages per machine per day
-  // Correct formula: (grand total value / number of machines) / number of days
-  const averageQty =
-    numberOfMachines && numberOfDays
-      ? grandTotalQty / numberOfMachines / numberOfDays
-      : 0;
-  const averageCash =
-    numberOfMachines && numberOfDays
-      ? grandTotalCash / numberOfMachines / numberOfDays
-      : 0;
-  const averageBurnCycles =
-    numberOfMachines && numberOfDays
-      ? grandTotalBurnCycles / numberOfMachines / numberOfDays
-      : 0;
-  const averageSanNapkins =
-    numberOfMachines && numberOfDays
-      ? grandTotalSanNapkins / numberOfMachines / numberOfDays
-      : 0;
-
-  console.log('Average calculation details:', {
-    grandTotalQty,
-    grandTotalCash,
-    grandTotalBurnCycles,
-    grandTotalSanNapkins,
-    numberOfMachines,
-    numberOfDays,
-    averageQty,
-    averageCash,
-    averageBurnCycles,
-    averageSanNapkins,
-  });
-
-  // ✅ Update Grand Total Correctly
-  this.grandTotal = {
-    quantity: grandTotalQty,
-    cash: `₹ ${grandTotalCash.toFixed(2)}`,
-    burnCycles: grandTotalBurnCycles,
-    sanNapkinsBurnt: grandTotalSanNapkins,
-  };
-
-  // Add averages to the component
-  this.averages = {
-    quantity: averageQty.toFixed(2),
-    cash: `₹ ${averageCash.toFixed(2)}`,
-    burnCycles: averageBurnCycles.toFixed(2),
-    sanNapkinsBurnt: averageSanNapkins.toFixed(2),
-  };
-
-  // Store the calculation metadata for debugging/display if needed
-  this.calculationMetadata = {
-    numberOfMachines,
-    numberOfDays,
-    uniqueDates: allDatesList, // Now contains all dates in the range
-  };
-
-  // Add dateRange as a separate property if needed
-  (this.calculationMetadata as any).dateRange =
-    startDate && endDate
-      ? `${startDate} to ${endDate}`
-      : 'No date range provided';
-
-  this.filteredData = [...this.reportsData];
-  this.updatePagination();
-}
-
-
-
-
-processResponseData2(
-  machineDetails: any[],
-  startDate?: string,
-  endDate?: string
-): void {
-  let grandTotalQty = 0;
-  let grandTotalCash = 0;
-  let grandTotalBurnCycles = 0;
-  let grandTotalSanNapkins = 0;
-
-  // Count the number of machines (excluding those with no transactions)
-  const machinesWithTransactions = machineDetails.filter(
-    (machine) =>
-      (machine.vending && machine.vending.length) ||
-      (machine.incinerator && machine.incinerator.length)
-  );
-  const numberOfMachines = machinesWithTransactions.length;
-
-  // ✅ Generate all dates between start and end date
-  const generateDateRange = (start: string, end: string): string[] => {
-    const dates: string[] = [];
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    
-    // Ensure valid dates
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      console.error('Invalid date range:', { start, end });
-      return [];
-    }
-    
-    const currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
-      // Format date as YYYY-MM-DD to match your data format
-      const formattedDate = currentDate.toISOString().split('T')[0];
-      dates.push(formattedDate);
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    return dates;
-  };
-
-  // Get date range from report periods or parameters
-  let allDatesList: string[] = [];
-  
-  if (this.reportFromPeriod && this.reportToPeriod && 
-      this.reportFromPeriod !== '-' && this.reportToPeriod !== '-') {
-    const fromDate = this.reportFromPeriod.split(' ')[0]; // Extract date part
-    const toDate = this.reportToPeriod.split(' ')[0]; // Extract date part
-    allDatesList = generateDateRange(fromDate, toDate);
-  } else if (startDate && endDate) {
-    allDatesList = generateDateRange(startDate, endDate);
-  }
-
-  this.reportsData = machineDetails
-    .filter(
-      (machine) =>
-        (machine.vending && machine.vending.length) ||
-        (machine.incinerator && machine.incinerator.length)
-    )
-    .map((machine, index): ReportItem => {
-      let transactionsMap = new Map<string, Transaction>();
-
-      // ✅ Initialize Machine Totals
-      let machineTotalQty = 0;
-      let machineTotalCash = 0;
-      let machineTotalBurnCycles = 0;
-      let machineTotalSanNapkins = 0;
-      let machineTotalOnTimeSeconds = 0;
-      let machineTotalOnTimeFormatted = '-';
-      let machineTotalOnTimeAvgPerDay = '-';
-
-      // ✅ FIXED: First collect all existing dates from actual data
-      const existingDates = new Set<string>();
-      
-      // Collect dates from vending data
-      (machine.vending || []).forEach((txn: any) => {
-        if (txn.date && txn.date !== 'Total') {
-          existingDates.add(txn.date);
-        }
-      });
-
-      // Collect dates from incinerator data
-      (machine.incinerator || []).forEach((txn: any) => {
-        if (txn.date && txn.date !== 'Total') {
-          existingDates.add(txn.date);
-        }
-      });
-
-      // ✅ FIXED: Initialize ALL dates in range with default values
-      allDatesList.forEach(date => {
-        transactionsMap.set(date, {
-          date: date,
-          qty: '-' as any,
-          cash: '-',
-          onTime: '-',
-          onTimeAvgPerDay: '-',
-          burnCycles: '-' as any,
-          sanNapkinsBurnt: '-' as any,
-        });
-      });
-
-      // ✅ Handle Vending Transactions - UPDATE existing entries
-      (machine.vending || []).forEach((txn: any) => {
-        if (txn.date && txn.date !== 'Total') {
-          machineTotalQty += txn.quantity ?? 0;
-          machineTotalCash += txn.cashCollected ?? 0;
-          
-          // Update the existing transaction (it should already exist from initialization)
-          if (transactionsMap.has(txn.date)) {
-            let existingTxn = transactionsMap.get(txn.date)!;
-            existingTxn.qty = txn.quantity ?? 0;
-            existingTxn.cash = `₹ ${txn.cashCollected?.toFixed(2) ?? '0'}`;
+        // Collect dates from incinerator data
+        (machine.incinerator || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            existingDates.add(txn.date);
           }
-        }
-      });
+        });
 
-      // ✅ Handle Incinerator Transactions - UPDATE existing entries
-      (machine.incinerator || []).forEach((txn: any) => {
-        if (txn.date && txn.date !== 'Total') {
-          machineTotalBurnCycles += txn.burnCycles ?? 0;
-          machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+        // ✅ FIXED: Initialize ALL dates in range with default values
+        allDatesList.forEach((date) => {
+          transactionsMap.set(date, {
+            date: date,
+            qty: '-' as any,
+            cash: '-',
+            onTime: '-',
+            onTimeAvgPerDay: '-',
+            burnCycles: '-' as any,
+            sanNapkinsBurnt: '-' as any,
+          });
+        });
 
-          // Parse the onTime string to extract total time and average per day
-          const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
+        // ✅ Handle Vending Transactions - UPDATE existing entries
+        (machine.vending || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            machineTotalQty += txn.quantity ?? 0;
+            machineTotalCash += txn.cashCollected ?? 0;
 
-          // Store the last valid onTime to use for machine total
-          if (totalTime && totalTime !== '-') {
-            machineTotalOnTimeFormatted = totalTime;
+            // Update the existing transaction (it should already exist from initialization)
+            if (transactionsMap.has(txn.date)) {
+              let existingTxn = transactionsMap.get(txn.date)!;
+              existingTxn.qty = txn.quantity ?? 0;
+              existingTxn.cash = `₹ ${txn.cashCollected?.toFixed(2) ?? '0'}`;
+            }
           }
+        });
 
-          // Store the last valid avgPerDay to use for machine total
-          if (avgPerDay && avgPerDay !== '-') {
-            machineTotalOnTimeAvgPerDay = avgPerDay;
-          }
+        // ✅ Handle Incinerator Transactions - UPDATE existing entries
+        (machine.incinerator || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            machineTotalBurnCycles += txn.burnCycles ?? 0;
+            machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
 
-          // Update the existing transaction (it should already exist from initialization)
-          if (transactionsMap.has(txn.date)) {
-            let existingTxn = transactionsMap.get(txn.date)!;
+            // Parse the onTime string to extract total time and average per day
             const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
-            existingTxn.onTime = totalTime ?? '-';
-            existingTxn.onTimeAvgPerDay = avgPerDay ?? '-';
-            existingTxn.burnCycles = txn.burnCycles ?? 0;
-            existingTxn.sanNapkinsBurnt = txn.sanitaryNapkinsBurnt ?? 0;
+
+            // Store the last valid onTime to use for machine total
+            if (totalTime && totalTime !== '-') {
+              machineTotalOnTimeFormatted = totalTime;
+            }
+
+            // Store the last valid avgPerDay to use for machine total
+            if (avgPerDay && avgPerDay !== '-') {
+              machineTotalOnTimeAvgPerDay = avgPerDay;
+            }
+
+            // Update the existing transaction (it should already exist from initialization)
+            if (transactionsMap.has(txn.date)) {
+              let existingTxn = transactionsMap.get(txn.date)!;
+              const { totalTime, avgPerDay } = this.parseOnTimeString(
+                txn.onTime
+              );
+              existingTxn.onTime = totalTime ?? '-';
+              existingTxn.onTimeAvgPerDay = avgPerDay ?? '-';
+              existingTxn.burnCycles = txn.burnCycles ?? 0;
+              existingTxn.sanNapkinsBurnt = txn.sanitaryNapkinsBurnt ?? 0;
+            }
           }
-        }
-      });
-
-      // ✅ Add Machine's Total Row
-      transactionsMap.set('Total', {
-        date: 'Total',
-        qty: machineTotalQty,
-        cash: `₹ ${machineTotalCash.toFixed(2)}`,
-        onTime: machineTotalOnTimeFormatted,
-        onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
-        burnCycles: machineTotalBurnCycles,
-        sanNapkinsBurnt: machineTotalSanNapkins,
-      });
-
-      // ✅ Update Grand Total (Sum of Each Machine's Totals)
-      grandTotalQty += machineTotalQty;
-      grandTotalCash += machineTotalCash;
-      grandTotalBurnCycles += machineTotalBurnCycles;
-      grandTotalSanNapkins += machineTotalSanNapkins;
-
-      // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
-      const sortedTransactions = Array.from(transactionsMap.values()).sort((a, b) => {
-        if (a.date === 'Total') return 1;
-        if (b.date === 'Total') return -1;
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      });
-
-      // Store total onTime in a custom property for later use
-      const result = {
-        srNo: index + 1,
-        machineId: machine.machineId,
-        machineLocation: machine.machineLocation
-          ? machine.machineLocation.trim()
-          : machine.address,
-        address: machine.address || '',
-        machineType: machine.machineType || 'N/A',
-        Zone: machine.Zone || 'N/A',
-        Ward: machine.Ward || 'N/A',
-        Beat: machine.Beat || 'N/A',
-        toiletType: machine.toiletType || 'N/A',
-        reportType: machine.reportType || 'N/A',
-        transactions: sortedTransactions, // Use sorted transactions
-      } as ReportItem;
-
-      // Add the onTime to the result as custom properties
-      (result as any)._totalOnTime = machineTotalOnTimeFormatted;
-      (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
-
-      return result;
-    });
-
-  // Calculate number of days between start date and end date
-  let numberOfDays = 1; // Default to 1 to avoid division by zero
-
-  // Define our helper function for calculating days between dates
-  const calculateDaysBetween = (
-    startDate: string,
-    endDate: string
-  ): number => {
-    try {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      // Check if dates are valid
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        console.error('Invalid date format in calculateDaysBetween:', {
-          startDate,
-          endDate,
         });
-        return 1; // Return default
-      }
 
-      // Reset hours to avoid time zone and daylight saving issues
-      start.setHours(0, 0, 0, 0);
-      end.setHours(0, 0, 0, 0);
+        // ✅ Add Machine's Total Row
+        transactionsMap.set('Total', {
+          date: 'Total',
+          qty: machineTotalQty,
+          cash: `₹ ${machineTotalCash.toFixed(2)}`,
+          onTime: machineTotalOnTimeFormatted,
+          onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
+          burnCycles: machineTotalBurnCycles,
+          sanNapkinsBurnt: machineTotalSanNapkins,
+        });
 
-      // Calculate difference in milliseconds and convert to days
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      // Add 1 to include both the start and end dates
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        // ✅ Update Grand Total (Sum of Each Machine's Totals)
+        grandTotalQty += machineTotalQty;
+        grandTotalCash += machineTotalCash;
+        grandTotalBurnCycles += machineTotalBurnCycles;
+        grandTotalSanNapkins += machineTotalSanNapkins;
 
-      return diffDays > 0 ? diffDays : 1; // Ensure at least 1 day
-    } catch (error) {
-      console.error('Error in calculateDaysBetween:', error);
-      return 1; // Return default on error
-    }
-  };
+        // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
+        const sortedTransactions = Array.from(transactionsMap.values()).sort(
+          (a, b) => {
+            if (a.date === 'Total') return 1;
+            if (b.date === 'Total') return -1;
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+          }
+        );
 
-  // Check if we have the top-level report period data
-  if (
-    this.reportFromPeriod &&
-    this.reportToPeriod &&
-    this.reportFromPeriod !== '-' &&
-    this.reportToPeriod !== '-'
-  ) {
-    try {
-      // Use the top-level reportFromPeriod and reportToPeriod
-      const fromPeriodStr = this.reportFromPeriod;
-      const toPeriodStr = this.reportToPeriod;
+        // Store total onTime in a custom property for later use
+        const result = {
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation
+            ? machine.machineLocation.trim()
+            : machine.address,
+          address: machine.address || '',
+          machineType: machine.machineType || 'N/A',
+          Zone: machine.Zone || 'N/A',
+          Ward: machine.Ward || 'N/A',
+          Beat: machine.Beat || 'N/A',
+          toiletType: machine.toiletType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: sortedTransactions, // Use sorted transactions
+        } as ReportItem;
 
-      numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
-      console.log(
-        `Using top-level report date range: ${fromPeriodStr} to ${toPeriodStr}`
-      );
-      console.log(`Number of days in report: ${numberOfDays}`);
-    } catch (error) {
-      console.error(
-        'Error calculating date difference from top-level report periods:',
-        error
-      );
-    }
-  }
-  // Fallback: Check if we have report period data in machineDetails
-  else if (machineDetails && machineDetails.length > 0) {
-    // Find first machine with valid report period data
-    const machineWithReportPeriod = machineDetails.find(
-      (machine) => machine.reportFromPeriod && machine.reportToPeriod
-    );
+        // Add the onTime to the result as custom properties
+        (result as any)._totalOnTime = machineTotalOnTimeFormatted;
+        (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
 
-    if (machineWithReportPeriod) {
+        return result;
+      });
+
+    // Calculate number of days between start date and end date
+    let numberOfDays = 1; // Default to 1 to avoid division by zero
+
+    // Define our helper function for calculating days between dates
+    const calculateDaysBetween = (
+      startDate: string,
+      endDate: string
+    ): number => {
       try {
-        // Extract date strings
-        const fromPeriodStr = machineWithReportPeriod.reportFromPeriod;
-        const toPeriodStr = machineWithReportPeriod.reportToPeriod;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        // Check if dates are valid
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          console.error('Invalid date format in calculateDaysBetween:', {
+            startDate,
+            endDate,
+          });
+          return 1; // Return default
+        }
+
+        // Reset hours to avoid time zone and daylight saving issues
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+
+        // Calculate difference in milliseconds and convert to days
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        // Add 1 to include both the start and end dates
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+        return diffDays > 0 ? diffDays : 1; // Ensure at least 1 day
+      } catch (error) {
+        console.error('Error in calculateDaysBetween:', error);
+        return 1; // Return default on error
+      }
+    };
+
+    // Check if we have the top-level report period data
+    if (
+      this.reportFromPeriod &&
+      this.reportToPeriod &&
+      this.reportFromPeriod !== '-' &&
+      this.reportToPeriod !== '-'
+    ) {
+      try {
+        // Use the top-level reportFromPeriod and reportToPeriod
+        const fromPeriodStr = this.reportFromPeriod;
+        const toPeriodStr = this.reportToPeriod;
 
         numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
         console.log(
-          `Using machine report date range: ${fromPeriodStr} to ${toPeriodStr}`
+          `Using top-level report date range: ${fromPeriodStr} to ${toPeriodStr}`
         );
         console.log(`Number of days in report: ${numberOfDays}`);
       } catch (error) {
         console.error(
-          'Error calculating date difference from machine report periods:',
+          'Error calculating date difference from top-level report periods:',
           error
         );
       }
     }
-  }
-
-  // If we still have default numberOfDays, try using startDate and endDate parameters
-  if (numberOfDays === 1 && startDate && endDate) {
-    try {
-      numberOfDays = calculateDaysBetween(startDate, endDate);
-      console.log(`Date parameter range: ${startDate} to ${endDate}`);
-      console.log(`Number of days from parameters: ${numberOfDays}`);
-    } catch (error) {
-      console.error(
-        'Error calculating date difference from parameters:',
-        error
+    // Fallback: Check if we have report period data in machineDetails
+    else if (machineDetails && machineDetails.length > 0) {
+      // Find first machine with valid report period data
+      const machineWithReportPeriod = machineDetails.find(
+        (machine) => machine.reportFromPeriod && machine.reportToPeriod
       );
+
+      if (machineWithReportPeriod) {
+        try {
+          // Extract date strings
+          const fromPeriodStr = machineWithReportPeriod.reportFromPeriod;
+          const toPeriodStr = machineWithReportPeriod.reportToPeriod;
+
+          numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
+          console.log(
+            `Using machine report date range: ${fromPeriodStr} to ${toPeriodStr}`
+          );
+          console.log(`Number of days in report: ${numberOfDays}`);
+        } catch (error) {
+          console.error(
+            'Error calculating date difference from machine report periods:',
+            error
+          );
+        }
+      }
     }
+
+    // If we still have default numberOfDays, try using startDate and endDate parameters
+    if (numberOfDays === 1 && startDate && endDate) {
+      try {
+        numberOfDays = calculateDaysBetween(startDate, endDate);
+        console.log(`Date parameter range: ${startDate} to ${endDate}`);
+        console.log(`Number of days from parameters: ${numberOfDays}`);
+      } catch (error) {
+        console.error(
+          'Error calculating date difference from parameters:',
+          error
+        );
+      }
+    }
+
+    // Final safety check - ensure we have at least 1 day
+    numberOfDays = Math.max(1, numberOfDays);
+
+    // FIX: Calculate averages per machine per day
+    // Correct formula: (grand total value / number of machines) / number of days
+    const averageQty =
+      numberOfMachines && numberOfDays
+        ? grandTotalQty / numberOfMachines / numberOfDays
+        : 0;
+    const averageCash =
+      numberOfMachines && numberOfDays
+        ? grandTotalCash / numberOfMachines / numberOfDays
+        : 0;
+    const averageBurnCycles =
+      numberOfMachines && numberOfDays
+        ? grandTotalBurnCycles / numberOfMachines / numberOfDays
+        : 0;
+    const averageSanNapkins =
+      numberOfMachines && numberOfDays
+        ? grandTotalSanNapkins / numberOfMachines / numberOfDays
+        : 0;
+
+    console.log('Average calculation details:', {
+      grandTotalQty,
+      grandTotalCash,
+      grandTotalBurnCycles,
+      grandTotalSanNapkins,
+      numberOfMachines,
+      numberOfDays,
+      averageQty,
+      averageCash,
+      averageBurnCycles,
+      averageSanNapkins,
+    });
+
+    // ✅ Update Grand Total Correctly
+    this.grandTotal = {
+      quantity: grandTotalQty,
+      cash: `₹ ${grandTotalCash.toFixed(2)}`,
+      burnCycles: grandTotalBurnCycles,
+      sanNapkinsBurnt: grandTotalSanNapkins,
+    };
+
+    // Add averages to the component
+    this.averages = {
+      quantity: averageQty.toFixed(2),
+      cash: `₹ ${averageCash.toFixed(2)}`,
+      burnCycles: averageBurnCycles.toFixed(2),
+      sanNapkinsBurnt: averageSanNapkins.toFixed(2),
+    };
+
+    // Store the calculation metadata for debugging/display if needed
+    this.calculationMetadata = {
+      numberOfMachines,
+      numberOfDays,
+      uniqueDates: allDatesList, // Now contains all dates in the range
+    };
+
+    // Add dateRange as a separate property if needed
+    (this.calculationMetadata as any).dateRange =
+      startDate && endDate
+        ? `${startDate} to ${endDate}`
+        : 'No date range provided';
+
+    this.filteredData = [...this.reportsData];
+    this.updatePagination();
   }
 
-  // Final safety check - ensure we have at least 1 day
-  numberOfDays = Math.max(1, numberOfDays);
+  processResponseData3partioallyworking(
+    machineDetails: any[],
+    startDate?: string,
+    endDate?: string
+  ): void {
+    let grandTotalQty = 0;
+    let grandTotalCash = 0;
+    let grandTotalBurnCycles = 0;
+    let grandTotalSanNapkins = 0;
 
-  // FIX: Calculate averages per machine per day
-  // Correct formula: (grand total value / number of machines) / number of days
-  const averageQty =
-    numberOfMachines && numberOfDays
-      ? grandTotalQty / numberOfMachines / numberOfDays
-      : 0;
-  const averageCash =
-    numberOfMachines && numberOfDays
-      ? grandTotalCash / numberOfMachines / numberOfDays
-      : 0;
-  const averageBurnCycles =
-    numberOfMachines && numberOfDays
-      ? grandTotalBurnCycles / numberOfMachines / numberOfDays
-      : 0;
-  const averageSanNapkins =
-    numberOfMachines && numberOfDays
-      ? grandTotalSanNapkins / numberOfMachines / numberOfDays
-      : 0;
-
-  console.log('Average calculation details:', {
-    grandTotalQty,
-    grandTotalCash,
-    grandTotalBurnCycles,
-    grandTotalSanNapkins,
-    numberOfMachines,
-    numberOfDays,
-    averageQty,
-    averageCash,
-    averageBurnCycles,
-    averageSanNapkins,
-  });
-
-  // ✅ Update Grand Total Correctly
-  this.grandTotal = {
-    quantity: grandTotalQty,
-    cash: `₹ ${grandTotalCash.toFixed(2)}`,
-    burnCycles: grandTotalBurnCycles,
-    sanNapkinsBurnt: grandTotalSanNapkins,
-  };
-
-  // Add averages to the component
-  this.averages = {
-    quantity: averageQty.toFixed(2),
-    cash: `₹ ${averageCash.toFixed(2)}`,
-    burnCycles: averageBurnCycles.toFixed(2),
-    sanNapkinsBurnt: averageSanNapkins.toFixed(2),
-  };
-
-  // Store the calculation metadata for debugging/display if needed
-  this.calculationMetadata = {
-    numberOfMachines,
-    numberOfDays,
-    uniqueDates: allDatesList, // Now contains all dates in the range
-  };
-
-  // Add dateRange as a separate property if needed
-  (this.calculationMetadata as any).dateRange =
-    startDate && endDate
-      ? `${startDate} to ${endDate}`
-      : 'No date range provided';
-
-  this.filteredData = [...this.reportsData];
-  this.updatePagination();
-}
-
-processResponseData3partioallyworking(
-  machineDetails: any[],
-  startDate?: string,
-  endDate?: string
-): void {
-  let grandTotalQty = 0;
-  let grandTotalCash = 0;
-  let grandTotalBurnCycles = 0;
-  let grandTotalSanNapkins = 0;
-
-  // Count the number of machines (excluding those with no transactions)
-  const machinesWithTransactions = machineDetails.filter(
-    (machine) =>
-      (machine.vending && machine.vending.length) ||
-      (machine.incinerator && machine.incinerator.length)
-  );
-  const numberOfMachines = machinesWithTransactions.length;
-
-  // ✅ Generate all dates between start and end date
-  const generateDateRange = (start: string, end: string): string[] => {
-    const dates: string[] = [];
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    
-    // Ensure valid dates
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      console.error('Invalid date range:', { start, end });
-      return [];
-    }
-    
-    const currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
-      // Format date as YYYY-MM-DD to match your data format
-      const formattedDate = currentDate.toISOString().split('T')[0];
-      dates.push(formattedDate);
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    return dates;
-  };
-
-  // Get date range from report periods or parameters
-  let allDatesList: string[] = [];
-  
-  if (this.reportFromPeriod && this.reportToPeriod && 
-      this.reportFromPeriod !== '-' && this.reportToPeriod !== '-') {
-    const fromDate = this.reportFromPeriod.split(' ')[0]; // Extract date part
-    const toDate = this.reportToPeriod.split(' ')[0]; // Extract date part
-    allDatesList = generateDateRange(fromDate, toDate);
-  } else if (startDate && endDate) {
-    allDatesList = generateDateRange(startDate, endDate);
-  }
-
-  this.reportsData = machineDetails
-    .filter(
+    // Count the number of machines (excluding those with no transactions)
+    const machinesWithTransactions = machineDetails.filter(
       (machine) =>
         (machine.vending && machine.vending.length) ||
         (machine.incinerator && machine.incinerator.length)
-    )
-    .map((machine, index): ReportItem => {
-      let transactionsMap = new Map<string, Transaction>();
+    );
+    const numberOfMachines = machinesWithTransactions.length;
 
-      // ✅ Initialize Machine Totals
-      let machineTotalQty = 0;
-      let machineTotalCash = 0;
-      let machineTotalBurnCycles = 0;
-      let machineTotalSanNapkins = 0;
-      let machineTotalOnTimeSeconds = 0;
-      let machineTotalOnTimeFormatted = '-';
-      let machineTotalOnTimeAvgPerDay = '-';
+    // ✅ Generate all dates between start and end date
+    const generateDateRange = (start: string, end: string): string[] => {
+      const dates: string[] = [];
+      const startDate = new Date(start);
+      const endDate = new Date(end);
 
-      // ✅ Create maps for faster lookup of transaction data by date
-      const vendingDataMap = new Map<string, any>();
-      const incineratorDataMap = new Map<string, any>();
-
-      // ✅ Populate vending data map and calculate totals
-      (machine.vending || []).forEach((txn: any) => {
-        if (txn.date && txn.date !== 'Total') {
-          vendingDataMap.set(txn.date, txn);
-          machineTotalQty += txn.quantity ?? 0;
-          machineTotalCash += txn.cashCollected ?? 0;
-        }
-      });
-
-      // ✅ Populate incinerator data map and calculate totals
-      (machine.incinerator || []).forEach((txn: any) => {
-        if (txn.date && txn.date !== 'Total') {
-          incineratorDataMap.set(txn.date, txn);
-          machineTotalBurnCycles += txn.burnCycles ?? 0;
-          machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
-
-          // Parse the onTime string to extract total time and average per day
-          const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
-
-          // Store the last valid onTime to use for machine total
-          if (totalTime && totalTime !== '-') {
-            machineTotalOnTimeFormatted = totalTime;
-          }
-
-          // Store the last valid avgPerDay to use for machine total
-          if (avgPerDay && avgPerDay !== '-') {
-            machineTotalOnTimeAvgPerDay = avgPerDay;
-          }
-        }
-      });
-
-      // ✅ Generate transaction entries for ALL dates in the range
-      allDatesList.forEach(date => {
-        const vendingData = vendingDataMap.get(date);
-        const incineratorData = incineratorDataMap.get(date);
-
-        // Initialize default values
-        let qty: any = '-';
-        let cash: string = '-';
-        let onTime: string = '-';
-        let onTimeAvgPerDay: string = '-';
-        let burnCycles: any = '-';
-        let sanNapkinsBurnt: any = '-';
-
-        // If vending data exists for this date, use it
-        if (vendingData) {
-          qty = vendingData.quantity ?? 0;
-          cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
-        }
-
-        // If incinerator data exists for this date, use it
-        if (incineratorData) {
-          const { totalTime, avgPerDay } = this.parseOnTimeString(incineratorData.onTime);
-          onTime = totalTime ?? '-';
-          onTimeAvgPerDay = avgPerDay ?? '-';
-          burnCycles = incineratorData.burnCycles ?? 0;
-          sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
-        }
-
-        // Add transaction for this date
-        transactionsMap.set(date, {
-          date: date,
-          qty: qty,
-          cash: cash,
-          onTime: onTime,
-          onTimeAvgPerDay: onTimeAvgPerDay,
-          burnCycles: burnCycles,
-          sanNapkinsBurnt: sanNapkinsBurnt,
-        });
-      });
-
-      // ✅ Add Machine's Total Row
-      transactionsMap.set('Total', {
-        date: 'Total',
-        qty: machineTotalQty,
-        cash: `₹ ${machineTotalCash.toFixed(2)}`,
-        onTime: machineTotalOnTimeFormatted,
-        onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
-        burnCycles: machineTotalBurnCycles,
-        sanNapkinsBurnt: machineTotalSanNapkins,
-      });
-
-      // ✅ Update Grand Total (Sum of Each Machine's Totals)
-      grandTotalQty += machineTotalQty;
-      grandTotalCash += machineTotalCash;
-      grandTotalBurnCycles += machineTotalBurnCycles;
-      grandTotalSanNapkins += machineTotalSanNapkins;
-
-      // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
-      const sortedTransactions = Array.from(transactionsMap.values()).sort((a, b) => {
-        if (a.date === 'Total') return 1;
-        if (b.date === 'Total') return -1;
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      });
-
-      // Store total onTime in a custom property for later use
-      const result = {
-        srNo: index + 1,
-        machineId: machine.machineId,
-        machineLocation: machine.machineLocation
-          ? machine.machineLocation.trim()
-          : machine.address,
-        address: machine.address || '',
-        machineType: machine.machineType || 'N/A',
-        Zone: machine.Zone || 'N/A',
-        Ward: machine.Ward || 'N/A',
-        Beat: machine.Beat || 'N/A',
-        toiletType: machine.toiletType || 'N/A',
-        reportType: machine.reportType || 'N/A',
-        transactions: sortedTransactions, // Use sorted transactions
-      } as ReportItem;
-
-      // Add the onTime to the result as custom properties
-      (result as any)._totalOnTime = machineTotalOnTimeFormatted;
-      (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
-
-      return result;
-    });
-
-  // Calculate number of days between start date and end date
-  let numberOfDays = 1; // Default to 1 to avoid division by zero
-
-  // Define our helper function for calculating days between dates
-  const calculateDaysBetween = (
-    startDate: string,
-    endDate: string
-  ): number => {
-    try {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      // Check if dates are valid
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        console.error('Invalid date format in calculateDaysBetween:', {
-          startDate,
-          endDate,
-        });
-        return 1; // Return default
+      // Ensure valid dates
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error('Invalid date range:', { start, end });
+        return [];
       }
 
-      // Reset hours to avoid time zone and daylight saving issues
-      start.setHours(0, 0, 0, 0);
-      end.setHours(0, 0, 0, 0);
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        // Format date as YYYY-MM-DD to match your data format
+        const formattedDate = currentDate.toISOString().split('T')[0];
+        dates.push(formattedDate);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
 
-      // Calculate difference in milliseconds and convert to days
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      // Add 1 to include both the start and end dates
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      return dates;
+    };
 
-      return diffDays > 0 ? diffDays : 1; // Ensure at least 1 day
-    } catch (error) {
-      console.error('Error in calculateDaysBetween:', error);
-      return 1; // Return default on error
+    // Get date range from report periods or parameters
+    let allDatesList: string[] = [];
+
+    if (
+      this.reportFromPeriod &&
+      this.reportToPeriod &&
+      this.reportFromPeriod !== '-' &&
+      this.reportToPeriod !== '-'
+    ) {
+      const fromDate = this.reportFromPeriod.split(' ')[0]; // Extract date part
+      const toDate = this.reportToPeriod.split(' ')[0]; // Extract date part
+      allDatesList = generateDateRange(fromDate, toDate);
+    } else if (startDate && endDate) {
+      allDatesList = generateDateRange(startDate, endDate);
     }
-  };
 
-  // Check if we have the top-level report period data
-  if (
-    this.reportFromPeriod &&
-    this.reportToPeriod &&
-    this.reportFromPeriod !== '-' &&
-    this.reportToPeriod !== '-'
-  ) {
-    try {
-      // Use the top-level reportFromPeriod and reportToPeriod
-      const fromPeriodStr = this.reportFromPeriod;
-      const toPeriodStr = this.reportToPeriod;
+    this.reportsData = machineDetails
+      .filter(
+        (machine) =>
+          (machine.vending && machine.vending.length) ||
+          (machine.incinerator && machine.incinerator.length)
+      )
+      .map((machine, index): ReportItem => {
+        let transactionsMap = new Map<string, Transaction>();
 
-      numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
-      console.log(
-        `Using top-level report date range: ${fromPeriodStr} to ${toPeriodStr}`
-      );
-      console.log(`Number of days in report: ${numberOfDays}`);
-    } catch (error) {
-      console.error(
-        'Error calculating date difference from top-level report periods:',
-        error
-      );
-    }
-  }
-  // Fallback: Check if we have report period data in machineDetails
-  else if (machineDetails && machineDetails.length > 0) {
-    // Find first machine with valid report period data
-    const machineWithReportPeriod = machineDetails.find(
-      (machine) => machine.reportFromPeriod && machine.reportToPeriod
-    );
+        // ✅ Initialize Machine Totals
+        let machineTotalQty = 0;
+        let machineTotalCash = 0;
+        let machineTotalBurnCycles = 0;
+        let machineTotalSanNapkins = 0;
+        let machineTotalOnTimeSeconds = 0;
+        let machineTotalOnTimeFormatted = '-';
+        let machineTotalOnTimeAvgPerDay = '-';
 
-    if (machineWithReportPeriod) {
+        // ✅ Create maps for faster lookup of transaction data by date
+        const vendingDataMap = new Map<string, any>();
+        const incineratorDataMap = new Map<string, any>();
+
+        // ✅ Populate vending data map and calculate totals
+        (machine.vending || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            vendingDataMap.set(txn.date, txn);
+            machineTotalQty += txn.quantity ?? 0;
+            machineTotalCash += txn.cashCollected ?? 0;
+          }
+        });
+
+        // ✅ Populate incinerator data map and calculate totals
+        (machine.incinerator || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            incineratorDataMap.set(txn.date, txn);
+            machineTotalBurnCycles += txn.burnCycles ?? 0;
+            machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+
+            // Parse the onTime string to extract total time and average per day
+            const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
+
+            // Store the last valid onTime to use for machine total
+            if (totalTime && totalTime !== '-') {
+              machineTotalOnTimeFormatted = totalTime;
+            }
+
+            // Store the last valid avgPerDay to use for machine total
+            if (avgPerDay && avgPerDay !== '-') {
+              machineTotalOnTimeAvgPerDay = avgPerDay;
+            }
+          }
+        });
+
+        // ✅ Generate transaction entries for ALL dates in the range
+        allDatesList.forEach((date) => {
+          const vendingData = vendingDataMap.get(date);
+          const incineratorData = incineratorDataMap.get(date);
+
+          // Initialize default values
+          let qty: any = '-';
+          let cash: string = '-';
+          let onTime: string = '-';
+          let onTimeAvgPerDay: string = '-';
+          let burnCycles: any = '-';
+          let sanNapkinsBurnt: any = '-';
+
+          // If vending data exists for this date, use it
+          if (vendingData) {
+            qty = vendingData.quantity ?? 0;
+            cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
+          }
+
+          // If incinerator data exists for this date, use it
+          if (incineratorData) {
+            const { totalTime, avgPerDay } = this.parseOnTimeString(
+              incineratorData.onTime
+            );
+            onTime = totalTime ?? '-';
+            onTimeAvgPerDay = avgPerDay ?? '-';
+            burnCycles = incineratorData.burnCycles ?? 0;
+            sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
+          }
+
+          // Add transaction for this date
+          transactionsMap.set(date, {
+            date: date,
+            qty: qty,
+            cash: cash,
+            onTime: onTime,
+            onTimeAvgPerDay: onTimeAvgPerDay,
+            burnCycles: burnCycles,
+            sanNapkinsBurnt: sanNapkinsBurnt,
+          });
+        });
+
+        // ✅ Add Machine's Total Row
+        transactionsMap.set('Total', {
+          date: 'Total',
+          qty: machineTotalQty,
+          cash: `₹ ${machineTotalCash.toFixed(2)}`,
+          onTime: machineTotalOnTimeFormatted,
+          onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
+          burnCycles: machineTotalBurnCycles,
+          sanNapkinsBurnt: machineTotalSanNapkins,
+        });
+
+        // ✅ Update Grand Total (Sum of Each Machine's Totals)
+        grandTotalQty += machineTotalQty;
+        grandTotalCash += machineTotalCash;
+        grandTotalBurnCycles += machineTotalBurnCycles;
+        grandTotalSanNapkins += machineTotalSanNapkins;
+
+        // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
+        const sortedTransactions = Array.from(transactionsMap.values()).sort(
+          (a, b) => {
+            if (a.date === 'Total') return 1;
+            if (b.date === 'Total') return -1;
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+          }
+        );
+
+        // Store total onTime in a custom property for later use
+        const result = {
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation
+            ? machine.machineLocation.trim()
+            : machine.address,
+          address: machine.address || '',
+          machineType: machine.machineType || 'N/A',
+          Zone: machine.Zone || 'N/A',
+          Ward: machine.Ward || 'N/A',
+          Beat: machine.Beat || 'N/A',
+          toiletType: machine.toiletType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: sortedTransactions, // Use sorted transactions
+        } as ReportItem;
+
+        // Add the onTime to the result as custom properties
+        (result as any)._totalOnTime = machineTotalOnTimeFormatted;
+        (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
+
+        return result;
+      });
+
+    // Calculate number of days between start date and end date
+    let numberOfDays = 1; // Default to 1 to avoid division by zero
+
+    // Define our helper function for calculating days between dates
+    const calculateDaysBetween = (
+      startDate: string,
+      endDate: string
+    ): number => {
       try {
-        // Extract date strings
-        const fromPeriodStr = machineWithReportPeriod.reportFromPeriod;
-        const toPeriodStr = machineWithReportPeriod.reportToPeriod;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        // Check if dates are valid
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          console.error('Invalid date format in calculateDaysBetween:', {
+            startDate,
+            endDate,
+          });
+          return 1; // Return default
+        }
+
+        // Reset hours to avoid time zone and daylight saving issues
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+
+        // Calculate difference in milliseconds and convert to days
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        // Add 1 to include both the start and end dates
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+        return diffDays > 0 ? diffDays : 1; // Ensure at least 1 day
+      } catch (error) {
+        console.error('Error in calculateDaysBetween:', error);
+        return 1; // Return default on error
+      }
+    };
+
+    // Check if we have the top-level report period data
+    if (
+      this.reportFromPeriod &&
+      this.reportToPeriod &&
+      this.reportFromPeriod !== '-' &&
+      this.reportToPeriod !== '-'
+    ) {
+      try {
+        // Use the top-level reportFromPeriod and reportToPeriod
+        const fromPeriodStr = this.reportFromPeriod;
+        const toPeriodStr = this.reportToPeriod;
 
         numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
         console.log(
-          `Using machine report date range: ${fromPeriodStr} to ${toPeriodStr}`
+          `Using top-level report date range: ${fromPeriodStr} to ${toPeriodStr}`
         );
         console.log(`Number of days in report: ${numberOfDays}`);
       } catch (error) {
         console.error(
-          'Error calculating date difference from machine report periods:',
+          'Error calculating date difference from top-level report periods:',
           error
         );
       }
     }
-  }
-
-  // If we still have default numberOfDays, try using startDate and endDate parameters
-  if (numberOfDays === 1 && startDate && endDate) {
-    try {
-      numberOfDays = calculateDaysBetween(startDate, endDate);
-      console.log(`Date parameter range: ${startDate} to ${endDate}`);
-      console.log(`Number of days from parameters: ${numberOfDays}`);
-    } catch (error) {
-      console.error(
-        'Error calculating date difference from parameters:',
-        error
+    // Fallback: Check if we have report period data in machineDetails
+    else if (machineDetails && machineDetails.length > 0) {
+      // Find first machine with valid report period data
+      const machineWithReportPeriod = machineDetails.find(
+        (machine) => machine.reportFromPeriod && machine.reportToPeriod
       );
+
+      if (machineWithReportPeriod) {
+        try {
+          // Extract date strings
+          const fromPeriodStr = machineWithReportPeriod.reportFromPeriod;
+          const toPeriodStr = machineWithReportPeriod.reportToPeriod;
+
+          numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
+          console.log(
+            `Using machine report date range: ${fromPeriodStr} to ${toPeriodStr}`
+          );
+          console.log(`Number of days in report: ${numberOfDays}`);
+        } catch (error) {
+          console.error(
+            'Error calculating date difference from machine report periods:',
+            error
+          );
+        }
+      }
     }
+
+    // If we still have default numberOfDays, try using startDate and endDate parameters
+    if (numberOfDays === 1 && startDate && endDate) {
+      try {
+        numberOfDays = calculateDaysBetween(startDate, endDate);
+        console.log(`Date parameter range: ${startDate} to ${endDate}`);
+        console.log(`Number of days from parameters: ${numberOfDays}`);
+      } catch (error) {
+        console.error(
+          'Error calculating date difference from parameters:',
+          error
+        );
+      }
+    }
+
+    // Final safety check - ensure we have at least 1 day
+    numberOfDays = Math.max(1, numberOfDays);
+
+    // FIX: Calculate averages per machine per day
+    // Correct formula: (grand total value / number of machines) / number of days
+    const averageQty =
+      numberOfMachines && numberOfDays
+        ? grandTotalQty / numberOfMachines / numberOfDays
+        : 0;
+    const averageCash =
+      numberOfMachines && numberOfDays
+        ? grandTotalCash / numberOfMachines / numberOfDays
+        : 0;
+    const averageBurnCycles =
+      numberOfMachines && numberOfDays
+        ? grandTotalBurnCycles / numberOfMachines / numberOfDays
+        : 0;
+    const averageSanNapkins =
+      numberOfMachines && numberOfDays
+        ? grandTotalSanNapkins / numberOfMachines / numberOfDays
+        : 0;
+
+    console.log('Average calculation details:', {
+      grandTotalQty,
+      grandTotalCash,
+      grandTotalBurnCycles,
+      grandTotalSanNapkins,
+      numberOfMachines,
+      numberOfDays,
+      averageQty,
+      averageCash,
+      averageBurnCycles,
+      averageSanNapkins,
+    });
+
+    // ✅ Update Grand Total Correctly
+    this.grandTotal = {
+      quantity: grandTotalQty,
+      cash: `₹ ${grandTotalCash.toFixed(2)}`,
+      burnCycles: grandTotalBurnCycles,
+      sanNapkinsBurnt: grandTotalSanNapkins,
+    };
+
+    // Add averages to the component
+    this.averages = {
+      quantity: averageQty.toFixed(2),
+      cash: `₹ ${averageCash.toFixed(2)}`,
+      burnCycles: averageBurnCycles.toFixed(2),
+      sanNapkinsBurnt: averageSanNapkins.toFixed(2),
+    };
+
+    // Store the calculation metadata for debugging/display if needed
+    this.calculationMetadata = {
+      numberOfMachines,
+      numberOfDays,
+      uniqueDates: allDatesList, // Now contains all dates in the range
+    };
+
+    // Add dateRange as a separate property if needed
+    (this.calculationMetadata as any).dateRange =
+      startDate && endDate
+        ? `${startDate} to ${endDate}`
+        : 'No date range provided';
+
+    this.filteredData = [...this.reportsData];
+    this.updatePagination();
   }
 
-  // Final safety check - ensure we have at least 1 day
-  numberOfDays = Math.max(1, numberOfDays);
+  processResponseDataw(
+    machineDetails: any[],
+    startDate?: string,
+    endDate?: string
+  ): void {
+    let grandTotalQty = 0;
+    let grandTotalCash = 0;
+    let grandTotalBurnCycles = 0;
+    let grandTotalSanNapkins = 0;
 
-  // FIX: Calculate averages per machine per day
-  // Correct formula: (grand total value / number of machines) / number of days
-  const averageQty =
-    numberOfMachines && numberOfDays
-      ? grandTotalQty / numberOfMachines / numberOfDays
-      : 0;
-  const averageCash =
-    numberOfMachines && numberOfDays
-      ? grandTotalCash / numberOfMachines / numberOfDays
-      : 0;
-  const averageBurnCycles =
-    numberOfMachines && numberOfDays
-      ? grandTotalBurnCycles / numberOfMachines / numberOfDays
-      : 0;
-  const averageSanNapkins =
-    numberOfMachines && numberOfDays
-      ? grandTotalSanNapkins / numberOfMachines / numberOfDays
-      : 0;
+    // Count the number of machines (excluding those with no transactions)
+    const machinesWithTransactions = machineDetails.filter(
+      (machine) =>
+        (machine.vending && machine.vending.length) ||
+        (machine.incinerator && machine.incinerator.length)
+    );
+    const numberOfMachines = machinesWithTransactions.length;
 
-  console.log('Average calculation details:', {
-    grandTotalQty,
-    grandTotalCash,
-    grandTotalBurnCycles,
-    grandTotalSanNapkins,
-    numberOfMachines,
-    numberOfDays,
-    averageQty,
-    averageCash,
-    averageBurnCycles,
-    averageSanNapkins,
-  });
+    // ✅ Date conversion helper functions with caching
+    const dateConversionCache = new Map<string, string>();
 
-  // ✅ Update Grand Total Correctly
-  this.grandTotal = {
-    quantity: grandTotalQty,
-    cash: `₹ ${grandTotalCash.toFixed(2)}`,
-    burnCycles: grandTotalBurnCycles,
-    sanNapkinsBurnt: grandTotalSanNapkins,
-  };
-
-  // Add averages to the component
-  this.averages = {
-    quantity: averageQty.toFixed(2),
-    cash: `₹ ${averageCash.toFixed(2)}`,
-    burnCycles: averageBurnCycles.toFixed(2),
-    sanNapkinsBurnt: averageSanNapkins.toFixed(2),
-  };
-
-  // Store the calculation metadata for debugging/display if needed
-  this.calculationMetadata = {
-    numberOfMachines,
-    numberOfDays,
-    uniqueDates: allDatesList, // Now contains all dates in the range
-  };
-
-  // Add dateRange as a separate property if needed
-  (this.calculationMetadata as any).dateRange =
-    startDate && endDate
-      ? `${startDate} to ${endDate}`
-      : 'No date range provided';
-
-  this.filteredData = [...this.reportsData];
-  this.updatePagination();
-}
-
-
-processResponseDataw(
-  machineDetails: any[],
-  startDate?: string,
-  endDate?: string
-): void {
-  let grandTotalQty = 0;
-  let grandTotalCash = 0;
-  let grandTotalBurnCycles = 0;
-  let grandTotalSanNapkins = 0;
-
-  // Count the number of machines (excluding those with no transactions)
-  const machinesWithTransactions = machineDetails.filter(
-    (machine) =>
-      (machine.vending && machine.vending.length) ||
-      (machine.incinerator && machine.incinerator.length)
-  );
-  const numberOfMachines = machinesWithTransactions.length;
-
-  // ✅ Date conversion helper functions with caching
-  const dateConversionCache = new Map<string, string>();
-  
-  const convertServiceDateToStandard = (serviceDate: string): string => {
-    // Check cache first
-    if (dateConversionCache.has(serviceDate)) {
-      return dateConversionCache.get(serviceDate)!;
-    }
-    
-    // Convert "17-May-2025" to "2025-05-17"
-    try {
-      const date = new Date(serviceDate);
-      if (isNaN(date.getTime())) {
-        console.error('Invalid service date:', serviceDate);
-        dateConversionCache.set(serviceDate, serviceDate);
-        return serviceDate; // Return original if conversion fails
+    const convertServiceDateToStandard = (serviceDate: string): string => {
+      // Check cache first
+      if (dateConversionCache.has(serviceDate)) {
+        return dateConversionCache.get(serviceDate)!;
       }
-      const standardDate = date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
-      dateConversionCache.set(serviceDate, standardDate);
-      return standardDate;
-    } catch (error) {
-      console.error('Error converting service date:', serviceDate, error);
-      dateConversionCache.set(serviceDate, serviceDate);
-      return serviceDate;
-    }
-  };
 
-  const convertStandardToServiceDate = (standardDate: string): string => {
-    // Check cache first (reverse lookup)
-    const cacheKey = `reverse_${standardDate}`;
-    if (dateConversionCache.has(cacheKey)) {
-      return dateConversionCache.get(cacheKey)!;
-    }
-    
-    // Convert "2025-05-17" to "17-May-2025" for display
-    try {
-      const date = new Date(standardDate);
-      if (isNaN(date.getTime())) {
+      // Convert "17-May-2025" to "2025-05-17"
+      try {
+        const date = new Date(serviceDate);
+        if (isNaN(date.getTime())) {
+          console.error('Invalid service date:', serviceDate);
+          dateConversionCache.set(serviceDate, serviceDate);
+          return serviceDate; // Return original if conversion fails
+        }
+        const standardDate = date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+        dateConversionCache.set(serviceDate, standardDate);
+        return standardDate;
+      } catch (error) {
+        console.error('Error converting service date:', serviceDate, error);
+        dateConversionCache.set(serviceDate, serviceDate);
+        return serviceDate;
+      }
+    };
+
+    const convertStandardToServiceDate = (standardDate: string): string => {
+      // Check cache first (reverse lookup)
+      const cacheKey = `reverse_${standardDate}`;
+      if (dateConversionCache.has(cacheKey)) {
+        return dateConversionCache.get(cacheKey)!;
+      }
+
+      // Convert "2025-05-17" to "17-May-2025" for display
+      try {
+        const date = new Date(standardDate);
+        if (isNaN(date.getTime())) {
+          dateConversionCache.set(cacheKey, standardDate);
+          return standardDate;
+        }
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = date.toLocaleDateString('en-US', { month: 'short' });
+        const year = date.getFullYear();
+        const serviceDate = `${day}-${month}-${year}`;
+        dateConversionCache.set(cacheKey, serviceDate);
+        return serviceDate;
+      } catch (error) {
+        console.error('Error converting standard date:', standardDate, error);
         dateConversionCache.set(cacheKey, standardDate);
         return standardDate;
       }
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = date.toLocaleDateString('en-US', { month: 'short' });
-      const year = date.getFullYear();
-      const serviceDate = `${day}-${month}-${year}`;
-      dateConversionCache.set(cacheKey, serviceDate);
-      return serviceDate;
-    } catch (error) {
-      console.error('Error converting standard date:', standardDate, error);
-      dateConversionCache.set(cacheKey, standardDate);
-      return standardDate;
-    }
-  };
+    };
 
-  // ✅ Generate all dates between start and end date
-  const generateDateRange = (start: string, end: string): string[] => {
-    const dates: string[] = [];
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    
-    // Ensure valid dates
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      console.error('Invalid date range:', { start, end });
-      return [];
-    }
-    
-    const currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
-      // Format date as YYYY-MM-DD to match your data format
-      const formattedDate = currentDate.toISOString().split('T')[0];
-      dates.push(formattedDate);
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    return dates;
-  };
+    // ✅ Generate all dates between start and end date
+    const generateDateRange = (start: string, end: string): string[] => {
+      const dates: string[] = [];
+      const startDate = new Date(start);
+      const endDate = new Date(end);
 
-  // Get date range from report periods or parameters
-  let allDatesList: string[] = [];
-  
-  if (this.reportFromPeriod && this.reportToPeriod && 
-      this.reportFromPeriod !== '-' && this.reportToPeriod !== '-') {
-    const fromDate = this.reportFromPeriod.split(' ')[0]; // Extract date part
-    const toDate = this.reportToPeriod.split(' ')[0]; // Extract date part
-    allDatesList = generateDateRange(fromDate, toDate);
-  } else if (startDate && endDate) {
-    allDatesList = generateDateRange(startDate, endDate);
-  }
-
-  // ✅ Pre-process all unique dates from the service response to avoid repeated conversions
-  const allServiceDates = new Set<string>();
-  machineDetails.forEach(machine => {
-    // Collect all vending dates
-    (machine.vending || []).forEach((txn: any) => {
-      if (txn.date && txn.date !== 'Total') {
-        allServiceDates.add(txn.date);
+      // Ensure valid dates
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error('Invalid date range:', { start, end });
+        return [];
       }
-    });
-    // Collect all incinerator dates
-    (machine.incinerator || []).forEach((txn: any) => {
-      if (txn.date && txn.date !== 'Total') {
-        allServiceDates.add(txn.date);
+
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        // Format date as YYYY-MM-DD to match your data format
+        const formattedDate = currentDate.toISOString().split('T')[0];
+        dates.push(formattedDate);
+        currentDate.setDate(currentDate.getDate() + 1);
       }
-    });
-  });
 
-  // Convert all unique service dates to standard format once
-  console.log('🔄 Pre-converting all unique service dates:', Array.from(allServiceDates));
-  allServiceDates.forEach(serviceDate => {
-    convertServiceDateToStandard(serviceDate); // This will cache the conversion
-  });
+      return dates;
+    };
 
-  console.log('📅 Date conversion cache populated:', dateConversionCache.size, 'entries');
+    // Get date range from report periods or parameters
+    let allDatesList: string[] = [];
 
-  this.reportsData = machineDetails
-    .filter(
-      (machine) =>
-        (machine.vending && machine.vending.length) ||
-        (machine.incinerator && machine.incinerator.length)
-    )
-    .map((machine, index): ReportItem => {
-      let transactionsMap = new Map<string, Transaction>();
+    if (
+      this.reportFromPeriod &&
+      this.reportToPeriod &&
+      this.reportFromPeriod !== '-' &&
+      this.reportToPeriod !== '-'
+    ) {
+      const fromDate = this.reportFromPeriod.split(' ')[0]; // Extract date part
+      const toDate = this.reportToPeriod.split(' ')[0]; // Extract date part
+      allDatesList = generateDateRange(fromDate, toDate);
+    } else if (startDate && endDate) {
+      allDatesList = generateDateRange(startDate, endDate);
+    }
 
-      // ✅ Initialize Machine Totals
-      let machineTotalQty = 0;
-      let machineTotalCash = 0;
-      let machineTotalBurnCycles = 0;
-      let machineTotalSanNapkins = 0;
-      let machineTotalOnTimeSeconds = 0;
-      let machineTotalOnTimeFormatted = '-';
-      let machineTotalOnTimeAvgPerDay = '-';
-
-      // ✅ Create maps for faster lookup of transaction data by date (using YYYY-MM-DD format)
-      const vendingDataMap = new Map<string, any>();
-      const incineratorDataMap = new Map<string, any>();
-
-      // ✅ Populate vending data map and calculate totals
+    // ✅ Pre-process all unique dates from the service response to avoid repeated conversions
+    const allServiceDates = new Set<string>();
+    machineDetails.forEach((machine) => {
+      // Collect all vending dates
       (machine.vending || []).forEach((txn: any) => {
         if (txn.date && txn.date !== 'Total') {
-          // Convert service date format to standard format for mapping
-          const standardDate = convertServiceDateToStandard(txn.date);
-          vendingDataMap.set(standardDate, { ...txn, originalDate: txn.date });
-          machineTotalQty += txn.quantity ?? 0;
-          machineTotalCash += txn.cashCollected ?? 0;
-          
-          console.log(`📌 Vending data mapped: ${txn.date} -> ${standardDate}`, txn);
+          allServiceDates.add(txn.date);
         }
       });
-
-      // ✅ Populate incinerator data map and calculate totals
+      // Collect all incinerator dates
       (machine.incinerator || []).forEach((txn: any) => {
         if (txn.date && txn.date !== 'Total') {
-          // Convert service date format to standard format for mapping
-          const standardDate = convertServiceDateToStandard(txn.date);
-          incineratorDataMap.set(standardDate, { ...txn, originalDate: txn.date });
-          machineTotalBurnCycles += txn.burnCycles ?? 0;
-          machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
-
-          // Parse the onTime string to extract total time and average per day
-          const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
-
-          // Store the last valid onTime to use for machine total
-          if (totalTime && totalTime !== '-') {
-            machineTotalOnTimeFormatted = totalTime;
-          }
-
-          // Store the last valid avgPerDay to use for machine total
-          if (avgPerDay && avgPerDay !== '-') {
-            machineTotalOnTimeAvgPerDay = avgPerDay;
-          }
-          
-          console.log(`📌 Incinerator data mapped: ${txn.date} -> ${standardDate}`, txn);
+          allServiceDates.add(txn.date);
         }
       });
-
-      console.log(`🔍 Machine ${machine.machineId} data maps:`, {
-        vendingDates: Array.from(vendingDataMap.keys()),
-        incineratorDates: Array.from(incineratorDataMap.keys())
-      });
-
-      // ✅ Generate transaction entries for ALL dates in the range
-      allDatesList.forEach(date => {
-        const vendingData = vendingDataMap.get(date);
-        const incineratorData = incineratorDataMap.get(date);
-
-        console.log(`📊 Processing date ${date}:`, {
-          hasVendingData: !!vendingData,
-          hasIncineratorData: !!incineratorData,
-          vendingData: vendingData,
-          incineratorData: incineratorData
-        });
-
-        // Initialize default values
-        let qty: any = '-';
-        let cash: string = '-';
-        let onTime: string = '-';
-        let onTimeAvgPerDay: string = '-';
-        let burnCycles: any = '-';
-        let sanNapkinsBurnt: any = '-';
-
-        // If vending data exists for this date, use it
-        if (vendingData) {
-          qty = vendingData.quantity ?? 0;
-          cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
-          console.log(`✅ Found vending data for ${date}:`, { qty, cash });
-        }
-
-        // If incinerator data exists for this date, use it
-        if (incineratorData) {
-          const { totalTime, avgPerDay } = this.parseOnTimeString(incineratorData.onTime);
-          onTime = totalTime ?? '-';
-          onTimeAvgPerDay = avgPerDay ?? '-';
-          burnCycles = incineratorData.burnCycles ?? 0;
-          sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
-          console.log(`✅ Found incinerator data for ${date}:`, { onTime, burnCycles, sanNapkinsBurnt });
-        }
-
-        // Add transaction for this date (display date in service format for consistency)
-        const displayDate = convertStandardToServiceDate(date);
-        transactionsMap.set(date, {
-          date: displayDate, // Display in original format (DD-MMM-YYYY)
-          qty: qty,
-          cash: cash,
-          onTime: onTime,
-          onTimeAvgPerDay: onTimeAvgPerDay,
-          burnCycles: burnCycles,
-          sanNapkinsBurnt: sanNapkinsBurnt,
-        });
-      });
-
-      // ✅ Add Machine's Total Row
-      transactionsMap.set('Total', {
-        date: 'Total',
-        qty: machineTotalQty,
-        cash: `₹ ${machineTotalCash.toFixed(2)}`,
-        onTime: machineTotalOnTimeFormatted,
-        onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
-        burnCycles: machineTotalBurnCycles,
-        sanNapkinsBurnt: machineTotalSanNapkins,
-      });
-
-      // ✅ Update Grand Total (Sum of Each Machine's Totals)
-      grandTotalQty += machineTotalQty;
-      grandTotalCash += machineTotalCash;
-      grandTotalBurnCycles += machineTotalBurnCycles;
-      grandTotalSanNapkins += machineTotalSanNapkins;
-
-      // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
-      const sortedTransactions = Array.from(transactionsMap.values()).sort((a, b) => {
-        if (a.date === 'Total') return 1;
-        if (b.date === 'Total') return -1;
-        
-        // Convert display dates back to standard format for sorting
-        const dateA = convertServiceDateToStandard(a.date);
-        const dateB = convertServiceDateToStandard(b.date);
-        return new Date(dateA).getTime() - new Date(dateB).getTime();
-      });
-
-      console.log(`📋 Machine ${machine.machineId} final transactions:`, sortedTransactions);
-
-      // Store total onTime in a custom property for later use
-      const result = {
-        srNo: index + 1,
-        machineId: machine.machineId,
-        machineLocation: machine.machineLocation
-          ? machine.machineLocation.trim()
-          : machine.address,
-        address: machine.address || '',
-        machineType: machine.machineType || 'N/A',
-        Zone: machine.Zone || 'N/A',
-        Ward: machine.Ward || 'N/A',
-        Beat: machine.Beat || 'N/A',
-        toiletType: machine.toiletType || 'N/A',
-        reportType: machine.reportType || 'N/A',
-        transactions: sortedTransactions, // Use sorted transactions
-      } as ReportItem;
-
-      // Add the onTime to the result as custom properties
-      (result as any)._totalOnTime = machineTotalOnTimeFormatted;
-      (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
-
-      return result;
     });
 
-  // Calculate number of days between start date and end date
-  let numberOfDays = 1; // Default to 1 to avoid division by zero
+    // Convert all unique service dates to standard format once
+    console.log(
+      '🔄 Pre-converting all unique service dates:',
+      Array.from(allServiceDates)
+    );
+    allServiceDates.forEach((serviceDate) => {
+      convertServiceDateToStandard(serviceDate); // This will cache the conversion
+    });
 
-  // Define our helper function for calculating days between dates
-  const calculateDaysBetween = (
-    startDate: string,
-    endDate: string
-  ): number => {
-    try {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      // Check if dates are valid
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        console.error('Invalid date format in calculateDaysBetween:', {
-          startDate,
-          endDate,
-        });
-        return 1; // Return default
-      }
-
-      // Reset hours to avoid time zone and daylight saving issues
-      start.setHours(0, 0, 0, 0);
-      end.setHours(0, 0, 0, 0);
-
-      // Calculate difference in milliseconds and convert to days
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      // Add 1 to include both the start and end dates
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-      return diffDays > 0 ? diffDays : 1; // Ensure at least 1 day
-    } catch (error) {
-      console.error('Error in calculateDaysBetween:', error);
-      return 1; // Return default on error
-    }
-  };
-
-  // Check if we have the top-level report period data
-  if (
-    this.reportFromPeriod &&
-    this.reportToPeriod &&
-    this.reportFromPeriod !== '-' &&
-    this.reportToPeriod !== '-'
-  ) {
-    try {
-      // Use the top-level reportFromPeriod and reportToPeriod
-      const fromPeriodStr = this.reportFromPeriod;
-      const toPeriodStr = this.reportToPeriod;
-
-      numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
-      console.log(
-        `Using top-level report date range: ${fromPeriodStr} to ${toPeriodStr}`
-      );
-      console.log(`Number of days in report: ${numberOfDays}`);
-    } catch (error) {
-      console.error(
-        'Error calculating date difference from top-level report periods:',
-        error
-      );
-    }
-  }
-  // Fallback: Check if we have report period data in machineDetails
-  else if (machineDetails && machineDetails.length > 0) {
-    // Find first machine with valid report period data
-    const machineWithReportPeriod = machineDetails.find(
-      (machine) => machine.reportFromPeriod && machine.reportToPeriod
+    console.log(
+      '📅 Date conversion cache populated:',
+      dateConversionCache.size,
+      'entries'
     );
 
-    if (machineWithReportPeriod) {
+    this.reportsData = machineDetails
+      .filter(
+        (machine) =>
+          (machine.vending && machine.vending.length) ||
+          (machine.incinerator && machine.incinerator.length)
+      )
+      .map((machine, index): ReportItem => {
+        let transactionsMap = new Map<string, Transaction>();
+
+        // ✅ Initialize Machine Totals
+        let machineTotalQty = 0;
+        let machineTotalCash = 0;
+        let machineTotalBurnCycles = 0;
+        let machineTotalSanNapkins = 0;
+        let machineTotalOnTimeSeconds = 0;
+        let machineTotalOnTimeFormatted = '-';
+        let machineTotalOnTimeAvgPerDay = '-';
+
+        // ✅ Create maps for faster lookup of transaction data by date (using YYYY-MM-DD format)
+        const vendingDataMap = new Map<string, any>();
+        const incineratorDataMap = new Map<string, any>();
+
+        // ✅ Populate vending data map and calculate totals
+        (machine.vending || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            // Convert service date format to standard format for mapping
+            const standardDate = convertServiceDateToStandard(txn.date);
+            vendingDataMap.set(standardDate, {
+              ...txn,
+              originalDate: txn.date,
+            });
+            machineTotalQty += txn.quantity ?? 0;
+            machineTotalCash += txn.cashCollected ?? 0;
+
+            console.log(
+              `📌 Vending data mapped: ${txn.date} -> ${standardDate}`,
+              txn
+            );
+          }
+        });
+
+        // ✅ Populate incinerator data map and calculate totals
+        (machine.incinerator || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            // Convert service date format to standard format for mapping
+            const standardDate = convertServiceDateToStandard(txn.date);
+            incineratorDataMap.set(standardDate, {
+              ...txn,
+              originalDate: txn.date,
+            });
+            machineTotalBurnCycles += txn.burnCycles ?? 0;
+            machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+
+            // Parse the onTime string to extract total time and average per day
+            const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
+
+            // Store the last valid onTime to use for machine total
+            if (totalTime && totalTime !== '-') {
+              machineTotalOnTimeFormatted = totalTime;
+            }
+
+            // Store the last valid avgPerDay to use for machine total
+            if (avgPerDay && avgPerDay !== '-') {
+              machineTotalOnTimeAvgPerDay = avgPerDay;
+            }
+
+            console.log(
+              `📌 Incinerator data mapped: ${txn.date} -> ${standardDate}`,
+              txn
+            );
+          }
+        });
+
+        console.log(`🔍 Machine ${machine.machineId} data maps:`, {
+          vendingDates: Array.from(vendingDataMap.keys()),
+          incineratorDates: Array.from(incineratorDataMap.keys()),
+        });
+
+        // ✅ Generate transaction entries for ALL dates in the range
+        allDatesList.forEach((date) => {
+          const vendingData = vendingDataMap.get(date);
+          const incineratorData = incineratorDataMap.get(date);
+
+          console.log(`📊 Processing date ${date}:`, {
+            hasVendingData: !!vendingData,
+            hasIncineratorData: !!incineratorData,
+            vendingData: vendingData,
+            incineratorData: incineratorData,
+          });
+
+          // Initialize default values
+          let qty: any = '-';
+          let cash: string = '-';
+          let onTime: string = '-';
+          let onTimeAvgPerDay: string = '-';
+          let burnCycles: any = '-';
+          let sanNapkinsBurnt: any = '-';
+
+          // If vending data exists for this date, use it
+          if (vendingData) {
+            qty = vendingData.quantity ?? 0;
+            cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
+            console.log(`✅ Found vending data for ${date}:`, { qty, cash });
+          }
+
+          // If incinerator data exists for this date, use it
+          if (incineratorData) {
+            const { totalTime, avgPerDay } = this.parseOnTimeString(
+              incineratorData.onTime
+            );
+            onTime = totalTime ?? '-';
+            onTimeAvgPerDay = avgPerDay ?? '-';
+            burnCycles = incineratorData.burnCycles ?? 0;
+            sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
+            console.log(`✅ Found incinerator data for ${date}:`, {
+              onTime,
+              burnCycles,
+              sanNapkinsBurnt,
+            });
+          }
+
+          // Add transaction for this date (display date in service format for consistency)
+          const displayDate = convertStandardToServiceDate(date);
+          transactionsMap.set(date, {
+            date: displayDate, // Display in original format (DD-MMM-YYYY)
+            qty: qty,
+            cash: cash,
+            onTime: onTime,
+            onTimeAvgPerDay: onTimeAvgPerDay,
+            burnCycles: burnCycles,
+            sanNapkinsBurnt: sanNapkinsBurnt,
+          });
+        });
+
+        // ✅ Add Machine's Total Row
+        transactionsMap.set('Total', {
+          date: 'Total',
+          qty: machineTotalQty,
+          cash: `₹ ${machineTotalCash.toFixed(2)}`,
+          onTime: machineTotalOnTimeFormatted,
+          onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
+          burnCycles: machineTotalBurnCycles,
+          sanNapkinsBurnt: machineTotalSanNapkins,
+        });
+
+        // ✅ Update Grand Total (Sum of Each Machine's Totals)
+        grandTotalQty += machineTotalQty;
+        grandTotalCash += machineTotalCash;
+        grandTotalBurnCycles += machineTotalBurnCycles;
+        grandTotalSanNapkins += machineTotalSanNapkins;
+
+        // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
+        const sortedTransactions = Array.from(transactionsMap.values()).sort(
+          (a, b) => {
+            if (a.date === 'Total') return 1;
+            if (b.date === 'Total') return -1;
+
+            // Convert display dates back to standard format for sorting
+            const dateA = convertServiceDateToStandard(a.date);
+            const dateB = convertServiceDateToStandard(b.date);
+            return new Date(dateA).getTime() - new Date(dateB).getTime();
+          }
+        );
+
+        console.log(
+          `📋 Machine ${machine.machineId} final transactions:`,
+          sortedTransactions
+        );
+
+        // Store total onTime in a custom property for later use
+        const result = {
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation
+            ? machine.machineLocation.trim()
+            : machine.address,
+          address: machine.address || '',
+          machineType: machine.machineType || 'N/A',
+          Zone: machine.Zone || 'N/A',
+          Ward: machine.Ward || 'N/A',
+          Beat: machine.Beat || 'N/A',
+          toiletType: machine.toiletType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: sortedTransactions, // Use sorted transactions
+        } as ReportItem;
+
+        // Add the onTime to the result as custom properties
+        (result as any)._totalOnTime = machineTotalOnTimeFormatted;
+        (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
+
+        return result;
+      });
+
+    // Calculate number of days between start date and end date
+    let numberOfDays = 1; // Default to 1 to avoid division by zero
+
+    // Define our helper function for calculating days between dates
+    const calculateDaysBetween = (
+      startDate: string,
+      endDate: string
+    ): number => {
       try {
-        // Extract date strings
-        const fromPeriodStr = machineWithReportPeriod.reportFromPeriod;
-        const toPeriodStr = machineWithReportPeriod.reportToPeriod;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        // Check if dates are valid
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          console.error('Invalid date format in calculateDaysBetween:', {
+            startDate,
+            endDate,
+          });
+          return 1; // Return default
+        }
+
+        // Reset hours to avoid time zone and daylight saving issues
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+
+        // Calculate difference in milliseconds and convert to days
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        // Add 1 to include both the start and end dates
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+        return diffDays > 0 ? diffDays : 1; // Ensure at least 1 day
+      } catch (error) {
+        console.error('Error in calculateDaysBetween:', error);
+        return 1; // Return default on error
+      }
+    };
+
+    // Check if we have the top-level report period data
+    if (
+      this.reportFromPeriod &&
+      this.reportToPeriod &&
+      this.reportFromPeriod !== '-' &&
+      this.reportToPeriod !== '-'
+    ) {
+      try {
+        // Use the top-level reportFromPeriod and reportToPeriod
+        const fromPeriodStr = this.reportFromPeriod;
+        const toPeriodStr = this.reportToPeriod;
 
         numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
         console.log(
-          `Using machine report date range: ${fromPeriodStr} to ${toPeriodStr}`
+          `Using top-level report date range: ${fromPeriodStr} to ${toPeriodStr}`
         );
         console.log(`Number of days in report: ${numberOfDays}`);
       } catch (error) {
         console.error(
-          'Error calculating date difference from machine report periods:',
+          'Error calculating date difference from top-level report periods:',
           error
         );
       }
     }
-  }
-
-  // If we still have default numberOfDays, try using startDate and endDate parameters
-  if (numberOfDays === 1 && startDate && endDate) {
-    try {
-      numberOfDays = calculateDaysBetween(startDate, endDate);
-      console.log(`Date parameter range: ${startDate} to ${endDate}`);
-      console.log(`Number of days from parameters: ${numberOfDays}`);
-    } catch (error) {
-      console.error(
-        'Error calculating date difference from parameters:',
-        error
+    // Fallback: Check if we have report period data in machineDetails
+    else if (machineDetails && machineDetails.length > 0) {
+      // Find first machine with valid report period data
+      const machineWithReportPeriod = machineDetails.find(
+        (machine) => machine.reportFromPeriod && machine.reportToPeriod
       );
+
+      if (machineWithReportPeriod) {
+        try {
+          // Extract date strings
+          const fromPeriodStr = machineWithReportPeriod.reportFromPeriod;
+          const toPeriodStr = machineWithReportPeriod.reportToPeriod;
+
+          numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
+          console.log(
+            `Using machine report date range: ${fromPeriodStr} to ${toPeriodStr}`
+          );
+          console.log(`Number of days in report: ${numberOfDays}`);
+        } catch (error) {
+          console.error(
+            'Error calculating date difference from machine report periods:',
+            error
+          );
+        }
+      }
     }
+
+    // If we still have default numberOfDays, try using startDate and endDate parameters
+    if (numberOfDays === 1 && startDate && endDate) {
+      try {
+        numberOfDays = calculateDaysBetween(startDate, endDate);
+        console.log(`Date parameter range: ${startDate} to ${endDate}`);
+        console.log(`Number of days from parameters: ${numberOfDays}`);
+      } catch (error) {
+        console.error(
+          'Error calculating date difference from parameters:',
+          error
+        );
+      }
+    }
+
+    // Final safety check - ensure we have at least 1 day
+    numberOfDays = Math.max(1, numberOfDays);
+
+    // FIX: Calculate averages per machine per day
+    // Correct formula: (grand total value / number of machines) / number of days
+    const averageQty =
+      numberOfMachines && numberOfDays
+        ? grandTotalQty / numberOfMachines / numberOfDays
+        : 0;
+    const averageCash =
+      numberOfMachines && numberOfDays
+        ? grandTotalCash / numberOfMachines / numberOfDays
+        : 0;
+    const averageBurnCycles =
+      numberOfMachines && numberOfDays
+        ? grandTotalBurnCycles / numberOfMachines / numberOfDays
+        : 0;
+    const averageSanNapkins =
+      numberOfMachines && numberOfDays
+        ? grandTotalSanNapkins / numberOfMachines / numberOfDays
+        : 0;
+
+    console.log('Average calculation details:', {
+      grandTotalQty,
+      grandTotalCash,
+      grandTotalBurnCycles,
+      grandTotalSanNapkins,
+      numberOfMachines,
+      numberOfDays,
+      averageQty,
+      averageCash,
+      averageBurnCycles,
+      averageSanNapkins,
+    });
+
+    // ✅ Update Grand Total Correctly
+    this.grandTotal = {
+      quantity: grandTotalQty,
+      cash: `₹ ${grandTotalCash.toFixed(2)}`,
+      burnCycles: grandTotalBurnCycles,
+      sanNapkinsBurnt: grandTotalSanNapkins,
+    };
+
+    // Add averages to the component
+    this.averages = {
+      quantity: averageQty.toFixed(2),
+      cash: `₹ ${averageCash.toFixed(2)}`,
+      burnCycles: averageBurnCycles.toFixed(2),
+      sanNapkinsBurnt: averageSanNapkins.toFixed(2),
+    };
+
+    // Store the calculation metadata for debugging/display if needed
+    this.calculationMetadata = {
+      numberOfMachines,
+      numberOfDays,
+      uniqueDates: allDatesList, // Now contains all dates in the range
+    };
+
+    // Add dateRange as a separate property if needed
+    (this.calculationMetadata as any).dateRange =
+      startDate && endDate
+        ? `${startDate} to ${endDate}`
+        : 'No date range provided';
+
+    this.filteredData = [...this.reportsData];
+    this.updatePagination();
   }
 
-  // Final safety check - ensure we have at least 1 day
-  numberOfDays = Math.max(1, numberOfDays);
+  processResponseData(
+    machineDetails: any[],
+    startDate?: string,
+    endDate?: string
+  ): void {
+    let grandTotalQty = 0;
+    let grandTotalCash = 0;
+    let grandTotalBurnCycles = 0;
+    let grandTotalSanNapkins = 0;
 
-  // FIX: Calculate averages per machine per day
-  // Correct formula: (grand total value / number of machines) / number of days
-  const averageQty =
-    numberOfMachines && numberOfDays
-      ? grandTotalQty / numberOfMachines / numberOfDays
-      : 0;
-  const averageCash =
-    numberOfMachines && numberOfDays
-      ? grandTotalCash / numberOfMachines / numberOfDays
-      : 0;
-  const averageBurnCycles =
-    numberOfMachines && numberOfDays
-      ? grandTotalBurnCycles / numberOfMachines / numberOfDays
-      : 0;
-  const averageSanNapkins =
-    numberOfMachines && numberOfDays
-      ? grandTotalSanNapkins / numberOfMachines / numberOfDays
-      : 0;
+    // Count the number of machines (excluding those with no transactions)
+    const machinesWithTransactions = machineDetails.filter(
+      (machine) =>
+        (machine.vending && machine.vending.length) ||
+        (machine.incinerator && machine.incinerator.length)
+    );
+    const numberOfMachines = machinesWithTransactions.length;
 
-  console.log('Average calculation details:', {
-    grandTotalQty,
-    grandTotalCash,
-    grandTotalBurnCycles,
-    grandTotalSanNapkins,
-    numberOfMachines,
-    numberOfDays,
-    averageQty,
-    averageCash,
-    averageBurnCycles,
-    averageSanNapkins,
-  });
+    // ✅ FIXED Date conversion helper functions with proper timezone handling
+    const dateConversionCache = new Map<string, string>();
 
-  // ✅ Update Grand Total Correctly
-  this.grandTotal = {
-    quantity: grandTotalQty,
-    cash: `₹ ${grandTotalCash.toFixed(2)}`,
-    burnCycles: grandTotalBurnCycles,
-    sanNapkinsBurnt: grandTotalSanNapkins,
-  };
+    // Clear any existing cache
+    dateConversionCache.clear();
 
-  // Add averages to the component
-  this.averages = {
-    quantity: averageQty.toFixed(2),
-    cash: `₹ ${averageCash.toFixed(2)}`,
-    burnCycles: averageBurnCycles.toFixed(2),
-    sanNapkinsBurnt: averageSanNapkins.toFixed(2),
-  };
+    const convertServiceDateToStandard = (serviceDate: string): string => {
+      // Check cache first
+      if (dateConversionCache.has(serviceDate)) {
+        return dateConversionCache.get(serviceDate)!;
+      }
 
-  // Store the calculation metadata for debugging/display if needed
-  this.calculationMetadata = {
-    numberOfMachines,
-    numberOfDays,
-    uniqueDates: allDatesList, // Now contains all dates in the range
-  };
+      // Convert "17-May-2025" to "2025-05-17"
+      try {
+        // Parse the date string manually to avoid timezone issues
+        const parts = serviceDate.split('-');
+        if (parts.length !== 3) {
+          console.error('Invalid service date format:', serviceDate);
+          dateConversionCache.set(serviceDate, serviceDate);
+          return serviceDate;
+        }
 
-  // Add dateRange as a separate property if needed
-  (this.calculationMetadata as any).dateRange =
-    startDate && endDate
-      ? `${startDate} to ${endDate}`
-      : 'No date range provided';
+        const day = parts[0].padStart(2, '0');
+        const monthStr = parts[1];
+        const year = parts[2];
 
-  this.filteredData = [...this.reportsData];
-  this.updatePagination();
-}
+        // Convert month name to number
+        const monthMap: { [key: string]: string } = {
+          Jan: '01',
+          Feb: '02',
+          Mar: '03',
+          Apr: '04',
+          May: '05',
+          Jun: '06',
+          Jul: '07',
+          Aug: '08',
+          Sep: '09',
+          Oct: '10',
+          Nov: '11',
+          Dec: '12',
+        };
 
+        const month = monthMap[monthStr];
+        if (!month) {
+          console.error('Invalid month in service date:', serviceDate);
+          dateConversionCache.set(serviceDate, serviceDate);
+          return serviceDate;
+        }
 
+        const standardDate = `${year}-${month}-${day}`;
+        console.log(`✅ Date conversion: ${serviceDate} -> ${standardDate}`);
+        dateConversionCache.set(serviceDate, standardDate);
+        return standardDate;
+      } catch (error) {
+        console.error('Error converting service date:', serviceDate, error);
+        dateConversionCache.set(serviceDate, serviceDate);
+        return serviceDate;
+      }
+    };
 
+    const convertStandardToServiceDate = (standardDate: string): string => {
+      // Check cache first (reverse lookup)
+      const cacheKey = `reverse_${standardDate}`;
+      if (dateConversionCache.has(cacheKey)) {
+        return dateConversionCache.get(cacheKey)!;
+      }
 
+      // Convert "2025-05-17" to "17-May-2025" for display
+      try {
+        const parts = standardDate.split('-');
+        if (parts.length !== 3) {
+          console.error('Invalid standard date format:', standardDate);
+          dateConversionCache.set(cacheKey, standardDate);
+          return standardDate;
+        }
+
+        const year = parts[0];
+        const month = parts[1];
+        const day = parts[2];
+
+        // Convert month number to name
+        const monthNames = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
+
+        const monthIndex = parseInt(month, 10) - 1;
+        if (monthIndex < 0 || monthIndex > 11) {
+          console.error('Invalid month in standard date:', standardDate);
+          dateConversionCache.set(cacheKey, standardDate);
+          return standardDate;
+        }
+
+        const monthName = monthNames[monthIndex];
+        const serviceDate = `${parseInt(day, 10)}-${monthName}-${year}`;
+        console.log(
+          `✅ Reverse date conversion: ${standardDate} -> ${serviceDate}`
+        );
+        dateConversionCache.set(cacheKey, serviceDate);
+        return serviceDate;
+      } catch (error) {
+        console.error('Error converting standard date:', standardDate, error);
+        dateConversionCache.set(cacheKey, standardDate);
+        return standardDate;
+      }
+    };
+
+    // ✅ FIXED Generate all dates between start and end date
+    const generateDateRange = (start: string, end: string): string[] => {
+      const dates: string[] = [];
+
+      try {
+        // Parse dates manually to avoid timezone issues
+        const startParts = start.split(/[-\s]/); // Split on dash or space
+        const endParts = end.split(/[-\s]/); // Split on dash or space
+
+        // Create dates at noon to avoid timezone issues
+        const startDate = new Date(
+          parseInt(startParts[0]),
+          parseInt(startParts[1]) - 1,
+          parseInt(startParts[2]),
+          12,
+          0,
+          0
+        );
+        const endDate = new Date(
+          parseInt(endParts[0]),
+          parseInt(endParts[1]) - 1,
+          parseInt(endParts[2]),
+          12,
+          0,
+          0
+        );
+
+        // Ensure valid dates
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          console.error('Invalid date range:', { start, end });
+          return [];
+        }
+
+        const currentDate = new Date(startDate);
+        while (currentDate <= endDate) {
+          // Format date as YYYY-MM-DD
+          const year = currentDate.getFullYear();
+          const month = (currentDate.getMonth() + 1)
+            .toString()
+            .padStart(2, '0');
+          const day = currentDate.getDate().toString().padStart(2, '0');
+          const formattedDate = `${year}-${month}-${day}`;
+          dates.push(formattedDate);
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        console.log(`✅ Generated date range from ${start} to ${end}:`, dates);
+        return dates;
+      } catch (error) {
+        console.error('Error generating date range:', error);
+        return [];
+      }
+    };
+
+    // Get date range from report periods or parameters
+    let allDatesList: string[] = [];
+
+    if (
+      this.reportFromPeriod &&
+      this.reportToPeriod &&
+      this.reportFromPeriod !== '-' &&
+      this.reportToPeriod !== '-'
+    ) {
+      const fromDate = this.reportFromPeriod.split(' ')[0]; // Extract date part
+      const toDate = this.reportToPeriod.split(' ')[0]; // Extract date part
+      allDatesList = generateDateRange(fromDate, toDate);
+    } else if (startDate && endDate) {
+      allDatesList = generateDateRange(startDate, endDate);
+    }
+
+    // ✅ Pre-process all unique dates from the service response to avoid repeated conversions
+    const allServiceDates = new Set<string>();
+    machineDetails.forEach((machine) => {
+      // Collect all vending dates
+      (machine.vending || []).forEach((txn: any) => {
+        if (txn.date && txn.date !== 'Total') {
+          allServiceDates.add(txn.date);
+        }
+      });
+      // Collect all incinerator dates
+      (machine.incinerator || []).forEach((txn: any) => {
+        if (txn.date && txn.date !== 'Total') {
+          allServiceDates.add(txn.date);
+        }
+      });
+    });
+
+    // Convert all unique service dates to standard format once
+    console.log(
+      '🔄 Pre-converting all unique service dates:',
+      Array.from(allServiceDates)
+    );
+    allServiceDates.forEach((serviceDate) => {
+      convertServiceDateToStandard(serviceDate); // This will cache the conversion
+    });
+
+    console.log(
+      '📅 Date conversion cache populated:',
+      dateConversionCache.size,
+      'entries'
+    );
+
+    this.reportsData = machineDetails
+      .filter(
+        (machine) =>
+          (machine.vending && machine.vending.length) ||
+          (machine.incinerator && machine.incinerator.length)
+      )
+      .map((machine, index): ReportItem => {
+        let transactionsMap = new Map<string, Transaction>();
+
+        // ✅ Initialize Machine Totals
+        let machineTotalQty = 0;
+        let machineTotalCash = 0;
+        let machineTotalBurnCycles = 0;
+        let machineTotalSanNapkins = 0;
+        let machineTotalOnTimeSeconds = 0;
+        let machineTotalOnTimeFormatted = '-';
+        let machineTotalOnTimeAvgPerDay = '-';
+
+        // ✅ Create maps for faster lookup of transaction data by date (using YYYY-MM-DD format)
+        const vendingDataMap = new Map<string, any>();
+        const incineratorDataMap = new Map<string, any>();
+
+        // ✅ Populate vending data map and calculate totals
+        (machine.vending || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            // Convert service date format to standard format for mapping
+            const standardDate = convertServiceDateToStandard(txn.date);
+            vendingDataMap.set(standardDate, {
+              ...txn,
+              originalDate: txn.date,
+            });
+            machineTotalQty += txn.quantity ?? 0;
+            machineTotalCash += txn.cashCollected ?? 0;
+
+            console.log(
+              `📌 Vending data mapped: ${txn.date} -> ${standardDate}`,
+              txn
+            );
+          }
+        });
+
+        // ✅ Populate incinerator data map and calculate totals
+        (machine.incinerator || []).forEach((txn: any) => {
+          if (txn.date && txn.date !== 'Total') {
+            // Convert service date format to standard format for mapping
+            const standardDate = convertServiceDateToStandard(txn.date);
+            incineratorDataMap.set(standardDate, {
+              ...txn,
+              originalDate: txn.date,
+            });
+            machineTotalBurnCycles += txn.burnCycles ?? 0;
+            machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+
+            // Parse the onTime string to extract total time and average per day
+            const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
+
+            // Store the last valid onTime to use for machine total
+            if (totalTime && totalTime !== '-') {
+              machineTotalOnTimeFormatted = totalTime;
+            }
+
+            // Store the last valid avgPerDay to use for machine total
+            if (avgPerDay && avgPerDay !== '-') {
+              machineTotalOnTimeAvgPerDay = avgPerDay;
+            }
+
+            console.log(
+              `📌 Incinerator data mapped: ${txn.date} -> ${standardDate}`,
+              txn
+            );
+          }
+        });
+
+        console.log(`🔍 Machine ${machine.machineId} data maps:`, {
+          vendingDates: Array.from(vendingDataMap.keys()),
+          incineratorDates: Array.from(incineratorDataMap.keys()),
+        });
+
+        // ✅ Generate transaction entries for ALL dates in the range
+        allDatesList.forEach((date) => {
+          const vendingData = vendingDataMap.get(date);
+          const incineratorData = incineratorDataMap.get(date);
+
+          console.log(`📊 Processing date ${date}:`, {
+            hasVendingData: !!vendingData,
+            hasIncineratorData: !!incineratorData,
+            vendingData: vendingData,
+            incineratorData: incineratorData,
+          });
+
+          // Initialize default values
+          let qty: any = '0';
+          let cash: string = '₹0';
+          let onTime: string = '0m';
+          let onTimeAvgPerDay: string = '-';
+          let burnCycles: any = '0';
+          let sanNapkinsBurnt: any = '0';
+
+          // If vending data exists for this date, use it
+          if (vendingData) {
+            qty = vendingData.quantity ?? 0;
+            cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
+            console.log(`✅ Found vending data for ${date}:`, { qty, cash });
+          }
+
+          // If incinerator data exists for this date, use it
+          if (incineratorData) {
+            const { totalTime, avgPerDay } = this.parseOnTimeString(
+              incineratorData.onTime
+            );
+            onTime = totalTime ?? '-';
+            onTimeAvgPerDay = avgPerDay ?? '-';
+            burnCycles = incineratorData.burnCycles ?? 0;
+            sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
+            console.log(`✅ Found incinerator data for ${date}:`, {
+              onTime,
+              burnCycles,
+              sanNapkinsBurnt,
+            });
+          }
+
+          // Add transaction for this date (display date in service format for consistency)
+          const displayDate = convertStandardToServiceDate(date);
+          transactionsMap.set(date, {
+            date: displayDate, // Display in original format (DD-MMM-YYYY)
+            qty: qty,
+            cash: cash,
+            onTime: onTime,
+            onTimeAvgPerDay: onTimeAvgPerDay,
+            burnCycles: burnCycles,
+            sanNapkinsBurnt: sanNapkinsBurnt,
+          });
+        });
+
+        // ✅ Add Machine's Total Row
+        transactionsMap.set('Total', {
+          date: 'Total',
+          qty: machineTotalQty,
+          cash: `₹ ${machineTotalCash.toFixed(2)}`,
+          onTime: machineTotalOnTimeFormatted,
+          onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
+          burnCycles: machineTotalBurnCycles,
+          sanNapkinsBurnt: machineTotalSanNapkins,
+        });
+
+        // ✅ Update Grand Total (Sum of Each Machine's Totals)
+        grandTotalQty += machineTotalQty;
+        grandTotalCash += machineTotalCash;
+        grandTotalBurnCycles += machineTotalBurnCycles;
+        grandTotalSanNapkins += machineTotalSanNapkins;
+
+        // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
+        const sortedTransactions = Array.from(transactionsMap.values()).sort(
+          (a, b) => {
+            if (a.date === 'Total') return 1;
+            if (b.date === 'Total') return -1;
+
+            // Convert display dates back to standard format for sorting
+            const dateA = convertServiceDateToStandard(a.date);
+            const dateB = convertServiceDateToStandard(b.date);
+            return new Date(dateA).getTime() - new Date(dateB).getTime();
+          }
+        );
+
+        console.log(
+          `📋 Machine ${machine.machineId} final transactions:`,
+          sortedTransactions
+        );
+
+        // Store total onTime in a custom property for later use
+        const result = {
+          srNo: index + 1,
+          machineId: machine.machineId,
+          machineLocation: machine.machineLocation
+            ? machine.machineLocation.trim()
+            : machine.address,
+          address: machine.address || '',
+          machineType: machine.machineType || 'N/A',
+          Zone: machine.Zone || 'N/A',
+          Ward: machine.Ward || 'N/A',
+          Beat: machine.Beat || 'N/A',
+          toiletType: machine.toiletType || 'N/A',
+          reportType: machine.reportType || 'N/A',
+          transactions: sortedTransactions, // Use sorted transactions
+        } as ReportItem;
+
+        // Add the onTime to the result as custom properties
+        (result as any)._totalOnTime = machineTotalOnTimeFormatted;
+        (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
+
+        return result;
+      });
+
+    // ✅ FIXED Calculate number of days between start date and end date
+    let numberOfDays = 1; // Default to 1 to avoid division by zero
+
+    // Define our helper function for calculating days between dates
+    const calculateDaysBetween = (
+      startDate: string,
+      endDate: string
+    ): number => {
+      try {
+        // Parse dates manually to avoid timezone issues
+        const startParts = startDate.split(/[-\s]/);
+        const endParts = endDate.split(/[-\s]/);
+
+        // Create dates at noon to avoid timezone issues
+        const start = new Date(
+          parseInt(startParts[0]),
+          parseInt(startParts[1]) - 1,
+          parseInt(startParts[2]),
+          12,
+          0,
+          0
+        );
+        const end = new Date(
+          parseInt(endParts[0]),
+          parseInt(endParts[1]) - 1,
+          parseInt(endParts[2]),
+          12,
+          0,
+          0
+        );
+
+        // Check if dates are valid
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          console.error('Invalid date format in calculateDaysBetween:', {
+            startDate,
+            endDate,
+          });
+          return 1; // Return default
+        }
+
+        // Calculate difference in milliseconds and convert to days
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        // Add 1 to include both the start and end dates
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+        console.log(`✅ Days between ${startDate} and ${endDate}: ${diffDays}`);
+        return diffDays > 0 ? diffDays : 1; // Ensure at least 1 day
+      } catch (error) {
+        console.error('Error in calculateDaysBetween:', error);
+        return 1; // Return default on error
+      }
+    };
+
+    // Check if we have the top-level report period data
+    if (
+      this.reportFromPeriod &&
+      this.reportToPeriod &&
+      this.reportFromPeriod !== '-' &&
+      this.reportToPeriod !== '-'
+    ) {
+      try {
+        // Use the top-level reportFromPeriod and reportToPeriod
+        const fromPeriodStr = this.reportFromPeriod;
+        const toPeriodStr = this.reportToPeriod;
+
+        numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
+        console.log(
+          `Using top-level report date range: ${fromPeriodStr} to ${toPeriodStr}`
+        );
+        console.log(`Number of days in report: ${numberOfDays}`);
+      } catch (error) {
+        console.error(
+          'Error calculating date difference from top-level report periods:',
+          error
+        );
+      }
+    }
+    // Fallback: Check if we have report period data in machineDetails
+    else if (machineDetails && machineDetails.length > 0) {
+      // Find first machine with valid report period data
+      const machineWithReportPeriod = machineDetails.find(
+        (machine) => machine.reportFromPeriod && machine.reportToPeriod
+      );
+
+      if (machineWithReportPeriod) {
+        try {
+          // Extract date strings
+          const fromPeriodStr = machineWithReportPeriod.reportFromPeriod;
+          const toPeriodStr = machineWithReportPeriod.reportToPeriod;
+
+          numberOfDays = calculateDaysBetween(fromPeriodStr, toPeriodStr);
+          console.log(
+            `Using machine report date range: ${fromPeriodStr} to ${toPeriodStr}`
+          );
+          console.log(`Number of days in report: ${numberOfDays}`);
+        } catch (error) {
+          console.error(
+            'Error calculating date difference from machine report periods:',
+            error
+          );
+        }
+      }
+    }
+
+    // If we still have default numberOfDays, try using startDate and endDate parameters
+    if (numberOfDays === 1 && startDate && endDate) {
+      try {
+        numberOfDays = calculateDaysBetween(startDate, endDate);
+        console.log(`Date parameter range: ${startDate} to ${endDate}`);
+        console.log(`Number of days from parameters: ${numberOfDays}`);
+      } catch (error) {
+        console.error(
+          'Error calculating date difference from parameters:',
+          error
+        );
+      }
+    }
+
+    // Final safety check - ensure we have at least 1 day
+    numberOfDays = Math.max(1, numberOfDays);
+
+    // FIX: Calculate averages per machine per day
+    // Correct formula: (grand total value / number of machines) / number of days
+    const averageQty =
+      numberOfMachines && numberOfDays
+        ? grandTotalQty / numberOfMachines / numberOfDays
+        : 0;
+    const averageCash =
+      numberOfMachines && numberOfDays
+        ? grandTotalCash / numberOfMachines / numberOfDays
+        : 0;
+    const averageBurnCycles =
+      numberOfMachines && numberOfDays
+        ? grandTotalBurnCycles / numberOfMachines / numberOfDays
+        : 0;
+    const averageSanNapkins =
+      numberOfMachines && numberOfDays
+        ? grandTotalSanNapkins / numberOfMachines / numberOfDays
+        : 0;
+
+    console.log('Average calculation details:', {
+      grandTotalQty,
+      grandTotalCash,
+      grandTotalBurnCycles,
+      grandTotalSanNapkins,
+      numberOfMachines,
+      numberOfDays,
+      averageQty,
+      averageCash,
+      averageBurnCycles,
+      averageSanNapkins,
+    });
+
+    // ✅ Update Grand Total Correctly
+    this.grandTotal = {
+      quantity: grandTotalQty,
+      cash: `₹ ${grandTotalCash.toFixed(2)}`,
+      burnCycles: grandTotalBurnCycles,
+      sanNapkinsBurnt: grandTotalSanNapkins,
+    };
+
+    // Add averages to the component
+    this.averages = {
+      quantity: averageQty.toFixed(2),
+      cash: `₹ ${averageCash.toFixed(2)}`,
+      burnCycles: averageBurnCycles.toFixed(2),
+      sanNapkinsBurnt: averageSanNapkins.toFixed(2),
+    };
+
+    // Store the calculation metadata for debugging/display if needed
+    this.calculationMetadata = {
+      numberOfMachines,
+      numberOfDays,
+      uniqueDates: allDatesList, // Now contains all dates in the range
+    };
+
+    // Add dateRange as a separate property if needed
+    (this.calculationMetadata as any).dateRange =
+      startDate && endDate
+        ? `${startDate} to ${endDate}`
+        : 'No date range provided';
+
+    this.filteredData = [...this.reportsData];
+    this.updatePagination();
+  }
 
   toggleSummaryType(): void {
     debugger;
@@ -3589,216 +3774,6 @@ processResponseDataw(
 
     return `${hours}h ${minutes}m ${seconds}s`;
   }
-
-  // toggleSummaryType1() {
-  //   this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
-
-  //   if (this.summaryType === 'Totals') {
-  //     this.filteredData = []; // Clear previous totals
-  //     const uniqueMachineIds = new Set(); // Track unique machines to prevent duplication
-  //     let grandTotalQty = 0,
-  //       grandTotalCash = 0,
-  //       grandTotalBurnCycles = 0,
-  //       grandTotalSanNapkins = 0;
-
-  //     this.reportsData.forEach((machine, index) => {
-  //       if (!uniqueMachineIds.has(machine.machineId)) {
-  //         // Prevent duplicate machines
-  //         uniqueMachineIds.add(machine.machineId);
-
-  //         // Find the total transaction (last item in transactions array)
-  //         const totalTransaction = machine.transactions.find(
-  //           (t) => t.date === 'Total'
-  //         );
-
-  //         // Get totals from the total transaction
-  //         const totalQty = totalTransaction ? totalTransaction.qty : 0;
-  //         const totalCashStr = totalTransaction ? totalTransaction.cash : '₹ 0';
-  //         const totalBurnCycles = totalTransaction
-  //           ? totalTransaction.burnCycles
-  //           : 0;
-  //         const totalSanNapkins = totalTransaction
-  //           ? totalTransaction.sanNapkinsBurnt
-  //           : 0;
-
-  //         // Get the machine's total onTime from our custom property
-  //         const totalOnTime = (machine as any)._totalOnTime || '-';
-
-  //         // Update grand totals
-  //         grandTotalQty += totalQty;
-  //         grandTotalCash += parseFloat(totalCashStr.replace('₹ ', '')) || 0;
-  //         grandTotalBurnCycles += totalBurnCycles;
-  //         grandTotalSanNapkins += totalSanNapkins;
-
-  //         const newMachine = {
-  //           srNo: index + 1,
-  //           machineId: machine.machineId,
-  //           machineLocation: machine.machineLocation || '-',
-  //           address: machine.address || '-',
-  //           machineType: machine.machineType || 'N/A',
-  //           Zone: machine.Zone || 'N/A',
-  //           Ward: machine.Ward || 'N/A',
-  //           Beat: machine.Beat || 'N/A',
-  //           toiletType: machine.toiletType || 'N/A',
-  //           reportType: machine.reportType || 'N/A',
-  //           transactions: [
-  //             {
-  //               date: 'Total',
-  //               qty: totalQty,
-  //               cash: totalCashStr,
-  //               onTime: totalOnTime,
-  //               burnCycles: totalBurnCycles,
-  //               sanNapkinsBurnt: totalSanNapkins,
-  //             },
-  //           ],
-  //         } as ReportItem;
-
-  //         // Add our custom property
-  //         (newMachine as any)._totalOnTime = totalOnTime;
-
-  //         this.filteredData.push(newMachine);
-  //       }
-  //     });
-
-  //     // You can add a final "Grand Total" row here if needed
-  //   } else {
-  //     this.filteredData = [...this.reportsData]; // Restore "Daily" view
-  //   }
-
-  //   this.currentPage = 1; // Reset pagination
-  //   this.updatePagination();
-  // }
-
-  // toggleSummaryType2() {
-  //   this.summaryType = this.summaryType === 'Daily' ? 'Totals' : 'Daily';
-
-  //   if (this.summaryType === 'Totals') {
-  //     this.filteredData = []; // Clear previous totals
-  //     const uniqueMachineIds = new Set(); // Track unique machines to prevent duplication
-  //     let grandTotalQty = 0,
-  //       grandTotalCash = 0,
-  //       grandTotalBurnCycles = 0,
-  //       grandTotalSanNapkins = 0;
-
-  //     // Set to track unique dates across all machines in Totals view
-  //     const uniqueDatesSet = new Set<string>();
-
-  //     this.reportsData.forEach((machine, index) => {
-  //       if (!uniqueMachineIds.has(machine.machineId)) {
-  //         // Prevent duplicate machines
-  //         uniqueMachineIds.add(machine.machineId);
-
-  //         // Find the total transaction (last item in transactions array)
-  //         const totalTransaction = machine.transactions.find(
-  //           (t) => t.date === 'Total'
-  //         );
-
-  //         // Get totals from the total transaction
-  //         const totalQty = totalTransaction ? totalTransaction.qty : 0;
-  //         const totalCashStr = totalTransaction ? totalTransaction.cash : '₹ 0';
-  //         const totalBurnCycles = totalTransaction
-  //           ? totalTransaction.burnCycles
-  //           : 0;
-  //         const totalSanNapkins = totalTransaction
-  //           ? totalTransaction.sanNapkinsBurnt
-  //           : 0;
-
-  //         // Get the machine's total onTime from our custom property
-  //         const totalOnTime = (machine as any)._totalOnTime || '-';
-
-  //         // Update grand totals
-  //         grandTotalQty += totalQty;
-  //         grandTotalCash += parseFloat(totalCashStr.replace('₹ ', '')) || 0;
-  //         grandTotalBurnCycles += totalBurnCycles;
-  //         grandTotalSanNapkins += totalSanNapkins;
-
-  //         // Collect unique dates from this machine's transactions
-  //         machine.transactions.forEach((txn) => {
-  //           if (txn.date && txn.date !== 'Total' && txn.date !== '-') {
-  //             uniqueDatesSet.add(txn.date);
-  //           }
-  //         });
-
-  //         const newMachine = {
-  //           srNo: index + 1,
-  //           machineId: machine.machineId,
-  //           machineLocation: machine.machineLocation || '-',
-  //           address: machine.address || '-',
-  //           machineType: machine.machineType || 'N/A',
-  //           reportType: machine.reportType || 'N/A',
-  //           transactions: [
-  //             {
-  //               date: 'Total',
-  //               qty: totalQty,
-  //               cash: totalCashStr,
-  //               onTime: totalOnTime,
-  //               burnCycles: totalBurnCycles,
-  //               sanNapkinsBurnt: totalSanNapkins,
-  //             },
-  //           ],
-  //         } as ReportItem;
-
-  //         // Add our custom property
-  //         (newMachine as any)._totalOnTime = totalOnTime;
-
-  //         this.filteredData.push(newMachine);
-  //       }
-  //     });
-
-  //     // Calculate number of machines and days
-  //     const numberOfMachines = uniqueMachineIds.size;
-  //     const numberOfDays = Math.max(1, uniqueDatesSet.size); // Ensure we don't divide by zero
-
-  //     // Calculate averages per machine per day
-  //     const averageQty =
-  //       numberOfMachines && numberOfDays
-  //         ? grandTotalQty / (numberOfMachines * numberOfDays)
-  //         : 0;
-  //     const averageCash =
-  //       numberOfMachines && numberOfDays
-  //         ? grandTotalCash / (numberOfMachines * numberOfDays)
-  //         : 0;
-  //     const averageBurnCycles =
-  //       numberOfMachines && numberOfDays
-  //         ? grandTotalBurnCycles / (numberOfMachines * numberOfDays)
-  //         : 0;
-  //     const averageSanNapkins =
-  //       numberOfMachines && numberOfDays
-  //         ? grandTotalSanNapkins / (numberOfMachines * numberOfDays)
-  //         : 0;
-
-  //     // Update grand total
-  //     this.grandTotal = {
-  //       quantity: grandTotalQty,
-  //       cash: `₹ ${grandTotalCash.toFixed(2)}`,
-  //       burnCycles: grandTotalBurnCycles,
-  //       sanNapkinsBurnt: grandTotalSanNapkins,
-  //     };
-
-  //     // Update averages
-  //     this.averages = {
-  //       quantity: averageQty.toFixed(2),
-  //       cash: `₹ ${averageCash.toFixed(2)}`,
-  //       burnCycles: averageBurnCycles.toFixed(2),
-  //       sanNapkinsBurnt: averageSanNapkins.toFixed(2),
-  //     };
-
-  //     // Update calculation metadata
-  //     this.calculationMetadata = {
-  //       numberOfMachines,
-  //       numberOfDays,
-  //       uniqueDates: Array.from(uniqueDatesSet),
-  //     };
-  //   } else {
-  //     this.filteredData = [...this.reportsData]; // Restore "Daily" view
-
-  //     // No need to recalculate averages here as they were calculated
-  //     // in the processResponseData method and should be preserved
-  //   }
-
-  //   this.currentPage = 1; // Reset pagination
-  //   this.updatePagination();
-  // }
 
   searchTexts: { [key: string]: string } = {};
 
