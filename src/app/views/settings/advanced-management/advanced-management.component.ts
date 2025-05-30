@@ -7,6 +7,9 @@ import {
 } from '@angular/core';
 import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
+import { Router } from '@angular/router';
+
+
 
 @Component({
   selector: 'app-advanced-management',
@@ -111,6 +114,7 @@ export class AdvancedManagementComponent implements OnInit {
   popupConfirmAction: () => void = () => {};
 
   constructor(
+    private router: Router,
     private commonDataService: CommonDataService,
     private dataService: DataService,
     private changeDetectorRef: ChangeDetectorRef,
@@ -207,6 +211,12 @@ export class AdvancedManagementComponent implements OnInit {
 
   ngOnInit(): void {
     debugger;
+    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
+      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
+     
+      this.router.navigate(['/login']);
+    }
+
     this.filteredMachineIds = this.machineIds; // Set initially
     this.merchantId = this.commonDataService.getMerchantId();
     this.clientname = '';

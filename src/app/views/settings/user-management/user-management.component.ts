@@ -473,6 +473,13 @@ export class UserManagementComponent {
   ) {}
  
   ngOnInit() {
+
+    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
+      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
+     
+      this.router.navigate(['/login']);
+    }
+
     const userData = JSON.parse(localStorage.getItem('userDetails') || '{}');
     console.log("LOADED USER DATA : ", userData);
     this.resetUserAccess();

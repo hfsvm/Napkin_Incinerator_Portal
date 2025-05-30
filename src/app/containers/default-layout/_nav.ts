@@ -58,7 +58,7 @@ export const navItems: INavData[] = [
         url: '/settings/advanced-management',
       },
       {
-        name: 'Configure Machines',
+        name: 'Configured Machines',
         url: '/settings/configure-machines',
       },
     ],
