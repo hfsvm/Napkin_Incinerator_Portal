@@ -5,6 +5,8 @@ import { DashboardRefreshService } from '../../service/dashboard-refresh.service
 import { Subscription, interval } from 'rxjs'; // Import interval and Subscription
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { Router } from '@angular/router';
+
 
 interface Beat {
   beat: string;
@@ -57,6 +59,7 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   private refreshInterval = 120; // refresh interval in seconds
   private countdownInterval!: any;
   refreshCountdown = 0;
+  totalItems = 0;
   roleName: string = localStorage.getItem('roleName') || '';
   // Projects (from second code)
   // projects: { ProjectId: number, projectname: string }[] = [];
@@ -167,6 +170,7 @@ hasZoneWardBeatStructure: boolean = false;
 availableHierarchyLevels: string[] = [];
 
   constructor(
+    private router: Router,
     private dataService: DataService,
     private commonDataService: CommonDataService,
     private changeDetectorRef: ChangeDetectorRef,
@@ -250,6 +254,13 @@ availableHierarchyLevels: string[] = [];
 
 
   ngOnInit() {
+
+    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
+      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
+     
+      this.router.navigate(['/login']);
+    }
+
   this.searchText = {
     projects: '',
     machineStatuses: '',
@@ -1100,6 +1111,7 @@ rebuildFilterChain(startKey: string) {
   }
 
   get totalPages(): number {
+    this.totalItems = this.filteredMachines.length;
     return Math.ceil(this.filteredMachines.length / this.itemsPerPage);
   }
 
