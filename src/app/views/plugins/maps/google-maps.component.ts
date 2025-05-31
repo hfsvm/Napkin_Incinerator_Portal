@@ -403,6 +403,10 @@ private numericalSort(a: any, b: any): number {
     this.initializeMap(); // Call the new initializeMap method
   }
 
+
+
+  
+
   // Load hierarchical data from API
   loadHierarchicalData(): void {
     this.isLoading = true;
@@ -440,6 +444,8 @@ private numericalSort(a: any, b: any): number {
             // Extract unique zones from the machines array
             this.extractUniqueZones();
 
+
+            
 
                       // IMPORTANT: Sort ALL dropdown options AFTER all data is processed
           setTimeout(() => {

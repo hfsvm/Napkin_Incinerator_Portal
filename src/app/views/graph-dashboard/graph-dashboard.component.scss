@@ -350,3 +350,41 @@
   text-align: center;
 }
 
+
+
+/* Remove default MapLibre popup background and styling */
+.custom-machine-popup .maplibregl-popup-content,
+.custom-aggregated-popup .maplibregl-popup-content {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Remove the popup tip/arrow */
+.custom-machine-popup .maplibregl-popup-tip,
+.custom-aggregated-popup .maplibregl-popup-tip {
+  display: none !important;
+}
+
+/* Ensure our custom content is properly styled */
+.custom-machine-popup .maplibregl-popup-content > div,
+.custom-aggregated-popup .maplibregl-popup-content > div {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+/* Optional: Remove any default margins */
+.custom-machine-popup,
+.custom-aggregated-popup {
+  margin: 0 !important;
+}
+
+
+
+.zone-title {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #333;
+}

@@ -18,7 +18,29 @@ interface DonutChartData {
 @Component({
   selector: 'app-zone-dashboard',
   templateUrl: './graph-dashboard.component.html',
-  styleUrls: ['./graph-dashboard.component.scss']
+  styleUrls: ['./graph-dashboard.component.scss'],
+
+    styles: [`
+    /* Remove default MapLibre popup background and styling */
+    ::ng-deep .custom-machine-popup .maplibregl-popup-content,
+    ::ng-deep .custom-aggregated-popup .maplibregl-popup-content {
+      background: transparent !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+    }
+
+    ::ng-deep .custom-machine-popup .maplibregl-popup-tip,
+    ::ng-deep .custom-aggregated-popup .maplibregl-popup-tip {
+      display: none !important;
+    }
+
+    ::ng-deep .custom-machine-popup .maplibregl-popup-content > div,
+    ::ng-deep .custom-aggregated-popup .maplibregl-popup-content > div {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+  `]
+
 })
 export class GraphDashboardComponent implements OnInit,AfterViewInit {
 
@@ -109,7 +131,7 @@ machines: any[] = []; // Will store machine data
     // Initialize map after the view has been initialized
     setTimeout(() => {
       this.initializeMap();
-    }, 500); // Small delay to ensure DOM is ready
+    }, 100); // Small delay to ensure DOM is ready
   }
 
 
@@ -546,63 +568,63 @@ ngOnInit(): void {
   }
 
 
-
-    initializeMap(): void {
-    console.log('🗺️ Initializing map...');
+// working code of map but map is showing some portion 
+  //   initializeMap(): void {
+  //   console.log('🗺️ Initializing map...');
     
-    // Check if map element exists in DOM
-    const mapElement = document.getElementById('map');
-    if (!mapElement) {
-      console.error('Map container element not found, will retry...');
-      // Try again in a moment if element not found
-      setTimeout(() => this.initializeMap(), 100);
-      return;
-    }
+  //   // Check if map element exists in DOM
+  //   const mapElement = document.getElementById('map');
+  //   if (!mapElement) {
+  //     console.error('Map container element not found, will retry...');
+  //     // Try again in a moment if element not found
+  //     setTimeout(() => this.initializeMap(), 100);
+  //     return;
+  //   }
     
-    // Check if map is already initialized
-    if (this.map) {
-      console.log('Map already initialized, resizing...');
-      this.map.resize();
-      return;
-    }
+  //   // Check if map is already initialized
+  //   if (this.map) {
+  //     console.log('Map already initialized, resizing...');
+  //     this.map.resize();
+  //     return;
+  //   }
     
-    try {
-      // Create a new map instance
-      this.map = new maplibregl.Map({
-        container: 'map',
-        style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Ldz7Kz6Xwxrw9kq0aYn3',
-        center: [72.8777, 19.0760], // Mumbai coordinates
-        zoom: 10.5
-      });
+  //   try {
+  //     // Create a new map instance
+  //     this.map = new maplibregl.Map({
+  //       container: 'map',
+  //       style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Ldz7Kz6Xwxrw9kq0aYn3',
+  //       center: [72.87, 19.07], // Mumbai coordinates
+  //       zoom: 10.5
+  //     });
       
-      // Add navigation controls
-      this.map.addControl(new maplibregl.NavigationControl(), 'top-right');
+  //     // Add navigation controls
+  //     this.map.addControl(new maplibregl.NavigationControl(), 'top-right');
       
-      // Add resize handler for proper map rendering
-      window.addEventListener('resize', () => {
-        if (this.map) this.map.resize();
-      });
+  //     // Add resize handler for proper map rendering
+  //     window.addEventListener('resize', () => {
+  //       if (this.map) this.map.resize();
+  //     });
       
-      // Wait for map to load
-      this.map.on('load', () => {
-        console.log('Map loaded successfully');
-        this.mapInitialized = true;
-        this.map.resize();
+  //     // Wait for map to load
+  //     this.map.on('load', () => {
+  //       console.log('Map loaded successfully');
+  //       this.mapInitialized = true;
+  //       this.map.resize();
         
-        // Update map with data if available
-        if (this.dashboardData?.machines?.length) {
-          this.updateMap();
-        }
-      });
+  //       // Update map with data if available
+  //       if (this.dashboardData?.machines?.length) {
+  //         this.updateMap();
+  //       }
+  //     });
       
-      // Add error handling
-      this.map.on('error', (e) => {
-        console.error('Map error:', e);
-      });
-    } catch (error) {
-      console.error('Error initializing map:', error);
-    }
-  }
+  //     // Add error handling
+  //     this.map.on('error', (e) => {
+  //       console.error('Map error:', e);
+  //     });
+  //   } catch (error) {
+  //     console.error('Error initializing map:', error);
+  //   }
+  // }
 
 
 
@@ -616,6 +638,164 @@ ngOnInit(): void {
 //   this.updateMap();
 // }
 
+
+
+initializeMap(): void {
+  console.log('🗺️ Initializing map...');
+  
+  // Check if map element exists in DOM
+  const mapElement = document.getElementById('map');
+  if (!mapElement) {
+    console.error('Map container element not found, will retry...');
+    // Try again in a moment if element not found
+    setTimeout(() => this.initializeMap(), 100);
+    return;
+  }
+  
+  // Check if map is already initialized
+  if (this.map) {
+    console.log('Map already initialized, resizing...');
+    this.map.resize();
+    return;
+  }
+  
+  try {
+    // Default coordinates for India (fallback)
+    let centerCoordinates: [number, number] = [72.8777, 19.076];
+    let zoomLevel: number = 10;
+    
+    // Create a new map instance
+    this.map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Ldz7Kz6Xwxrw9kq0aYn3',
+      center: centerCoordinates,
+      zoom: zoomLevel,
+      attributionControl: false // disable default attribution control
+    });
+    
+    // Add compact attribution control
+    const attributionControl = new maplibregl.AttributionControl({ compact: true });
+    this.map.addControl(attributionControl, 'bottom-right');
+    
+    // Add navigation controls
+    this.map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    
+    // Add resize handler for proper map rendering
+    window.addEventListener('resize', () => {
+      if (this.map) this.map.resize();
+    });
+    
+    // Wait for map to load
+    this.map.on('load', () => {
+      console.log('Map loaded successfully');
+      this.mapInitialized = true;
+      this.map.resize();
+      console.log('Map bounds:', this.map.getBounds());
+      
+      // Fit map to show all machines if data available (without animation)
+      if (this.dashboardData?.machines?.length) {
+        this.fitMapToShowAllMachines();
+      }
+      
+      // Update map with data if available
+      if (this.dashboardData?.machines?.length) {
+        this.updateMap();
+      }
+    });
+    
+    // Set padding (keep this from your maps page)
+    this.map.setPadding({ right: 400, top: 50 });
+    
+    // Add event listeners for map interactions
+    this.map.on('moveend', () => this.updateMap());
+    this.map.on('zoomend', () => this.updateMap());
+    
+    // Add error handling
+    this.map.on('error', (e) => {
+      console.error('Map error:', e);
+    });
+    
+    // MutationObserver to remove the 'maplibregl-compact-show' class as soon as it's added
+    const observer = new MutationObserver(() => {
+      const attrEl = document.querySelector('.maplibregl-ctrl-attrib');
+      if (attrEl?.classList.contains('maplibregl-compact-show')) {
+        attrEl.classList.remove('maplibregl-compact-show');
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+  } catch (error) {
+    console.error('Error initializing map:', error);
+  }
+}
+
+// Helper method to calculate bounds from machine coordinates
+private calculateMachineBounds(): maplibregl.LngLatBoundsLike | null {
+  if (!this.dashboardData?.machines?.length) {
+    return null;
+  }
+
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+
+  this.dashboardData.machines.forEach((machine: { latitude: { toString: () => string; }; longitude: { toString: () => string; }; }) => {
+    if (machine.latitude && machine.longitude) {
+      const lat = parseFloat(machine.latitude.toString());
+      const lng = parseFloat(machine.longitude.toString());
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        minLat = Math.min(minLat, lat);
+        maxLat = Math.max(maxLat, lat);
+        minLng = Math.min(minLng, lng);
+        maxLng = Math.max(maxLng, lng);
+      }
+    }
+  });
+
+  // Check if we found valid coordinates
+  if (minLat === Infinity || maxLat === -Infinity || minLng === Infinity || maxLng === -Infinity) {
+    return null;
+  }
+
+  // Add some padding to the bounds
+  const latPadding = (maxLat - minLat) * 0.1;
+  const lngPadding = (maxLng - minLng) * 0.1;
+
+  return [
+    [minLng - lngPadding, minLat - latPadding], // Southwest corner
+    [maxLng + lngPadding, maxLat + latPadding]  // Northeast corner
+  ];
+}
+
+// Method to fit map to show all machines (no animation, immediate fit)
+private fitMapToShowAllMachines(): void {
+  if (!this.map || !this.dashboardData?.machines?.length) {
+    return;
+  }
+
+  const bounds = this.calculateMachineBounds();
+  if (bounds) {
+    // Immediately fit to bounds without animation
+    this.map.fitBounds(bounds, {
+      padding: { top: 50, bottom: 50, left: 50, right: 450 }, // Extra right padding for sidebar
+      maxZoom: 12,
+      duration: 0 // No animation - immediate fit
+    });
+  }
+}
+
+// Method to refresh map bounds when data changes (no animation)
+public refreshMapBounds(): void {
+  if (this.map && this.mapInitialized && this.dashboardData?.machines?.length) {
+    this.fitMapToShowAllMachines();
+  }
+}
 
 /*start */
 
@@ -685,7 +865,7 @@ ngOnInit(): void {
   }
 
 // Modified displayMachineView method to handle new stockStatus format
-displayMachineView(machines: any[]): void {
+displayMachineView1(machines: any[]): void {
   console.log("🔍 Displaying Machine View");
   
   // Handle overlapping markers
@@ -836,7 +1016,7 @@ getStockStatusIcon(status: number): string {
 }
 
 // Updated popup HTML generator to handle the new data structure
-generatePopupHTML(machine: any): string {
+generatePopupHTML1(machine: any): string {
   // Convert stock status to text
   let stockStatusText = 'Unknown';
   
@@ -884,7 +1064,7 @@ generatePopupHTML(machine: any): string {
     </div>`;
 }
   // Generic method to display aggregated views (zone, ward, beat)
-  displayAggregatedView(machines: any[], viewType: 'zone' | 'ward' | 'beat', markerColor: string): void {
+  displayAggregatedView1(machines: any[], viewType: 'zone' | 'ward' | 'beat', markerColor: string): void {
     console.log(`📊 Displaying ${viewType.charAt(0).toUpperCase() + viewType.slice(1)} View`);
     
     // Group machines by the selected view type
@@ -1059,6 +1239,345 @@ generatePopupHTML(machine: any): string {
     return groups;
   }
 
+
+  // Updated displayMachineView method with working close button
+displayMachineView(machines: any[]): void {
+  console.log("🔍 Displaying Machine View");
+  
+  // Handle overlapping markers
+  const locationMap = new Map<string, number>();
+  
+  // Create markers for all machines
+  machines.forEach(machine => {
+    if (!machine.location && (!machine.longitude || !machine.latitude)) {
+      console.warn(`Machine ${machine.machineId} has no location data`);
+      return;
+    }
+
+    // Use machine.location if available, otherwise use longitude/latitude
+    let lng: number, lat: number;
+    if (machine.location && Array.isArray(machine.location) && machine.location.length >= 2) {
+      lng = Number(machine.location[0]);
+      lat = Number(machine.location[1]);
+    } else {
+      lng = Number(machine.longitude);
+      lat = Number(machine.latitude);
+    }
+    
+    // Skip if coordinates are invalid
+    if (isNaN(lng) || isNaN(lat) || lng === 0 || lat === 0) {
+      console.warn(`Machine ${machine.machineId} has invalid coordinates`);
+      return;
+    }
+
+    const key = `${lng},${lat}`;
+
+    // Handle overlapping markers by slightly offsetting them
+    if (locationMap.has(key)) {
+      const count = locationMap.get(key)! + 1;
+      locationMap.set(key, count);
+
+      const angle = (count * 45) * (Math.PI / 180);
+      const radius = 0.000001 * count;
+      lng += radius * Math.cos(angle);
+      lat += radius * Math.sin(angle);
+    } else {
+      locationMap.set(key, 1);
+    }
+
+    // Get stock status - handle the new format where stockStatus is an array
+    let stockStatusNumber = this.getStockStatusNumber(machine.stockStatus);
+    console.log(`Machine ${machine.machineId} processed stockStatus:`, stockStatusNumber);
+
+    // Set marker icon based on machine status
+    const iconUrl = this.getStockStatusIcon(stockStatusNumber);
+    console.log(`Using icon: ${iconUrl} for status: ${stockStatusNumber}`);
+
+    const markerElement = document.createElement('div');
+    markerElement.className = 'custom-marker';
+    markerElement.style.backgroundImage = `url(${iconUrl})`;
+    markerElement.style.width = '40px';
+    markerElement.style.height = '40px';
+    markerElement.style.backgroundSize = 'contain';
+    markerElement.style.backgroundRepeat = 'no-repeat';
+
+    // Zoom on double-click
+    markerElement.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      this.map.flyTo({
+        center: [lng, lat] as [number, number],
+        zoom: 15,
+        speed: 5,
+        curve: 1,
+        easing(t) {
+          return t;
+        }
+      });
+    });
+
+    // Create popup with machine info
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: true,
+      className: 'custom-machine-popup'
+    }).setHTML(this.generatePopupHTML(machine));
+
+    // Add event listener for close button after popup is added to DOM
+    popup.on('open', () => {
+      const closeBtn = document.querySelector(`[data-machine-id="${machine.machineId}"]`);
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          popup.remove();
+        });
+      }
+    });
+
+    // Create and add marker to map
+    const newMarker = new maplibregl.Marker({ element: markerElement })
+      .setLngLat([lng, lat])
+      .setPopup(popup)
+      .addTo(this.map);
+
+    // Store marker for later removal
+    this.markers.push(newMarker);
+  });
+  
+  console.log(`✅ Added ${this.markers.length} markers to map`);
+}
+
+// Updated popup HTML generator with improved styling
+generatePopupHTML(machine: any): string {
+  // Convert stock status to text
+  let stockStatusText = 'Unknown';
+  
+  // Handle the array format for stock status
+  if (Array.isArray(machine.stockStatus)) {
+    const statuses = machine.stockStatus.map((s: { SpringName: any; SpringStatus: any; }) => `${s.SpringName}: ${s.SpringStatus}`).join(', ');
+    stockStatusText = statuses || 'Unknown';
+  } else {
+    // Use the legacy conversion
+    switch (this.getStockStatusNumber(machine.stockStatus)) {
+      case 0: stockStatusText = 'Empty/No Stock'; break;
+      case 1: stockStatusText = 'Low'; break;
+      case 2: stockStatusText = 'Full'; break;
+    }
+  }
+
+  // Convert burning status to text
+  let burningStatusText = machine.burningStatus || 'Unknown';
+
+  return `
+    <div style="position: relative; padding: 12px 15px 15px 15px; background: white; border-radius: 8px; min-width: 280px; 
+                border: 1px solid #e0e0e0;">
+      
+      <!-- Close Button -->
+      <button class="custom-close-btn" data-machine-id="${machine.machineId}" 
+              style="position: absolute; top: 5px; right: 5px; background: #f44336; color: white; 
+                     border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; 
+                     display: flex; align-items: center; justify-content: center; font-size: 12px;
+                     font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.3); z-index: 999;
+                     line-height: 1;">
+        ×
+      </button>
+
+      <!-- Card Content -->
+      <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px; padding-right: 25px;">📍 Vending Machine</h3>
+      <div style="font-size: 13px; line-height: 1.4;">
+        <p style="margin: 3px 0;"><strong>Machine ID:</strong> ${machine.machineId}</p>
+        <p style="margin: 3px 0;"><strong>State:</strong> ${machine.level1 || 'N/A'}</p>
+        <p style="margin: 3px 0;"><strong>District:</strong> ${machine.level2 || 'N/A'}</p>
+        <p style="margin: 3px 0;"><strong>Zone:</strong> ${machine.zone || 'N/A'}</p>
+        <p style="margin: 3px 0;"><strong>Ward:</strong> ${machine.ward || 'N/A'}</p>
+        <p style="margin: 3px 0;"><strong>Beat:</strong> ${machine.beat || 'N/A'}</p>
+        <p style="margin: 3px 0;"><strong>Status:</strong> ${machine.status || 'N/A'}</p>
+        <p style="margin: 3px 0;"><strong>Stock Status:</strong> ${stockStatusText}</p>
+        <p style="margin: 3px 0;"><strong>Burning Status:</strong> ${burningStatusText}</p>
+        <p style="margin: 3px 0;"><strong>Total Collection:</strong> ₹${machine.collection || 0}</p>
+        <p style="margin: 3px 0;"><strong>Items Dispensed:</strong> ${machine.itemsDispensed || 0}</p>
+        <p style="margin: 3px 0;"><strong>Address:</strong> ${machine.address || 'N/A'}</p>
+      </div>
+    </div>`;
+}
+
+// Updated displayAggregatedView method with close buttons
+displayAggregatedView(machines: any[], viewType: 'zone' | 'ward' | 'beat', markerColor: string): void {
+  console.log(`📊 Displaying ${viewType.charAt(0).toUpperCase() + viewType.slice(1)} View`);
+  
+  // Group machines by the selected view type
+  const groups = this.groupMachinesByProperty(machines, viewType);
+  
+  // Create a marker for each group
+  Object.entries(groups).forEach(([groupName, groupMachines]) => {
+    if (groupName === 'Unknown' || groupName === 'null' || !groupName) {
+      console.warn(`⚠️ Skipping ${viewType} with invalid name: "${groupName}"`);
+      return;
+    }
+    
+    // Find coordinates - try specialized lat/long first, then fallback to averaging machine positions
+    let groupLocation: [number, number];
+    
+    const coordPropertyPrefix = {
+      'zone': 'zone',
+      'ward': 'ward',
+      'beat': 'beat'
+    }[viewType];
+    
+    const latProperty = `${coordPropertyPrefix}latitude`;
+    const longProperty = `${coordPropertyPrefix}longitude`;
+    
+    // Try to use specialized coordinates if available
+    const firstMachineWithCoords = groupMachines.find(m => 
+      m[latProperty] && m[longProperty] && 
+      m[latProperty] !== 0 && m[longProperty] !== 0
+    );
+    
+    if (firstMachineWithCoords) {
+      groupLocation = [
+        Number(firstMachineWithCoords[longProperty]), 
+        Number(firstMachineWithCoords[latProperty])
+      ];
+    } else {
+      // Fallback: Calculate average coordinates of all machines in group
+      const validMachines = groupMachines.filter(m => 
+        m.longitude && m.latitude && 
+        m.longitude !== 0 && m.latitude !== 0
+      );
+      
+      if (validMachines.length === 0) {
+        console.warn(`⚠️ No valid coordinates for ${viewType}: ${groupName}`);
+        return;
+      }
+      
+      const totalLng = validMachines.reduce((sum, m) => sum + Number(m.longitude), 0);
+      const totalLat = validMachines.reduce((sum, m) => sum + Number(m.latitude), 0);
+      
+      groupLocation = [
+        totalLng / validMachines.length, 
+        totalLat / validMachines.length
+      ];
+    }
+    
+    if (!groupLocation || groupLocation[0] === 0 || groupLocation[1] === 0) {
+      console.warn(`⚠️ Invalid coordinates for ${viewType}: ${groupName}`);
+      return;
+    }
+    
+    // Create custom marker element - button style with name
+    const markerElement = document.createElement('div');
+    markerElement.className = `${viewType}-marker`;
+    markerElement.style.backgroundColor = markerColor;
+    markerElement.style.color = 'white';
+    markerElement.style.padding = '8px 12px';
+    markerElement.style.borderRadius = '4px';
+    markerElement.style.fontWeight = 'bold';
+    markerElement.style.textAlign = 'center';
+    markerElement.style.minWidth = '80px';
+    markerElement.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+    markerElement.style.cursor = 'pointer';
+    markerElement.style.display = 'flex';
+    markerElement.style.alignItems = 'center';
+    markerElement.style.justifyContent = 'center';
+    
+    // Add text label - capitalize the first letter of viewType
+    const viewTypeCapitalized = viewType.charAt(0).toUpperCase() + viewType.slice(1);
+    markerElement.textContent = `${viewTypeCapitalized}: ${groupName}`;
+
+    // Calculate statistics for this group
+    const installedMachines = groupMachines.length;
+    const runningMachines = groupMachines.filter(m => m.status === 'Online').length;
+    const totalCollection = groupMachines.reduce((sum, m) => sum + (m.totalCollection || 0), 0);
+    const itemsDispensed = groupMachines.reduce((sum, m) => sum + (m.itemsDispensed || 0), 0);
+    const stockLow = groupMachines.filter(m =>
+      m.stockStatus === 'Low Stock' ||
+      m.stockStatus === 1 ||
+      (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Low Stock'))
+    ).length;
+    const stockEmpty = groupMachines.filter(m =>
+      m.stockStatus === 'Empty' ||
+      m.stockStatus === 0 ||
+      (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Empty'))
+    ).length;
+    const stockError = groupMachines.filter(m =>
+      m.stockStatus === 'Error' ||
+      (Array.isArray(m.stockStatus) && m.stockStatus.some((s: any) => s.SpringStatus === 'Error'))
+    ).length;
+    const stockOkay = groupMachines.filter(m =>
+      m.stockStatus === 'Okay' ||
+      m.stockStatus === 2 ||
+      (Array.isArray(m.stockStatus) && m.stockStatus.every((s: any) => s.SpringStatus === 'Okay'))
+    ).length;
+    const burningIdle = groupMachines.filter(m => m.burnStatus === 1).length;
+    const burningEnabled = groupMachines.filter(m => m.burnStatus === 2).length;
+    const burningError = groupMachines.filter(m => m.burnStatus === 3).length;
+    const totalBurningCycle = groupMachines.reduce((sum, m) => sum + (m.burningCycle || 0), 0);
+    
+    // Generate unique ID for this popup
+    const popupId = `${viewType}-${groupName.replace(/\s+/g, '-')}`;
+    
+    // Create popup with group info and close button
+    const popupHTML = `
+      <div class="${viewType}-popup" style="position: relative; padding: 12px 15px 15px 15px; background: white; border-radius: 8px; min-width: 320px;
+                                            border: 1px solid #e0e0e0;">
+        
+        <!-- Close Button -->
+        <button class="aggregated-close-btn" data-popup-id="${popupId}" 
+                style="position: absolute; top: 5px; right: 5px; background: #f44336; color: white; 
+                       border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; 
+                       display: flex; align-items: center; justify-content: center; font-size: 12px;
+                       font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.3); z-index: 999;
+                       line-height: 1;">
+          ×
+        </button>
+
+        <h4 style="margin: 0 0 10px 0; color: #333; font-size: 16px; padding-right: 25px;">${viewTypeCapitalized}: ${groupName}</h4>
+        <div class="${viewType}-stats" style="font-size: 13px; line-height: 1.4;">
+          <div style="margin: 3px 0;"><strong>Machines Installed:</strong> ${installedMachines}</div>
+          <div style="margin: 3px 0;"><strong>Machines Running:</strong> ${runningMachines}</div>
+          <div style="margin: 3px 0;"><strong>Total Collection:</strong> ₹${totalCollection}</div>
+          <div style="margin: 3px 0;"><strong>Items Dispensed:</strong> ${itemsDispensed}</div>
+          <div style="margin: 3px 0;"><strong>Stock Empty:</strong> ${stockEmpty}</div>
+          <div style="margin: 3px 0;"><strong>Stock Low:</strong> ${stockLow}</div>
+          <div style="margin: 3px 0;"><strong>Stock Error:</strong> ${stockError}</div>
+          <div style="margin: 3px 0;"><strong>Stock Okay:</strong> ${stockOkay}</div>
+          <div style="margin: 3px 0;"><strong>Burning Idle:</strong> ${burningIdle}</div>
+          <div style="margin: 3px 0;"><strong>Burning Enabled:</strong> ${burningEnabled}</div>
+          <div style="margin: 3px 0;"><strong>Burning Error:</strong> ${burningError}</div>
+          <div style="margin: 3px 0;"><strong>Total Burning Cycles:</strong> ${totalBurningCycle}</div>
+        </div>
+      </div>
+    `;
+    
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: true,
+      maxWidth: '350px',
+      className: 'custom-aggregated-popup'
+    }).setHTML(popupHTML);
+
+    // Add event listener for close button after popup is added to DOM
+    popup.on('open', () => {
+      const closeBtn = document.querySelector(`[data-popup-id="${popupId}"]`);
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          popup.remove();
+        });
+      }
+    });
+    
+    // Create and add marker to map
+    const newMarker = new maplibregl.Marker({ element: markerElement })
+      .setLngLat([groupLocation[0], groupLocation[1]])
+      .setPopup(popup)
+      .addTo(this.map);
+    
+    // Store marker for later removal
+    this.markers.push(newMarker);
+    
+    console.log(`✅ Added ${viewType} marker for: ${groupName} at [${groupLocation}]`);
+  });
+}
   setupViewSelectionHandlers() {
     // If using radio buttons or other UI elements to change views
     // Connect them to the changeMapView method
