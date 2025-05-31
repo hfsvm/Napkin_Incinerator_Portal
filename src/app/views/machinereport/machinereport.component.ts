@@ -69,6 +69,12 @@ refreshCountdown = 0;
   
   ngOnInit(): void {
 
+    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
+      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
+     
+      this.router.navigate(['/login']);
+    }
+
     this.merchantId = localStorage.getItem('merchantId') || '';
     this.machineId = this.route.snapshot.paramMap.get('machineId') || '';
 

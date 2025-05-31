@@ -5,6 +5,7 @@ import { throwError } from 'rxjs';
 import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
 import { DashboardRefreshService } from '../../../service/dashboard-refresh.service';
+import { Router } from '@angular/router';
 
 interface Beat {
   beat: string;
@@ -164,6 +165,7 @@ export class ConfigureMachinesComponent implements OnInit, OnDestroy {
   machinesList: any[] = [];
 
   constructor(
+    private router: Router,
     private dataService: DataService,
     private commonDataService: CommonDataService,
     private changeDetectorRef: ChangeDetectorRef,
@@ -171,6 +173,13 @@ export class ConfigureMachinesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+
+    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
+      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
+     
+      this.router.navigate(['/login']);
+    }
+    
     this.searchText = {
       projects: '',
       machineStatuses: '',

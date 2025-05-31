@@ -126,12 +126,13 @@ onSubmit(): void {
     return;
   }
 
-  if (controls['captcha'].value !== this.captchaCode) {      
-        this.fieldErrors.captcha = '❌ Invalid CAPTCHA. Please match the code exactly.';
-        this.loadCaptcha(); // ✅ Load new captcha after server says wrong
-        return;
-   } 
-  
+  if (controls['captcha'].value !== this.captchaCode) {
+  setTimeout(() => {
+    this.fieldErrors.captcha = '❌ Invalid CAPTCHA. Please match the code exactly.';
+  });
+  this.loadCaptcha();
+  return;
+} 
 
  
   const { email, password, merchantId, captcha } = this.loginForm.value;

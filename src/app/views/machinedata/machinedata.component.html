@@ -579,7 +579,8 @@
               let i = index
             "
           >
-            <td>{{ i + 1 }}</td>
+            <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+            
             <td>
               <!-- Machine ID as clickable link -->
               <!-- <a [routerLink]="['/machine-report', machine.machineId]" style="color: #007bff; text-decoration: underline; cursor: pointer;">
@@ -775,6 +776,18 @@
           ›
         </button>
       </div>
+      <!-- Showing X to Y of Z entries -->
+  <div class="text-muted" style="font-size: 0.95rem;">
+    Showing 
+    {{ (currentPage - 1) * itemsPerPage + 1 }} 
+    to 
+    {{
+      currentPage * itemsPerPage > totalItems
+        ? totalItems
+        : currentPage * itemsPerPage
+    }} 
+    of {{ totalItems }} entries
+  </div>
     </div>
   </div>
 </div>

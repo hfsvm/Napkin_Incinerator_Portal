@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonDataService } from '../../../Common/common-data.service';
 
 @Component({
   selector: 'app-default-header',
@@ -17,7 +18,11 @@ export class DefaultHeaderComponent implements OnInit, OnDestroy {
   private intervalId: any; 
   public showLogoutTooltip: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private commonDataService: CommonDataService
+  ) 
+    {}
 
   ngOnInit() {
     // ✅ Load roleName
@@ -99,6 +104,9 @@ export class DefaultHeaderComponent implements OnInit, OnDestroy {
 
     this.userRole = 'Guest';
     this.userName = 'Unknown';
+
+    this.commonDataService.merchantId = null;
+    this.commonDataService.userId = null;
 
     this.router.navigate(['/#/login']);
   }

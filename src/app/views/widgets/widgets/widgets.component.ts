@@ -11,6 +11,7 @@ import * as d3 from 'd3';
 import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
 import { DashboardRefreshService } from '../../../service/dashboard-refresh.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-widgets',
@@ -39,12 +40,20 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
   private refreshSubscription!: Subscription;
 
   constructor(
+    private router: Router,
     private dataService: DataService,
     private commonDataService: CommonDataService,
     private dashboardRefreshService: DashboardRefreshService
   ) {}
 
   ngAfterContentInit(): void {
+
+     if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
+      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
+     
+      this.router.navigate(['/login']);
+    }
+
     this.merchantId = this.commonDataService.merchantId;
     if (this.merchantId) {
       this.fetchDashboardData();

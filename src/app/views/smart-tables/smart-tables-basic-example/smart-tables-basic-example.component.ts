@@ -4,6 +4,7 @@ import { CommonDataService } from '../../../Common/common-data.service';
 import * as XLSX from 'xlsx';
 import { Subscription, interval } from 'rxjs';
 import { format, eachDayOfInterval, parseISO } from 'date-fns';
+import { Router } from '@angular/router';
 
 
 interface Transaction {
@@ -85,6 +86,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   showInitialMessage: boolean = true;
   summaryType: 'Daily' | 'Totals' = 'Daily';
   errorMessage = '';
+  totalItems: number = 0;
 
   zones: string[] = [];
   wards: string[] = [];
@@ -154,7 +156,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   // ✅ Pagination
   paginatedData: ReportItem[] = [];
   currentPage = 1;
-  itemsPerPage = 10;
+  itemsPerPage = 20;
   reportType: any;
 
   //report variables start
@@ -263,6 +265,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
 
 
   constructor(
+    private router: Router,
     private dataService: DataService,
     private commonDataService: CommonDataService,
     private cdr: ChangeDetectorRef
@@ -270,6 +273,12 @@ export class SmartTablesBasicExampleComponent implements OnInit {
 
   ngOnInit() {
     //this.loadReport();
+
+    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
+      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
+     
+      this.router.navigate(['/login']);
+    }
 
     this.merchantId = this.commonDataService.merchantId ?? '';
     this.userId = this.commonDataService.userId ?? 0;
@@ -871,6 +880,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   }
 
   get totalPages(): number {
+    this.totalItems = this.filteredData.length;
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
   }
 
