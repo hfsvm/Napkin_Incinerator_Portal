@@ -1810,12 +1810,16 @@ processResponseData(
   let grandTotalSanNapkins = 0;
 
   // Count the number of machines (excluding those with no transactions)
-  const machinesWithTransactions = machineDetails.filter(
-    (machine) =>
-      (machine.vending && machine.vending.length) ||
-      (machine.incinerator && machine.incinerator.length)
-  );
-  const numberOfMachines = machinesWithTransactions.length;
+  // const machinesWithTransactions = machineDetails.filter(
+  //   (machine) =>
+  //     (machine.vending && machine.vending.length) ||
+  //     (machine.incinerator && machine.incinerator.length)
+  // );
+  // const numberOfMachines = machinesWithTransactions.length;
+
+
+  const numberOfMachines = machineDetails.length; // Use all machines
+
 
   // ✅ FIXED Date conversion helper functions with proper timezone handling
   const dateConversionCache = new Map<string, string>();
@@ -2001,13 +2005,16 @@ processResponseData(
 
   console.log('📅 Date conversion cache populated:', dateConversionCache.size, 'entries');
 
+  // this.reportsData = machineDetails
+  //   .filter(
+  //     (machine) =>
+  //       (machine.vending && machine.vending.length) ||
+  //       (machine.incinerator && machine.incinerator.length)
+  //   )
+  //   .map((machine, index): ReportItem => {
+
   this.reportsData = machineDetails
-    .filter(
-      (machine) =>
-        (machine.vending && machine.vending.length) ||
-        (machine.incinerator && machine.incinerator.length)
-    )
-    .map((machine, index): ReportItem => {
+  .map((machine, index): ReportItem => {
       let transactionsMap = new Map<string, Transaction>();
 
       // ✅ Initialize Machine Totals
