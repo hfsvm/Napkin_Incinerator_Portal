@@ -9,8 +9,6 @@ import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
 import { Router } from '@angular/router';
 
-
-
 @Component({
   selector: 'app-advanced-management',
   templateUrl: './advanced-management.component.html',
@@ -211,9 +209,12 @@ export class AdvancedManagementComponent implements OnInit {
 
   ngOnInit(): void {
     debugger;
-    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
-      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
-     
+    if (
+      this.commonDataService.merchantId === null ||
+      (this.commonDataService.merchantId === undefined &&
+        this.commonDataService.userId === null) ||
+      this.commonDataService.userId === undefined
+    ) {
       this.router.navigate(['/login']);
     }
 
@@ -225,13 +226,19 @@ export class AdvancedManagementComponent implements OnInit {
     )
       ? this.commonDataService.userDetails.machineId
       : [];
+
+    // Get clients and their projects
     const userDetails = this.commonDataService.userDetails;
-
-    // ✅ Properly set the project list
-    this.projectList = userDetails?.projects || [];
-
-    console.log('✅✅✅✅✅✅Project List=====>:', this.projectList);
-
+    this.projectList =
+      userDetails?.clients?.flatMap(
+        (client: any) =>
+          client.projects?.map((project: any) => ({
+            clientId: client.clientId,
+            clientName: client.clientName, // Make sure this matches your API response
+            projectId: project.projectId,
+            projectName: project.projectName, // Make sure this matches your API response
+          })) || []
+      ) || [];
     if (this.projectList.length > 0) {
       // this.selectedProjectId = this.projectList[0].projectId;
 
