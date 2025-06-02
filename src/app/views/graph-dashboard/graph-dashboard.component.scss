@@ -44,45 +44,89 @@
     margin-bottom: 20px;
   }
   
-  .chart-container {
-    width: 48%;
-    background-color: white;
-    border-radius: 8px;
-    padding: 15px;
-    height: 200px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+//   .chart-container {
+//     width: 48%;
+//     background-color: white;
+//     border-radius: 8px;
+//     padding: 15px;
+//     height: 200px;
+//     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     justify-content: center;
+//   }
 
-  .chart-container:hover {
-  transform: scale(1.05); /* Slightly enlarge the chart on hover */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Make shadow stronger */
-  background-color: #f0f0f0; /* Change background color on hover */
+//   .chart-container:hover {
+//   transform: scale(1.05); /* Slightly enlarge the chart on hover */
+//   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Make shadow stronger */
+//   background-color: #f0f0f0; /* Change background color on hover */
+// }
+
+// .chart-container:hover .card-value {
+//   color: #3498db; /* Change text color on hover */
+// }
+  
+//   .donut-chart {
+//     width: 100%;
+//     height: 150px;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//   }
+  
+  
+//   .status-legend {
+//     display: flex;
+//     flex-wrap: wrap;
+//     justify-content: center;
+//     gap: 15px;
+//     margin-top: auto;
+//   }
+
+
+
+.chart-container {
+  width: 48%;
+  background-color: white;
+  border-radius: 8px;
+  padding: 15px;
+  height: 240px; /* Increased height to accommodate all elements */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; /* This ensures proper spacing between donut-chart and status-legend */
+}
+
+.chart-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #f0f0f0;
 }
 
 .chart-container:hover .card-value {
-  color: #3498db; /* Change text color on hover */
+  color: #3498db;
 }
-  
-  .donut-chart {
-    width: 100%;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  
-  .status-legend {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin-top: auto;
-  }
+
+.donut-chart {
+  width: 100%;
+  height: 180px; /* Fixed height for chart area including zone name */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Align items from top */
+}
+
+.status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 0; /* Remove auto margin */
+  height: 30px; /* Fixed height for legend */
+  align-items: center;
+}
   
   .legend-item {
     display: flex;

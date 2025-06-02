@@ -397,7 +397,7 @@ ngOnInit(): void {
   
 
 
-  renderCharts(): void {
+  renderChartsworking(): void {
   // Clear previous charts
   this.statusChartRef?.toArray().forEach(ref => {
     d3.select(ref.nativeElement).selectAll('*').remove();
@@ -416,6 +416,25 @@ ngOnInit(): void {
   });
 }
 
+renderCharts(): void {
+  // Clear previous charts
+  this.statusChartRef?.toArray().forEach(ref => {
+    d3.select(ref.nativeElement).selectAll('*').remove();
+  });
+
+  // Render one chart per zone
+  this.zoneSummaries.forEach((zoneSummary, index) => {
+    const chartElement = this.statusChartRef?.toArray()[index]?.nativeElement;
+    if (chartElement) {
+      this.renderDonutChart({
+        element: chartElement,
+        data: this.prepareStatusChartData(zoneSummary.zone),
+        colors: ['#4CAF50', '#F44336'],
+        zoneName: zoneSummary.zone
+      });
+    }
+  });
+}
   
   prepareStatusChartData(zone: string): DonutChartData[] {
   const summary = this.zoneSummaries.find(z => z.zone === zone);
@@ -429,7 +448,7 @@ ngOnInit(): void {
 
 
 
-   renderDonutChart(options: { element: any, data: DonutChartData[], colors: string[] }): void {
+   renderDonutChartworking(options: { element: any, data: DonutChartData[], colors: string[] }): void {
   const { element, data, colors } = options;
  
   if (!element || !data || data.length === 0) return;
@@ -499,6 +518,113 @@ ngOnInit(): void {
       tooltip.style('display', 'none');  
     });
      
+}
+
+renderDonutChart(options: { element: any, data: DonutChartData[], colors: string[], zoneName?: string }): void {
+  const { element, data, colors, zoneName } = options;
+    
+  if (!element || !data || data.length === 0) return;
+    
+  const width = 150;
+  const height = 150; // Keep original chart size
+  const radius = Math.min(width, height) / 2;
+    
+  // Clear previous chart if any
+  d3.select(element).selectAll('*').remove();
+    
+  // Create a wrapper div to contain both zone name and chart
+  const wrapper = d3.select(element)
+    .append('div')
+    .style('display', 'flex')
+    .style('flex-direction', 'column')
+    .style('align-items', 'center')
+    .style('width', '100%')
+    .style('height', '100%')
+    .style('justify-content', 'flex-start'); // Start from top instead of space-between
+    
+  // Add zone name label above the chart
+  if (zoneName) {
+    wrapper
+      .append('div')
+      .style('text-align', 'center')
+      .style('font-weight', 'bold')
+      .style('margin-bottom', '8px') // Fixed spacing after zone name
+      .style('font-size', '14px')
+      .style('color', '#333')
+      .style('width', '100%')
+      .style('height', '20px') // Fixed height for zone name
+      .text(zoneName);
+  }
+    
+  // Create chart container with fixed positioning
+  const chartContainer = wrapper
+    .append('div')
+    .style('position', 'relative')
+    .style('display', 'flex')
+    .style('justify-content', 'center')
+    .style('align-items', 'center')
+    .style('margin-bottom', '10px') // Fixed spacing after chart
+    .style('height', `${height}px`) // Fixed height for chart area
+    .style('width', `${width}px`); // Fixed width for chart area
+    
+  // Create SVG
+  const svg = chartContainer
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .append('g')
+    .attr('transform', `translate(${width / 2}, ${height / 2})`);
+    
+  // Tooltip div (positioned absolutely outside SVG)
+  const tooltip = chartContainer
+    .append('div')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.7)')
+    .style('color', '#fff')
+    .style('padding', '4px 8px')
+    .style('border-radius', '4px')
+    .style('pointer-events', 'none')
+    .style('font-size', '12px')
+    .style('display', 'none')
+    .style('z-index', '10');
+    
+  // Color scale
+  const color = d3.scaleOrdinal<string>()
+    .domain(data.map(d => d.name))
+    .range(colors);
+    
+  const pie = d3.pie<DonutChartData>()
+    .sort(null)
+    .value(d => d.value);
+    
+  const pieData = pie(data);
+    
+  const arc = d3.arc<d3.PieArcDatum<DonutChartData>>()
+    .innerRadius(radius * 0.6)
+    .outerRadius(radius * 0.9);
+    
+  // Build the pie chart
+  svg.selectAll('path')
+    .data(pieData)
+    .enter()
+    .append('path')
+    .attr('d', arc)
+    .attr('fill', d => color(d.data.name))
+    .attr('stroke', '#fff')
+    .style('stroke-width', '1px')
+    .on('mouseover', function (event, d) {
+      tooltip
+        .style('display', 'block')
+        .html(`<strong>${d.data.name}</strong>: ${d.data.value}`);
+    })
+    .on('mousemove', function (event) {
+      tooltip
+        .style('left', (event.offsetX + 10) + 'px')
+        .style('top', (event.offsetY + 10) + 'px');
+    })
+    .on('mouseout', function () {
+      tooltip.style('display', 'none');
+    });
 }
  
   
