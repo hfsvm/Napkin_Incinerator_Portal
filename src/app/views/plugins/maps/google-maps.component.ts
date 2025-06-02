@@ -276,10 +276,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
           this.wardFilter.setValue([]);
           this.beatFilter.setValue([]);
           this.machineFilter.setValue([]);
-
-                  // Sort after updating
-        this.sortSpecificArrays(['districts', 'zones', 'wards', 'beats', 'machines']);
-
         }
       }
     );
@@ -296,10 +292,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
           this.wardFilter.setValue([]);
           this.beatFilter.setValue([]);
           this.machineFilter.setValue([]);
-
-                  // Sort after updating
-        this.sortSpecificArrays(['zones', 'wards', 'beats', 'machines']);
-
         }
       }
     );
@@ -314,10 +306,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
         this.wardFilter.setValue([]);
         this.beatFilter.setValue([]);
         this.machineFilter.setValue([]);
-
-              // Sort after updating
-      this.sortSpecificArrays(['wards', 'beats', 'machines']);
-
       }
     });
 
@@ -330,10 +318,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
         // Clear dependent filter
         this.beatFilter.setValue([]);
         this.machineFilter.setValue([]);
-
-              // Sort after updating
-      this.sortSpecificArrays(['beats', 'machines']);
-
       }
     });
 
@@ -344,40 +328,9 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
         this.updateMachinesFromBeats(selectedBeats);
 
         // Don't clear machine filter, just update available options
-
-              // Sort after updating
-      this.sortSpecificArrays(['machines']);
-
       }
     });
   }
-
-
-      // Helper function for natural sorting (handles numbers and text)
-private naturalSort(a: string, b: string): number {
-  const reA = /[^a-zA-Z]/g;
-  const reN = /[^0-9]/g;
-  
-  const aA = a.replace(reA, '');
-  const bA = b.replace(reA, '');
-  
-  if (aA === bA) {
-    const aN = parseInt(a.replace(reN, ''), 10);
-    const bN = parseInt(b.replace(reN, ''), 10);
-    return aN === bN ? 0 : aN > bN ? 1 : -1;
-  } else {
-    return aA > bA ? 1 : -1;
-  }
-}
-
-// Helper function for pure numerical sorting
-private numericalSort(a: any, b: any): number {
-  const numA = parseFloat(String(a.value || a || '0'));
-  const numB = parseFloat(String(b.value || b || '0'));
-  return numA - numB;
-}
-
-
 
   ngOnDestroy() {
     // Clean up subscriptions and intervals
@@ -402,10 +355,6 @@ private numericalSort(a: any, b: any): number {
 
     this.initializeMap(); // Call the new initializeMap method
   }
-
-
-
-  
 
   // Load hierarchical data from API
   loadHierarchicalData(): void {
@@ -443,15 +392,6 @@ private numericalSort(a: any, b: any): number {
 
             // Extract unique zones from the machines array
             this.extractUniqueZones();
-
-
-            
-
-                      // IMPORTANT: Sort ALL dropdown options AFTER all data is processed
-          setTimeout(() => {
-            this.sortDropdownOptions();
-          }, 100);
-
 
             // 🛠 Ensure both values are not accidentally set the same unless it's valid
             console.log('📌 Extracted clientId:', this.clientId);
@@ -513,249 +453,64 @@ private numericalSort(a: any, b: any): number {
       this.disabledStates = false;
       this.disabledDistricts = false;
     }
-  // Sort after BMC setup
-  setTimeout(() => {
-    this.sortDropdownOptions();
-  }, 50);
-
   }
 
-
-// NEW METHOD: Sort specific arrays
-private sortSpecificArrays(arrayNames: string[]): void {
-  arrayNames.forEach(arrayName => {
-    switch(arrayName) {
-      case 'districts':
-        if (this.districts && this.districts.length > 0) {
-          this.districts.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-        }
-        break;
-      case 'zones':
-        if (this.zones && this.zones.length > 0) {
-          this.zones.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-        }
-        break;
-      case 'wards':
-        if (this.wards && this.wards.length > 0) {
-          this.wards.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-        }
-        break;
-      case 'beats':
-        if (this.beats && this.beats.length > 0) {
-          const sampleValue = String(this.beats[0]?.valueOf || this.beats[0] || '');
-          const hasAlphaNumeric = /[a-zA-Z]/.test(sampleValue);
-          
-          if (hasAlphaNumeric) {
-            this.beats.sort((a, b) => {
-              const valueA = String(a.valueOf || a || '').toLowerCase();
-              const valueB = String(b.valueOf || b || '').toLowerCase();
-              return this.naturalSort(valueA, valueB);
-            });
-          } else {
-            this.beats.sort((a, b) => this.numericalSort(a, b));
-          }
-        }
-        break;
-      case 'machines':
-        if (this.machines && this.machines.length > 0) {
-          this.machines.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-        }
-        break;
-    }
-  });
-}
-
-// UPDATED sortDropdownOptions method:
-sortDropdownOptions(): void {
-  console.log('Starting to sort dropdown options...');
-  
-  // Sort projects (A to Z)
-  if (this.projects && this.projects.length > 0) {
-    this.projects.sort((a, b) => {
-      const nameA = (a.projectname || '').toLowerCase();
-      const nameB = (b.projectname || '').toLowerCase();
-      return nameA.localeCompare(nameB);
+  // Update districts based on selected states
+  updateDistrictsFromStates(selectedStates: string[]): void {
+    const districtsSet = new Set<string>();
+    selectedStates.forEach((state) => {
+      (this.stateDistrictMap[state] || []).forEach((district) =>
+        districtsSet.add(district)
+      );
     });
-    console.log('Projects sorted:', this.projects.length, 'items');
+    this.districts = Array.from(districtsSet);
+    console.log('📊 Updated districts based on states:', this.districts);
   }
 
-  // Sort machine statuses (A to Z)
-  if (this.machineStatuses && this.machineStatuses.length > 0) {
-    this.machineStatuses.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
+  // Update zones based on selected districts
+  updateZonesFromDistricts(selectedDistricts: string[]): void {
+    const zonesSet = new Set<string>();
+    selectedDistricts.forEach((district) => {
+      (this.districtZoneMap[district] || []).forEach((zone) =>
+        zonesSet.add(zone)
+      );
     });
-    console.log('Machine statuses sorted:', this.machineStatuses.length, 'items');
+    this.zones = Array.from(zonesSet);
+    console.log('📊 Updated zones based on districts:', this.zones);
   }
 
-  // Sort stock statuses (A to Z)
-  if (this.stockStatuses && this.stockStatuses.length > 0) {
-    this.stockStatuses.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
+  // Update wards based on selected zones
+  updateWardsFromZones(selectedZones: string[]): void {
+    const wardsSet = new Set<string>();
+    selectedZones.forEach((zone) => {
+      (this.zoneWardMap[zone] || []).forEach((ward) => wardsSet.add(ward));
     });
-    console.log('Stock statuses sorted:', this.stockStatuses.length, 'items');
+    this.wards = Array.from(wardsSet);
+    console.log('📊 Updated wards based on zones:', this.wards);
   }
 
-  // Sort burn statuses (A to Z)
-  if (this.burnStatuses && this.burnStatuses.length > 0) {
-    this.burnStatuses.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
+  // Update beats based on selected wards
+  updateBeatsFromWards(selectedWards: string[]): void {
+    const beatsSet = new Set<string>();
+    selectedWards.forEach((ward) => {
+      (this.wardBeatMap[ward] || []).forEach((beat) => beatsSet.add(beat));
     });
-    console.log('Burn statuses sorted:', this.burnStatuses.length, 'items');
+    this.beats = Array.from(beatsSet);
+    console.log('📊 Updated beats based on wards:', this.beats);
   }
 
-  // Sort states/zones (A to Z)
-  if (this.zones && this.zones.length > 0) {
-    this.zones.sort((a, b) => {
-      const valueA = String(a.valueOf || a || '').toLowerCase();
-      const valueB = String(b.valueOf || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
+  // Update machines based on selected beats
+  updateMachinesFromBeats(selectedBeats: string[]): void {
+    const machinesSet = new Set<string>();
+    selectedBeats.forEach((beat) => {
+      (this.beatMachineMap[beat] || []).forEach((machine) =>
+        machinesSet.add(machine)
+      );
     });
-    console.log('Zones/States sorted:', this.zones.length, 'items');
+    // Update machine options but don't set the filter value
+    this.machines = Array.from(machinesSet);
+    console.log('📊 Updated available machines based on beats:', this.machines);
   }
-
-  // Sort districts/wards (A to Z)
-  if (this.wards && this.wards.length > 0) {
-    this.wards.sort((a, b) => {
-      const valueA = String(a.valueOf || a || '').toLowerCase();
-      const valueB = String(b.valueOf || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Wards/Districts sorted:', this.wards.length, 'items');
-  }
-
-  // Sort sub zones (A to Z)
-  if (this.subZones && this.subZones.length > 0) {
-    this.subZones.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Sub zones sorted:', this.subZones.length, 'items');
-  }
-
-  // Sort ward list (A to Z)
-  if (this.wardList && this.wardList.length > 0) {
-    this.wardList.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Ward list sorted:', this.wardList.length, 'items');
-  }
-
-  // Sort beat list (Numerical: low to high) 
-  if (this.beatList && this.beatList.length > 0) {
-    this.beatList.sort((a, b) => this.numericalSort(a, b));
-    console.log('Beat list sorted numerically:', this.beatList.length, 'items');
-  }
-
-  // Sort beats/machines (Natural sort for alphanumeric, numerical for numbers)
-  if (this.beats && this.beats.length > 0) {
-    const sampleValue = String(this.beats[0]?.valueOf || this.beats[0] || '');
-    const hasAlphaNumeric = /[a-zA-Z]/.test(sampleValue);
-    
-    if (hasAlphaNumeric) {
-      this.beats.sort((a, b) => {
-        const valueA = String(a.valueOf || a || '').toLowerCase();
-        const valueB = String(b.valueOf || b || '').toLowerCase();
-        return this.naturalSort(valueA, valueB);
-      });
-      console.log('Beats sorted naturally (alphanumeric):', this.beats.length, 'items');
-    } else {
-      this.beats.sort((a, b) => this.numericalSort(a, b));
-      console.log('Beats sorted numerically:', this.beats.length, 'items');
-    }
-  }
-
-  console.log('All dropdown options sorted successfully');
-}
-
-
-
-// UPDATED filter update methods to maintain sorting:
-
-updateDistrictsFromStates(selectedStates: string[]): void {
-  const districtsSet = new Set<string>();
-  selectedStates.forEach((state) => {
-    (this.stateDistrictMap[state] || []).forEach((district) =>
-      districtsSet.add(district)
-    );
-  });
-  this.districts = Array.from(districtsSet).sort((a, b) => 
-    a.toLowerCase().localeCompare(b.toLowerCase())
-  );
-  console.log('📊 Updated districts based on states:', this.districts);
-}
-
-updateZonesFromDistricts(selectedDistricts: string[]): void {
-  const zonesSet = new Set<string>();
-  selectedDistricts.forEach((district) => {
-    (this.districtZoneMap[district] || []).forEach((zone) =>
-      zonesSet.add(zone)
-    );
-  });
-  this.zones = Array.from(zonesSet).sort((a, b) => 
-    a.toLowerCase().localeCompare(b.toLowerCase())
-  );
-  console.log('📊 Updated zones based on districts:', this.zones);
-}
-
-updateWardsFromZones(selectedZones: string[]): void {
-  const wardsSet = new Set<string>();
-  selectedZones.forEach((zone) => {
-    (this.zoneWardMap[zone] || []).forEach((ward) => wardsSet.add(ward));
-  });
-  this.wards = Array.from(wardsSet).sort((a, b) => 
-    a.toLowerCase().localeCompare(b.toLowerCase())
-  );
-  console.log('📊 Updated wards based on zones:', this.wards);
-}
-
-updateBeatsFromWards(selectedWards: string[]): void {
-  const beatsSet = new Set<string>();
-  selectedWards.forEach((ward) => {
-    (this.wardBeatMap[ward] || []).forEach((beat) => beatsSet.add(beat));
-  });
-  
-  // Sort beats immediately after creating the array
-  this.beats = Array.from(beatsSet);
-  if (this.beats.length > 0) {
-    const sampleValue = String(this.beats[0]?.valueOf || this.beats[0] || '');
-    const hasAlphaNumeric = /[a-zA-Z]/.test(sampleValue);
-    
-    if (hasAlphaNumeric) {
-      this.beats.sort((a, b) => {
-        const valueA = String(a.valueOf || a || '').toLowerCase();
-        const valueB = String(b.valueOf || b || '').toLowerCase();
-        return this.naturalSort(valueA, valueB);
-      });
-    } else {
-      this.beats.sort((a, b) => this.numericalSort(a, b));
-    }
-  }
-  
-  console.log('📊 Updated beats based on wards:', this.beats);
-}
-
-updateMachinesFromBeats(selectedBeats: string[]): void {
-  const machinesSet = new Set<string>();
-  selectedBeats.forEach((beat) => {
-    (this.beatMachineMap[beat] || []).forEach((machine) =>
-      machinesSet.add(machine)
-    );
-  });
-  
-  this.machines = Array.from(machinesSet).sort((a, b) => 
-    a.toLowerCase().localeCompare(b.toLowerCase())
-  );
-  console.log('📊 Updated available machines based on beats:', this.machines);
-}
 
   // Add these methods to implement the auto-refresh functionality
   startAutoRefresh(): void {
@@ -815,15 +570,7 @@ updateMachinesFromBeats(selectedBeats: string[]): void {
       // zoom: 4.3
       center: centerCoordinates,
       zoom: zoomLevel,
-          attributionControl: false // disable default attribution control
-
     });
-
-
-      // Add compact attribution control
-  const attributionControl = new maplibregl.AttributionControl({ compact: true });
-  this.map.addControl(attributionControl, 'bottom-right');
-
 
     this.map.on('load', () => {
       this.map.resize();
@@ -833,21 +580,6 @@ updateMachinesFromBeats(selectedBeats: string[]): void {
     this.map.setPadding({ right: 400, top: 50 });
     this.map.on('moveend', () => this.updateMap());
     this.map.on('zoomend', () => this.updateMap());
-
-
-      // MutationObserver to remove the 'maplibregl-compact-show' class as soon as it's added
-  const observer = new MutationObserver(() => {
-    const attrEl = document.querySelector('.maplibregl-ctrl-attrib');
-    if (attrEl?.classList.contains('maplibregl-compact-show')) {
-      attrEl.classList.remove('maplibregl-compact-show');
-    }
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
   }
 
   // 🔧 These are the missing methods
@@ -868,80 +600,74 @@ updateMachinesFromBeats(selectedBeats: string[]): void {
     this.filterPanelOpen = !this.filterPanelOpen;
   }
 
+  // 1. Fix for the toggleSelectAll function
+  toggleSelectAll(selected: any[], options: any[], key: string) {
+    // First check if all items are already selected
+    const allSelected =
+      selected.length === options.length && options.length > 0;
 
+    console.log(
+      `Toggle Select All for ${key} - Current selection: ${selected.length}/${options.length} items`
+    );
 
+    if (allSelected) {
+      // Clear the selection
+      selected.length = 0; // This modifies the array in-place
+      console.log(`Cleared all selections for ${key}`);
 
-toggleSelectAll(selected: any[], options: any[], key: string) {
-  // Store dropdown's internal scroll position
-  const dropdown = document.getElementById(`dropdown-${key}`);
-  const dropdownScrollTop = dropdown ? dropdown.scrollTop : 0;
-  
-  // Your existing code remains the same
-  const allSelected = selected.length === options.length && options.length > 0;
+      // Clear dependent filters when appropriate
+      this.clearDependentSelections(key);
+    } else {
+      // Clear the array first
+      selected.length = 0;
 
-  console.log(
-    `Toggle Select All for ${key} - Current selection: ${selected.length}/${options.length} items`
-  );
+      // Then add all values from options
+      options.forEach((option) => {
+        // Extract the appropriate ID from the option
+        const value =
+          typeof option === 'object'
+            ? option.ProjectId || option.key || option.id || option.value
+            : option;
 
-  if (allSelected) {
-    selected.length = 0;
-    console.log(`Cleared all selections for ${key}`);
-    this.clearDependentSelections(key);
-  } else {
-    selected.length = 0;
-    options.forEach((option) => {
-      const value =
-        typeof option === 'object'
-          ? option.ProjectId || option.key || option.id || option.value
-          : option;
-      selected.push(value);
-    });
-    console.log(`Selected all ${selected.length} options for ${key}`);
+        selected.push(value);
+      });
+
+      console.log(`Selected all ${selected.length} options for ${key}`);
+    }
+
+    // Update the hierarchy selection with a new array reference
+    this.updateHierarchySelection(key, [...selected]);
+
+    // Rebuild filter chain
+    this.rebuildFilterChain(key);
+
+    // Reload data with updated filters
+    this.loadMachineData();
   }
 
-  this.updateHierarchySelection(key, [...selected]);
-  this.rebuildFilterChain(key);
-  this.loadMachineData();
-  
-  // Restore dropdown's internal scroll position
-  setTimeout(() => {
-    const dropdownAfter = document.getElementById(`dropdown-${key}`);
-    if (dropdownAfter) {
-      dropdownAfter.scrollTop = dropdownScrollTop;
+  // 2. Fix for the toggleSelection function
+  toggleSelection(selectedArray: any[], value: any, key: string) {
+    const index = selectedArray.indexOf(value);
+
+    if (index >= 0) {
+      // Deselecting an item
+      selectedArray.splice(index, 1);
+      console.log(`Removed ${value} from ${key} selections`);
+    } else {
+      // Selecting an item
+      selectedArray.push(value);
+      console.log(`Added ${value} to ${key} selections`);
     }
-  }, 50);
-}
 
-toggleSelection(selectedArray: any[], value: any, key: string) {
-  // Store dropdown's internal scroll position
-  const dropdown = document.getElementById(`dropdown-${key}`);
-  const dropdownScrollTop = dropdown ? dropdown.scrollTop : 0;
-  
-  // Your existing code remains the same
-  const index = selectedArray.indexOf(value);
+    // Update the hierarchy selection with a new array reference
+    this.updateHierarchySelection(key, [...selectedArray]);
 
-  if (index >= 0) {
-    selectedArray.splice(index, 1);
-    console.log(`Removed ${value} from ${key} selections`);
-  } else {
-    selectedArray.push(value);
-    console.log(`Added ${value} to ${key} selections`);
+    // Rebuild filter chain
+    this.rebuildFilterChain(key);
+
+    // Reload data with updated filters
+    this.loadMachineData();
   }
-
-  this.updateHierarchySelection(key, [...selectedArray]);
-  this.rebuildFilterChain(key);
-  this.loadMachineData();
-  
-  // Restore dropdown's internal scroll position
-  setTimeout(() => {
-    const dropdownAfter = document.getElementById(`dropdown-${key}`);
-    if (dropdownAfter) {
-      dropdownAfter.scrollTop = dropdownScrollTop;
-    }
-  }, 1);
-}
-
-
 
   // 3. Fixed updateHierarchySelection function
   updateHierarchySelection(key: string, selectedArray: any[]) {
@@ -2095,6 +1821,21 @@ toggleSelection(selectedArray: any[], value: any, key: string) {
     );
   }
 
+  // extractUniqueZones(): void {
+  //   // Extract unique zone names from the machines data
+  //   const zoneSet = new Set<string>();
+
+  //   this.machines.forEach(machine => {
+  //     if (machine.zone) {
+  //       zoneSet.add(machine.zone);
+  //     }
+  //   });
+
+  //   // Convert Set to array
+  //   this.zones1 = Array.from(zoneSet);
+  //   console.log('Extracted zonesbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:', this.zones1);
+  // }
+
   extractUniqueZones(): void {
     // Initialize an empty Set to store unique zone names
     const zoneSet = new Set<string>();
@@ -2254,7 +1995,192 @@ toggleSelection(selectedArray: any[], value: any, key: string) {
     console.log(`Closed popup via direct DOM removal`);
   }
 
+  // Fix for updateMap to correctly filter based on states
+  // updateMap(): void {
+  //   console.log("🔄 updateMap() called!");
 
+  //   // Clear old markers
+  //   this.markers.forEach(marker => marker.remove());
+  //   this.markers = [];
+
+  //   // Get selected filters
+  //   console.log("All available states:", this.states);
+  // //   const selectedStates = this.stateFilter.setValue([...this.hierarchySelection.state]);
+  // //   const selectedDistricts=this.districtFilter.setValue([...this.hierarchySelection.district]);
+  // //   const selectedZones =this.zoneFilter.setValue([...this.hierarchySelection.zone]);
+  // // const selectedWards =this.wardFilter.setValue([...this.hierarchySelection.ward]);
+  // // const selectedBeats = this.beatFilter.setValue([...this.hierarchySelection.beat]);
+
+  // // const selectedStates = this.stateFilter.value || [];
+  // //   const selectedDistricts = this.districtFilter.value || [];
+  // //   const selectedZones = this.zoneFilter.value || [];
+  // //   const selectedWards = this.wardFilter.value || [];
+  // //   const selectedBeats = this.beatFilter.value || [];
+
+  // const selectedStates = this.hierarchySelection.state || [];
+  // const selectedDistricts = this.hierarchySelection.district || [];
+  // const selectedZones = this.hierarchySelection.zone || [];
+  // const selectedWards = this.hierarchySelection.ward || [];
+  // const selectedBeats = this.hierarchySelection.beat || [];
+
+  //   const selectedMachines = this.machineFilter.value || [];
+  //   const selectedStockStatuses = this.stockStatusFilter.value || [];
+
+  //   const selectedMachineStatuses = this.machineStatusFilter.value || [];
+  //   const selectedBurnStatusesRaw = this.buttonStatusFilter.value || [];
+
+  //   console.log("Selected states from dropdown:", selectedStates);
+
+  //   // Log all filter values for debugging
+  //   console.log("🗺️ Current Filter Values:", {
+  //     states: selectedStates,
+  //     districts: selectedDistricts,
+  //     zones: selectedZones,
+  //     wards: selectedWards,
+  //     beats: selectedBeats,
+  //     machines: selectedMachines,
+  //     stockStatuses: selectedStockStatuses,
+  //     machineStatuses: selectedMachineStatuses,
+  //     burnStatuses: selectedBurnStatusesRaw
+  //   });
+
+  //   // Map burn status labels to numeric values
+  //   const burnStatusMapping: Record<string, number> = {
+  //     "Burning": 2,
+  //     "Idle": 1
+  //   };
+
+  //   const selectedBurnStatuses = selectedBurnStatusesRaw
+  //     .map((status: string) => burnStatusMapping[status])
+  //     .filter(v => v !== undefined);
+
+  //   // CRITICAL DEBUGGING: Compare selected states to actual states in machines
+  //   if (selectedStates.length > 0) {
+  //     console.log("🔍 Selected States from filter:", selectedStates);
+  //     const availableStates = [...new Set(this.machines.map(m => m.state))];
+  //     console.log("🔍 Available States in Machines:", availableStates);
+
+  //     // Check if any selected states exist in the machines
+  //     const existingStates = selectedStates.filter(state => availableStates.includes(state));
+  //     console.log("🔍 Matching States:", existingStates);
+  //   }
+
+  //   // Filter machines based on selected filters
+  //   const filteredMachines = this.machines.filter(machine => {
+
+  //     console.log("this selcted machinessss", this.machines)
+  //     // FIX: Check case-insensitive state matching and log specific information
+  //     const stateMatches = selectedStates.length === 0 ||
+  //                   selectedStates.some(state => {
+  //                     const matches = machine.state.toLowerCase() === state.toLowerCase();
+  //                     if (selectedStates.includes(state) && !matches) {
+  //                       console.log(`State mismatch: Machine state "${machine.state}" != selected "${state}"`);
+  //                     }
+  //                     return matches;
+  //                   });
+
+  //     const districtMatch = selectedDistricts.length === 0 ||
+  //                          (machine.district && selectedDistricts.includes(machine.district));
+
+  //     const zoneMatch = selectedZones.length === 0 ||
+  //                      (machine.zone && selectedZones.includes(machine.zone));
+
+  //     const wardMatch = selectedWards.length === 0 ||
+  //                      (machine.ward && selectedWards.includes(machine.ward));
+
+  //     const beatMatch = selectedBeats.length === 0 ||
+  //                      (machine.beat && selectedBeats.includes(machine.beat));
+
+  //     const machineMatch = selectedMachines.length === 0 ||
+  //                          selectedMachines.includes(machine.machineId);
+
+  //     const stockMatch = selectedStockStatuses.length === 0 ||
+  //                        selectedStockStatuses.includes(machine.stockStatus);
+
+  //     const statusMatch = selectedMachineStatuses.length === 0 ||
+  //                         selectedMachineStatuses.includes(machine.status);
+
+  //     const burnMatch = selectedBurnStatuses.length === 0 ||
+  //                       selectedBurnStatuses.includes(machine.burnStatus);
+
+  //     // Track why a machine is being filtered out (if it is)
+  //     if (selectedStates.length > 0 && !stateMatches) {
+  //       console.log(`Machine ${machine.machineId} filtered out - state: ${machine.state}`);
+  //     }
+
+  //     return stateMatches && districtMatch && zoneMatch && wardMatch && beatMatch &&
+  //            machineMatch && stockMatch && statusMatch && burnMatch;
+  //   });
+
+  //   console.log("🔍 Filtered Machines:", filteredMachines.length);
+
+  //   if (filteredMachines.length === 0) {
+  //     console.warn("⚠️ No matching machines found based on filters.");
+  //   }
+
+  //   // Handle overlapping markers
+  //   const locationMap = new Map<string, number>();
+
+  //   filteredMachines.forEach(machine => {
+  //     if (!machine.location) return;
+
+  //     const [lng, lat] = machine.location;
+  //     const key = `${lng},${lat}`;
+
+  //     if (locationMap.has(key)) {
+  //       const count = locationMap.get(key)! + 1;
+  //       locationMap.set(key, count);
+
+  //       const angle = (count * 45) * (Math.PI / 180);
+  //       const radius = 0.000001 * count;
+  //       machine.location = [
+  //         lng + radius * Math.cos(angle),
+  //         lat + radius * Math.sin(angle)
+  //       ];
+  //     } else {
+  //       locationMap.set(key, 1);
+  //     }
+
+  //     // Set marker icon dynamically based on stock status
+  //     const iconUrl = this.getStockStatusIcon(machine.stockStatus);
+
+  //     const markerElement = document.createElement('div');
+  //     markerElement.className = 'custom-marker';
+  //     markerElement.style.backgroundImage = `url(${iconUrl})`;
+  //     markerElement.style.width = '40px';
+  //     markerElement.style.height = '40px';
+  //     markerElement.style.backgroundSize = 'contain';
+  //     markerElement.style.backgroundRepeat = 'no-repeat';
+
+  //     // Zoom on double-click
+  //     markerElement.addEventListener('dblclick', (e) => {
+  //       e.stopPropagation();
+  //       this.map.flyTo({
+  //         center: machine.location,
+  //         zoom: 15,
+  //         speed: 5,
+  //         curve: 1,
+  //         easing(t) {
+  //           return t;
+  //         }
+  //       });
+  //     });
+
+  // const popup = new maplibregl.Popup({
+  //   closeButton: false,  // Disable default close button, we'll use our custom one
+  //   closeOnClick: true  // Disable closing when clicking map
+  // }).setHTML(this.generatePopupHTML(machine));
+
+  //   // Create marker
+  //   const newMarker = new maplibregl.Marker({ element: markerElement })
+  //     .setLngLat(machine.location)
+  //     // .setPopup(new maplibregl.Popup().setHTML(this.generatePopupHTML(machine)))
+  //     .setPopup(popup)
+  //     .addTo(this.map);
+
+  //   this.markers.push(newMarker);
+  // });
+  // }
 
   getStockStatusIcon(status: number): string {
     switch (status) {
@@ -2327,7 +2253,83 @@ toggleSelection(selectedArray: any[], value: any, key: string) {
     <p><strong>Address:</strong> ${machine.address}</p></div>`;
   }
 
+  // toggleSelectAll(selected: any[], options: any[], key: string) {
+  //   // Check if all items are already selected
+  //   const allSelected = selected.length === options.length && options.length > 0;
 
+  //   if (allSelected) {
+  //     // Clear the selection
+  //     selected.length = 0;  // This modifies the array in-place
+
+  //     // Clear dependent filters when needed
+  //     this.clearDependentSelections(key);
+  //   } else {
+  //     // Select all items
+  //     // First clear the array
+  //     selected.length = 0;
+
+  //     // Then add all values from options
+  //     options.forEach(option => {
+  //       const value = option.ProjectId || option.key || option;
+  //       selected.push(value);
+  //     });
+  //   }
+
+  //   // Update the hierarchy selection
+  //   this.updateHierarchySelection(key, [...selected]);
+
+  //   // Rebuild filter chain
+  //   this.rebuildFilterChain(key);
+
+  //   // Reload data with updated filters
+  //   this.loadMachineData();
+  // }
+
+  // toggleSelectAll(filterControl: FormControl, items: any[], key: string): void {
+  //   const allSelected = filterControl.value.length === items.length;
+
+  //   // Toggle selection
+  //   if (allSelected) {
+  //     filterControl.setValue([]);
+
+  //     // Optionally clear dependent selections
+  //     this.clearDependentSelections(key);
+  //   } else {
+  //     // You can customize how to extract the value from item
+  //     const selectedValues = items.map(item => item.ProjectId || item.key || item);
+  //     filterControl.setValue(selectedValues);
+  //   }
+
+  //   console.log(`🔹 Updated ${key} Selection: ${filterControl.value}`);
+
+  //   // Update hierarchy and reload
+  //   this.updateHierarchySelection(key, filterControl.value);
+  //   this.rebuildFilterChain(key);
+  //   this.loadMachineData();
+  // }
+
+  // toggleSelectAll(key: string, items: any[], filterControl: FormControl) {
+  //   const currentValues = filterControl.value || [];
+  //   const allSelected = currentValues.length === items.length;
+
+  //   if (allSelected) {
+  //     filterControl.setValue([]);
+  //     this.clearDependentSelections(key);
+  //   } else {
+  //     const selectedValues = items.map(item => {
+  //       if (typeof item === 'object') {
+  //         return item.ProjectId ?? item.key ?? item.id ?? item.value ?? '';
+  //       }
+  //       return item;
+  //     });
+
+  //     filterControl.setValue([...selectedValues]);
+  //   }
+
+  //   this.updateHierarchySelection(key, filterControl.value);
+  //   this.rebuildFilterChain(key);
+  //   this.loadMachineData();
+  // }
 
   toggleDropdown(key: string) {
     // Close all other dropdowns
@@ -2584,37 +2586,98 @@ toggleSelection(selectedArray: any[], value: any, key: string) {
     // this.filterMachines(); // Optional next step
   }
 
+  // filterMachines() {
+  //   this.beats = [];
+  //   this.selectedBeats = [];
+
+  //   this.selectedProjects.forEach((pid) => {
+  //     const project = this.fullData.find((p) => p.projectId === pid);
+  //     project?.states?.forEach((stateobj: any) => {
+  //       if (this.selectedZones.includes(stateobj.state)) {
+  //         stateobj.districts?.forEach((districtobj: any) => {
+  //           if (this.selectedWards.includes(districtobj.district)) {
+  //             districtobj.zones?.forEach((zoneobj: any) => {
+  //               if (this.selectedSubZones.includes(zoneobj.zone)) {
+  //                 zoneobj.wards?.forEach((wardobj: any) => {
+  //                   if (this.selectedWardList.includes(wardobj.ward)) {
+  //                     wardobj.beats?.forEach((beatobj: any) => {
+  //                       if (this.selectedBeatList.includes(beatobj.beat)) {
+  //                         if (beatobj.machines) {
+  //                           this.beats.push(...beatobj.machines);
+  //                         }
+  //                       }
+  //                     });
+  //                   }
+  //                 });
+  //               }
+  //             });
+  //           }
+  //         });
+  //       }
+  //     });
+  //   });
+  // }
+
   filterMachines() {
     this.beats = [];
     this.selectedBeats = [];
 
+    if (this.selectedProjects.length === 0) {
+      return;
+    }
+
     this.selectedProjects.forEach((pid) => {
       const project = this.fullData.find((p) => p.projectId === pid);
-      project?.states?.forEach((stateobj: any) => {
+      if (!project || !project.states) return;
+
+      project.states.forEach((stateobj: any) => {
         if (this.selectedZones.includes(stateobj.state)) {
-          stateobj.districts?.forEach((districtobj: any) => {
+          if (!stateobj.districts) return;
+
+          stateobj.districts.forEach((districtobj: any) => {
             if (this.selectedWards.includes(districtobj.district)) {
-              districtobj.zones?.forEach((zoneobj: any) => {
-                if (this.selectedSubZones.includes(zoneobj.zone)) {
-                  zoneobj.wards?.forEach((wardobj: any) => {
-                    if (this.selectedWardList.includes(wardobj.ward)) {
-                      wardobj.beats?.forEach((beatobj: any) => {
-                        if (this.selectedBeatList.includes(beatobj.beat)) {
-                          if (beatobj.machines) {
-                            this.beats.push(...beatobj.machines);
+              // Scenario 1: Zones exist (machines are under beats)
+              if (districtobj.zones && districtobj.zones.length > 0) {
+                districtobj.zones.forEach((zoneobj: any) => {
+                  if (this.selectedSubZones.includes(zoneobj.zone)) {
+                    if (!zoneobj.wards) return;
+
+                    zoneobj.wards.forEach((wardobj: any) => {
+                      if (this.selectedWardList.includes(wardobj.ward)) {
+                        if (!wardobj.beats) return;
+
+                        wardobj.beats.forEach((beatobj: any) => {
+                          if (this.selectedBeatList.includes(beatobj.beat)) {
+                            if (
+                              beatobj.machines &&
+                              Array.isArray(beatobj.machines)
+                            ) {
+                              this.beats.push(...beatobj.machines);
+                            }
                           }
-                        }
-                      });
-                    }
-                  });
-                }
-              });
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+              // Scenario 2: No zones (machines are directly under district)
+              else if (
+                districtobj.machines &&
+                Array.isArray(districtobj.machines)
+              ) {
+                this.beats.push(...districtobj.machines);
+              }
             }
           });
         }
       });
     });
+
+    this.selectedBeats = [...this.beats];
+    console.log('Updated selectedBeats:', this.selectedBeats);
   }
+
   refreshFilters1(): void {
     console.log('🔄 Refreshing Filters and clearing selections...');
 
