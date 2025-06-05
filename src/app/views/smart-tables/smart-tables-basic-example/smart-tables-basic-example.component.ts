@@ -1612,13 +1612,13 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     let grandTotalBurnCycles = 0;
     let grandTotalSanNapkins = 0;
 
-    // Count the number of machines (excluding those with no transactions)
+    //Count the number of machines (excluding those with no transactions)
     const machinesWithTransactions = machineDetails.filter(
       (machine) =>
         (machine.vending && machine.vending.length) ||
         (machine.incinerator && machine.incinerator.length)
     );
-    const numberOfMachines = machinesWithTransactions.length;
+    const numberOfMachines = machineDetails.length;
 
     this.reportsData = machineDetails
       .filter(
@@ -1970,6 +1970,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
           (machine.vending && machine.vending.length) ||
           (machine.incinerator && machine.incinerator.length)
       )
+
       .map((machine, index): ReportItem => {
         let transactionsMap = new Map<string, Transaction>();
 
@@ -2795,12 +2796,14 @@ export class SmartTablesBasicExampleComponent implements OnInit {
       'entries'
     );
 
+    // // this.reportsData = machineDetails
+    // //   .filter(
+    // //     (machine) =>
+    // //       (machine.vending && machine.vending.length) ||
+    // //       (machine.incinerator && machine.incinerator.length)
+    // //   )
+    //   .map((machine, index): ReportItem => {
     this.reportsData = machineDetails
-      .filter(
-        (machine) =>
-          (machine.vending && machine.vending.length) ||
-          (machine.incinerator && machine.incinerator.length)
-      )
       .map((machine, index): ReportItem => {
         let transactionsMap = new Map<string, Transaction>();
 
@@ -3169,12 +3172,14 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     let grandTotalSanNapkins = 0;
 
     // Count the number of machines (excluding those with no transactions)
-    const machinesWithTransactions = machineDetails.filter(
-      (machine) =>
-        (machine.vending && machine.vending.length) ||
-        (machine.incinerator && machine.incinerator.length)
-    );
-    const numberOfMachines = machinesWithTransactions.length;
+    // const machinesWithTransactions = machineDetails.filter(
+    //   (machine) =>
+    //     (machine.vending && machine.vending.length) ||
+    //     (machine.incinerator && machine.incinerator.length)
+    // );
+    // const numberOfMachines = machinesWithTransactions.length;
+
+    const numberOfMachines = machineDetails.length; // Use all machines
 
     // ✅ FIXED Date conversion helper functions with proper timezone handling
     const dateConversionCache = new Map<string, string>();
@@ -3395,13 +3400,16 @@ export class SmartTablesBasicExampleComponent implements OnInit {
       'entries'
     );
 
-    this.reportsData = machineDetails
-      .filter(
-        (machine) =>
-          (machine.vending && machine.vending.length) ||
-          (machine.incinerator && machine.incinerator.length)
-      )
-      .map((machine, index): ReportItem => {
+    // this.reportsData = machineDetails
+  //   .filter(
+  //     (machine) =>
+  //       (machine.vending && machine.vending.length) ||
+  //       (machine.incinerator && machine.incinerator.length)
+  //   )
+  //   .map((machine, index): ReportItem => {
+
+  this.reportsData = machineDetails
+  .map((machine, index): ReportItem => {
         let transactionsMap = new Map<string, Transaction>();
 
         // ✅ Initialize Machine Totals
