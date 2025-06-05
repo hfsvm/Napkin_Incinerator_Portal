@@ -231,57 +231,75 @@
           </ng-container>
         </div>
       </div> -->
-    
-    <!-- Row 2: Remaining 4 filters -->
-<div class="row filter mt-3">
-  <!-- If zones/wards/beats are shown, display all normally -->
-  <ng-container *ngIf="checkIfDistrictsHaveZones(); else onlyMachines">
-    <div class="col" *ngFor="let filter of [
-      {
-        name: 'Zone',
-        key: 'selectedSubZones',
-        selected: selectedSubZones,
-        options: subZones
-      },
-      {
-        name: 'Ward',
-        key: 'selectedWardList',
-        selected: selectedWardList,
-        options: wardList
-      },
-      {
-        name: 'Beat',
-        key: 'selectedBeatList',
-        selected: selectedBeatList,
-        options: beatList
-      },
-      {
-        name: 'Machines',
-        key: 'beats',
-        selected: selectedBeats,
-        options: beats
-      }
-    ]">
-      <ng-container *ngIf="filter.name !== 'Machines' || checkIfDistrictsHaveZones()">
-        <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"></ng-container>
-      </ng-container>
-    </div>
-  </ng-container>
 
-  <!-- Only Machines aligned to left when other filters are hidden -->
-  <ng-template #onlyMachines>
-    <div class="col-12 col-md-2">
-      <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
-        name: 'Machines',
-        key: 'beats',
-        selected: selectedBeats,
-        options: beats,
-        show: true
-      }}"></ng-container>
-    </div>
-  </ng-template>
-</div>
+      <!-- Row 2: Remaining 4 filters -->
+      <div class="row filter mt-3">
+        <!-- If zones/wards/beats are shown, display all normally -->
+        <ng-container *ngIf="checkIfDistrictsHaveZones(); else onlyMachines">
+          <div
+            class="col"
+            *ngFor="
+              let filter of [
+                {
+                  name: 'Zone',
+                  key: 'selectedSubZones',
+                  selected: selectedSubZones,
+                  options: subZones
+                },
+                {
+                  name: 'Ward',
+                  key: 'selectedWardList',
+                  selected: selectedWardList,
+                  options: wardList
+                },
+                {
+                  name: 'Beat',
+                  key: 'selectedBeatList',
+                  selected: selectedBeatList,
+                  options: beatList
+                },
+                {
+                  name: 'Machines',
+                  key: 'beats',
+                  selected: selectedBeats,
+                  options: beats
+                }
+              ]
+            "
+          >
+            <ng-container
+              *ngIf="filter.name !== 'Machines' || checkIfDistrictsHaveZones()"
+            >
+              <ng-container
+                *ngTemplateOutlet="
+                  dropdownTemplate;
+                  context: { $implicit: filter }
+                "
+              ></ng-container>
+            </ng-container>
+          </div>
+        </ng-container>
 
+        <!-- Only Machines aligned to left when other filters are hidden -->
+        <ng-template #onlyMachines>
+          <div class="col-12 col-md-2">
+            <ng-container
+              *ngTemplateOutlet="
+                dropdownTemplate;
+                context: {
+                  $implicit: {
+                    name: 'Machines',
+                    key: 'beats',
+                    selected: selectedBeats,
+                    options: beats,
+                    show: true
+                  }
+                }
+              "
+            ></ng-container>
+          </div>
+        </ng-template>
+      </div>
     </div>
 
     <!-- Dropdown Template -->
@@ -603,8 +621,7 @@
               let i = index
             "
           >
-            
-            <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>        
+            <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
 
             <td>
               <!-- Machine ID as clickable link -->
@@ -660,7 +677,11 @@
                 class="badge badge-fixed px-3 py-2"
                 [ngStyle]="{
                   'background-color':
-                    machine.status === '1' ? '#7ED321' : '#fcba4e',
+                    machine.status === '1'
+                      ? machine.isManuallyUpdated
+                        ? '#B5E57D'
+                        : '#7ED321'
+                      : '#fcba4e',
                   color: '#000000'
                 }"
               >
@@ -802,17 +823,17 @@
         </button>
       </div>
       <!-- Showing X to Y of Z entries -->
-  <div class="text-muted" style="font-size: 0.95rem;">
-    Showing 
-    {{ (currentPage - 1) * itemsPerPage + 1 }} 
-    to 
-    {{
-      currentPage * itemsPerPage > totalItems
-        ? totalItems
-        : currentPage * itemsPerPage
-    }} 
-    of {{ totalItems }} entries
-    </div>
+      <div class="text-muted" style="font-size: 0.95rem">
+        Showing
+        {{ (currentPage - 1) * itemsPerPage + 1 }}
+        to
+        {{
+          currentPage * itemsPerPage > totalItems
+            ? totalItems
+            : currentPage * itemsPerPage
+        }}
+        of {{ totalItems }} entries
+      </div>
     </div>
   </div>
 </div>

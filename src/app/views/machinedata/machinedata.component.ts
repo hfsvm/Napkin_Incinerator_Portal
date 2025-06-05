@@ -5,7 +5,7 @@ import { DashboardRefreshService } from '../../service/dashboard-refresh.service
 import { Subscription, interval } from 'rxjs'; // Import interval and Subscription
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 
 interface Beat {
   beat: string;
@@ -173,16 +173,16 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     private dataService: DataService,
     private commonDataService: CommonDataService,
     private changeDetectorRef: ChangeDetectorRef,
-    private dashboardRefreshService: DashboardRefreshService,
-    
-
+    private dashboardRefreshService: DashboardRefreshService
   ) {}
 
   ngOnInit() {
-
-    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
-      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
-     
+    if (
+      this.commonDataService.merchantId === null ||
+      (this.commonDataService.merchantId === undefined &&
+        this.commonDataService.userId === null) ||
+      this.commonDataService.userId === undefined
+    ) {
       this.router.navigate(['/login']);
     }
 
@@ -262,7 +262,7 @@ export class MachinedataComponent implements OnInit, OnDestroy {
 
           this.selectedProjects = this.projects.map((p) => p.ProjectId);
           this.rebuildFilterChain('projects');
-                    this.sortDropdownOptions();
+          this.sortDropdownOptions();
 
           console.log('Hierarchy Data: ', this.fullData);
         }
@@ -273,145 +273,155 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     });
   }
 
-
-
   // Helper function for natural sorting (handles numbers and text)
-private naturalSort(a: string, b: string): number {
-  const reA = /[^a-zA-Z]/g;
-  const reN = /[^0-9]/g;
-  
-  const aA = a.replace(reA, '');
-  const bA = b.replace(reA, '');
-  
-  if (aA === bA) {
-    const aN = parseInt(a.replace(reN, ''), 10);
-    const bN = parseInt(b.replace(reN, ''), 10);
-    return aN === bN ? 0 : aN > bN ? 1 : -1;
-  } else {
-    return aA > bA ? 1 : -1;
-  }
-}
+  private naturalSort(a: string, b: string): number {
+    const reA = /[^a-zA-Z]/g;
+    const reN = /[^0-9]/g;
 
-// Helper function for pure numerical sorting
-private numericalSort(a: any, b: any): number {
-  const numA = parseFloat(String(a.value || a || '0'));
-  const numB = parseFloat(String(b.value || b || '0'));
-  return numA - numB;
-}
+    const aA = a.replace(reA, '');
+    const bA = b.replace(reA, '');
 
-// Replace your existing sortDropdownOptions method with this one
-sortDropdownOptions(): void {
-  console.log('Starting to sort dropdown options...');
-  
-  // Sort projects (A to Z)
-  if (this.projects && this.projects.length > 0) {
-    this.projects.sort((a, b) => {
-      const nameA = (a.projectname || '').toLowerCase();
-      const nameB = (b.projectname || '').toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
-    console.log('Projects sorted:', this.projects.length, 'items');
-  }
-
-  // Sort machine statuses (A to Z)
-  if (this.machineStatuses && this.machineStatuses.length > 0) {
-    this.machineStatuses.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Machine statuses sorted:', this.machineStatuses.length, 'items');
-  }
-
-  // Sort stock statuses (A to Z)
-  if (this.stockStatuses && this.stockStatuses.length > 0) {
-    this.stockStatuses.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Stock statuses sorted:', this.stockStatuses.length, 'items');
-  }
-
-  // Sort burn statuses (A to Z)
-  if (this.burnStatuses && this.burnStatuses.length > 0) {
-    this.burnStatuses.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Burn statuses sorted:', this.burnStatuses.length, 'items');
-  }
-
-  // Sort zones (A to Z)
-  if (this.zones && this.zones.length > 0) {
-    this.zones.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Zones sorted:', this.zones.length, 'items');
-  }
-
-  // Sort wards (A to Z)
-  if (this.wards && this.wards.length > 0) {
-    this.wards.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Wards sorted:', this.wards.length, 'items');
-  }
-
-  // Sort sub zones (A to Z)
-  if (this.subZones && this.subZones.length > 0) {
-    this.subZones.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Sub zones sorted:', this.subZones.length, 'items');
-  }
-
-  // Sort ward list (A to Z)
-  if (this.wardList && this.wardList.length > 0) {
-    this.wardList.sort((a, b) => {
-      const valueA = String(a.value || a || '').toLowerCase();
-      const valueB = String(b.value || b || '').toLowerCase();
-      return valueA.localeCompare(valueB);
-    });
-    console.log('Ward list sorted:', this.wardList.length, 'items');
-  }
-
-  // Sort beat list (Numerical: low to high) 
-  if (this.beatList && this.beatList.length > 0) {
-    this.beatList.sort((a, b) => this.numericalSort(a, b));
-    console.log('Beat list sorted numerically:', this.beatList.length, 'items');
-  }
-
-  // Sort beats (Numerical: low to high) - These are the "Machines" in your template
-  if (this.beats && this.beats.length > 0) {
-    // Check if beats contain machine names (like "rz 1001") or just numbers
-    const sampleValue = String(this.beats[0]?.value || this.beats[0] || '');
-    const hasAlphaNumeric = /[a-zA-Z]/.test(sampleValue);
-    
-    if (hasAlphaNumeric) {
-      // Use natural sort for alphanumeric values like "rz 1001", "rz 1002"
-      this.beats.sort((a, b) => {
-        const valueA = String(a.value || a || '').toLowerCase();
-        const valueB = String(b.value || b || '').toLowerCase();
-        return this.naturalSort(valueA, valueB);
-      });
-      console.log('Beats sorted naturally (alphanumeric):', this.beats.length, 'items');
+    if (aA === bA) {
+      const aN = parseInt(a.replace(reN, ''), 10);
+      const bN = parseInt(b.replace(reN, ''), 10);
+      return aN === bN ? 0 : aN > bN ? 1 : -1;
     } else {
-      // Use numerical sort for pure numbers
-      this.beats.sort((a, b) => this.numericalSort(a, b));
-      console.log('Beats sorted numerically:', this.beats.length, 'items');
+      return aA > bA ? 1 : -1;
     }
   }
 
-  console.log('All dropdown options sorted successfully');
-}
+  // Helper function for pure numerical sorting
+  private numericalSort(a: any, b: any): number {
+    const numA = parseFloat(String(a.value || a || '0'));
+    const numB = parseFloat(String(b.value || b || '0'));
+    return numA - numB;
+  }
+
+  // Replace your existing sortDropdownOptions method with this one
+  sortDropdownOptions(): void {
+    console.log('Starting to sort dropdown options...');
+
+    // Sort projects (A to Z)
+    if (this.projects && this.projects.length > 0) {
+      this.projects.sort((a, b) => {
+        const nameA = (a.projectname || '').toLowerCase();
+        const nameB = (b.projectname || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+      console.log('Projects sorted:', this.projects.length, 'items');
+    }
+
+    // Sort machine statuses (A to Z)
+    if (this.machineStatuses && this.machineStatuses.length > 0) {
+      this.machineStatuses.sort((a, b) => {
+        const valueA = String(a.value || a || '').toLowerCase();
+        const valueB = String(b.value || b || '').toLowerCase();
+        return valueA.localeCompare(valueB);
+      });
+      console.log(
+        'Machine statuses sorted:',
+        this.machineStatuses.length,
+        'items'
+      );
+    }
+
+    // Sort stock statuses (A to Z)
+    if (this.stockStatuses && this.stockStatuses.length > 0) {
+      this.stockStatuses.sort((a, b) => {
+        const valueA = String(a.value || a || '').toLowerCase();
+        const valueB = String(b.value || b || '').toLowerCase();
+        return valueA.localeCompare(valueB);
+      });
+      console.log('Stock statuses sorted:', this.stockStatuses.length, 'items');
+    }
+
+    // Sort burn statuses (A to Z)
+    if (this.burnStatuses && this.burnStatuses.length > 0) {
+      this.burnStatuses.sort((a, b) => {
+        const valueA = String(a.value || a || '').toLowerCase();
+        const valueB = String(b.value || b || '').toLowerCase();
+        return valueA.localeCompare(valueB);
+      });
+      console.log('Burn statuses sorted:', this.burnStatuses.length, 'items');
+    }
+
+    // Sort zones (A to Z)
+    if (this.zones && this.zones.length > 0) {
+      this.zones.sort((a, b) => {
+        const valueA = String(a.value || a || '').toLowerCase();
+        const valueB = String(b.value || b || '').toLowerCase();
+        return valueA.localeCompare(valueB);
+      });
+      console.log('Zones sorted:', this.zones.length, 'items');
+    }
+
+    // Sort wards (A to Z)
+    if (this.wards && this.wards.length > 0) {
+      this.wards.sort((a, b) => {
+        const valueA = String(a.value || a || '').toLowerCase();
+        const valueB = String(b.value || b || '').toLowerCase();
+        return valueA.localeCompare(valueB);
+      });
+      console.log('Wards sorted:', this.wards.length, 'items');
+    }
+
+    // Sort sub zones (A to Z)
+    if (this.subZones && this.subZones.length > 0) {
+      this.subZones.sort((a, b) => {
+        const valueA = String(a.value || a || '').toLowerCase();
+        const valueB = String(b.value || b || '').toLowerCase();
+        return valueA.localeCompare(valueB);
+      });
+      console.log('Sub zones sorted:', this.subZones.length, 'items');
+    }
+
+    // Sort ward list (A to Z)
+    if (this.wardList && this.wardList.length > 0) {
+      this.wardList.sort((a, b) => {
+        const valueA = String(a.value || a || '').toLowerCase();
+        const valueB = String(b.value || b || '').toLowerCase();
+        return valueA.localeCompare(valueB);
+      });
+      console.log('Ward list sorted:', this.wardList.length, 'items');
+    }
+
+    // Sort beat list (Numerical: low to high)
+    if (this.beatList && this.beatList.length > 0) {
+      this.beatList.sort((a, b) => this.numericalSort(a, b));
+      console.log(
+        'Beat list sorted numerically:',
+        this.beatList.length,
+        'items'
+      );
+    }
+
+    // Sort beats (Numerical: low to high) - These are the "Machines" in your template
+    if (this.beats && this.beats.length > 0) {
+      // Check if beats contain machine names (like "rz 1001") or just numbers
+      const sampleValue = String(this.beats[0]?.value || this.beats[0] || '');
+      const hasAlphaNumeric = /[a-zA-Z]/.test(sampleValue);
+
+      if (hasAlphaNumeric) {
+        // Use natural sort for alphanumeric values like "rz 1001", "rz 1002"
+        this.beats.sort((a, b) => {
+          const valueA = String(a.value || a || '').toLowerCase();
+          const valueB = String(b.value || b || '').toLowerCase();
+          return this.naturalSort(valueA, valueB);
+        });
+        console.log(
+          'Beats sorted naturally (alphanumeric):',
+          this.beats.length,
+          'items'
+        );
+      } else {
+        // Use numerical sort for pure numbers
+        this.beats.sort((a, b) => this.numericalSort(a, b));
+        console.log('Beats sorted numerically:', this.beats.length, 'items');
+      }
+    }
+
+    console.log('All dropdown options sorted successfully');
+  }
 
   toggleDropdown(key: string) {
     // Close all other dropdowns
@@ -929,8 +939,7 @@ sortDropdownOptions(): void {
         this.filterMachines();
         break;
     }
-              this.sortDropdownOptions();
-
+    this.sortDropdownOptions();
   }
 
   checkIfDistrictsHaveZones(): boolean {
@@ -1094,49 +1103,6 @@ sortDropdownOptions(): void {
       this.currentPage = page;
     }
   }
-
-  // clearFilters() {
-  //   // Reset selected filters
-  //   this.selectedMachineStatuses = []; // Reset machine statuses to default (Online, Offline)
-  //   this.selectedStockStatuses = []; // Clear stock statuses
-  //   this.selectedBurnStatuses = []; // Clear burn statuses
-  //   this.selectedZones = []; // Clear selected zones (states)
-  //   this.selectedWards = []; // Clear selected wards (districts)
-  //   this.selectedBeats = []; // Clear selected beats (machines)
-  //   this.selectedProjects = []; // Clear selected projects
-  //   this.selectedSubZones = []; // Clear selected Zones
-  //   this.selectedWardList = []; // Clear selected wards
-  //   this.selectedBeatList = []; // Clear selected beats
-
-  //   // ✅ Reset search filters
-  //   this.columnFilters = {
-  //     'Machine ID': '',
-  //     mcSrNo: '',
-  //     pcbNo: '',
-  //     'Location Name': '',
-  //     'Location Address': '',
-  //     Uid: '',
-  //     'Machine Type': '',
-  //     Status: '',
-  //     'Stock Status': '',
-  //     'Burning Status': '',
-  //   };
-
-  //   // // ✅ Reapply filtering logic if needed
-  //   // this.applyFiltersAndSort();
-
-  //   this.filteredMachines = [...this.machines]; // Reset the filtered machines list to the original list
-
-  //   // Reset the pagination to the first page
-  //   this.currentPage = 1;
-
-  //   // Call the method to load the data with the cleared filters
-  //   this.loadMachineData();
-
-  //   // Optionally reset the columns in the dashboard data if needed
-  //   this.dashboardData = {};
-  //   console.log('✅ All filters cleared and data reloaded');
-  // }
 
   clearFilters() {
     // Reset selected filters
