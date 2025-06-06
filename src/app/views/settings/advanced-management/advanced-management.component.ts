@@ -1178,38 +1178,77 @@ export class AdvancedManagementComponent implements OnInit {
     this.selectedMachineId = '';
     this.selectedMachineIdPricing = '';
   }
-  // switchTab(tabName: string):void {
-  //   this.currentTab = tabName;
 
-  //   this.clientname = '';
+  // onTabChange(tab: string): void {
+  //   this.activeTab = tab;
+  //   this.selectedMachineId = '';
+
+  //   // to clear the selected fota cilentid,machinename,fota table data when tab is changed
+  //   this.selectedFotaMachineId = '';
+  //   this.selectedProjectIdfota = null;
+  //   this.fotaMachines = [];
+
+  //   //to clear the selected clinet id when tab is changed
+  //   this.selectedProjectId = null;
   //   this.machineIds = [];
 
+  //   this.clientname = '';
+
+  //   this.clearClientAndMachine();
+
+  //   if (tab === 'MachineInstalled') {
+  //     this.resetMachineInstalledForm(); // Reset fields when changing tab
+  //   }
+  //   if (this.activeTab === 'pricing1') {
+  //     //this.resetMachineInstalledForm();
+  //   }
+
+  //   // Always reset both pricing and incineration values regardless of tab
+  //   this.currentValues = {
+  //     iid: '',
+  //     itp: '',
+  //     qrBytes: '',
+  //   };
+  //   this.updatedValues = {
+  //     iid: null as number | null,
+  //     itp: 0,
+  //     qrBytes: '',
+  //   };
+  //   this.incinerationCurrentValues = {
+  //     scheduler: '',
+  //     limitSwitch: '',
+  //     napkinCost: '',
+  //     setHeaterTempA: '',
+  //     setHeaterTempB: '',
+  //     heaterAMinTemp: '',
+  //     heaterBOnTemp: '',
+  //   };
+
+  //   this.notification = {
+  //     message: '',
+  //     type: '',
+  //   };
   // }
+
   onTabChange(tab: string): void {
     this.activeTab = tab;
-    this.selectedMachineId = '';
 
-    // to clear the selected fota cilentid,machinename,fota table data when tab is changed
+    // Clear Machine Installed form when switching tabs
+    if (tab !== 'machineInstalled') {
+      this.resetMachineInstalledForm();
+    }
+
+    // Reset other tab-specific data
+    this.selectedMachineId = '';
     this.selectedFotaMachineId = '';
     this.selectedProjectIdfota = null;
     this.fotaMachines = [];
-
-    //to clear the selected clinet id when tab is changed
     this.selectedProjectId = null;
     this.machineIds = [];
-
     this.clientname = '';
-
     this.clearClientAndMachine();
 
-    if (tab === 'MachineInstalled') {
-      this.resetMachineInstalledForm(); // Reset fields when changing tab
-    }
-    if (this.activeTab === 'pricing1') {
-      //this.resetMachineInstalledForm();
-    }
-
-    // Always reset both pricing and incineration values regardless of tab
+    // Reset pricing and incineration values
     this.currentValues = {
       iid: '',
       itp: '',
@@ -1235,9 +1274,10 @@ export class AdvancedManagementComponent implements OnInit {
       type: '',
     };
   }
+
   resetMachineInstalledForm(): void {
     this.selectedMachineInstalledId = '';
-    this.installedStatus = '';
+    this.installedStatus = '1'; // Reset to default (e
     this.uid = '';
     this.pcbNo = '';
     this.mcSrNo = '';
