@@ -447,7 +447,7 @@
   <div
     class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3"
   >
-    <!-- Items per page -->
+    <!-- Items per page
     <div class="d-flex align-items-center gap-2">
       <label class="mb-0 fw-bold text-dark" style="font-size: 1rem"
         >Items per page:</label
@@ -464,7 +464,7 @@
         </select>
         <span class="dropdown-icon"></span>
       </div>
-    </div>
+    </div> -->
 
     <!-- Pagination controls -->
     <div class="d-flex align-items-center gap-2">
@@ -490,5 +490,19 @@
         ›
       </button>
     </div>
+
+    <!-- Showing X to Y of Z entries -->
+      <div class="text-muted" style="font-size: 0.95rem">
+        Showing
+        {{ (currentPage - 1) * itemsPerPage + 1 }}
+        to
+        {{
+          currentPage * itemsPerPage > totalItems
+            ? totalItems
+            : currentPage * itemsPerPage
+        }}
+        of {{ totalItems }} entries
+      </div>
+      
   </div>
 </div>

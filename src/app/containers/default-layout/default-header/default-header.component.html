@@ -14,33 +14,82 @@
     </span>
     <small class="current-time ms-2">{{ currentTime }}</small>  <!-- ✅ Small Time Text -->
 
-    <!-- ✅ User Avatar (No Logout on Click) -->
-    <c-header-nav class="ms-auto me-sm-4 position-relative text-center">
-      <div class="dropdown">
-        <c-avatar
-          cTextColor="primary"
-          shape="rounded-0" 
-          size="xl"
-          src="./assets/img/avatars/6.jpg"
-          class="p-0"
-          style="width: 48px; height: 48px; border-radius: 8px; cursor: pointer;"
+    <c-header-nav class="ms-auto me-sm-4 position-relative text-center d-flex align-items-center gap-3">
+
+  <!-- 🔔 Bell Icon near Avatar -->
+<div class="notification-container position-relative">
+  <i class="fas fa-bell notification-icon" (click)="toggleNotifications()"></i>
+
+  <!-- 🔴 Notification Count Badge -->
+  <span
+    *ngIf="unseenCount > 0"
+    class="notification-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+  >
+    {{ unseenCount }}
+  </span>
+
+  <div class="notification-popover" *ngIf="showNotifications">
+    <!-- ❌ Close button -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <strong>Stock Refill Alerts</strong>
+      <button class="btn btn-sm btn-light" (click)="closeNotifications()">✖</button>
+    </div>
+
+    <div *ngIf="stockNotifications.length > 0; else noData">
+      <div
+        class="notification-item d-flex justify-content-between align-items-center mb-2"
+        *ngFor="let notification of stockNotifications"
+      >
+        <span class="notification-message">{{ notification.message }}</span>
+        <button
+          class="btn btn-sm btn-primary"
+          [disabled]="notification.seen"
+          (click)="markAsSeen(notification)"
         >
-        </c-avatar>
-
-        <!-- ✅ UserID below Avatar -->
-        <div class="user-id text-light fw-bold mt-1">
-          {{ userName  }}
-        </div>
+          {{ notification.seen ? 'Seen' : 'Seen' }}
+        </button>
       </div>
+    </div>
 
-      <!-- ✅ Logout Icon with Hover Tooltip -->
-      <div class="logout-container position-relative">
-        <i class="fas fa-sign-out-alt logout-icon ms-3" (click)="confirmLogout()" (mouseover)="showLogoutTooltip = true" (mouseleave)="showLogoutTooltip = false"></i>
+    <ng-template #noData>
+      <p class="text-muted">No notifications.</p>
+    </ng-template>
+  </div>
+</div>
 
-        <!-- 🔹 Tooltip (Visible on Hover) -->
-        <span class="tooltip-text" *ngIf="showLogoutTooltip">Logout</span>
-      </div>
-    </c-header-nav>
+
+
+
+  <!-- ✅ User Avatar -->
+  <div class="dropdown text-center">
+    <c-avatar
+      cTextColor="primary"
+      shape="rounded-0"
+      size="xl"
+      src="./assets/img/avatars/6.jpg"
+      class="p-0"
+      style="width: 48px; height: 48px; border-radius: 8px; cursor: pointer;"
+    ></c-avatar>
+
+    <div class="user-id text-light fw-bold mt-1">
+      {{ userName }}
+    </div>
+  </div>
+
+  <!-- ✅ Logout Icon -->
+  <div class="logout-container position-relative">
+    <i
+      class="fas fa-sign-out-alt logout-icon ms-3"
+      (click)="confirmLogout()"
+      (mouseover)="showLogoutTooltip = true"
+      (mouseleave)="showLogoutTooltip = false"
+    ></i>
+    <span class="tooltip-text" *ngIf="showLogoutTooltip">Logout</span>
+  </div>
+
+</c-header-nav>
+  
+
   </c-container>
 
   <!-- ✅ Logout Confirmation Modal -->
@@ -53,4 +102,7 @@
       </div>
     </div>
   </div>
+
+  
+
 </ng-container>

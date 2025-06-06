@@ -105,6 +105,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
 
   startDate = '';
   endDate = '';
+  totalItems = 0;
 
   dropdownOpen: Record<string, boolean> = {
     zone: false,
@@ -153,7 +154,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   // ✅ Pagination
   paginatedData: ReportItem[] = [];
   currentPage = 1;
-  itemsPerPage = 10;
+  itemsPerPage = 20;
   reportType: any;
 
   //report variables start
@@ -974,6 +975,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   }
 
   get totalPages(): number {
+    this.totalItems = this.filteredData.length;
     return Math.ceil(this.filteredData.length / this.itemsPerPage);
   }
 

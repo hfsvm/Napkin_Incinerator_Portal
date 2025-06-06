@@ -1,6 +1,14 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
+import { interval, Subscription } from 'rxjs';
+
+interface NotificationItem {
+  machineId: string;
+  message: string;
+  seen: boolean;
+}
 
 
 @Component({
@@ -18,9 +26,15 @@ export class DefaultHeaderComponent implements OnInit, OnDestroy {
   public currentTime: string = '';  
   private intervalId: any; 
   public showLogoutTooltip: boolean = false;
+  showNotifications = false;
+  stockNotifications: NotificationItem[] = [];
+  notificationSubscription!: Subscription;
+  seenMachineIds: string[] = []; // ✅ collected IDs
+  unseenCount: number = 0;
 
   constructor(
     private router: Router,
+    private dataService: DataService,
     private commonDataService: CommonDataService
   ) {}
 
@@ -46,9 +60,89 @@ export class DefaultHeaderComponent implements OnInit, OnDestroy {
     this.intervalId = setInterval(() => {
       this.updateTime();
     }, 1000);
+
+    // Fetch notifications every 2 minutes
+    this.notificationSubscription = interval(120000).subscribe(() => {
+      this.fetchStockNotifications();
+    });
+
+    // Initial call
+    this.fetchStockNotifications();
   }
 
+  fetchStockNotifications() {
+
+    const merchantId = this.commonDataService.merchantId || '';
+    const userId = this.commonDataService.userId || 0;
+
+    this.dataService.getStockInformation(merchantId, userId).subscribe({
+      next: (response) => {
+        if (response?.code === 200 && response?.data) {
+          debugger;
+          this.stockNotifications = response.data.map((machineId: string) => ({
+      machineId,
+      message: `${machineId} machine has low stock.`,
+      seen: false // 👈 Needed to track seen state
+    }));
+
+        // 🔴 Count unseen notifications
+        this.unseenCount = this.stockNotifications.filter(n => !n.seen).length;
+          
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching stock notification data: ', error);
+      },
+    });
+  }
+
+  toggleNotifications() {
+    this.showNotifications = !this.showNotifications;
+
+    if (this.showNotifications) {
+    this.fetchStockNotifications(); // 🔄 Fetch fresh data on bell click
+  }
+  }
+
+  closeNotifications() {
+  this.showNotifications = false;
+
+  if (this.seenMachineIds.length > 0) {
+    const merchantId = this.commonDataService.merchantId || '';
+    const userId = this.commonDataService.userId || 0;
+
+    const payload = {
+      machineId: this.seenMachineIds,
+      merchantId,
+      userId
+    };
+
+    this.dataService.saveStockSeenInformation(payload).subscribe({
+      next: (response) => {
+        console.log('✅ Bulk seen update success', response);
+        this.seenMachineIds = []; // ✅ clear after sending
+      },
+      error: (err) => {
+        console.error('❌ Error sending bulk seen IDs:', err);
+      }
+    });
+  }
+}
+
+ markAsSeen(notification: NotificationItem): void {
+  if (!notification.seen) {
+    notification.seen = true; // disable button
+    this.seenMachineIds.push(notification.machineId); // ✅ collect
+    this.unseenCount--; // 🔻 Decrease badge count
+  }
+}
+
+
   ngOnDestroy() {
+
+    if (this.notificationSubscription) {
+      this.notificationSubscription.unsubscribe();
+    }
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }

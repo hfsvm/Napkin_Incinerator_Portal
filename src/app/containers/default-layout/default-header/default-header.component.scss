@@ -271,4 +271,58 @@ body {
       transition: opacity 0.2s;
     }
   }
+  .notification-container {
+  cursor: pointer;
+
+  .notification-icon {
+    font-size: 1.5rem;
+    color: #fff;
+  }
+
+  .notification-popover {
+    position: absolute;
+    top: 2rem;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 0.75rem;
+    width: 250px;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-radius: 6px;
+    max-height: 600px;      // or any height you want
+    overflow-y: auto;       // enable vertical scroll
+
+    .notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.notification-badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.6em;
+}
+
+    .notification-message {
+  font-size: 14px;
+  color: #333;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.seen-button {
+  background-color: #5f3dc4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+  }
+}
   

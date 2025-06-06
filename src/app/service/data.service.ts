@@ -906,4 +906,39 @@ export class DataService {
       catchError(this.handleError)
     );
   }
+
+  /** 🔹 Get stock information */
+  getStockInformation(
+    merchantId: string,
+    userId: number
+  ): Observable<any> {
+    debugger;
+
+    const url = `${this.url1}/getStockInformation/${merchantId}/${userId}`;
+    console.log('📡 API CALL:', url);
+    debugger;
+
+    return this.http.get(url, this.httpOptions).pipe(
+      retry(1),
+      tap((response) => console.log('🔹 Get Stockinfo Response:', response)),
+      catchError(this.handleError)
+    );
+  }
+
+  /** 🔹 Get stock information */
+  saveStockSeenInformation(payload: {
+  machineId: string[],
+  merchantId: string,
+  userId: number
+}): Observable<any> {
+  const url = `${this.url1}/saveStockSeenInformation`; // No path params
+
+  console.log('📡 API CALL:', url, 'Payload:', payload);
+
+  return this.http.post(url, payload, this.httpOptions).pipe(
+    retry(1),
+    tap((response) => console.log('🔹 saveStockSeenInformation Response:', response)),
+    catchError(this.handleError)
+  );
+}
 }
