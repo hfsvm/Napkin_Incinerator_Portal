@@ -173,10 +173,12 @@ export class ConfigureMachinesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-
-    if(this.commonDataService.merchantId === null || this.commonDataService.merchantId === undefined
-      && this.commonDataService.userId === null || this.commonDataService.userId === undefined) {
-     
+    if (
+      this.commonDataService.merchantId === null ||
+      (this.commonDataService.merchantId === undefined &&
+        this.commonDataService.userId === null) ||
+      this.commonDataService.userId === undefined
+    ) {
       this.router.navigate(['/login']);
     }
 
@@ -235,26 +237,20 @@ export class ConfigureMachinesComponent implements OnInit, OnDestroy {
       next: (response) => {
         if (response?.code === 200 && response?.data) {
           debugger;
-          // Get the first client's data
-          // const firstClient = response.data.clients[0];
-          // this.fullData = firstClient.projects;
-          // console.log('fullData =', this.fullData);
+          const allProjects =
+            response.data.clients?.flatMap(
+              (client: any) => client.projects || []
+            ) || [];
 
-          // this.projects = this.fullData.map((p: any) => ({
-          //   ProjectId: p.projectId,
-          //   projectname: p.projectName,
-          // }));
-          // console.log('projects =', this.projects);
-
-          // this.selectedProjects = this.projects.map((p) => p.ProjectId);
-          // this.rebuildFilterChain('projects');
-          this.fullData = response.data.projects;
-          // this.projects = this.fullData; // Assign projects to options
+          this.fullData = allProjects;
+          console.log('fullData =', this.fullData);
 
           this.projects = this.fullData.map((p: any) => ({
             ProjectId: p.projectId,
             projectname: p.projectName,
           }));
+
+          console.log('projects =', this.projects);
 
           this.selectedProjects = this.projects.map((p) => p.ProjectId);
           this.rebuildFilterChain('projects');

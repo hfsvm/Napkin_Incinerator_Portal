@@ -198,6 +198,141 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     this.drawD3PieChart(this.stockChartRef.nativeElement, data, 50);
   }
 
+  // drawD3PieChart(
+  //   container: HTMLElement,
+  //   data: { label: string; value: number; color: string }[],
+  //   marginOffset: number // controls donut hole size
+  // ): void {
+  //   // Clear previous chart
+  //   d3.select(container).selectAll('*').remove();
+
+  //   const width = 400;
+  //   const height = 400;
+  //   const radius = Math.min(width, height) / 2.5;
+
+  //   const svg = d3
+  //     .select(container)
+  //     .append('svg')
+  //     .attr('width', width)
+  //     .attr('height', height)
+  //     .append('g')
+  //     .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
+  //   const pie = d3.pie<any>().value((d: any) => d.value);
+
+  //   // Main arc for drawing slices
+  //   const arc = d3
+  //     .arc<any>()
+  //     .innerRadius(marginOffset)
+  //     .outerRadius(radius - 15);
+
+  //   // Outer arc for placing labels outside
+  //   const outerArc = d3
+  //     .arc<any>()
+  //     .innerRadius(radius * 0.9)
+  //     .outerRadius(radius * 0.9);
+
+  //   // Custom arc for reducing the starting point of arrow line
+  //   const labelLineStartArc = d3
+  //     .arc<any>()
+  //     .innerRadius((radius + marginOffset) / 2) // midway between outer and inner
+  //     .outerRadius((radius + marginOffset) / 2);
+
+  //   const total = data.reduce((sum, d) => sum + d.value, 0);
+  //   const pieData = pie(data);
+
+  //   const arcs = svg.selectAll('arc').data(pieData).enter().append('g');
+
+  //   // Draw pie slices
+  //   arcs
+  //     .append('path')
+  //     .attr('d', arc)
+  //     .attr('fill', (d: any) => d.data.color);
+
+  //   // Labels and connecting lines
+  //   arcs.each(function (d: any) {
+  //     const group = d3.select(this);
+  //     const percent = total === 0 ? 0 : (d.data.value / total) * 100;
+
+  //     if (percent <= 0) return;
+
+  //     const labelText = `${percent.toFixed(1)}%`;
+
+  //     const centroid = labelLineStartArc.centroid(d); // reduced starting point
+  //     const outerCentroid = outerArc.centroid(d);
+  //     const midAngle = (d.startAngle + d.endAngle) / 2;
+  //     const direction = midAngle < Math.PI ? 1 : -1;
+
+  //     if (percent > 5) {
+  //       group
+  //         .append('text')
+  //         .attr('transform', `translate(${centroid})`)
+  //         .attr('text-anchor', 'middle')
+  //         .attr('alignment-baseline', 'middle')
+  //         .text(labelText)
+  //         .style('font-size', '12px')
+  //         .style('fill', '#000')
+  //         .style('font-weight', 'bold');
+  //     } else {
+  //       const labelPos = [
+  //         outerCentroid[0] + 20 * direction,
+  //         outerCentroid[1] - 20,
+  //       ];
+
+  //       group
+  //         .append('polyline')
+  //         .attr('points', [centroid, outerCentroid, labelPos].join(' '))
+  //         .attr('stroke', '#000')
+  //         .attr('fill', 'none')
+  //         .attr('stroke-width', 1);
+
+  //       group
+  //         .append('text')
+  //         .attr('transform', `translate(${labelPos})`)
+  //         .attr('text-anchor', direction === 1 ? 'start' : 'end')
+  //         .attr('alignment-baseline', 'middle')
+  //         .attr('dy', '-0.5em')
+  //         .text(labelText)
+  //         .style('font-size', '12px')
+  //         .style('fill', '#000')
+  //         .style('font-weight', 'bold');
+  //     }
+  //   });
+
+  //   // Color legend below the chart
+  //   const legend = d3
+  //     .select(container)
+  //     .append('div')
+  //     .attr('class', 'd3-legend')
+  //     .style('display', 'flex')
+  //     .style('justify-content', 'center')
+  //     .style('flex-wrap', 'wrap')
+  //     .style('margin-top', '10px')
+  //     .style('gap', '12px');
+
+  //   data.forEach((d) => {
+  //     const item = legend
+  //       .append('div')
+  //       .style('display', 'flex')
+  //       .style('align-items', 'center')
+  //       .style('margin', '0 8px');
+
+  //     item
+  //       .append('div')
+  //       .style('width', '14px')
+  //       .style('height', '14px')
+  //       .style('background-color', d.color)
+  //       .style('margin-right', '6px')
+  //       .style('border-radius', '50%');
+
+  //     item
+  //       .append('span')
+  //       .text(d.label)
+  //       .style('font-size', '13px')
+  //       .style('color', '#333');
+  //   });
+  // }
+
   drawD3PieChart(
     container: HTMLElement,
     data: { label: string; value: number; color: string }[],
@@ -229,8 +364,8 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     // Outer arc for placing labels outside
     const outerArc = d3
       .arc<any>()
-      .innerRadius(radius * 0.9)
-      .outerRadius(radius * 0.9);
+      .innerRadius(radius * 1.1)
+      .outerRadius(radius * 1.1);
 
     // Custom arc for reducing the starting point of arrow line
     const labelLineStartArc = d3
@@ -249,7 +384,10 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
       .attr('d', arc)
       .attr('fill', (d: any) => d.data.color);
 
-    // Labels and connecting lines
+    // Labels and connecting lines with improved positioning for small slices
+    let smallLabelCount = 0;
+    const spacing = 16;
+
     arcs.each(function (d: any) {
       const group = d3.select(this);
       const percent = total === 0 ? 0 : (d.data.value / total) * 100;
@@ -262,6 +400,7 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
       const outerCentroid = outerArc.centroid(d);
       const midAngle = (d.startAngle + d.endAngle) / 2;
       const direction = midAngle < Math.PI ? 1 : -1;
+      const side = direction === 1 ? 'right' : 'left';
 
       if (percent > 5) {
         group
@@ -274,14 +413,24 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
           .style('fill', '#000')
           .style('font-weight', 'bold');
       } else {
+        // Offset vertically to avoid collision
+        smallLabelCount++;
+        const direction = smallLabelCount % 2 === 0 ? -1 : 1; // alternate
+        const yOffset = (Math.ceil(smallLabelCount / 2) - 1) * spacing;
+
         const labelPos = [
-          outerCentroid[0] + 20 * direction,
-          outerCentroid[1] - 20,
+          outerCentroid[0] + 30 * direction,
+          outerCentroid[1] + (direction === 1 ? yOffset : -yOffset),
         ];
 
         group
           .append('polyline')
-          .attr('points', [centroid, outerCentroid, labelPos].join(' '))
+          .attr(
+            'points',
+            [centroid, outerCentroid, labelPos]
+              .map((p) => p.join(','))
+              .join(' ')
+          )
           .attr('stroke', '#000')
           .attr('fill', 'none')
           .attr('stroke-width', 1);
@@ -291,7 +440,7 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
           .attr('transform', `translate(${labelPos})`)
           .attr('text-anchor', direction === 1 ? 'start' : 'end')
           .attr('alignment-baseline', 'middle')
-          .attr('dy', '-0.5em')
+          .attr('dy', '0.35em')
           .text(labelText)
           .style('font-size', '12px')
           .style('fill', '#000')

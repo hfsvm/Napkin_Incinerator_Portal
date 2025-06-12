@@ -326,171 +326,211 @@ export class AdvancedManagementComponent implements OnInit {
       this.showNotification('⚠️ Please select a machine first.', 'error');
       return;
     }
+    if (this.activeTab !== 'machineInstalled') {
+      this.dataService
+        .getBusinessConfig(this.merchantId, this.selectedMachineId)
+        .subscribe(
+          (res: any) => {
+            console.log('📥 Business Config Response:', res);
 
-    // 📡 Fetch Business Config
-    this.dataService
-      .getBusinessConfig(this.merchantId, this.selectedMachineId)
-      .subscribe(
-        (res: any) => {
-          console.log('📥 Business Config Response:', res);
+            if (res.code !== 200 || res.error) {
+              const msg =
+                res.phrase || res.error || 'Business configuration error.';
+              this.showNotification(`⚠️ ${msg}`, 'error');
+              return;
+            }
 
-          if (res.code !== 200 || res.error) {
-            const msg =
-              res.phrase || res.error || 'Business configuration error.';
-            this.showNotification(`⚠️ ${msg}`, 'error');
-            return;
+            const configData = res.data?.ica?.[0]; // First object in ICA array
+
+            if (configData) {
+              this.currentValues.iid = configData.iid || '';
+              this.currentValues.itp = configData.itp || '';
+              this.currentValues.qrBytes = configData.qrb || '';
+            } else {
+              this.currentValues.iid = '';
+              this.currentValues.itp = '';
+              this.currentValues.qrBytes = '';
+            }
+
+            this.changeDetectorRef.detectChanges();
+          },
+          (error) => {
+            console.error('❌ Business Config HTTP Error:', error);
+
+            if (error.status === 404) {
+              this.showNotification(
+                'No configuration found for the selected machine. Please set configurations.',
+                'error'
+              );
+            } else if (error.status === 401) {
+              this.showNotification(
+                '🔒 Error 401: Unauthorized access to business config.',
+                'error'
+              );
+            } else if (error.status === 500) {
+              this.showNotification(
+                '💥 Error 500: Server error while fetching business config.',
+                'error'
+              );
+            } else if (error.status === 0) {
+              this.showNotification(
+                '🔌 Network error while fetching business config.',
+                'error'
+              );
+            } else {
+              this.showNotification(
+                `❌ Error ${error.status}: ${
+                  error.error?.message || 'Unknown error occurred'
+                }`,
+                'error'
+              );
+            }
           }
+        );
 
-          const configData = res.data?.ica?.[0]; // First object in ICA array
+      // 🔥 Fetch Incineration Config
+      this.dataService
+        .getAdvanceConfig(this.merchantId, this.selectedMachineId)
+        .subscribe(
+          (res: any) => {
+            debugger;
+            console.log('📥 Incineration Config Response:', res);
 
-          if (configData) {
-            this.currentValues.iid = configData.iid || '';
-            this.currentValues.itp = configData.itp || '';
-            this.currentValues.qrBytes = configData.qrb || '';
-          } else {
-            this.currentValues.iid = '';
-            this.currentValues.itp = '';
-            this.currentValues.qrBytes = '';
+            if (res.code !== 200 || res.error) {
+              const msg =
+                res.phrase || res.error || 'Advanced configuration error.';
+              this.showNotification(`⚠️ ${msg}`, 'error');
+              return;
+            }
+
+            const incinerationData = res.data;
+
+            if (incinerationData) {
+              this.incinerationCurrentValues.scheduler =
+                incinerationData.scheduler || '';
+              this.incinerationCurrentValues.limitSwitch =
+                incinerationData.limitSwitch || '';
+              this.incinerationCurrentValues.napkinCost =
+                incinerationData.napkinCost || '';
+              this.incinerationCurrentValues.setHeaterTempA =
+                incinerationData.setHeaterTempA || '';
+              this.incinerationCurrentValues.setHeaterTempB =
+                incinerationData.setHeaterTempB || '';
+              this.incinerationCurrentValues.heaterAMinTemp =
+                incinerationData.heaterAMinTemp || '';
+              this.incinerationCurrentValues.heaterBOnTemp =
+                incinerationData.heaterBOnTemp || '';
+
+              if (this.activeTab === 'incineration') {
+                this.currentValues = {
+                  iid: '',
+                  itp: '',
+                  qrBytes: '',
+                  ...this.incinerationCurrentValues,
+                };
+              }
+            } else {
+              this.incinerationCurrentValues = {
+                scheduler: '',
+                limitSwitch: '',
+                napkinCost: '',
+                setHeaterTempA: '',
+                setHeaterTempB: '',
+                heaterAMinTemp: '',
+                heaterBOnTemp: '',
+              };
+            }
+
+            this.changeDetectorRef.detectChanges();
+          },
+          (error) => {
+            console.error('❌ Incineration Config HTTP Error:', error);
+
+            if (error.code === 404) {
+              this.showNotification(
+                'No configuration found for the selected machine. Please set configurations.',
+                'error'
+              );
+            } else if (error.code === 401) {
+              this.showNotification(
+                '🔒 Error 401: Unauthorized access.',
+                'error'
+              );
+            } else if (error.code === 500) {
+              this.showNotification(
+                '💥 Error 500: Server error occurred.',
+                'error'
+              );
+            } else if (error.code === 0) {
+              this.showNotification(
+                '🔌 Network error. Please check your connection.',
+                'error'
+              );
+            } else {
+              this.showNotification(
+                `❌ Error ${error.status}: ${
+                  error.error?.message || 'Unknown error occurred'
+                }`,
+                'error'
+              );
+            }
           }
+        );
 
-          this.changeDetectorRef.detectChanges();
-        },
-        (error) => {
-          console.error('❌ Business Config HTTP Error:', error);
+      this.dataService
+        .getFotaVersionDetails(this.merchantId, this.selectedMachineId)
+        .subscribe(
+          (res: any) => {
+            console.log('📥 FOTA Version Response:', res);
 
-          if (error.status === 404) {
-            this.showNotification(
-              'No configuration found for the selected machine. Please set configurations.',
-              'error'
-            );
-          } else if (error.status === 401) {
-            this.showNotification(
-              '🔒 Error 401: Unauthorized access to business config.',
-              'error'
-            );
-          } else if (error.status === 500) {
-            this.showNotification(
-              '💥 Error 500: Server error while fetching business config.',
-              'error'
-            );
-          } else if (error.status === 0) {
-            this.showNotification(
-              '🔌 Network error while fetching business config.',
-              'error'
-            );
-          } else {
-            this.showNotification(
-              `❌ Error ${error.status}: ${
-                error.error?.message || 'Unknown error occurred'
-              }`,
-              'error'
-            );
+            if (res.code !== 200 || res.error) {
+              const msg =
+                res.phrase || res.error || 'FOTA version fetch error.';
+              this.showNotification(`⚠️ ${msg}`, 'error');
+              return;
+            }
+
+            const fotaData = res.data;
+
+            if (fotaData) {
+              this.selectedMachineId = fotaData.machineid || '';
+              this.installedStatus = fotaData.currentVersion || 'Not Installed';
+              this.uid = fotaData.imenumber || '';
+              this.fotaRows = fotaData.updatedVersion || [];
+              this.selectedUpdatedVersion = null; // For dropdown selection
+            } else {
+              this.selectedMachineId = '';
+              this.installedStatus = 'Not Available';
+              this.uid = '';
+              this.fotaRows = [];
+            }
+
+            this.changeDetectorRef.detectChanges();
+          },
+          (error) => {
+            console.error('❌ FOTA Config HTTP Error:', error);
+
+            if (error.code === 404) {
+              this.showNotification(
+                '⚠️ No FOTA info found for the machine.',
+                'error'
+              );
+            } else if (error.code === 0) {
+              this.showNotification(
+                '🔌 Network error. Please check your connection.',
+                'error'
+              );
+            } else {
+              this.showNotification(
+                `❌ Error ${error.status}: ${
+                  error.error?.message || 'Unknown error occurred'
+                }`,
+                'error'
+              );
+            }
           }
-        }
-      );
-
-    // 🔥 Fetch Incineration Config
-    // this.dataService.getAdvancedConfig(this.merchantId, this.selectedMachineId).subscribe(
-    //   (res: any) => {
-    //     debugger;
-    //     console.log('📥 Incineration Config Response:', res);
-
-    //     if (res.code !== 200 || res.error) {
-    //       const msg = res.phrase || res.error || 'Advanced configuration error.';
-    //       this.showNotification(`⚠️ ${msg}`, 'error');
-    //       return;
-    //     }
-
-    //     const incinerationData = res.data;
-
-    //     if (incinerationData) {
-    //       this.incinerationCurrentValues.scheduler = incinerationData.scheduler || '';
-    //       this.incinerationCurrentValues.limitSwitch = incinerationData.limitSwitch || '';
-    //       this.incinerationCurrentValues.napkinCost = incinerationData.napkinCost || '';
-    //       this.incinerationCurrentValues.setHeaterTempA = incinerationData.setHeaterTempA || '';
-    //       this.incinerationCurrentValues.setHeaterTempB = incinerationData.setHeaterTempB || '';
-    //       this.incinerationCurrentValues.heaterAMinTemp = incinerationData.heaterAMinTemp || '';
-    //       this.incinerationCurrentValues.heaterBOnTemp = incinerationData.heaterBOnTemp || '';
-
-    //       if (this.activeTab === 'incineration') {
-    //         this.currentValues = {
-    //           iid: '',
-    //           itp: '',
-    //           qrBytes: '',
-    //           ...this.incinerationCurrentValues
-    //         };
-    //       }
-    //     } else {
-    //       this.incinerationCurrentValues = {
-    //         scheduler: '',
-    //         limitSwitch: '',
-    //         napkinCost: '',
-    //         setHeaterTempA: '',
-    //         setHeaterTempB: '',
-    //         heaterAMinTemp: '',
-    //         heaterBOnTemp: ''
-    //       };
-    //     }
-
-    //     this.changeDetectorRef.detectChanges();
-    //   },
-    //   error => {
-    //     console.error("❌ Incineration Config HTTP Error:", error);
-
-    //     if (error.code === 404) {
-    //       this.showNotification("No configuration found for the selected machine. Please set configurations.", "error");
-    //     } else if (error.code === 401) {
-    //       this.showNotification("🔒 Error 401: Unauthorized access.", "error");
-    //     } else if (error.code === 500) {
-    //       this.showNotification("💥 Error 500: Server error occurred.", "error");
-    //     } else if (error.code === 0) {
-    //       this.showNotification("🔌 Network error. Please check your connection.", "error");
-    //     } else {
-    //       this.showNotification(`❌ Error ${error.status}: ${error.error?.message || 'Unknown error occurred'}`, "error");
-    //     }
-    //   }
-
-    // );
-
-    // this.dataService.getFotaVersionDetails(this.merchantId, this.selectedMachineId).subscribe(
-    //   (res: any) => {
-    //     console.log('📥 FOTA Version Response:', res);
-
-    //     if (res.code !== 200 || res.error) {
-    //       const msg = res.phrase || res.error || 'FOTA version fetch error.';
-    //       this.showNotification(`⚠️ ${msg}`, 'error');
-    //       return;
-    //     }
-
-    //     const fotaData = res.data;
-
-    //     if (fotaData) {
-    //       this.selectedMachineId = fotaData.machineid || '';
-    //       this.installedStatus = fotaData.currentVersion || 'Not Installed';
-    //       this.uid = fotaData.imenumber || '';
-    //       this.fotaRows = fotaData.updatedVersion || [];
-    //       this.selectedUpdatedVersion = null; // For dropdown selection
-    //     } else {
-    //       this.selectedMachineId = '';
-    //       this.installedStatus = 'Not Available';
-    //       this.uid = '';
-    //       this.fotaRows = [];
-    //     }
-
-    //     this.changeDetectorRef.detectChanges();
-    //   },
-    //   error => {
-    //     console.error("❌ FOTA Config HTTP Error:", error);
-
-    //     if (error.code === 404) {
-    //       this.showNotification("⚠️ No FOTA info found for the machine.", "error");
-    //     } else if (error.code === 0) {
-    //       this.showNotification("🔌 Network error. Please check your connection.", "error");
-    //     } else {
-    //       this.showNotification(`❌ Error ${error.status}: ${error.error?.message || 'Unknown error occurred'}`, "error");
-    //     }
-    //   }
-    // );
+        );
+    }
   }
 
   selectMachineFota(id: string) {
@@ -1179,65 +1219,14 @@ export class AdvancedManagementComponent implements OnInit {
     this.selectedMachineIdPricing = '';
   }
 
-  // onTabChange(tab: string): void {
-  //   this.activeTab = tab;
-  //   this.selectedMachineId = '';
-
-  //   // to clear the selected fota cilentid,machinename,fota table data when tab is changed
-  //   this.selectedFotaMachineId = '';
-  //   this.selectedProjectIdfota = null;
-  //   this.fotaMachines = [];
-
-  //   //to clear the selected clinet id when tab is changed
-  //   this.selectedProjectId = null;
-  //   this.machineIds = [];
-
-  //   this.clientname = '';
-
-  //   this.clearClientAndMachine();
-
-  //   if (tab === 'MachineInstalled') {
-  //     this.resetMachineInstalledForm(); // Reset fields when changing tab
-  //   }
-  //   if (this.activeTab === 'pricing1') {
-  //     //this.resetMachineInstalledForm();
-  //   }
-
-  //   // Always reset both pricing and incineration values regardless of tab
-  //   this.currentValues = {
-  //     iid: '',
-  //     itp: '',
-  //     qrBytes: '',
-  //   };
-  //   this.updatedValues = {
-  //     iid: null as number | null,
-  //     itp: 0,
-  //     qrBytes: '',
-  //   };
-  //   this.incinerationCurrentValues = {
-  //     scheduler: '',
-  //     limitSwitch: '',
-  //     napkinCost: '',
-  //     setHeaterTempA: '',
-  //     setHeaterTempB: '',
-  //     heaterAMinTemp: '',
-  //     heaterBOnTemp: '',
-  //   };
-
-  //   this.notification = {
-  //     message: '',
-  //     type: '',
-  //   };
-  // }
-
   onTabChange(tab: string): void {
     this.activeTab = tab;
 
     // Clear Machine Installed form when switching tabs
-    if (tab !== 'machineInstalled') {
-      this.resetMachineInstalledForm();
-    }
-
+    // if (tab !== 'machineInstalled') {
+    //   this.resetMachineInstalledForm();
+    // }
+    this.resetMachineInstalledForm();
     // Reset other tab-specific data
     this.selectedMachineId = '';
     this.selectedFotaMachineId = '';
@@ -1275,18 +1264,53 @@ export class AdvancedManagementComponent implements OnInit {
     };
   }
 
+  // resetMachineInstalledForm(): void {
+  //   this.selectedMachineInstalledId = '';
+  //   this.installedStatus = '1'; // Reset to default (e
+  //   this.uid = '';
+  //   this.pcbNo = '';
+  //   this.mcSrNo = '';
+  //   this.notificationMessage = '';
+  //   this.notificationType = '';
+  //   this.selectedFotaMachineId = '';
+  //   this.installedDate = '';
+  //   this.machineIds = [];
+  //   this.fotamachineIds = [];
+  // }
+
+  // onTabChange(tab: string): void {
+  //   this.activeTab = tab;
+
+  //   // Reset machine selections
+  //   this.selectedMachineId = '';
+  //   this.selectedMachineIdPricing = '';
+  //   this.selectedFotaMachineId = '';
+
+  //   // Clear form data
+  //   if (tab !== 'machineInstalled') {
+  //     this.resetMachineInstalledForm();
+  //   }
+  //   // this.resetMachineInstalledForm();
+  //   // Reset other tab-specific states
+  //   this.clearEnteredValues();
+  //   this.clearIncinerationValues();
+
+  //   // Clear notifications
+  //   this.notification = {
+  //     message: '',
+  //     type: '',
+  //   };
+  // }
+
   resetMachineInstalledForm(): void {
-    this.selectedMachineInstalledId = '';
-    this.installedStatus = '1'; // Reset to default (e
+    this.selectedMachineId = ''; // Add this line
+    this.installedStatus = '1';
     this.uid = '';
     this.pcbNo = '';
     this.mcSrNo = '';
+    this.installedDate = '';
     this.notificationMessage = '';
     this.notificationType = '';
-    this.selectedFotaMachineId = '';
-    this.installedDate = '';
-    this.machineIds = [];
-    this.fotamachineIds = [];
   }
 
   showNotification(message: string, type: 'success' | 'error') {
@@ -1393,11 +1417,22 @@ export class AdvancedManagementComponent implements OnInit {
   dropdownOpenMachine = false;
   machineSearchTerm = '';
 
+  // selectMachine(id: string) {
+  //   this.selectedMachineId = id;
+  //   this.dropdownOpen = false;
+  //   this.dropdownOpenMachine = false;
+  //   this.onMachineChange();
+  // }
+
   selectMachine(id: string) {
     this.selectedMachineId = id;
     this.dropdownOpen = false;
     this.dropdownOpenMachine = false;
-    this.onMachineChange();
+
+    // Only call onMachineChange if we're not on the Machine Installed tab
+    if (this.activeTab !== 'machineInstalled') {
+      this.onMachineChange();
+    }
   }
   clientDropdownOpen = false;
   clientSearchTerm = '';

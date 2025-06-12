@@ -699,7 +699,9 @@
                       : machine.stockStatus === 'Low'
                       ? '#FFA500'
                       : machine.stockStatus === 'Full'
-                      ? '#7ED321'
+                      ? machine.stockIsManuallyUpdated
+                        ? '#B5E57D'
+                        : '#7ED321'
                       : 'transparent',
                   color: '#000000'
                 }"
