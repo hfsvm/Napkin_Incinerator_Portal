@@ -6,6 +6,7 @@ import { Subscription, interval } from 'rxjs'; // Import interval and Subscripti
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import * as XLSX from 'xlsx';
 
 interface Beat {
   beat: string;
@@ -153,6 +154,7 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     Status: '',
     'Stock Status': '',
     'Burning Status': '',
+    'Installed Date': '',
   };
   sortKey: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -990,6 +992,50 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     this.loadMachineData();
   }
 
+  // toggleSelectAll(selectedArray: any[], options: any[], key: string) {
+  //   debugger;
+  //   // Toggle select all logic
+  //   if (selectedArray.length === options.length) {
+  //     selectedArray.length = 0;
+  //     // Clear dependent selections when deselecting all items
+  //     this.clearDependentSelections(key);
+  //   } else {
+  //     selectedArray.length = 0;
+  //     selectedArray.push(
+  //       ...options.map((opt) => opt.ProjectId || opt.key || opt)
+  //     );
+
+  //     // When selecting all beats, preserve the parent selections
+  //     if (key === 'selectedBeatList') {
+  //       // Ensure parent selections are maintained
+  //       if (this.selectedProjects.length === 0 && this.projects.length > 0) {
+  //         this.selectedProjects = this.projects.map((p) => p.ProjectId);
+  //       }
+  //       if (this.selectedZones.length === 0 && this.zones.length > 0) {
+  //         this.selectedZones = [...this.zones];
+  //       }
+  //       if (this.selectedWards.length === 0 && this.wards.length > 0) {
+  //         this.selectedWards = [...this.wards];
+  //       }
+  //       if (this.selectedSubZones.length === 0 && this.subZones.length > 0) {
+  //         this.selectedSubZones = [...this.subZones];
+  //       }
+  //       if (this.selectedWardList.length === 0 && this.wardList.length > 0) {
+  //         this.selectedWardList = [...this.wardList];
+  //       }
+  //     }
+  //   }
+
+  //   // Update hierarchy selection
+  //   this.updateHierarchySelection(key, selectedArray);
+
+  //   // Rebuild the entire filter chain
+  //   this.rebuildFilterChain(key);
+
+  //   // Reload machine data with updated filters
+  //   this.loadMachineData();
+  // }
+
   startAutoRefresh(): void {
     // Refresh every 2 minutes (120,000 milliseconds)
     this.autoRefreshSubscription = interval(120000).subscribe(() => {
@@ -1105,12 +1151,12 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   }
 
   clearFilters() {
-    // Reset selected filters
+    // Reset selected filters - Keep these
     this.selectedMachineStatuses = ['1', '2'];
     this.selectedStockStatuses = [];
     this.selectedBurnStatuses = [];
 
-    // Reset hierarchy selections
+    // Clear hierarchy selections - Keep projects (Client Name), clear others
     this.selectedProjects = [];
     this.selectedZones = [];
     this.selectedWards = [];
@@ -1119,7 +1165,7 @@ export class MachinedataComponent implements OnInit, OnDestroy {
     this.selectedBeatList = [];
     this.selectedBeats = [];
 
-    // Reset hierarchy selection object
+    // Reset hierarchy selection object - Keep project, clear others
     this.hierarchySelection = {
       project: [],
       state: [],
@@ -1144,11 +1190,20 @@ export class MachinedataComponent implements OnInit, OnDestroy {
       'Burning Status': '',
     };
 
-    // Reload initial data
+    // Reset dropdown options - Keep projects, clear others
+    this.zones = [];
+    this.wards = [];
+    this.subZones = [];
+    this.wardList = [];
+    this.beatList = [];
+    this.beats = [];
+
+    // Reload initial data but only with basic filters
     this.initialLoadMachineData();
   }
 
   loadMachineData() {
+    debugger;
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -1175,27 +1230,45 @@ export class MachinedataComponent implements OnInit, OnDestroy {
           : [],
     };
 
-    // Add hierarchy selections to query params
-    if (this.hierarchySelection.project.length > 0) {
-      queryParams.project = this.hierarchySelection.project.join(',');
+    // Always include project if available
+    if (this.projects.length > 0) {
+      queryParams.project =
+        this.selectedProjects.length > 0
+          ? this.selectedProjects.join(',')
+          : this.projects.map((p) => p.ProjectId).join(',');
     }
-    if (this.hierarchySelection.state.length > 0) {
-      queryParams.state = this.hierarchySelection.state.join(',');
+
+    // Include all hierarchy levels that have values
+    if (this.selectedZones.length > 0) {
+      queryParams.state = this.selectedZones.join(',');
+    } else if (this.zones.length > 0 && this.isStateUser) {
+      queryParams.state = this.zones.join(',');
     }
-    if (this.hierarchySelection.district.length > 0) {
-      queryParams.district = this.hierarchySelection.district.join(',');
+
+    if (this.selectedWards.length > 0) {
+      queryParams.district = this.selectedWards.join(',');
+    } else if (this.wards.length > 0 && this.isDistrictUser) {
+      queryParams.district = this.wards.join(',');
     }
-    if (this.hierarchySelection.zone.length > 0) {
-      queryParams.zone = this.hierarchySelection.zone.join(',');
+
+    if (this.selectedSubZones.length > 0) {
+      queryParams.zone = this.selectedSubZones.join(',');
+    } else if (this.subZones.length > 0) {
+      queryParams.zone = this.subZones.join(',');
     }
-    if (this.hierarchySelection.ward.length > 0) {
-      queryParams.ward = this.hierarchySelection.ward.join(',');
+
+    if (this.selectedWardList.length > 0) {
+      queryParams.ward = this.selectedWardList.join(',');
+    } else if (this.wardList.length > 0) {
+      queryParams.ward = this.wardList.join(',');
     }
-    if (this.hierarchySelection.beat.length > 0) {
-      queryParams.beat = this.hierarchySelection.beat.join(',');
+
+    if (this.selectedBeatList.length > 0) {
+      queryParams.beat = this.selectedBeatList.join(',');
     }
-    if (this.hierarchySelection.machine.length > 0) {
-      queryParams.machineId = this.hierarchySelection.machine.join(',');
+
+    if (this.selectedBeats.length > 0) {
+      queryParams.machineId = this.selectedBeats.join(',');
     }
 
     console.log('📡 Final API Call Params:', queryParams);
@@ -1689,6 +1762,92 @@ export class MachinedataComponent implements OnInit, OnDestroy {
         );
       default:
         return false;
+    }
+  }
+
+  exportToExcel(): void {
+    // Show loading indicator
+    this.isLoading = true;
+
+    try {
+      // Prepare the data for export
+      const exportData = this.filteredMachines.map((machine, index) => ({
+        'S.No': index + 1,
+        'Machine ID': machine.machineId,
+        'MC SrNo': machine.mcSrNo || 'N/A',
+        'Pcb No': machine.pcbNo || 'N/A',
+        Zone: machine.zone || 'N/A',
+        Ward: machine.ward || 'N/A',
+        Beat: machine.beat || 'N/A',
+        'Location Address': machine.address || 'N/A',
+        UID: machine.uid || 'N/A',
+        'Machine Type': machine.machineType || 'N/A',
+        Status: machine.status === '1' ? 'Online' : 'Offline',
+        'Stock Status': machine.stockStatus || 'N/A',
+        'Burning Status': this.getBurningStatusLabel(machine.burningStatus),
+        'Items Dispensed': machine.itemsDispensed || 0,
+        Collection: machine.collection ? '₹ ' + machine.collection : '₹ 0',
+        'Items Burnt': machine.itemsBurnt || 0,
+        'Burning Cycles': machine.burningCycles || 0,
+        'Installed Date': machine.machineInstalledDate || 'N/A',
+      }));
+
+      // Create worksheet with auto-filter
+      const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(exportData);
+
+      // Calculate the range for auto-filter (A1:O[length+1])
+      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:O1');
+      ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
+
+      // Set column widths
+      ws['!cols'] = [
+        { width: 8 }, // S.No
+        { width: 15 }, // Machine ID
+        { width: 12 }, // MC SrNo
+        { width: 12 }, // Pcb No
+        { width: 15 }, // Zone
+        { width: 15 }, // Ward
+        { width: 15 }, // Beat
+        { width: 25 }, // Location Name
+        { width: 30 }, // Location Address
+        { width: 15 }, // UID
+        { width: 15 }, // Machine Type
+        { width: 12 }, // Status
+        { width: 15 }, // Stock Status
+        { width: 15 }, // Burning Status
+        { width: 15 }, // Items Dispensed
+        { width: 15 }, // Collection
+        { width: 15 }, // Items Burnt
+        { width: 15 }, // Burning Cycles
+        { width: 20 }, // Last Updated
+        { width: 20 }, // Installed Date
+      ];
+
+      // Create workbook
+      const wb: XLSX.WorkBook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Machine Report');
+
+      // Generate file name with timestamp
+      const date = new Date();
+      const fileName = `MachineReport_${date.getFullYear()}-${(
+        date.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}_${date
+        .getHours()
+        .toString()
+        .padStart(2, '0')}-${date
+        .getMinutes()
+        .toString()
+        .padStart(2, '0')}.xlsx`;
+
+      // Export the file
+      XLSX.writeFile(wb, fileName);
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      this.errorMessage = 'Failed to export data. Please try again.';
+    } finally {
+      this.isLoading = false;
     }
   }
 }

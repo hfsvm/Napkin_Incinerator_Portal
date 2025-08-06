@@ -554,14 +554,20 @@ label,
   opacity: 1;
 }
 
-
-
-
-
 .disabled-link {
   pointer-events: none;
   color: black;
   cursor: not-allowed;
   text-decoration: none;
+  font-weight: bold;
+}
+
+/* Add this to your component's CSS or global styles */
+.total-row {
+  font-weight: bold;
+  background-color: #f8f9fa; /* Optional: Add a light background color */
+}
+
+.font-weight-bold {
   font-weight: bold;
 }

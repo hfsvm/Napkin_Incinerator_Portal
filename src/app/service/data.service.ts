@@ -908,10 +908,7 @@ export class DataService {
   }
 
   /** 🔹 Get stock information */
-  getStockInformation(
-    merchantId: string,
-    userId: number
-  ): Observable<any> {
+  getStockInformation(merchantId: string, userId: number): Observable<any> {
     debugger;
 
     const url = `${this.url1}/getStockInformation/${merchantId}/${userId}`;
@@ -927,18 +924,72 @@ export class DataService {
 
   /** 🔹 Get stock information */
   saveStockSeenInformation(payload: {
-  machineId: string[],
-  merchantId: string,
-  userId: number
-}): Observable<any> {
-  const url = `${this.url1}/saveStockSeenInformation`; // No path params
+    machineId: string[];
+    merchantId: string;
+    userId: number;
+  }): Observable<any> {
+    const url = `${this.url1}/saveStockSeenInformation`; // No path params
 
-  console.log('📡 API CALL:', url, 'Payload:', payload);
+    console.log('📡 API CALL:', url, 'Payload:', payload);
 
-  return this.http.post(url, payload, this.httpOptions).pipe(
-    retry(1),
-    tap((response) => console.log('🔹 saveStockSeenInformation Response:', response)),
-    catchError(this.handleError)
-  );
-}
+    return this.http.post(url, payload, this.httpOptions).pipe(
+      retry(1),
+      tap((response) =>
+        console.log('🔹 saveStockSeenInformation Response:', response)
+      ),
+      catchError(this.handleError)
+    );
+  }
+
+  getAllUser(merchantId: string): Observable<any> {
+    const url = `${this.url1}/getAllUser/${merchantId}`;
+    console.log('📡 API CALL:', url);
+
+    return this.http.get(url, this.httpOptions).pipe(
+      retry(1),
+      tap((response) => console.log('🔹 AllUser', response)),
+      catchError(this.handleError)
+    );
+  }
+
+  getAllNotificationType(): Observable<any> {
+    const url = `${this.url1}/getAllNotificationType`;
+    console.log('📡 Fetching NotificationType List...');
+
+    return this.http.get<any>(url, this.httpOptions).pipe(
+      retry(1),
+      tap((response) => console.log('📋 NotificationType:', response)),
+      catchError(this.handleError)
+    );
+  }
+
+  getAllEventType(): Observable<any> {
+    const url = `${this.url1}/getAllEventType`;
+    console.log('📡 Fetching EventType List...');
+
+    return this.http.get<any>(url, this.httpOptions).pipe(
+      retry(1),
+      tap((response) => console.log('📋 EventType:', response)),
+      catchError(this.handleError)
+    );
+  }
+
+  setUserNotificationAccess(payload: {
+    eventTypeId: number[];
+    merchantId: string;
+    notificationTypeId: number;
+    userId: number;
+  }): Observable<any> {
+    const url = `${this.url1}/setUserNotificationAccess`; // No path params
+
+    console.log('📡 API CALL:', url, 'Payload:', payload);
+
+    return this.http.post(url, payload, this.httpOptions).pipe(
+      retry(1),
+      tap((response) =>
+        console.log('🔹 setUserNotificationAccess Response:', response)
+      ),
+      catchError(this.handleError)
+    );
+  }
 }

@@ -82,6 +82,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
 
   isLoading: boolean = false;
   showInitialMessage: boolean = true;
+  hasInitialLoad: boolean = false;
   summaryType: 'Daily' | 'Totals' = 'Daily';
   errorMessage = '';
 
@@ -292,10 +293,10 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     );
     this.cdr.detectChanges();
     // Start auto-refresh functionality
-    this.startAutoRefresh();
+    // this.startAutoRefresh();
 
     // Start the countdown
-    this.startRefreshCountdown();
+    // this.startRefreshCountdown();
 
     this.updatePagination();
   }
@@ -517,45 +518,50 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   //   this.selectedZones = [];
 
   //   if (this.selectedProjects.length === 0) {
-  //     // If no projects selected, clear all dependent filters
-  //     this.clearDependentSelections('project');
-  //     return;
+  //     // If no projects selected, get all states from all projects
+  //     this.fullData.forEach((project) => {
+  //       project?.states?.forEach((stateobj: any) => {
+  //         if (!this.zones.includes(stateobj.state)) {
+  //           this.zones.push(stateobj.state);
+  //         }
+  //       });
+  //     });
+  //   } else {
+  //     // If projects are selected, only get states from selected projects
+  //     this.selectedProjects.forEach((pid) => {
+  //       const project = this.fullData.find((p) => p.projectId === pid);
+  //       project?.states?.forEach((stateobj: any) => {
+  //         if (!this.zones.includes(stateobj.state)) {
+  //           this.zones.push(stateobj.state);
+  //         }
+  //       });
+  //     });
   //   }
 
-  //   this.selectedProjects.forEach((pid) => {
-  //     const project = this.fullData.find((p) => p.projectId === pid);
-  //     project?.states?.forEach((stateobj: any) => {
-  //       if (!this.zones.includes(stateobj.state)) {
-  //         this.zones.push(stateobj.state);
-  //       }
-  //     });
-  //   });
+  //   // Select all by default
   //   this.selectedZones = [...this.zones];
+  //   this.updateHierarchySelection('zones', this.selectedZones);
   // }
+
   filterStates() {
     this.zones = [];
     this.selectedZones = [];
 
     if (this.selectedProjects.length === 0) {
-      // If no projects selected, get all states from all projects
-      this.fullData.forEach((project) => {
-        project?.states?.forEach((stateobj: any) => {
-          if (!this.zones.includes(stateobj.state)) {
-            this.zones.push(stateobj.state);
-          }
-        });
-      });
-    } else {
-      // If projects are selected, only get states from selected projects
-      this.selectedProjects.forEach((pid) => {
-        const project = this.fullData.find((p) => p.projectId === pid);
-        project?.states?.forEach((stateobj: any) => {
-          if (!this.zones.includes(stateobj.state)) {
-            this.zones.push(stateobj.state);
-          }
-        });
-      });
+      // Clear all dependent filters
+      this.clearDependentSelections('project');
+      return;
     }
+
+    // If projects are selected, populate states
+    this.selectedProjects.forEach((pid) => {
+      const project = this.fullData.find((p) => p.projectId === pid);
+      project?.states?.forEach((stateobj: any) => {
+        if (!this.zones.includes(stateobj.state)) {
+          this.zones.push(stateobj.state);
+        }
+      });
+    });
 
     // Select all by default
     this.selectedZones = [...this.zones];
@@ -567,24 +573,35 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   //   this.selectedWards = [];
 
   //   if (this.selectedZones.length === 0) {
-  //     // If no zones selected, clear all dependent filters
-  //     this.clearDependentSelections('zones');
-  //     return;
-  //   }
-
-  //   this.selectedProjects.forEach((pid) => {
-  //     const project = this.fullData.find((p) => p.projectId === pid);
-  //     project?.states?.forEach((stateobj: any) => {
-  //       if (this.selectedZones.includes(stateobj.state)) {
+  //     // If no zones selected, get all districts from all states
+  //     this.fullData.forEach((project) => {
+  //       project?.states?.forEach((stateobj: any) => {
   //         stateobj.districts?.forEach((districtobj: any) => {
   //           if (!this.wards.includes(districtobj.district)) {
   //             this.wards.push(districtobj.district);
   //           }
   //         });
-  //       }
+  //       });
   //     });
-  //   });
+  //   } else {
+  //     // If zones are selected, only get districts from selected zones
+  //     this.selectedProjects.forEach((pid) => {
+  //       const project = this.fullData.find((p) => p.projectId === pid);
+  //       project?.states?.forEach((stateobj: any) => {
+  //         if (this.selectedZones.includes(stateobj.state)) {
+  //           stateobj.districts?.forEach((districtobj: any) => {
+  //             if (!this.wards.includes(districtobj.district)) {
+  //               this.wards.push(districtobj.district);
+  //             }
+  //           });
+  //         }
+  //       });
+  //     });
+  //   }
+
+  //   // Select all by default
   //   this.selectedWards = [...this.wards];
+  //   this.updateHierarchySelection('wards', this.selectedWards);
   // }
 
   filterWards() {
@@ -592,31 +609,23 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     this.selectedWards = [];
 
     if (this.selectedZones.length === 0) {
-      // If no zones selected, get all districts from all states
-      this.fullData.forEach((project) => {
-        project?.states?.forEach((stateobj: any) => {
+      // Clear all dependent filters if zones not selected
+      this.clearDependentSelections('zone');
+      return;
+    }
+
+    this.selectedProjects.forEach((pid) => {
+      const project = this.fullData.find((p) => p.projectId === pid);
+      project?.states?.forEach((stateobj: any) => {
+        if (this.selectedZones.includes(stateobj.state)) {
           stateobj.districts?.forEach((districtobj: any) => {
             if (!this.wards.includes(districtobj.district)) {
               this.wards.push(districtobj.district);
             }
           });
-        });
+        }
       });
-    } else {
-      // If zones are selected, only get districts from selected zones
-      this.selectedProjects.forEach((pid) => {
-        const project = this.fullData.find((p) => p.projectId === pid);
-        project?.states?.forEach((stateobj: any) => {
-          if (this.selectedZones.includes(stateobj.state)) {
-            stateobj.districts?.forEach((districtobj: any) => {
-              if (!this.wards.includes(districtobj.district)) {
-                this.wards.push(districtobj.district);
-              }
-            });
-          }
-        });
-      });
-    }
+    });
 
     // Select all by default
     this.selectedWards = [...this.wards];
@@ -773,12 +782,91 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     console.log('Updated selectedBeats:', this.selectedBeats);
   }
 
+  // clearDependentSelections(key: string) {
+  //   switch (key) {
+  //     case 'project':
+  //       if (this.selectedProjects.length === 0) {
+  //         this.selectedZones = [];
+  //         this.selectedWards = [];
+  //         this.selectedSubZones = [];
+  //         this.selectedWardList = [];
+  //         this.selectedBeatList = [];
+  //         this.selectedBeats = [];
+
+  //         // Clear hierarchy selections as well
+  //         this.hierarchySelection.state = [];
+  //         this.hierarchySelection.district = [];
+  //         this.hierarchySelection.zone = [];
+  //         this.hierarchySelection.ward = [];
+  //         this.hierarchySelection.beat = [];
+  //       }
+  //       break;
+  //     case 'zones':
+  //     case 'state':
+  //       if (this.selectedZones.length === 0) {
+  //         this.selectedWards = [];
+  //         this.selectedSubZones = [];
+  //         this.selectedWardList = [];
+  //         this.selectedBeatList = [];
+  //         this.selectedBeats = [];
+
+  //         // Clear hierarchy selections
+  //         this.hierarchySelection.district = [];
+  //         this.hierarchySelection.zone = [];
+  //         this.hierarchySelection.ward = [];
+  //         this.hierarchySelection.beat = [];
+  //       }
+  //       break;
+  //     case 'wards':
+  //     case 'district':
+  //       if (this.selectedWards.length === 0) {
+  //         this.selectedSubZones = [];
+  //         this.selectedWardList = [];
+  //         this.selectedBeatList = [];
+  //         this.selectedBeats = [];
+
+  //         // Clear hierarchy selections
+  //         this.hierarchySelection.zone = [];
+  //         this.hierarchySelection.ward = [];
+  //         this.hierarchySelection.beat = [];
+  //       }
+  //       break;
+  //     case 'selectedSubZones':
+  //     case 'zone':
+  //       if (this.selectedSubZones.length === 0) {
+  //         this.selectedWardList = [];
+  //         this.selectedBeatList = [];
+  //         this.selectedBeats = [];
+
+  //         // Clear hierarchy selections
+  //         this.hierarchySelection.ward = [];
+  //         this.hierarchySelection.beat = [];
+  //       }
+  //       break;
+  //     case 'selectedWardList':
+  //     case 'ward':
+  //       if (this.selectedWardList.length === 0) {
+  //         this.selectedBeatList = [];
+  //         this.selectedBeats = [];
+
+  //         // Clear hierarchy selection
+  //         this.hierarchySelection.beat = [];
+  //       }
+  //       break;
+  //     case 'selectedBeatList':
+  //     case 'beat':
+  //       if (this.selectedBeatList.length === 0) {
+  //         this.selectedBeats = [];
+  //       }
+  //       break;
+  //   }
+  // }
   clearDependentSelections(key: string) {
     switch (key) {
       case 'project':
         if (this.selectedProjects.length === 0) {
-          this.selectedZones = [];
-          this.selectedWards = [];
+          this.selectedZones = []; // Clear states
+          this.selectedWards = []; // Clear districts
           this.selectedSubZones = [];
           this.selectedWardList = [];
           this.selectedBeatList = [];
@@ -790,8 +878,12 @@ export class SmartTablesBasicExampleComponent implements OnInit {
           this.hierarchySelection.zone = [];
           this.hierarchySelection.ward = [];
           this.hierarchySelection.beat = [];
+
+          // Also clear the zones array to reset the dropdown
+          this.zones = [];
         }
         break;
+
       case 'zones':
       case 'state':
         if (this.selectedZones.length === 0) {
@@ -893,7 +985,9 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   }
 
   rebuildFilterChain(startKey: string) {
-    // Determine where to start rebuilding based on the changed key
+    this.clearDependentSelections(startKey);
+
+    // Then rebuild the chain
     switch (startKey) {
       case 'projects':
         this.filterStates();
@@ -903,6 +997,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
         this.filterBeatList();
         this.filterMachines();
         break;
+
       case 'zones':
       case 'state':
         this.filterWards();
@@ -936,13 +1031,29 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     }
   }
 
+  // startAutoRefresh(): void {
+  //   // Refresh every 2 minutes (120,000 milliseconds)
+  //   this.autoRefreshSubscription = interval(120000).subscribe(() => {
+  //     console.log('🔄 Auto-refreshing data...');
+  //     // Replace with your data loading method
+  //     this.loadReport();
+  //   });
+  // }
+
   startAutoRefresh(): void {
-    // Refresh every 2 minutes (120,000 milliseconds)
+    // ✅ Only start if not already running
+    if (this.autoRefreshSubscription) {
+      return;
+    }
+
+    // Start auto-refresh every 2 minutes (120,000 milliseconds)
     this.autoRefreshSubscription = interval(120000).subscribe(() => {
       console.log('🔄 Auto-refreshing data...');
-      // Replace with your data loading method
-      this.loadReport();
+      this.loadReport(); // This will refresh the data
     });
+
+    // Start the countdown display
+    this.startRefreshCountdown();
   }
 
   startRefreshCountdown(): void {
@@ -1159,9 +1270,20 @@ export class SmartTablesBasicExampleComponent implements OnInit {
 
   loadReport() {
     debugger;
+
+    // Check if Client Name (selectedProjects) is empty
+    if (!this.selectedProjects || this.selectedProjects.length === 0) {
+      this.errorMessage = 'Please select at least one Client Name';
+      this.isLoading = false;
+      this.showInitialMessage = false;
+      return; // Exit the function early
+    }
+
     this.showInitialMessage = false;
     this.isLoading = true;
     this.errorMessage = '';
+    this.hasInitialLoad = true;
+    this.searchQuery = '';
 
     const merchantId = this.commonDataService.merchantId ?? '';
     const userDetailsList = this.commonDataService.userDetails.clients || [];
@@ -1228,10 +1350,12 @@ export class SmartTablesBasicExampleComponent implements OnInit {
           });
           this.isLoading = false;
           this.processResponseData(response.data.machineDetails);
+          if (!this.autoRefreshSubscription) {
+            this.startAutoRefresh();
+          }
         } else {
           this.filteredData = [];
           this.isLoading = false;
-
           this.errorMessage = 'No data available for the selected filters.';
         }
       },
@@ -1317,7 +1441,7 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   setSearchQuery(value: string) {
     this.searchQuery = value;
     this.currentPage = 1; // Reset to first page
-    // this.updatePagination(); //
+    this.updatePagination(); //
   }
 
   clearSearch() {
@@ -1391,21 +1515,6 @@ export class SmartTablesBasicExampleComponent implements OnInit {
 
     return lastTwoParts;
   }
-
-  // exportToExcel() {
-  //   debugger;
-  //   const table = document.querySelector('.report-table') as HTMLTableElement;
-  //   if (!table) {
-  //     console.error('Table not found!');
-  //     return;
-  //   }
-
-  //   const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(table);
-  //   const wb: XLSX.WorkBook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(wb, ws, 'Machine Report');
-
-  //   XLSX.writeFile(wb, 'Machine_Report.xlsx');
-  // }
 
   exportToExcel(): void {
     debugger;
@@ -2805,193 +2914,192 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     // //       (machine.incinerator && machine.incinerator.length)
     // //   )
     //   .map((machine, index): ReportItem => {
-    this.reportsData = machineDetails
-      .map((machine, index): ReportItem => {
-        let transactionsMap = new Map<string, Transaction>();
+    this.reportsData = machineDetails.map((machine, index): ReportItem => {
+      let transactionsMap = new Map<string, Transaction>();
 
-        // ✅ Initialize Machine Totals
-        let machineTotalQty = 0;
-        let machineTotalCash = 0;
-        let machineTotalBurnCycles = 0;
-        let machineTotalSanNapkins = 0;
-        let machineTotalOnTimeSeconds = 0;
-        let machineTotalOnTimeFormatted = '-';
-        let machineTotalOnTimeAvgPerDay = '-';
+      // ✅ Initialize Machine Totals
+      let machineTotalQty = 0;
+      let machineTotalCash = 0;
+      let machineTotalBurnCycles = 0;
+      let machineTotalSanNapkins = 0;
+      let machineTotalOnTimeSeconds = 0;
+      let machineTotalOnTimeFormatted = '-';
+      let machineTotalOnTimeAvgPerDay = '-';
 
-        // ✅ Create maps for faster lookup of transaction data by date (using YYYY-MM-DD format)
-        const vendingDataMap = new Map<string, any>();
-        const incineratorDataMap = new Map<string, any>();
+      // ✅ Create maps for faster lookup of transaction data by date (using YYYY-MM-DD format)
+      const vendingDataMap = new Map<string, any>();
+      const incineratorDataMap = new Map<string, any>();
 
-        // ✅ Populate vending data map and calculate totals
-        (machine.vending || []).forEach((txn: any) => {
-          if (txn.date && txn.date !== 'Total') {
-            // Convert service date format to standard format for mapping
-            const standardDate = convertServiceDateToStandard(txn.date);
-            vendingDataMap.set(standardDate, {
-              ...txn,
-              originalDate: txn.date,
-            });
-            machineTotalQty += txn.quantity ?? 0;
-            machineTotalCash += txn.cashCollected ?? 0;
-
-            console.log(
-              `📌 Vending data mapped: ${txn.date} -> ${standardDate}`,
-              txn
-            );
-          }
-        });
-
-        // ✅ Populate incinerator data map and calculate totals
-        (machine.incinerator || []).forEach((txn: any) => {
-          if (txn.date && txn.date !== 'Total') {
-            // Convert service date format to standard format for mapping
-            const standardDate = convertServiceDateToStandard(txn.date);
-            incineratorDataMap.set(standardDate, {
-              ...txn,
-              originalDate: txn.date,
-            });
-            machineTotalBurnCycles += txn.burnCycles ?? 0;
-            machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
-
-            // Parse the onTime string to extract total time and average per day
-            const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
-
-            // Store the last valid onTime to use for machine total
-            if (totalTime && totalTime !== '-') {
-              machineTotalOnTimeFormatted = totalTime;
-            }
-
-            // Store the last valid avgPerDay to use for machine total
-            if (avgPerDay && avgPerDay !== '-') {
-              machineTotalOnTimeAvgPerDay = avgPerDay;
-            }
-
-            console.log(
-              `📌 Incinerator data mapped: ${txn.date} -> ${standardDate}`,
-              txn
-            );
-          }
-        });
-
-        console.log(`🔍 Machine ${machine.machineId} data maps:`, {
-          vendingDates: Array.from(vendingDataMap.keys()),
-          incineratorDates: Array.from(incineratorDataMap.keys()),
-        });
-
-        // ✅ Generate transaction entries for ALL dates in the range
-        allDatesList.forEach((date) => {
-          const vendingData = vendingDataMap.get(date);
-          const incineratorData = incineratorDataMap.get(date);
-
-          console.log(`📊 Processing date ${date}:`, {
-            hasVendingData: !!vendingData,
-            hasIncineratorData: !!incineratorData,
-            vendingData: vendingData,
-            incineratorData: incineratorData,
+      // ✅ Populate vending data map and calculate totals
+      (machine.vending || []).forEach((txn: any) => {
+        if (txn.date && txn.date !== 'Total') {
+          // Convert service date format to standard format for mapping
+          const standardDate = convertServiceDateToStandard(txn.date);
+          vendingDataMap.set(standardDate, {
+            ...txn,
+            originalDate: txn.date,
           });
+          machineTotalQty += txn.quantity ?? 0;
+          machineTotalCash += txn.cashCollected ?? 0;
 
-          // Initialize default values
-          let qty: any = '-';
-          let cash: string = '-';
-          let onTime: string = '-';
-          let onTimeAvgPerDay: string = '-';
-          let burnCycles: any = '-';
-          let sanNapkinsBurnt: any = '-';
-
-          // If vending data exists for this date, use it
-          if (vendingData) {
-            qty = vendingData.quantity ?? 0;
-            cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
-            console.log(`✅ Found vending data for ${date}:`, { qty, cash });
-          }
-
-          // If incinerator data exists for this date, use it
-          if (incineratorData) {
-            const { totalTime, avgPerDay } = this.parseOnTimeString(
-              incineratorData.onTime
-            );
-            onTime = totalTime ?? '-';
-            onTimeAvgPerDay = avgPerDay ?? '-';
-            burnCycles = incineratorData.burnCycles ?? 0;
-            sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
-            console.log(`✅ Found incinerator data for ${date}:`, {
-              onTime,
-              burnCycles,
-              sanNapkinsBurnt,
-            });
-          }
-
-          // Add transaction for this date (display date in service format for consistency)
-          const displayDate = convertStandardToServiceDate(date);
-          transactionsMap.set(date, {
-            date: displayDate, // Display in original format (DD-MMM-YYYY)
-            qty: qty,
-            cash: cash,
-            onTime: onTime,
-            onTimeAvgPerDay: onTimeAvgPerDay,
-            burnCycles: burnCycles,
-            sanNapkinsBurnt: sanNapkinsBurnt,
-          });
-        });
-
-        // ✅ Add Machine's Total Row
-        transactionsMap.set('Total', {
-          date: 'Total',
-          qty: machineTotalQty,
-          cash: `₹ ${machineTotalCash.toFixed(2)}`,
-          onTime: machineTotalOnTimeFormatted,
-          onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
-          burnCycles: machineTotalBurnCycles,
-          sanNapkinsBurnt: machineTotalSanNapkins,
-        });
-
-        // ✅ Update Grand Total (Sum of Each Machine's Totals)
-        grandTotalQty += machineTotalQty;
-        grandTotalCash += machineTotalCash;
-        grandTotalBurnCycles += machineTotalBurnCycles;
-        grandTotalSanNapkins += machineTotalSanNapkins;
-
-        // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
-        const sortedTransactions = Array.from(transactionsMap.values()).sort(
-          (a, b) => {
-            if (a.date === 'Total') return 1;
-            if (b.date === 'Total') return -1;
-
-            // Convert display dates back to standard format for sorting
-            const dateA = convertServiceDateToStandard(a.date);
-            const dateB = convertServiceDateToStandard(b.date);
-            return new Date(dateA).getTime() - new Date(dateB).getTime();
-          }
-        );
-
-        console.log(
-          `📋 Machine ${machine.machineId} final transactions:`,
-          sortedTransactions
-        );
-
-        // Store total onTime in a custom property for later use
-        const result = {
-          srNo: index + 1,
-          machineId: machine.machineId,
-          machineLocation: machine.machineLocation
-            ? machine.machineLocation.trim()
-            : machine.address,
-          address: machine.address || '',
-          machineType: machine.machineType || 'N/A',
-          Zone: machine.Zone || 'N/A',
-          Ward: machine.Ward || 'N/A',
-          Beat: machine.Beat || 'N/A',
-          toiletType: machine.toiletType || 'N/A',
-          reportType: machine.reportType || 'N/A',
-          transactions: sortedTransactions, // Use sorted transactions
-        } as ReportItem;
-
-        // Add the onTime to the result as custom properties
-        (result as any)._totalOnTime = machineTotalOnTimeFormatted;
-        (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
-
-        return result;
+          console.log(
+            `📌 Vending data mapped: ${txn.date} -> ${standardDate}`,
+            txn
+          );
+        }
       });
+
+      // ✅ Populate incinerator data map and calculate totals
+      (machine.incinerator || []).forEach((txn: any) => {
+        if (txn.date && txn.date !== 'Total') {
+          // Convert service date format to standard format for mapping
+          const standardDate = convertServiceDateToStandard(txn.date);
+          incineratorDataMap.set(standardDate, {
+            ...txn,
+            originalDate: txn.date,
+          });
+          machineTotalBurnCycles += txn.burnCycles ?? 0;
+          machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+
+          // Parse the onTime string to extract total time and average per day
+          const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
+
+          // Store the last valid onTime to use for machine total
+          if (totalTime && totalTime !== '-') {
+            machineTotalOnTimeFormatted = totalTime;
+          }
+
+          // Store the last valid avgPerDay to use for machine total
+          if (avgPerDay && avgPerDay !== '-') {
+            machineTotalOnTimeAvgPerDay = avgPerDay;
+          }
+
+          console.log(
+            `📌 Incinerator data mapped: ${txn.date} -> ${standardDate}`,
+            txn
+          );
+        }
+      });
+
+      console.log(`🔍 Machine ${machine.machineId} data maps:`, {
+        vendingDates: Array.from(vendingDataMap.keys()),
+        incineratorDates: Array.from(incineratorDataMap.keys()),
+      });
+
+      // ✅ Generate transaction entries for ALL dates in the range
+      allDatesList.forEach((date) => {
+        const vendingData = vendingDataMap.get(date);
+        const incineratorData = incineratorDataMap.get(date);
+
+        console.log(`📊 Processing date ${date}:`, {
+          hasVendingData: !!vendingData,
+          hasIncineratorData: !!incineratorData,
+          vendingData: vendingData,
+          incineratorData: incineratorData,
+        });
+
+        // Initialize default values
+        let qty: any = '-';
+        let cash: string = '-';
+        let onTime: string = '-';
+        let onTimeAvgPerDay: string = '-';
+        let burnCycles: any = '-';
+        let sanNapkinsBurnt: any = '-';
+
+        // If vending data exists for this date, use it
+        if (vendingData) {
+          qty = vendingData.quantity ?? 0;
+          cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
+          console.log(`✅ Found vending data for ${date}:`, { qty, cash });
+        }
+
+        // If incinerator data exists for this date, use it
+        if (incineratorData) {
+          const { totalTime, avgPerDay } = this.parseOnTimeString(
+            incineratorData.onTime
+          );
+          onTime = totalTime ?? '-';
+          onTimeAvgPerDay = avgPerDay ?? '-';
+          burnCycles = incineratorData.burnCycles ?? 0;
+          sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
+          console.log(`✅ Found incinerator data for ${date}:`, {
+            onTime,
+            burnCycles,
+            sanNapkinsBurnt,
+          });
+        }
+
+        // Add transaction for this date (display date in service format for consistency)
+        const displayDate = convertStandardToServiceDate(date);
+        transactionsMap.set(date, {
+          date: displayDate, // Display in original format (DD-MMM-YYYY)
+          qty: qty,
+          cash: cash,
+          onTime: onTime,
+          onTimeAvgPerDay: onTimeAvgPerDay,
+          burnCycles: burnCycles,
+          sanNapkinsBurnt: sanNapkinsBurnt,
+        });
+      });
+
+      // ✅ Add Machine's Total Row
+      transactionsMap.set('Total', {
+        date: 'Total',
+        qty: machineTotalQty,
+        cash: `₹ ${machineTotalCash.toFixed(2)}`,
+        onTime: machineTotalOnTimeFormatted,
+        onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
+        burnCycles: machineTotalBurnCycles,
+        sanNapkinsBurnt: machineTotalSanNapkins,
+      });
+
+      // ✅ Update Grand Total (Sum of Each Machine's Totals)
+      grandTotalQty += machineTotalQty;
+      grandTotalCash += machineTotalCash;
+      grandTotalBurnCycles += machineTotalBurnCycles;
+      grandTotalSanNapkins += machineTotalSanNapkins;
+
+      // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
+      const sortedTransactions = Array.from(transactionsMap.values()).sort(
+        (a, b) => {
+          if (a.date === 'Total') return 1;
+          if (b.date === 'Total') return -1;
+
+          // Convert display dates back to standard format for sorting
+          const dateA = convertServiceDateToStandard(a.date);
+          const dateB = convertServiceDateToStandard(b.date);
+          return new Date(dateA).getTime() - new Date(dateB).getTime();
+        }
+      );
+
+      console.log(
+        `📋 Machine ${machine.machineId} final transactions:`,
+        sortedTransactions
+      );
+
+      // Store total onTime in a custom property for later use
+      const result = {
+        srNo: index + 1,
+        machineId: machine.machineId,
+        machineLocation: machine.machineLocation
+          ? machine.machineLocation.trim()
+          : machine.address,
+        address: machine.address || '',
+        machineType: machine.machineType || 'N/A',
+        Zone: machine.Zone || 'N/A',
+        Ward: machine.Ward || 'N/A',
+        Beat: machine.Beat || 'N/A',
+        toiletType: machine.toiletType || 'N/A',
+        reportType: machine.reportType || 'N/A',
+        transactions: sortedTransactions, // Use sorted transactions
+      } as ReportItem;
+
+      // Add the onTime to the result as custom properties
+      (result as any)._totalOnTime = machineTotalOnTimeFormatted;
+      (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
+
+      return result;
+    });
 
     // Calculate number of days between start date and end date
     let numberOfDays = 1; // Default to 1 to avoid division by zero
@@ -3403,200 +3511,199 @@ export class SmartTablesBasicExampleComponent implements OnInit {
     );
 
     // this.reportsData = machineDetails
-  //   .filter(
-  //     (machine) =>
-  //       (machine.vending && machine.vending.length) ||
-  //       (machine.incinerator && machine.incinerator.length)
-  //   )
-  //   .map((machine, index): ReportItem => {
+    //   .filter(
+    //     (machine) =>
+    //       (machine.vending && machine.vending.length) ||
+    //       (machine.incinerator && machine.incinerator.length)
+    //   )
+    //   .map((machine, index): ReportItem => {
 
-  this.reportsData = machineDetails
-  .map((machine, index): ReportItem => {
-        let transactionsMap = new Map<string, Transaction>();
+    this.reportsData = machineDetails.map((machine, index): ReportItem => {
+      let transactionsMap = new Map<string, Transaction>();
 
-        // ✅ Initialize Machine Totals
-        let machineTotalQty = 0;
-        let machineTotalCash = 0;
-        let machineTotalBurnCycles = 0;
-        let machineTotalSanNapkins = 0;
-        let machineTotalOnTimeSeconds = 0;
-        let machineTotalOnTimeFormatted = '-';
-        let machineTotalOnTimeAvgPerDay = '-';
+      // ✅ Initialize Machine Totals
+      let machineTotalQty = 0;
+      let machineTotalCash = 0;
+      let machineTotalBurnCycles = 0;
+      let machineTotalSanNapkins = 0;
+      let machineTotalOnTimeSeconds = 0;
+      let machineTotalOnTimeFormatted = '-';
+      let machineTotalOnTimeAvgPerDay = '-';
 
-        // ✅ Create maps for faster lookup of transaction data by date (using YYYY-MM-DD format)
-        const vendingDataMap = new Map<string, any>();
-        const incineratorDataMap = new Map<string, any>();
+      // ✅ Create maps for faster lookup of transaction data by date (using YYYY-MM-DD format)
+      const vendingDataMap = new Map<string, any>();
+      const incineratorDataMap = new Map<string, any>();
 
-        // ✅ Populate vending data map and calculate totals
-        (machine.vending || []).forEach((txn: any) => {
-          if (txn.date && txn.date !== 'Total') {
-            // Convert service date format to standard format for mapping
-            const standardDate = convertServiceDateToStandard(txn.date);
-            vendingDataMap.set(standardDate, {
-              ...txn,
-              originalDate: txn.date,
-            });
-            machineTotalQty += txn.quantity ?? 0;
-            machineTotalCash += txn.cashCollected ?? 0;
-
-            console.log(
-              `📌 Vending data mapped: ${txn.date} -> ${standardDate}`,
-              txn
-            );
-          }
-        });
-
-        // ✅ Populate incinerator data map and calculate totals
-        (machine.incinerator || []).forEach((txn: any) => {
-          if (txn.date && txn.date !== 'Total') {
-            // Convert service date format to standard format for mapping
-            const standardDate = convertServiceDateToStandard(txn.date);
-            incineratorDataMap.set(standardDate, {
-              ...txn,
-              originalDate: txn.date,
-            });
-            machineTotalBurnCycles += txn.burnCycles ?? 0;
-            machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
-
-            // Parse the onTime string to extract total time and average per day
-            const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
-
-            // Store the last valid onTime to use for machine total
-            if (totalTime && totalTime !== '-') {
-              machineTotalOnTimeFormatted = totalTime;
-            }
-
-            // Store the last valid avgPerDay to use for machine total
-            if (avgPerDay && avgPerDay !== '-') {
-              machineTotalOnTimeAvgPerDay = avgPerDay;
-            }
-
-            console.log(
-              `📌 Incinerator data mapped: ${txn.date} -> ${standardDate}`,
-              txn
-            );
-          }
-        });
-
-        console.log(`🔍 Machine ${machine.machineId} data maps:`, {
-          vendingDates: Array.from(vendingDataMap.keys()),
-          incineratorDates: Array.from(incineratorDataMap.keys()),
-        });
-
-        // ✅ Generate transaction entries for ALL dates in the range
-        allDatesList.forEach((date) => {
-          const vendingData = vendingDataMap.get(date);
-          const incineratorData = incineratorDataMap.get(date);
-
-          console.log(`📊 Processing date ${date}:`, {
-            hasVendingData: !!vendingData,
-            hasIncineratorData: !!incineratorData,
-            vendingData: vendingData,
-            incineratorData: incineratorData,
+      // ✅ Populate vending data map and calculate totals
+      (machine.vending || []).forEach((txn: any) => {
+        if (txn.date && txn.date !== 'Total') {
+          // Convert service date format to standard format for mapping
+          const standardDate = convertServiceDateToStandard(txn.date);
+          vendingDataMap.set(standardDate, {
+            ...txn,
+            originalDate: txn.date,
           });
+          machineTotalQty += txn.quantity ?? 0;
+          machineTotalCash += txn.cashCollected ?? 0;
 
-          // Initialize default values
-          let qty: any = '0';
-          let cash: string = '₹0';
-          let onTime: string = '0m';
-          let onTimeAvgPerDay: string = '-';
-          let burnCycles: any = '0';
-          let sanNapkinsBurnt: any = '0';
-
-          // If vending data exists for this date, use it
-          if (vendingData) {
-            qty = vendingData.quantity ?? 0;
-            cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
-            console.log(`✅ Found vending data for ${date}:`, { qty, cash });
-          }
-
-          // If incinerator data exists for this date, use it
-          if (incineratorData) {
-            const { totalTime, avgPerDay } = this.parseOnTimeString(
-              incineratorData.onTime
-            );
-            onTime = totalTime ?? '-';
-            onTimeAvgPerDay = avgPerDay ?? '-';
-            burnCycles = incineratorData.burnCycles ?? 0;
-            sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
-            console.log(`✅ Found incinerator data for ${date}:`, {
-              onTime,
-              burnCycles,
-              sanNapkinsBurnt,
-            });
-          }
-
-          // Add transaction for this date (display date in service format for consistency)
-          const displayDate = convertStandardToServiceDate(date);
-          transactionsMap.set(date, {
-            date: displayDate, // Display in original format (DD-MMM-YYYY)
-            qty: qty,
-            cash: cash,
-            onTime: onTime,
-            onTimeAvgPerDay: onTimeAvgPerDay,
-            burnCycles: burnCycles,
-            sanNapkinsBurnt: sanNapkinsBurnt,
-          });
-        });
-
-        // ✅ Add Machine's Total Row
-        transactionsMap.set('Total', {
-          date: 'Total',
-          qty: machineTotalQty,
-          cash: `₹ ${machineTotalCash.toFixed(2)}`,
-          onTime: machineTotalOnTimeFormatted,
-          onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
-          burnCycles: machineTotalBurnCycles,
-          sanNapkinsBurnt: machineTotalSanNapkins,
-        });
-
-        // ✅ Update Grand Total (Sum of Each Machine's Totals)
-        grandTotalQty += machineTotalQty;
-        grandTotalCash += machineTotalCash;
-        grandTotalBurnCycles += machineTotalBurnCycles;
-        grandTotalSanNapkins += machineTotalSanNapkins;
-
-        // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
-        const sortedTransactions = Array.from(transactionsMap.values()).sort(
-          (a, b) => {
-            if (a.date === 'Total') return 1;
-            if (b.date === 'Total') return -1;
-
-            // Convert display dates back to standard format for sorting
-            const dateA = convertServiceDateToStandard(a.date);
-            const dateB = convertServiceDateToStandard(b.date);
-            return new Date(dateA).getTime() - new Date(dateB).getTime();
-          }
-        );
-
-        console.log(
-          `📋 Machine ${machine.machineId} final transactions:`,
-          sortedTransactions
-        );
-
-        // Store total onTime in a custom property for later use
-        const result = {
-          srNo: index + 1,
-          machineId: machine.machineId,
-          machineLocation: machine.machineLocation
-            ? machine.machineLocation.trim()
-            : machine.address,
-          address: machine.address || '',
-          machineType: machine.machineType || 'N/A',
-          Zone: machine.Zone || 'N/A',
-          Ward: machine.Ward || 'N/A',
-          Beat: machine.Beat || 'N/A',
-          toiletType: machine.toiletType || 'N/A',
-          reportType: machine.reportType || 'N/A',
-          transactions: sortedTransactions, // Use sorted transactions
-        } as ReportItem;
-
-        // Add the onTime to the result as custom properties
-        (result as any)._totalOnTime = machineTotalOnTimeFormatted;
-        (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
-
-        return result;
+          console.log(
+            `📌 Vending data mapped: ${txn.date} -> ${standardDate}`,
+            txn
+          );
+        }
       });
+
+      // ✅ Populate incinerator data map and calculate totals
+      (machine.incinerator || []).forEach((txn: any) => {
+        if (txn.date && txn.date !== 'Total') {
+          // Convert service date format to standard format for mapping
+          const standardDate = convertServiceDateToStandard(txn.date);
+          incineratorDataMap.set(standardDate, {
+            ...txn,
+            originalDate: txn.date,
+          });
+          machineTotalBurnCycles += txn.burnCycles ?? 0;
+          machineTotalSanNapkins += txn.sanitaryNapkinsBurnt ?? 0;
+
+          // Parse the onTime string to extract total time and average per day
+          const { totalTime, avgPerDay } = this.parseOnTimeString(txn.onTime);
+
+          // Store the last valid onTime to use for machine total
+          if (totalTime && totalTime !== '-') {
+            machineTotalOnTimeFormatted = totalTime;
+          }
+
+          // Store the last valid avgPerDay to use for machine total
+          if (avgPerDay && avgPerDay !== '-') {
+            machineTotalOnTimeAvgPerDay = avgPerDay;
+          }
+
+          console.log(
+            `📌 Incinerator data mapped: ${txn.date} -> ${standardDate}`,
+            txn
+          );
+        }
+      });
+
+      console.log(`🔍 Machine ${machine.machineId} data maps:`, {
+        vendingDates: Array.from(vendingDataMap.keys()),
+        incineratorDates: Array.from(incineratorDataMap.keys()),
+      });
+
+      // ✅ Generate transaction entries for ALL dates in the range
+      allDatesList.forEach((date) => {
+        const vendingData = vendingDataMap.get(date);
+        const incineratorData = incineratorDataMap.get(date);
+
+        console.log(`📊 Processing date ${date}:`, {
+          hasVendingData: !!vendingData,
+          hasIncineratorData: !!incineratorData,
+          vendingData: vendingData,
+          incineratorData: incineratorData,
+        });
+
+        // Initialize default values
+        let qty: any = '0';
+        let cash: string = '₹0';
+        let onTime: string = '0m';
+        let onTimeAvgPerDay: string = '-';
+        let burnCycles: any = '0';
+        let sanNapkinsBurnt: any = '0';
+
+        // If vending data exists for this date, use it
+        if (vendingData) {
+          qty = vendingData.quantity ?? 0;
+          cash = `₹ ${vendingData.cashCollected?.toFixed(2) ?? '0'}`;
+          console.log(`✅ Found vending data for ${date}:`, { qty, cash });
+        }
+
+        // If incinerator data exists for this date, use it
+        if (incineratorData) {
+          const { totalTime, avgPerDay } = this.parseOnTimeString(
+            incineratorData.onTime
+          );
+          onTime = totalTime ?? '-';
+          onTimeAvgPerDay = avgPerDay ?? '-';
+          burnCycles = incineratorData.burnCycles ?? 0;
+          sanNapkinsBurnt = incineratorData.sanitaryNapkinsBurnt ?? 0;
+          console.log(`✅ Found incinerator data for ${date}:`, {
+            onTime,
+            burnCycles,
+            sanNapkinsBurnt,
+          });
+        }
+
+        // Add transaction for this date (display date in service format for consistency)
+        const displayDate = convertStandardToServiceDate(date);
+        transactionsMap.set(date, {
+          date: displayDate, // Display in original format (DD-MMM-YYYY)
+          qty: qty,
+          cash: cash,
+          onTime: onTime,
+          onTimeAvgPerDay: onTimeAvgPerDay,
+          burnCycles: burnCycles,
+          sanNapkinsBurnt: sanNapkinsBurnt,
+        });
+      });
+
+      // ✅ Add Machine's Total Row
+      transactionsMap.set('Total', {
+        date: 'Total',
+        qty: machineTotalQty,
+        cash: `₹ ${machineTotalCash.toFixed(2)}`,
+        onTime: machineTotalOnTimeFormatted,
+        onTimeAvgPerDay: machineTotalOnTimeAvgPerDay,
+        burnCycles: machineTotalBurnCycles,
+        sanNapkinsBurnt: machineTotalSanNapkins,
+      });
+
+      // ✅ Update Grand Total (Sum of Each Machine's Totals)
+      grandTotalQty += machineTotalQty;
+      grandTotalCash += machineTotalCash;
+      grandTotalBurnCycles += machineTotalBurnCycles;
+      grandTotalSanNapkins += machineTotalSanNapkins;
+
+      // ✅ IMPORTANT: Sort transactions to show dates in chronological order, with Total at the end
+      const sortedTransactions = Array.from(transactionsMap.values()).sort(
+        (a, b) => {
+          if (a.date === 'Total') return 1;
+          if (b.date === 'Total') return -1;
+
+          // Convert display dates back to standard format for sorting
+          const dateA = convertServiceDateToStandard(a.date);
+          const dateB = convertServiceDateToStandard(b.date);
+          return new Date(dateA).getTime() - new Date(dateB).getTime();
+        }
+      );
+
+      console.log(
+        `📋 Machine ${machine.machineId} final transactions:`,
+        sortedTransactions
+      );
+
+      // Store total onTime in a custom property for later use
+      const result = {
+        srNo: index + 1,
+        machineId: machine.machineId,
+        machineLocation: machine.machineLocation
+          ? machine.machineLocation.trim()
+          : machine.address,
+        address: machine.address || '',
+        machineType: machine.machineType || 'N/A',
+        Zone: machine.Zone || 'N/A',
+        Ward: machine.Ward || 'N/A',
+        Beat: machine.Beat || 'N/A',
+        toiletType: machine.toiletType || 'N/A',
+        reportType: machine.reportType || 'N/A',
+        transactions: sortedTransactions, // Use sorted transactions
+      } as ReportItem;
+
+      // Add the onTime to the result as custom properties
+      (result as any)._totalOnTime = machineTotalOnTimeFormatted;
+      (result as any)._avgOnTimePerDay = machineTotalOnTimeAvgPerDay;
+
+      return result;
+    });
 
     // ✅ FIXED Calculate number of days between start date and end date
     let numberOfDays = 1; // Default to 1 to avoid division by zero
@@ -3838,6 +3945,4 @@ export class SmartTablesBasicExampleComponent implements OnInit {
   isAllSelected(selectedArray: string[], fullList: string[]): boolean {
     return selectedArray.length === fullList.length && fullList.length > 0;
   }
-
-  /** ✅ Toggle "Select All" Checkbox */
 }

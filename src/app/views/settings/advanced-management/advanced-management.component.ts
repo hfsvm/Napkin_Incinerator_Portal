@@ -55,10 +55,16 @@ export class AdvancedManagementComponent implements OnInit {
   selectedMachineIdPricing: string | null = null;
   dropdownOpenPricing: boolean = false;
   machineSearchTermPricing: string = '';
-
   fotaConfigList: any[] = [];
-
   selectedUpdatedVersion: string | null = null;
+
+  selectedUserId: number | null = null;
+  selectedUser: string = '';
+  notificationTypes: any[] = [];
+  selectedNotificationTypeId: number | null = null;
+  eventTypes: any[] = [];
+  selectedEventTypeIds: number[] = [];
+  users: any[] = [];
 
   currentValues = {
     iid: '',
@@ -84,6 +90,7 @@ export class AdvancedManagementComponent implements OnInit {
   };
   notificationMessage = '';
   notificationType = '';
+  selectUser = '';
   // Incineration Config Values (current values and updated values)
   incinerationCurrentValues = {
     scheduler: '',
@@ -266,6 +273,178 @@ export class AdvancedManagementComponent implements OnInit {
 
       this.getItemsByMerchant(this.merchantId);
     }
+    this.loadNotificationAccessData();
+  }
+
+  // Add these new methods
+  loadNotificationAccessData(): void {
+    this.loadNotificationUsers();
+    this.loadNotificationTypes();
+    this.loadEventTypes();
+  }
+
+  loadNotificationUsers(): void {
+    this.dataService.getAllUser(this.merchantId).subscribe(
+      (res: any) => {
+        if (res.code === 200 && Array.isArray(res.data)) {
+          this.users = res.data
+            .filter((user: { email: any }) => user.email)
+            .map((user: { userId: any; email: any; userName: any }) => ({
+              userId: user.userId,
+              email: user.email,
+              userName: user.userName || 'No Name',
+            }));
+        }
+      },
+      (error) => {
+        console.error('Error loading users:', error);
+      }
+    );
+  }
+
+  loadNotificationTypes(): void {
+    this.dataService.getAllNotificationType().subscribe(
+      (res: any) => {
+        if (res.code === 200 && Array.isArray(res.data)) {
+          this.notificationTypes = res.data.map((type: any) => ({
+            id: type.notificationTypeId,
+            name: type.notificationTypeName,
+          }));
+          console.log('Notification types loaded:', this.notificationTypes);
+        } else {
+          console.error('Unexpected response format for notification types');
+          this.notificationTypes = [];
+        }
+      },
+      (error) => {
+        console.error('Error loading notification types:', error);
+        this.notificationTypes = [];
+      }
+    );
+  }
+
+  loadEventTypes(): void {
+    this.dataService.getAllEventType().subscribe(
+      (res: any) => {
+        if (res.code === 200 && Array.isArray(res.data)) {
+          this.eventTypes = res.data.map((event: any) => ({
+            id: event.eventTypeId,
+            name: event.eventTypeName,
+            selected: false,
+          }));
+          console.log('Event types loaded:', this.eventTypes);
+        } else {
+          console.error('Unexpected response format for event types');
+          this.eventTypes = [];
+        }
+      },
+      (error) => {
+        console.error('Error loading event types:', error);
+        this.eventTypes = [];
+      }
+    );
+  }
+
+  updateSelectedEventTypes(): void {
+    const allEvent = this.eventTypes.find((e) => e.name === 'All');
+
+    if (allEvent && allEvent.selected) {
+      // Only include "All"'s ID
+      this.selectedEventTypeIds = [allEvent.id];
+    } else {
+      // Include all selected except "All"
+      this.selectedEventTypeIds = this.eventTypes
+        .filter((e) => e.selected && e.name !== 'All')
+        .map((e) => e.id);
+    }
+  }
+
+  onEventTypeChange(changedEvent: any): void {
+    if (changedEvent.name === 'All') {
+      // If "All" is selected, select/deselect all
+      this.eventTypes.forEach(
+        (event) => (event.selected = changedEvent.selected)
+      );
+    } else {
+      // If any non-"All" is toggled, check/uncheck "All" accordingly
+      const allEvent = this.eventTypes.find((e) => e.name === 'All');
+      const otherEvents = this.eventTypes.filter((e) => e.name !== 'All');
+
+      if (allEvent) {
+        allEvent.selected = otherEvents.every((e) => e.selected);
+      }
+    }
+
+    this.updateSelectedEventTypes();
+  }
+
+  saveNotificationAccess(): void {
+    // Validate inputs
+    if (!this.selectedUserId) {
+      this.showNotification('⚠️ Please select a user.', 'error');
+      return;
+    }
+
+    if (!this.selectedNotificationTypeId) {
+      this.showNotification('⚠️ Please select a notification type.', 'error');
+      return;
+    }
+
+    if (this.selectedEventTypeIds.length === 0) {
+      this.showNotification(
+        '⚠️ Please select at least one event type.',
+        'error'
+      );
+      return;
+    }
+
+    // Prepare payload
+    const payload = {
+      eventTypeId: this.selectedEventTypeIds,
+      merchantId: this.merchantId,
+      notificationTypeId: this.selectedNotificationTypeId,
+      userId: this.selectedUserId,
+    };
+
+    console.log('📤 Sending Notification Access Payload:', payload);
+
+    // Call the service
+    this.dataService.setUserNotificationAccess(payload).subscribe(
+      (response: any) => {
+        console.log('✅ Notification Access Response:', response);
+        if (response && response.code === 200) {
+          this.showNotification(
+            '✅ Notification access saved successfully!',
+            'success'
+          );
+          this.clearNotificationAccessForm();
+        } else {
+          this.showNotification(
+            `⚠️ ${response.phrase || 'Failed to save notification access.'}`,
+            'error'
+          );
+        }
+      },
+      (error) => {
+        console.error('❌ Notification Access Error:', error);
+        this.showNotification(
+          `❌ Error: ${error.message || 'Failed to save notification access.'}`,
+          'error'
+        );
+      }
+    );
+  }
+
+  clearNotificationAccessForm(): void {
+    this.selectedUserId = null;
+    this.selectedNotificationTypeId = null;
+    this.selectedEventTypeIds = [];
+
+    // Reset checkboxes
+    this.eventTypes.forEach((event) => (event.selected = false));
+
+    // Reset the form to initial state
+    this.cdr.detectChanges();
   }
 
   getItemsByMerchant(merchantId: string): void {
@@ -934,6 +1113,57 @@ export class AdvancedManagementComponent implements OnInit {
     );
   }
 
+  // onSubmitMachineInstalled(): void {
+  //   if (
+  //     !this.selectedMachineId ||
+  //     !this.installedStatus ||
+  //     (this.installedStatus === 'Yes' && !this.uid)
+  //   ) {
+  //     this.showNotification('⚠️ Please fill all required fields.', 'error');
+  //     return;
+  //   }
+  //   const machineOnboardingPayload = {
+  //     machineId: this.selectedMachineId,
+  //     machineInfo: {
+  //       uid: this.uid,
+  //       pcbNo: this.pcbNo,
+  //       mcSrNo: this.mcSrNo,
+  //       installed: Number(this.installedStatus),
+  //       installedDate: this.installedDate.toString(),
+  //     },
+  //     installed: Number(this.installedStatus),
+  //     merchantId: this.merchantId,
+  //   };
+
+  //   // 🔍 Log the payload being sent to the API
+  //   console.log(
+  //     '📤 Submitting Machine Onboarding Payload:',
+  //     machineOnboardingPayload
+  //   );
+  //   this.dataService.machineOnboarding(machineOnboardingPayload).subscribe(
+  //     (response: any) => {
+  //       if (response.code === 200) {
+  //         this.showNotification(
+  //           '✅ Machine Installed successfully.',
+  //           'success'
+  //         );
+  //         this.resetMachineInstalledForm();
+  //       } else {
+  //         this.showNotification(
+  //           `⚠️ ${response.error || 'An error occurred.'}`,
+  //           'error'
+  //         );
+  //       }
+  //     },
+  //     (error) => {
+  //       this.showNotification(
+  //         `❌ Error: ${error.message || 'Unknown error.'}`,
+  //         'error'
+  //       );
+  //     }
+  //   );
+  // }
+
   onSubmitMachineInstalled(): void {
     if (
       !this.selectedMachineId ||
@@ -943,6 +1173,14 @@ export class AdvancedManagementComponent implements OnInit {
       this.showNotification('⚠️ Please fill all required fields.', 'error');
       return;
     }
+
+    // Format the installedDate to yyyy-MM-dd HH:mm:ss by adding :00 at the end
+    let formattedInstalledDate = this.installedDate.toString();
+    if (formattedInstalledDate.length === 16) {
+      // If format is yyyy-MM-ddTHH:mm
+      formattedInstalledDate = formattedInstalledDate.replace('T', ' ') + ':00';
+    }
+
     const machineOnboardingPayload = {
       machineId: this.selectedMachineId,
       machineInfo: {
@@ -950,7 +1188,8 @@ export class AdvancedManagementComponent implements OnInit {
         pcbNo: this.pcbNo,
         mcSrNo: this.mcSrNo,
         installed: Number(this.installedStatus),
-        installedDate: this.installedDate.toString(),
+        installedDate: formattedInstalledDate,
+        field: 'UID',
       },
       installed: Number(this.installedStatus),
       merchantId: this.merchantId,
@@ -985,43 +1224,6 @@ export class AdvancedManagementComponent implements OnInit {
     );
   }
 
-  // validateHeaterInputs(): boolean {
-  //   // Destructure updated values from the form state
-  //   const { setHeaterTempA, setHeaterTempB, heaterAMinTemp, heaterBOnTemp } = this.updatedIncinerationValues;
-
-  //   // Check if updated values for heater temps exist (ensure validation only happens when values are updated)
-  //   if (setHeaterTempA && setHeaterTempB) {
-  //     // Only perform the validation if both Set Heater Temp A and Set Heater Temp B are updated.
-  //     if (+setHeaterTempA <= +setHeaterTempB) {
-  //       this.showNotification('⚠️ Heater B cut off temperature must be less than Heater A cut off temperature .', 'error');
-  //       return false;
-  //     }
-  //   }
-
-  //   // Validate Heater A Minimum Temp (if updated)
-  //   if (heaterAMinTemp && +heaterAMinTemp >= +setHeaterTempA) {
-  //     console.log('Heater A Min Temp:', heaterAMinTemp, 'Heater A Cut Off Temp:', setHeaterTempA);
-
-  //     this.showNotification('⚠️ Heater A Min Temp should be less than  Heater A cut off temperature.', 'error');
-  //     return false;
-  //   }
-
-  //   // Validate Heater A Minimum Temp and Set Heater Temp B (if updated)
-  //   if (heaterAMinTemp && +heaterAMinTemp <= +setHeaterTempB) {
-  //     console.log('Heater A Min Temp:', heaterAMinTemp, 'Heater A Cut Off Temp:', setHeaterTempA);
-
-  //     this.showNotification('⚠️ Heater A Min Temp should be greater than Heater B cut off temperature.', 'error');
-  //     return false;
-  //   }
-
-  //   // Validate Heater B On Temp (if updated)
-  //   if (heaterBOnTemp && (+heaterBOnTemp >= +setHeaterTempA || +heaterBOnTemp >= +setHeaterTempB)) {
-  //     this.showNotification('⚠️ Heater A temperature to start Heater B should less than heater A cut off temperature.', 'error');
-  //     return false;
-  //   }
-
-  //   return true; // All validations passed
-  // }
   validateHeaterInputs(): boolean {
     const { setHeaterTempA, setHeaterTempB, heaterAMinTemp, heaterBOnTemp } =
       this.updatedIncinerationValues;
@@ -1236,6 +1438,10 @@ export class AdvancedManagementComponent implements OnInit {
     this.machineIds = [];
     this.clientname = '';
     this.clearClientAndMachine();
+
+    if (tab !== 'notificationAccess') {
+      this.clearNotificationAccessForm();
+    }
 
     // Reset pricing and incineration values
     this.currentValues = {

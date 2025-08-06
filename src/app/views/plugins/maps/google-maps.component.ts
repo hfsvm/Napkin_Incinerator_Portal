@@ -241,8 +241,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     this.merchantId = this.commonDataService.merchantId ?? '';
     this.userId = this.commonDataService.userId ?? 0;
 
-    // this.loadInitialData();
-
     if (!sessionStorage.getItem('reloaded')) {
       sessionStorage.setItem('reloaded', 'true');
       window.location.reload();
@@ -1821,21 +1819,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // extractUniqueZones(): void {
-  //   // Extract unique zone names from the machines data
-  //   const zoneSet = new Set<string>();
-
-  //   this.machines.forEach(machine => {
-  //     if (machine.zone) {
-  //       zoneSet.add(machine.zone);
-  //     }
-  //   });
-
-  //   // Convert Set to array
-  //   this.zones1 = Array.from(zoneSet);
-  //   console.log('Extracted zonesbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:', this.zones1);
-  // }
-
   extractUniqueZones(): void {
     // Initialize an empty Set to store unique zone names
     const zoneSet = new Set<string>();
@@ -1995,193 +1978,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     console.log(`Closed popup via direct DOM removal`);
   }
 
-  // Fix for updateMap to correctly filter based on states
-  // updateMap(): void {
-  //   console.log("🔄 updateMap() called!");
-
-  //   // Clear old markers
-  //   this.markers.forEach(marker => marker.remove());
-  //   this.markers = [];
-
-  //   // Get selected filters
-  //   console.log("All available states:", this.states);
-  // //   const selectedStates = this.stateFilter.setValue([...this.hierarchySelection.state]);
-  // //   const selectedDistricts=this.districtFilter.setValue([...this.hierarchySelection.district]);
-  // //   const selectedZones =this.zoneFilter.setValue([...this.hierarchySelection.zone]);
-  // // const selectedWards =this.wardFilter.setValue([...this.hierarchySelection.ward]);
-  // // const selectedBeats = this.beatFilter.setValue([...this.hierarchySelection.beat]);
-
-  // // const selectedStates = this.stateFilter.value || [];
-  // //   const selectedDistricts = this.districtFilter.value || [];
-  // //   const selectedZones = this.zoneFilter.value || [];
-  // //   const selectedWards = this.wardFilter.value || [];
-  // //   const selectedBeats = this.beatFilter.value || [];
-
-  // const selectedStates = this.hierarchySelection.state || [];
-  // const selectedDistricts = this.hierarchySelection.district || [];
-  // const selectedZones = this.hierarchySelection.zone || [];
-  // const selectedWards = this.hierarchySelection.ward || [];
-  // const selectedBeats = this.hierarchySelection.beat || [];
-
-  //   const selectedMachines = this.machineFilter.value || [];
-  //   const selectedStockStatuses = this.stockStatusFilter.value || [];
-
-  //   const selectedMachineStatuses = this.machineStatusFilter.value || [];
-  //   const selectedBurnStatusesRaw = this.buttonStatusFilter.value || [];
-
-  //   console.log("Selected states from dropdown:", selectedStates);
-
-  //   // Log all filter values for debugging
-  //   console.log("🗺️ Current Filter Values:", {
-  //     states: selectedStates,
-  //     districts: selectedDistricts,
-  //     zones: selectedZones,
-  //     wards: selectedWards,
-  //     beats: selectedBeats,
-  //     machines: selectedMachines,
-  //     stockStatuses: selectedStockStatuses,
-  //     machineStatuses: selectedMachineStatuses,
-  //     burnStatuses: selectedBurnStatusesRaw
-  //   });
-
-  //   // Map burn status labels to numeric values
-  //   const burnStatusMapping: Record<string, number> = {
-  //     "Burning": 2,
-  //     "Idle": 1
-  //   };
-
-  //   const selectedBurnStatuses = selectedBurnStatusesRaw
-  //     .map((status: string) => burnStatusMapping[status])
-  //     .filter(v => v !== undefined);
-
-  //   // CRITICAL DEBUGGING: Compare selected states to actual states in machines
-  //   if (selectedStates.length > 0) {
-  //     console.log("🔍 Selected States from filter:", selectedStates);
-  //     const availableStates = [...new Set(this.machines.map(m => m.state))];
-  //     console.log("🔍 Available States in Machines:", availableStates);
-
-  //     // Check if any selected states exist in the machines
-  //     const existingStates = selectedStates.filter(state => availableStates.includes(state));
-  //     console.log("🔍 Matching States:", existingStates);
-  //   }
-
-  //   // Filter machines based on selected filters
-  //   const filteredMachines = this.machines.filter(machine => {
-
-  //     console.log("this selcted machinessss", this.machines)
-  //     // FIX: Check case-insensitive state matching and log specific information
-  //     const stateMatches = selectedStates.length === 0 ||
-  //                   selectedStates.some(state => {
-  //                     const matches = machine.state.toLowerCase() === state.toLowerCase();
-  //                     if (selectedStates.includes(state) && !matches) {
-  //                       console.log(`State mismatch: Machine state "${machine.state}" != selected "${state}"`);
-  //                     }
-  //                     return matches;
-  //                   });
-
-  //     const districtMatch = selectedDistricts.length === 0 ||
-  //                          (machine.district && selectedDistricts.includes(machine.district));
-
-  //     const zoneMatch = selectedZones.length === 0 ||
-  //                      (machine.zone && selectedZones.includes(machine.zone));
-
-  //     const wardMatch = selectedWards.length === 0 ||
-  //                      (machine.ward && selectedWards.includes(machine.ward));
-
-  //     const beatMatch = selectedBeats.length === 0 ||
-  //                      (machine.beat && selectedBeats.includes(machine.beat));
-
-  //     const machineMatch = selectedMachines.length === 0 ||
-  //                          selectedMachines.includes(machine.machineId);
-
-  //     const stockMatch = selectedStockStatuses.length === 0 ||
-  //                        selectedStockStatuses.includes(machine.stockStatus);
-
-  //     const statusMatch = selectedMachineStatuses.length === 0 ||
-  //                         selectedMachineStatuses.includes(machine.status);
-
-  //     const burnMatch = selectedBurnStatuses.length === 0 ||
-  //                       selectedBurnStatuses.includes(machine.burnStatus);
-
-  //     // Track why a machine is being filtered out (if it is)
-  //     if (selectedStates.length > 0 && !stateMatches) {
-  //       console.log(`Machine ${machine.machineId} filtered out - state: ${machine.state}`);
-  //     }
-
-  //     return stateMatches && districtMatch && zoneMatch && wardMatch && beatMatch &&
-  //            machineMatch && stockMatch && statusMatch && burnMatch;
-  //   });
-
-  //   console.log("🔍 Filtered Machines:", filteredMachines.length);
-
-  //   if (filteredMachines.length === 0) {
-  //     console.warn("⚠️ No matching machines found based on filters.");
-  //   }
-
-  //   // Handle overlapping markers
-  //   const locationMap = new Map<string, number>();
-
-  //   filteredMachines.forEach(machine => {
-  //     if (!machine.location) return;
-
-  //     const [lng, lat] = machine.location;
-  //     const key = `${lng},${lat}`;
-
-  //     if (locationMap.has(key)) {
-  //       const count = locationMap.get(key)! + 1;
-  //       locationMap.set(key, count);
-
-  //       const angle = (count * 45) * (Math.PI / 180);
-  //       const radius = 0.000001 * count;
-  //       machine.location = [
-  //         lng + radius * Math.cos(angle),
-  //         lat + radius * Math.sin(angle)
-  //       ];
-  //     } else {
-  //       locationMap.set(key, 1);
-  //     }
-
-  //     // Set marker icon dynamically based on stock status
-  //     const iconUrl = this.getStockStatusIcon(machine.stockStatus);
-
-  //     const markerElement = document.createElement('div');
-  //     markerElement.className = 'custom-marker';
-  //     markerElement.style.backgroundImage = `url(${iconUrl})`;
-  //     markerElement.style.width = '40px';
-  //     markerElement.style.height = '40px';
-  //     markerElement.style.backgroundSize = 'contain';
-  //     markerElement.style.backgroundRepeat = 'no-repeat';
-
-  //     // Zoom on double-click
-  //     markerElement.addEventListener('dblclick', (e) => {
-  //       e.stopPropagation();
-  //       this.map.flyTo({
-  //         center: machine.location,
-  //         zoom: 15,
-  //         speed: 5,
-  //         curve: 1,
-  //         easing(t) {
-  //           return t;
-  //         }
-  //       });
-  //     });
-
-  // const popup = new maplibregl.Popup({
-  //   closeButton: false,  // Disable default close button, we'll use our custom one
-  //   closeOnClick: true  // Disable closing when clicking map
-  // }).setHTML(this.generatePopupHTML(machine));
-
-  //   // Create marker
-  //   const newMarker = new maplibregl.Marker({ element: markerElement })
-  //     .setLngLat(machine.location)
-  //     // .setPopup(new maplibregl.Popup().setHTML(this.generatePopupHTML(machine)))
-  //     .setPopup(popup)
-  //     .addTo(this.map);
-
-  //   this.markers.push(newMarker);
-  // });
-  // }
-
   getStockStatusIcon(status: number): string {
     switch (status) {
       case 2:
@@ -2252,84 +2048,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     <p><strong>Items Dispensed:</strong> ${machine.itemsDispensed}</p>
     <p><strong>Address:</strong> ${machine.address}</p></div>`;
   }
-
-  // toggleSelectAll(selected: any[], options: any[], key: string) {
-  //   // Check if all items are already selected
-  //   const allSelected = selected.length === options.length && options.length > 0;
-
-  //   if (allSelected) {
-  //     // Clear the selection
-  //     selected.length = 0;  // This modifies the array in-place
-
-  //     // Clear dependent filters when needed
-  //     this.clearDependentSelections(key);
-  //   } else {
-  //     // Select all items
-  //     // First clear the array
-  //     selected.length = 0;
-
-  //     // Then add all values from options
-  //     options.forEach(option => {
-  //       const value = option.ProjectId || option.key || option;
-  //       selected.push(value);
-  //     });
-  //   }
-
-  //   // Update the hierarchy selection
-  //   this.updateHierarchySelection(key, [...selected]);
-
-  //   // Rebuild filter chain
-  //   this.rebuildFilterChain(key);
-
-  //   // Reload data with updated filters
-  //   this.loadMachineData();
-  // }
-
-  // toggleSelectAll(filterControl: FormControl, items: any[], key: string): void {
-  //   const allSelected = filterControl.value.length === items.length;
-
-  //   // Toggle selection
-  //   if (allSelected) {
-  //     filterControl.setValue([]);
-
-  //     // Optionally clear dependent selections
-  //     this.clearDependentSelections(key);
-  //   } else {
-  //     // You can customize how to extract the value from item
-  //     const selectedValues = items.map(item => item.ProjectId || item.key || item);
-  //     filterControl.setValue(selectedValues);
-  //   }
-
-  //   console.log(`🔹 Updated ${key} Selection: ${filterControl.value}`);
-
-  //   // Update hierarchy and reload
-  //   this.updateHierarchySelection(key, filterControl.value);
-  //   this.rebuildFilterChain(key);
-  //   this.loadMachineData();
-  // }
-
-  // toggleSelectAll(key: string, items: any[], filterControl: FormControl) {
-  //   const currentValues = filterControl.value || [];
-  //   const allSelected = currentValues.length === items.length;
-
-  //   if (allSelected) {
-  //     filterControl.setValue([]);
-  //     this.clearDependentSelections(key);
-  //   } else {
-  //     const selectedValues = items.map(item => {
-  //       if (typeof item === 'object') {
-  //         return item.ProjectId ?? item.key ?? item.id ?? item.value ?? '';
-  //       }
-  //       return item;
-  //     });
-
-  //     filterControl.setValue([...selectedValues]);
-  //   }
-
-  //   this.updateHierarchySelection(key, filterControl.value);
-  //   this.rebuildFilterChain(key);
-  //   this.loadMachineData();
-  // }
 
   toggleDropdown(key: string) {
     // Close all other dropdowns
@@ -2586,38 +2304,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     // this.filterMachines(); // Optional next step
   }
 
-  // filterMachines() {
-  //   this.beats = [];
-  //   this.selectedBeats = [];
-
-  //   this.selectedProjects.forEach((pid) => {
-  //     const project = this.fullData.find((p) => p.projectId === pid);
-  //     project?.states?.forEach((stateobj: any) => {
-  //       if (this.selectedZones.includes(stateobj.state)) {
-  //         stateobj.districts?.forEach((districtobj: any) => {
-  //           if (this.selectedWards.includes(districtobj.district)) {
-  //             districtobj.zones?.forEach((zoneobj: any) => {
-  //               if (this.selectedSubZones.includes(zoneobj.zone)) {
-  //                 zoneobj.wards?.forEach((wardobj: any) => {
-  //                   if (this.selectedWardList.includes(wardobj.ward)) {
-  //                     wardobj.beats?.forEach((beatobj: any) => {
-  //                       if (this.selectedBeatList.includes(beatobj.beat)) {
-  //                         if (beatobj.machines) {
-  //                           this.beats.push(...beatobj.machines);
-  //                         }
-  //                       }
-  //                     });
-  //                   }
-  //                 });
-  //               }
-  //             });
-  //           }
-  //         });
-  //       }
-  //     });
-  //   });
-  // }
-
   filterMachines() {
     this.beats = [];
     this.selectedBeats = [];
@@ -2701,36 +2387,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     this.loadMachineData();
   }
 
-  // refreshFilters(): void {
-  //   console.log('🔄 Refreshing Filters and clearing selections...');
-
-  //   // Use runOutsideAngular if there's heavy processing (optional)
-  //   this.zone.runOutsideAngular(() => {
-  //     // Reset all FormControl filters
-  //     const filters = [
-  //       this.stateFilter,
-  //       this.districtFilter,
-  //       this.machineFilter,
-  //       this.stockStatusFilter,
-  //       this.buttonStatusFilter,
-  //       this.machineStatusFilter,
-  //       this.zoneFilter,
-  //       this.wardFilter,
-  //       this.beatFilter
-  //     ];
-
-  //     filters.forEach(f => f.setValue([], { emitEvent: false }));
-
-  //     // Reset dropdowns
-  //     this.dropdownOpen = {};
-
-  //     // Force detection & reload data inside Angular zone
-  //     this.zones.run(() => {
-  //       this.loadMachineData();
-  //     });
-  //   });
-  // }
-
   refreshFilters(): void {
     window.location.reload();
   }
@@ -2748,11 +2404,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  // navigateToZone(zoneId: number) {
-  //   this.router.navigate(['/zone-dashboard']); // adjust if 'maps' is a lazy-loaded route
-  // }
-
-  /* working */
   navigateTo(route: string): void {
     this.router.navigate([`/${route}`]);
   }
@@ -2764,12 +2415,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  //     navigateToZone(zoneName: string): void {
-  //   const encodedZoneName = encodeURIComponent(zoneName);
-  //   const fullUrl = `${window.location.origin}/#/zone-dashboard?zone=${encodedZoneName}`;
-  //   window.open(fullUrl, '_blank');
-  // }
-
   navigateToGraph(graphType: string, zones: string[]): void {
     debugger;
     // Navigate to zone dashboard with the zone name as parameter
@@ -2777,73 +2422,4 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
       queryParams: { zone: zones },
     });
   }
-
-  //     navigateToGraph(graphType: string, zones: string[]): void {
-  //   const encodedZones = zones.map(zone => encodeURIComponent(zone));
-  //   const queryParam = encodedZones.map(zone => `zone=${zone}`).join('&');
-  //   const fullUrl = `${window.location.origin}/#/graph-dashboard?${queryParam}`;
-  //   window.open(fullUrl, '_blank');
-  // }
-
-  /*end*/
-
-  // // Updated navigation functions for maps.ts
-  // navigateTo(route: string): void {
-  //   // Get the base URL of your application
-  //   const baseUrl = window.location.origin;
-  //   // Get merchantId from CommonDataService or sessionStorage
-  //   // You may need to inject CommonDataService or use a method to access it
-  //   const merchantId = sessionStorage.getItem('merchantId');
-
-  //   // Open the URL in a new tab with merchantId as query parameter
-  //   window.open(`${baseUrl}/${route}${merchantId ? '?merchantId=' + merchantId : ''}`, '_blank');
-  // }
-
-  // navigateToZone(zoneName: string): void {
-  //   // Get the base URL of your application
-  //   const baseUrl = window.location.origin;
-  //   // Get merchantId from sessionStorage
-  //   const merchantId = sessionStorage.getItem('merchantId');
-
-  //   // Build URL with zone parameter and merchantId
-  //   const merchantIdParam = merchantId ? `&merchantId=${merchantId}` : '';
-  //   window.open(`${baseUrl}/zone-dashboard?zone=${encodeURIComponent(zoneName)}${merchantIdParam}`, '_blank');
-  // }
-
-  // navigateToGraph(graphType: string, zones: string[]): void {
-  //   // Get the base URL of your application
-  //   const baseUrl = window.location.origin;
-  //   // Get merchantId from sessionStorage
-  //   const merchantId = sessionStorage.getItem('merchantId');
-
-  //   // Build the URL with query parameters including zones and merchantId
-  //   const zonesParam = zones.map(zone => `zone=${encodeURIComponent(zone)}`).join('&');
-  //   const merchantIdParam = merchantId ? `&merchantId=${merchantId}` : '';
-  //   const url = `${baseUrl}/graph-dashboard?${zonesParam}${merchantIdParam}`;
-  //   window.open(url, '_blank');
-  // }
-
-  //     // Original navigation method (keep this if you still need it)
-  // navigateTo(route: string): void {
-  //   this.router.navigate([`/${route}`]);
-  // }
-
-  // // Updated method to open zone dashboard in a new tab
-  // navigateToZone(zoneName: string): void {
-  //   // Get the base URL of the current page
-  //   const baseUrl = window.location.origin;
-
-  //   // Create the URL with query parameters
-  //   const relativePath = this.router.serializeUrl(
-  //     this.router.createUrlTree(['/zone-dashboard'], {
-  //       queryParams: { zone: zoneName }
-  //     })
-  //   );
-
-  //   // Combine to create absolute URL
-  //   const absoluteUrl = `${baseUrl}${relativePath}`;
-
-  //   // Open in a new tab
-  //   window.open(absoluteUrl, '_blank');
-  // }
 }

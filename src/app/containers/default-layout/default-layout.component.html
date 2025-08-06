@@ -5,8 +5,8 @@
   id="sidebar1"
   visible
   [ngStyle]="{
-    'background-color': '#', 
-    'color': '#ffffff'
+    'background-color': '#',
+    color: '#ffffff'
   }"
 >
   <!-- <c-sidebar-brand [routerLink]="[]">
@@ -20,10 +20,24 @@
     ></c-sidebar-toggler>
   </c-sidebar-brand>//before fixing nccode  -->
   <c-sidebar-brand [routerLink]="[]">
-    <img src="assets/img/brand/logo.png" class="sidebar-brand-full" height="35" alt="My Logo">
-    <img src="assets/img/brand/logo.png" class="sidebar-brand-narrow" height="35" alt="My Logo Small">
+    <img
+      src="assets/img/brand/logo.png"
+      class="sidebar-brand-full"
+      height="35"
+      alt="My Logo"
+    />
+    <img
+      src="assets/img/brand/logo.png"
+      class="sidebar-brand-narrow"
+      height="35"
+      alt="My Logo Small"
+    />
     <!-- Use CSS classes for visibility instead of ngIf -->
-    <span class="sidebar-brand-full sidebar-text fw-bold text-white" style="font-size:9px;">REALZEST VENDCON PVT LTD</span>
+    <span
+      class="sidebar-brand-full sidebar-text fw-bold text-white"
+      style="font-size: 9px"
+      >REALZEST VENDCON PVT LTD</span
+    >
     <c-sidebar-toggler
       *ngIf="!sidebar1.narrow"
       cSidebarToggle="sidebar1"
@@ -51,21 +65,22 @@
   }
 </style>
 
-
-
 <!--main-->
-<div class="wrapper d-flex flex-column min-vh-100 bg-light bg-opacity-50 dark:bg-transparent">
+<div
+  class="wrapper d-flex flex-column min-vh-100 bg-light bg-opacity-50 dark:bg-transparent"
+>
   <!--app-header-->
   <app-default-header
     class="mb-4 d-print-none header header-sticky bg-primary"
     position="sticky"
-    sidebarId="sidebar1">
+    sidebarId="sidebar1"
+  >
   </app-default-header>
   <!--app-body-->
   <div class="body flex-grow-1 px-3">
     <c-container breakpoint="lg" class="h-auto">
       <c-row class="mb-4 d-print-none">
-        <div class="fs-2 fw-semibold">{{title}}</div>
+        <div class="fs-2 fw-semibold">{{ title }}</div>
         <!-- <c-breadcrumb-router></c-breadcrumb-router> -->
       </c-row>
       <router-outlet></router-outlet>
@@ -76,4 +91,4 @@
 </div>
 
 <!--aside-->
-<app-default-aside style="display: none;"></app-default-aside>
+<app-default-aside style="display: none"></app-default-aside>

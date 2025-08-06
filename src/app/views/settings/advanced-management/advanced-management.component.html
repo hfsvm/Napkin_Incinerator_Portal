@@ -93,6 +93,28 @@
         style="height: 2px; background-color: #0066cc; margin-top: 5px"
       ></div>
     </li>
+    <!-- Add this to your nav-pills list -->
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'notificationAccess'"
+        (click)="onTabChange('notificationAccess')"
+        style="
+          border: none;
+          color: #0066cc;
+          padding: 10px 15px;
+          font-weight: bold;
+          outline: none;
+          background: none;
+        "
+      >
+        Notification Access
+      </button>
+      <div
+        *ngIf="activeTab === 'notificationAccess'"
+        style="height: 2px; background-color: #0066cc; margin-top: 5px"
+      ></div>
+    </li>
   </ul>
 
   <div
@@ -1034,6 +1056,97 @@
           <button
             class="btn btn-sm custom-btn"
             (click)="resetMachineInstalledForm()"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="activeTab === 'notificationAccess'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row">
+          <!-- User Dropdown -->
+          <div class="col-md-6 mb-3">
+            <label for="selectUser" class="form-label">Select User</label>
+            <select
+              class="form-select"
+              [(ngModel)]="selectedUserId"
+              id="selectUser"
+            >
+              <option [ngValue]="null" disabled selected>Select User</option>
+              <option *ngFor="let user of users" [value]="user.userId">
+                {{ user.email }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Notification Type Dropdown -->
+          <div class="col-md-6 mb-3">
+            <label for="notificationType" class="form-label"
+              >Notification Type</label
+            >
+            <select
+              class="form-select"
+              [(ngModel)]="selectedNotificationTypeId"
+              id="notificationType"
+            >
+              <option [ngValue]="null" disabled selected>
+                Select Notification Type
+              </option>
+              <option *ngFor="let type of notificationTypes" [value]="type.id">
+                {{ type.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Event Type Selectable List -->
+          <div class="col-md-12 mb-3">
+            <label class="form-label">Event Types</label>
+            <div class="form-check" *ngFor="let event of eventTypes">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                [id]="'event-' + event.id"
+                [(ngModel)]="event.selected"
+                (change)="onEventTypeChange(event)"
+              />
+              <label class="form-check-label" [for]="'event-' + event.id">
+                {{ event.name }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Event Types Preview -->
+        <!-- <div class="row" *ngIf="selectedEventTypeIds.length > 0">
+          <div class="col-md-12 mb-3">
+            <label class="form-label">Selected Events:</label>
+            <div class="d-flex flex-wrap gap-2">
+              <span
+                *ngFor="let id of selectedEventTypeIds"
+                class="badge bg-primary"
+              >
+                {{ getEventName(id) }}
+              </span>
+            </div>
+          </div>
+        </div> -->
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button
+            class="btn btn-primary px-4 custom-btn"
+            (click)="saveNotificationAccess()"
+          >
+            Save
+          </button>
+          <button
+            class="btn btn-sm custom-btn"
+            (click)="clearNotificationAccessForm()"
           >
             Clear
           </button>

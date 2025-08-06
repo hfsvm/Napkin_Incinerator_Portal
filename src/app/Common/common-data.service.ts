@@ -111,7 +111,7 @@ export class CommonDataService {
   refreshUserDetails() {
     console.log('🔄 Refreshing user details on page reload...');
     this.loadUserDetails();
-    this.fetchUserDetailsFromApi(); // Fetch the fresh data from the API
+    // this.fetchUserDetailsFromApi(); // Fetch the fresh data from the API
   }
 
   // ✅ Method to fetch fresh user details from the API

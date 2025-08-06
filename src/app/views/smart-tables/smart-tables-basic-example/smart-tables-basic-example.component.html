@@ -195,7 +195,12 @@
           {{ summaryType === "Daily" ? "Switch to Totals" : "Switch to Daily" }}
         </button>
 
-        <button type="button" class="btn btn-sm" (click)="loadReport()">
+        <button
+          type="button"
+          class="btn btn-sm"
+          (click)="loadReport()"
+          [disabled]="!selectedProjects || selectedProjects.length === 0"
+        >
           Load Report
         </button>
       </div>
@@ -287,7 +292,7 @@
           <ng-container
             *ngFor="let txn of machine.transactions; let txnIndex = index"
           >
-            <tr>
+            <tr [class.total-row]="txn.date === 'Total'">
               <!-- Show left side columns only for the first row -->
               <td
                 *ngIf="txnIndex === 0"
@@ -339,18 +344,27 @@
               </td>
 
               <!-- Date or "Total" text -->
-              <td
-                [ngClass]="{
-                  'font-weight-bold text-right': txn.date === 'Total'
-                }"
-              >
-                {{ txn.date === "Total" ? "Total" : txn.date }}
+              <td>
+                <span *ngIf="txn.date === 'Total'" class="font-weight-bold"
+                  >Total</span
+                >
+                <span *ngIf="txn.date !== 'Total'">{{ txn.date }}</span>
               </td>
-              <td>{{ txn.qty ?? "" }}</td>
-              <td>{{ txn.cash ?? "₹ 0" }}</td>
-              <td>{{ txn.onTime !== "-" ? txn.onTime : "-" }}</td>
-              <td>{{ txn.burnCycles ?? 0 }}</td>
-              <td>{{ txn.sanNapkinsBurnt ?? 0 }}</td>
+              <td [class.font-weight-bold]="txn.date === 'Total'">
+                {{ txn.qty ?? "" }}
+              </td>
+              <td [class.font-weight-bold]="txn.date === 'Total'">
+                {{ txn.cash ?? "₹ 0" }}
+              </td>
+              <td [class.font-weight-bold]="txn.date === 'Total'">
+                {{ txn.onTime !== "-" ? txn.onTime : "-" }}
+              </td>
+              <td [class.font-weight-bold]="txn.date === 'Total'">
+                {{ txn.burnCycles ?? 0 }}
+              </td>
+              <td [class.font-weight-bold]="txn.date === 'Total'">
+                {{ txn.sanNapkinsBurnt ?? 0 }}
+              </td>
             </tr>
           </ng-container>
         </ng-container>
@@ -492,17 +506,16 @@
     </div>
 
     <!-- Showing X to Y of Z entries -->
-      <div class="text-muted" style="font-size: 0.95rem">
-        Showing
-        {{ (currentPage - 1) * itemsPerPage + 1 }}
-        to
-        {{
-          currentPage * itemsPerPage > totalItems
-            ? totalItems
-            : currentPage * itemsPerPage
-        }}
-        of {{ totalItems }} entries
-      </div>
-      
+    <div class="text-muted" style="font-size: 0.95rem">
+      Showing
+      {{ (currentPage - 1) * itemsPerPage + 1 }}
+      to
+      {{
+        currentPage * itemsPerPage > totalItems
+          ? totalItems
+          : currentPage * itemsPerPage
+      }}
+      of {{ totalItems }} entries
+    </div>
   </div>
 </div>

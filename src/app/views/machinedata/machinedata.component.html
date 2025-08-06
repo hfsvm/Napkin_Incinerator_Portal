@@ -396,7 +396,14 @@
   </div>
 
   <div class="card p-3">
-    <h3>Machine Report</h3>
+    <!-- Move this div to wrap both the button and heading -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">Machine Report</h3>
+      <!-- Added mb-0 to remove margin-bottom -->
+      <button class="btn btn-primary btn-sm" (click)="exportToExcel()">
+        <i class="fas fa-file-excel"></i> Export to Excel
+      </button>
+    </div>
 
     <!-- Filters -->
 
@@ -601,12 +608,12 @@
 
             <!-- Info filter (disabled input) -->
             <th>
-              <input
+              <!-- <input
                 type="text"
                 class="form-control form-control-sm"
                 placeholder="Search"
                 disabled
-              />
+              /> -->
             </th>
           </tr>
         </thead>
@@ -762,6 +769,8 @@
                   <strong>Items Burnt:</strong> {{ machine.itemsBurnt }}<br />
                   <strong>Burning Cycles:</strong> {{ machine.burningCycles
                   }}<br />
+                  <strong>Installed Date:</strong>
+                  {{ machine.machineInstalledDate || "N/A" }}<br />
                 </div>
               </div>
             </td>

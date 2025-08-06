@@ -7,7 +7,7 @@ import { navItems as allNavItems } from './_nav'; // ✅ Import all navigation i
 
 @Component({
   selector: 'app-dashboard',
-  templateUrl: './default-layout.component.html'
+  templateUrl: './default-layout.component.html',
 })
 export class DefaultLayoutComponent implements OnInit {
   public logoNegative = logoNegative;
@@ -15,10 +15,10 @@ export class DefaultLayoutComponent implements OnInit {
 
   public title!: string;
   public navItems: INavData[] = []; // ✅ Explicitly define navItems type
-  public activeItem: string = '';  
+  public activeItem: string = '';
 
   public perfectScrollbarConfig = {
-    suppressScrollX: true
+    suppressScrollX: true,
   };
 
   constructor(private router: Router) {}
@@ -34,33 +34,47 @@ export class DefaultLayoutComponent implements OnInit {
   }
 
   titleSubscribe() {
-    this.router.events.pipe(
-      filter(event => event instanceof ActivationEnd && !event.snapshot.firstChild),
-      map(value => {
-        const activatedRoute = <ActivatedRoute><unknown>value;
-        return activatedRoute.snapshot?.data?.['title'] ?? null;
-      })
-    ).subscribe((title: string | null) => {
-      this.title = title ?? '';
-    });
+    this.router.events
+      .pipe(
+        filter(
+          (event) =>
+            event instanceof ActivationEnd && !event.snapshot.firstChild
+        ),
+        map((value) => {
+          const activatedRoute = <ActivatedRoute>(<unknown>value);
+          return activatedRoute.snapshot?.data?.['title'] ?? null;
+        })
+      )
+      .subscribe((title: string | null) => {
+        this.title = title ?? '';
+      });
   }
 
   // ✅ Function to filter nav items based on user role
   setUserNavItems(): void {
-    const userRole = localStorage.getItem('roleName') || sessionStorage.getItem('roleName') || 'User'; 
-    const userName = localStorage.getItem('userName') || sessionStorage.getItem('userName') || 'User'; 
-    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId') || ''; // 🔹 Get userId
-  
+    const userRole =
+      localStorage.getItem('roleName') ||
+      sessionStorage.getItem('roleName') ||
+      'User';
+    const userName =
+      localStorage.getItem('userName') ||
+      sessionStorage.getItem('userName') ||
+      'User';
+    const userId =
+      localStorage.getItem('userId') || sessionStorage.getItem('userId') || ''; // 🔹 Get userId
+
     // 🛡️ Condition to hide "Settings" for userId == 15, even if Admin
     // const shouldHideSettings = userId === '15';
-  
+
     // ✅ Logic to determine navItems
     if (userRole === 'Admin') {
       this.navItems = allNavItems; // Full access for other Admins
     } else {
-      this.navItems = allNavItems.filter((item: INavData) => item.name !== 'Settings');
+      this.navItems = allNavItems.filter(
+        (item: INavData) => item.name !== 'Settings'
+      );
     }
-  
+
     console.log('📌 Filtered Nav Items:', this.navItems);
   }
-}  
+}
