@@ -992,4 +992,14 @@ export class DataService {
       catchError(this.handleError)
     );
   }
+
+  loadMachineData(loadMachineData: any): Observable<any> {
+    const url = `${this.url1}/loadMachineData`;
+
+    return this.http.post(url, loadMachineData, this.httpOptions).pipe(
+      retry(1),
+      tap((response) => console.log('🔹 Load MachineData Response:', response)),
+      catchError(this.handleError)
+    );
+  }
 }

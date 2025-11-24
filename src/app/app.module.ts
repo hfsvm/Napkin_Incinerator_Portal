@@ -61,6 +61,7 @@ import { VideosComponent } from './views/videos/videos.component';
 import { UserManagementComponent } from './views/settings/user-management/user-management.component';
 import { MachineManagementComponent } from './views/settings/machine-management/machine-management.component';
 import { AdvancedManagementComponent } from './views/settings/advanced-management/advanced-management.component';
+import { DataManagementComponent } from './views/settings/data-management/data-management.component';
 import { ConfirmDialogComponent } from './views/confirm-dialog/confirm-dialog.component';
 import { MachinereportComponent } from './views/machinereport/machinereport.component';
 import { ShareModule } from './share/share.module';
@@ -89,6 +90,7 @@ const APP_CONTAINERS = [
     UserManagementComponent,
     MachineManagementComponent,
     AdvancedManagementComponent,
+    DataManagementComponent,
     ConfigureMachinesComponent,
     ConfirmDialogComponent,
     MachinereportComponent,

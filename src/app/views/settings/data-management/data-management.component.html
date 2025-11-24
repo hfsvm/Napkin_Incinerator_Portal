@@ -1,0 +1,271 @@
+<div class="container p-4">
+  <!-- Tab Navigation -->
+  <ul
+    class="nav nav-pills mb-3"
+    role="tablist"
+    style="border-bottom: 1px solid #d3d8dc"
+  >
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'dataEntry'"
+        (click)="onTabChange('dataEntry')"
+        style="
+          border: none;
+          color: #0066cc;
+          padding: 10px 15px;
+          font-weight: bold;
+          outline: none;
+          background: none;
+          font-size: 18px;
+        "
+      >
+        Load Machine Data
+      </button>
+      <div
+        *ngIf="activeTab === 'dataEntry'"
+        style="height: 2px; background-color: #0066cc; margin-top: 5px"
+      ></div>
+    </li>
+  </ul>
+
+  <!-- Notification Toast -->
+  <div
+    *ngIf="notification.message"
+    [ngClass]="notification.type"
+    class="custom-toast"
+  >
+    {{ notification.message }}
+  </div>
+
+  <!-- Data Entry Tab Content -->
+  <div *ngIf="activeTab === 'dataEntry'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Data Entry Form -->
+        <form (ngSubmit)="onSubmitWithConfirmation()" #dataForm="ngForm">
+          <div class="row">
+            <!-- Transaction Date Input -->
+            <div class="col-md-6 mb-3">
+              <label for="txnDate" class="form-label"
+                >Transaction Date <span class="text-danger"></span
+              ></label>
+              <input
+                type="date"
+                class="form-control"
+                id="txnDate"
+                name="txnDate"
+                [(ngModel)]="data.txnDate"
+                required
+                [max]="maxDate"
+              />
+              <div class="form-text">Select the transaction date</div>
+            </div>
+
+            <!-- Ward Dropdown -->
+            <div class="col-md-6 mb-3">
+              <label for="ward" class="form-label"
+                >Ward <span class="text-danger"></span
+              ></label>
+              <select
+                class="form-select"
+                id="ward"
+                name="ward"
+                [(ngModel)]="data.ward"
+                required
+              >
+                <option value="" disabled selected>Select Ward</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+                <option value="FN">FN</option>
+                <option value="FS">FS</option>
+                <option value="GN">GN</option>
+                <option value="GS">GS</option>
+                <option value="HE">HE</option>
+                <option value="HW">HW</option>
+                <option value="KE">KE</option>
+                <option value="KW">KW</option>
+                <option value="L">L</option>
+                <option value="ME">ME</option>
+                <option value="MW">MW</option>
+                <option value="N">N</option>
+                <option value="PN">PN</option>
+                <option value="PS">PS</option>
+                <option value="RC">RC</option>
+                <option value="RN">RN</option>
+                <option value="RS">RS</option>
+                <option value="S">S</option>
+                <option value="T">T</option>
+              </select>
+              <div class="form-text">Select ward from the list</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Vend Average Input -->
+            <div class="col-md-6 mb-3">
+              <label for="vendAvg" class="form-label"
+                >Vend Average <span class="text-danger"></span
+              ></label>
+              <input
+                type="number"
+                class="form-control"
+                id="vendAvg"
+                name="vendAvg"
+                [(ngModel)]="data.vendAvg"
+                min="0"
+                max="9999"
+                step="1"
+                placeholder="Enter whole number"
+                required
+                (input)="onNumberInput($event, 'vendAvg')"
+              />
+              <div class="form-text">Enter whole number only (no decimals)</div>
+            </div>
+
+            <!-- Burn Average Input -->
+            <div class="col-md-6 mb-3">
+              <label for="burnAvg" class="form-label"
+                >Burn Average <span class="text-danger"></span
+              ></label>
+              <input
+                type="number"
+                class="form-control"
+                id="burnAvg"
+                name="burnAvg"
+                [(ngModel)]="data.burnAvg"
+                min="0"
+                max="9999"
+                step="1"
+                placeholder="Enter whole number"
+                required
+                (input)="onNumberInput($event, 'burnAvg')"
+              />
+              <div class="form-text">Enter whole number only (no decimals)</div>
+            </div>
+          </div>
+
+          <!-- Data Preview -->
+          <!-- <div
+            class="mt-4 p-3 border rounded bg-light"
+            *ngIf="showDataPreview()"
+          >
+            <h6 class="text-muted mb-3">Data Preview:</h6>
+            <div class="row">
+              <div class="col-md-6">
+                <strong>Ward:</strong> {{ data.ward || "Not set" }}
+              </div>
+              <div class="col-md-6">
+                <strong>Date:</strong> {{ data.txnDate || "Not set" }}
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-md-6">
+                <strong>Vend Avg:</strong>
+                {{ data.vendAvg !== null ? data.vendAvg : "Not set" }}
+              </div>
+              <div class="col-md-6">
+                <strong>Burn Avg:</strong>
+                {{ data.burnAvg !== null ? data.burnAvg : "Not set" }}
+              </div>
+            </div>
+          </div> -->
+
+          <!-- Action Buttons -->
+          <div class="d-flex justify-content-center gap-3 mt-4">
+            <button
+              type="submit"
+              class="btn btn-primary px-4 custom-btn"
+              [disabled]="!dataForm.form.valid || isSubmitting"
+            >
+              <span
+                *ngIf="isSubmitting"
+                class="spinner-border spinner-border-sm me-2"
+              ></span>
+              {{ isSubmitting ? "Saving..." : "Submit" }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary px-4 custom-btn"
+              (click)="clearForm()"
+              [disabled]="isSubmitting"
+            >
+              Clear
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Popup -->
+  <div *ngIf="showConfirmationPopup" class="custom-popup-overlay">
+    <div class="custom-popup-container">
+      <div class="custom-popup-header">
+        <h5 class="mb-0">Confirm Submission</h5>
+      </div>
+      <div class="custom-popup-body">
+        <p>Are you sure you want to submit the following data?</p>
+        <div class="confirmation-details">
+          <div class="row">
+            <div class="col-md-6"><strong>Ward:</strong> {{ data.ward }}</div>
+            <div class="col-md-6">
+              <strong>Date:</strong> {{ data.txnDate }}
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-md-6">
+              <strong>Vend Avg:</strong> {{ data.vendAvg }}
+            </div>
+            <div class="col-md-6">
+              <strong>Burn Avg:</strong> {{ data.burnAvg }}
+            </div>
+          </div>
+        </div>
+        <p class="mt-3 text-muted">This action cannot be undone.</p>
+      </div>
+      <div class="custom-popup-footer">
+        <div class="d-flex justify-content-center w-100 gap-3">
+          <button
+            class="btn btn-primary custom-btn"
+            (click)="confirmSubmission()"
+          >
+            Yes, Submit
+          </button>
+          <button
+            class="btn btn-primary custom-btn"
+            (click)="cancelSubmission()"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Popup -->
+  <div *ngIf="showPopup" class="custom-popup-overlay">
+    <div class="custom-popup-container">
+      <div class="custom-popup-header">
+        <h5 class="mb-0">{{ popupTitle }}</h5>
+      </div>
+      <div class="custom-popup-body" [innerHTML]="popupMessage"></div>
+      <div class="custom-popup-footer">
+        <div class="d-flex justify-content-center w-100">
+          <button class="btn btn-sm me-3 custom-btn" (click)="confirmPopup()">
+            OK
+          </button>
+          <button
+            class="btn btn-sm btn-outline-secondary"
+            (click)="cancelPopup()"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

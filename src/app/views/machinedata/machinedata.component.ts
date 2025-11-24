@@ -1038,10 +1038,10 @@ export class MachinedataComponent implements OnInit, OnDestroy {
 
   startAutoRefresh(): void {
     // Refresh every 2 minutes (120,000 milliseconds)
-    this.autoRefreshSubscription = interval(120000).subscribe(() => {
-      console.log('🔄 Auto-refreshing machine data...');
-      this.loadMachineData();
-    });
+    // this.autoRefreshSubscription = interval(120000).subscribe(() => {
+    //   console.log('🔄 Auto-refreshing machine data...');
+    //    this.loadMachineData();
+    // });
   }
 
   startRefreshCountdown(): void {
@@ -1083,7 +1083,8 @@ export class MachinedataComponent implements OnInit, OnDestroy {
   refreshDashboard() {
     console.log('🔄 Dashboard Refresh Triggered...');
     // Logic to refresh dashboard data
-    this.loadMachineData(); // Example, you can customize this
+    this.initialLoadMachineData();
+    // this.loadMachineData(); // Example, you can customize this
   }
 
   loadUserRole() {
@@ -1306,7 +1307,11 @@ export class MachinedataComponent implements OnInit, OnDestroy {
           this.dashboardData = {
             ...response.data,
             machinesInstalled: response.data.machinesInstalled ?? 0,
-            machinesRunning: response.data.machinesRunning ?? 0,
+            machinesOnline: response.data.machinesRunning ?? 0,
+            machinesOffline:
+              (response.data.machinesInstalled ?? 0) -
+              (response.data.machinesRunning ?? 0),
+
             stockEmpty: response.data.stockEmpty ?? 0,
             stockLow: response.data.stockLow ?? 0,
             stockOk: response.data.stockOk ?? 0,
@@ -1489,7 +1494,11 @@ export class MachinedataComponent implements OnInit, OnDestroy {
           this.dashboardData = {
             ...response.data,
             machinesInstalled: response.data.machinesInstalled ?? 0,
-            machinesRunning: response.data.machinesRunning ?? 0,
+            machinesOnline: response.data.machinesRunning ?? 0,
+            machinesOffline:
+              (response.data.machinesInstalled ?? 0) -
+              (response.data.machinesRunning ?? 0),
+
             stockEmpty: response.data.stockEmpty ?? 0,
             stockLow: response.data.stockLow ?? 0,
             stockOk: response.data.stockOk ?? 0,

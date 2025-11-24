@@ -212,6 +212,7 @@ import { MachinereportComponent } from './views/machinereport/machinereport.comp
 import { GoogleMapsComponent } from './views/plugins/maps/google-maps.component';
 import { ZoneDashboardComponent } from './views/zone-dashboard/zone-dashboard.component';
 import { GraphDashboardComponent } from './views/graph-dashboard/graph-dashboard.component';
+import { DataManagementComponent } from './views/settings/data-management/data-management.component';
 
 const routes: Routes = [
   {
@@ -405,6 +406,11 @@ const routes: Routes = [
             path: 'configure-machines',
             component: ConfigureMachinesComponent,
             data: { title: 'Configured Machines' },
+          },
+          {
+            path: 'data-management',
+            component: DataManagementComponent,
+            data: { title: '' },
           },
         ],
       },

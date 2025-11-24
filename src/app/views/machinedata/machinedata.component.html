@@ -15,7 +15,7 @@
         },
         {
           title: 'Machines Running',
-          value: dashboardData.machinesRunning,
+          value: 'multi-line',
           color: '#A5D6A7',
           icon: 'https://img.icons8.com/ios-filled/50/FFFFFF/gears.png'
         },
@@ -72,21 +72,10 @@
         </div>
         <div class="ms-2">
           <h6 class="card-title">{{ card.title }}</h6>
-          <p
-            *ngIf="card.title !== 'Stock Status'"
-            style="
-              text-align: center;
-              font-size: 16px;
-              margin-top: auto;
-              margin-bottom: auto;
-            "
-          >
-            {{ card.value }}
-          </p>
 
-          <!-- ✅ Stock Status Special Handling (Without Changing Card Size) -->
-          <p
-            *ngIf="card.title === 'Stock Status'"
+          <!-- ✅ Special case: Machines Running -->
+          <div
+            *ngIf="card.title === 'Machines Running'; else normalCardValue"
             style="
               display: flex;
               flex-direction: column;
@@ -99,11 +88,45 @@
               margin-bottom: auto;
             "
           >
-            <span
-              >Empty: {{ dashboardData.stockEmpty }} | Full:
-              {{ dashboardData.stockOk }}</span
+            <div>Online: {{ dashboardData.machinesOnline || 0 }}</div>
+            <div>Offline: {{ dashboardData.machinesOffline || 0 }}</div>
+          </div>
+
+          <!-- ✅ All other cards -->
+          <ng-template #normalCardValue>
+            <p
+              *ngIf="card.title !== 'Stock Status'"
+              style="
+                text-align: center;
+                font-size: 16px;
+                margin-top: auto;
+                margin-bottom: auto;
+              "
             >
-          </p>
+              {{ card.value }}
+            </p>
+
+            <!-- ✅ Stock Status Special Handling -->
+            <p
+              *ngIf="card.title === 'Stock Status'"
+              style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                line-height: 1.2;
+                height: 40px;
+                margin-top: auto;
+                margin-bottom: auto;
+              "
+            >
+              <span>
+                Empty: {{ dashboardData.stockEmpty }} | Full:
+                {{ dashboardData.stockOk }}
+              </span>
+            </p>
+          </ng-template>
         </div>
       </div>
     </div>
