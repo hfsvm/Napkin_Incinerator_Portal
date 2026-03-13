@@ -32,7 +32,7 @@ export const environment = {
   // url1:"http://vmdemo.hfsgroup.in:8080/hfs_vm/merchantPortal",
   // urld:"http://vmdemo.hfsgroup.in:8080/hfs_vm/incinerator",
 
-  // PROD
+  // // PROD
   // url: 'http://vmdemo.hfsgroup.in:8080/hfs_vm/tab',
   // urlc: 'http://vmdemo.hfsgroup.in:8080/hfs_vm/customer',
   // urla: 'http://vmdemo.hfsgroup.in:8080/hfs_vm/consumer',
@@ -45,7 +45,8 @@ export const environment = {
   urla: 'http://vmdemo.hfsgroup.in:8080/hfs_vm/consumer',
   url1: 'https://vmuat.hfsgroup.in/hfs_napkinIncinerator/portal',
   urld: 'http://vmdemo.hfsgroup.in:8080/hfs_vm/incinerator',
-
+  // FIXED: Changed to absolute URL
+  url2: 'https://vmuat.hfsgroup.in/hfs_napkinIncinerator'
   //UAT
   // url: 'http://vmuat.hfsgroup.in:8080/hfs_vm/tab',
   // urlc: 'http://vmuat.hfsgroup.in:8080/hfs_vm/customer',
@@ -66,4 +67,6 @@ export const environment = {
   // urla: 'http://vmdemo.hfsgroup.in:8080/hfs_vm/consumer',
   // url1: 'http://13.235.244.122:8080/hfs_napkinIncinerator/portal',
   // urld: 'http://vmdemo.hfsgroup.in:8080/hfs_vm/incinerator',
+
+  
 };

@@ -1,5 +1,5 @@
 <div class="container p-4">
-  <!-- Tabs Navigation (Tabs for Pricing and Incineration) -->
+  <!-- Tabs Navigation -->
   <ul
     class="nav nav-pills mb-3"
     role="tablist"
@@ -21,7 +21,6 @@
       >
         Pricing
       </button>
-      <!-- Blue underline only for active tab -->
       <div
         *ngIf="activeTab === 'pricing'"
         style="height: 2px; background-color: #0066cc; margin-top: 5px"
@@ -44,12 +43,12 @@
       >
         Incineration
       </button>
-      <!-- Blue underline only for active tab -->
       <div
         *ngIf="activeTab === 'incineration'"
         style="height: 2px; background-color: #0066cc; margin-top: 5px"
       ></div>
     </li>
+    
     <li class="nav-item" role="presentation">
       <button
         class="nav-link"
@@ -66,12 +65,12 @@
       >
         FOTA
       </button>
-      <!-- Blue underline only for active tab -->
       <div
         *ngIf="activeTab === 'pricing1'"
         style="height: 2px; background-color: #0066cc; margin-top: 5px"
       ></div>
     </li>
+    
     <li class="nav-item" role="presentation">
       <button
         class="nav-link"
@@ -93,7 +92,7 @@
         style="height: 2px; background-color: #0066cc; margin-top: 5px"
       ></div>
     </li>
-    <!-- Add this to your nav-pills list -->
+    
     <li class="nav-item" role="presentation">
       <button
         class="nav-link"
@@ -115,6 +114,29 @@
         style="height: 2px; background-color: #0066cc; margin-top: 5px"
       ></div>
     </li>
+    
+    <!-- REMAP-IMEI-MID Tab -->
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'remapImeiMid'"
+        (click)="onTabChange('remapImeiMid')"
+        style="
+          border: none;
+          color: #0066cc;
+          padding: 10px 15px;
+          font-weight: bold;
+          outline: none;
+          background: none;
+        "
+      >
+        REMAP-IMEI-MID
+      </button>
+      <div
+        *ngIf="activeTab === 'remapImeiMid'"
+        style="height: 2px; background-color: #0066cc; margin-top: 5px"
+      ></div>
+    </li>
   </ul>
 
   <div
@@ -127,22 +149,9 @@
 
   <!-- Pricing Tab Content -->
   <div *ngIf="activeTab === 'pricing'">
-    <!-- Card Layout for Pricing -->
     <div class="card shadow-sm mb-4">
       <div class="card-body">
         <div class="row">
-          <!-- Project Dropdown -->
-          <!-- <div class="col-md-6 mb-3">
-            <label for="selectProject" class="form-label"> Client Name</label>
-            <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
-              <option [ngValue]="null" disabled>Client Name</option>
- 
-              <option *ngFor="let project of projectList" [value]="project.ProjectId">
-                {{ project.projectname }}
-              </option>
-            </select>
-          </div> -->
-
           <!-- Project Dropdown -->
           <div class="col-md-6 mb-3">
             <label for="selectProject" class="form-label">Client Name</label>
@@ -152,8 +161,6 @@
               (change)="onProjectChange()"
             >
               <option [ngValue]="null" disabled selected>Select Client</option>
-
-              <!-- ✅ Use correct property names -->
               <option
                 *ngFor="let project of projectList"
                 [value]="project.projectId"
@@ -163,7 +170,7 @@
             </select>
           </div>
 
-          <!-- Machine Dropdown for Pricing Tab (Custom Dropdown with Search) -->
+          <!-- Machine Dropdown for Pricing Tab -->
           <div class="col-md-6 mb-3">
             <label for="selectMachinePricing" class="form-label">
               Machine</label
@@ -217,7 +224,6 @@
         </div>
 
         <!-- Configuration Table -->
-
         <table class="table table-bordered table-hover">
           <thead class="custom-header">
             <tr class="">
@@ -228,7 +234,6 @@
           </thead>
           <tbody>
             <!-- Row for Item ID -->
-            <!-- Row for Item ID with Dropdown -->
             <tr>
               <td><strong>Item ID</strong></td>
               <td class="text-center">{{ currentValues.iid }}</td>
@@ -246,7 +251,7 @@
               </td>
             </tr>
 
-            <!-- Row for Napkin Cost (auto-filled, readonly) -->
+            <!-- Row for Napkin Cost -->
             <tr>
               <td><strong>Napkin Cost</strong></td>
               <td class="text-center">{{ currentValues.itp }}</td>
@@ -265,7 +270,6 @@
             <!-- Row for QR Bytes -->
             <tr>
               <td><strong>QR URL</strong></td>
-              <!-- Add the class to the td that contains the current value -->
               <td class="text-center wrap-text">{{ currentValues.qrBytes }}</td>
               <td>
                 <input
@@ -289,14 +293,13 @@
             Clear
           </button>
         </div>
-        <!-- Custom Popup - Add this at the end of your component's HTML template -->
+        <!-- Custom Popup -->
         <div *ngIf="showPopup" class="custom-popup-overlay">
           <div class="custom-popup-container">
             <div class="custom-popup-header">
               <h5 class="mb-0">{{ popupTitle }}</h5>
             </div>
             <div class="custom-popup-body" [innerHTML]="popupMessage">
-              <!-- Using innerHTML to render HTML content -->
             </div>
             <div class="custom-popup-footer">
               <div class="d-flex justify-content-center w-100">
@@ -319,23 +322,10 @@
 
   <!-- Incineration Tab Content -->
   <div *ngIf="activeTab === 'incineration'">
-    <!-- Card Layout for Incineration -->
     <div class="card shadow-sm mb-4">
       <div class="card-body">
         <!-- Machine Selection Form -->
         <div class="row">
-          <!-- Project Dropdown -->
-          <!-- <div class="col-md-6 mb-3">
-            <label for="selectProject" class="form-label"> Client Name</label>
-            <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
-              <option [ngValue]="null" disabled> client Name</option>
- 
-              <option *ngFor="let project of projectList" [value]="project.ProjectId">
-                {{ project.projectname }}
-              </option>
-            </select>
-          </div> -->
-
           <div class="col-md-6 mb-3">
             <label for="selectProject" class="form-label">Client Name</label>
             <select
@@ -344,8 +334,6 @@
               (change)="onProjectChange()"
             >
               <option [ngValue]="null" disabled selected>Select Client</option>
-
-              <!-- ✅ Use correct property names -->
               <option
                 *ngFor="let project of projectList"
                 [value]="project.projectId"
@@ -358,9 +346,7 @@
           <!-- Machine Dropdown -->
           <div class="col-md-6 mb-3">
             <label for="selectMachine" class="form-label"> Machine</label>
-
             <div class="position-relative">
-              <!-- Fake Select Box Button -->
               <div
                 class="form-select"
                 style="cursor: pointer"
@@ -375,7 +361,6 @@
                 class="border rounded position-absolute bg-white w-100 mt-1 shadow-sm zindex-dropdown"
                 style="max-height: 220px; overflow-y: auto"
               >
-                <!-- Search Input Inside Dropdown -->
                 <input
                   type="text"
                   [(ngModel)]="machineSearchTerm"
@@ -423,7 +408,6 @@
               <tr>
                 <td><strong>Scheduler (Auto Cleaning Time)</strong></td>
                 <td class="text-center">{{ getFormattedSchedulerTime() }}</td>
-
                 <td>
                   <div class="d-flex gap-2">
                     <!-- Hour Input -->
@@ -523,7 +507,7 @@
 
               <tr>
                 <td><strong>Limit Switch (Burning Cycle Count)</strong></td>
-                <td class="text-center">{{ currentValues.limitSwitch }}</td>
+                <td class="text-center">{{ incinerationCurrentValues.limitSwitch }}</td>
                 <td>
                   <input
                     class="form-control"
@@ -562,7 +546,7 @@
               <!-- Set Heater Temp A -->
               <tr>
                 <td><strong>Heater A Cut Off Temperature</strong></td>
-                <td class="text-center">{{ currentValues.setHeaterTempA }}</td>
+                <td class="text-center">{{ incinerationCurrentValues.setHeaterTempA }}</td>
                 <td>
                   <input
                     class="form-control"
@@ -602,10 +586,9 @@
               </tr>
 
               <!-- Set Heater Temp B -->
-              <!-- Set Heater Temp B -->
               <tr>
                 <td><strong>Heater B Cut Off Temperature</strong></td>
-                <td class="text-center">{{ currentValues.setHeaterTempB }}</td>
+                <td class="text-center">{{ incinerationCurrentValues.setHeaterTempB }}</td>
                 <td>
                   <input
                     class="form-control"
@@ -646,7 +629,7 @@
 
               <tr>
                 <td><strong>Heater A Minimum Temperature</strong></td>
-                <td class="text-center">{{ currentValues.heaterAMinTemp }}</td>
+                <td class="text-center">{{ incinerationCurrentValues.heaterAMinTemp }}</td>
                 <td>
                   <input
                     class="form-control"
@@ -676,7 +659,7 @@
               <!-- Heater B On Temp -->
               <tr>
                 <td><strong>Heater A Temperature to Start Heater B</strong></td>
-                <td class="text-center">{{ currentValues.heaterBOnTemp }}</td>
+                <td class="text-center">{{ incinerationCurrentValues.heaterBOnTemp }}</td>
                 <td>
                   <input
                     class="form-control"
@@ -724,24 +707,11 @@
     </div>
   </div>
 
-  <!-- Pricing1 FOTA Tab Content -->
+  <!-- FOTA Tab Content -->
   <div *ngIf="activeTab === 'pricing1'">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
-        <!-- Row: Client Name + Machine Dropdown with Search -->
         <div class="row">
-          <!-- Project Dropdown -->
-          <!-- <div class="col-md-6 mb-3">
-          <label for="selectProject" class="form-label"> Client Name</label>
-          <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
-            <option [ngValue]="null" disabled>Client Name</option>
- 
-            <option *ngFor="let project of projectList" [value]="project.ProjectId">
-              {{ project.projectname }}
-            </option>
-          </select>
-        </div> -->
-
           <div class="col-md-6 mb-3">
             <label for="selectProject" class="form-label">Client Name</label>
             <select
@@ -750,8 +720,6 @@
               (change)="onProjectChangeFota()"
             >
               <option [ngValue]="null" disabled selected>Select Client</option>
-
-              <!-- ✅ Use correct property names -->
               <option
                 *ngFor="let project of projectList"
                 [value]="project.projectId"
@@ -761,7 +729,7 @@
             </select>
           </div>
 
-          <!-- Machine Dropdown for Pricing Tab (Custom Dropdown with Search) -->
+          <!-- Machine Dropdown for FOTA -->
           <div class="col-md-6 mb-3">
             <label for="selectMachinePricing" class="form-label">
               Machine</label
@@ -845,13 +813,13 @@
                 </td>
                 <td>{{ machine.machineid }}</td>
                 <td>{{ machine.uid }}</td>
-                <td>{{ machine.pcbNumber }}</td>
                 <td>{{ machine.installedStatus }}</td>
                 <td>
                   <select
                     class="form-select"
                     [(ngModel)]="machine.selectedUpdatedVersion"
                   >
+                    <option [ngValue]="null" disabled selected>Select Version</option>
                     <option
                       *ngFor="let version of machine.updatedVersion"
                       [value]="version"
@@ -887,22 +855,11 @@
     </div>
   </div>
 
+  <!-- Machine Installed Tab Content -->
   <div *ngIf="activeTab === 'machineInstalled'">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
-        <!-- Client Name & Machine Dropdowns Side by Side -->
         <div class="row">
-          <!-- Client Dropdown -->
-          <!-- <div class="col-md-6 mb-3">
-            <label class="form-label">Client Name</label>
-            <select class="form-select" [(ngModel)]="selectedProjectId" (change)="onProjectChange()">
-              <option [ngValue]="null" disabled>Select Client</option>
-              <option *ngFor="let project of projectList" [value]="project.ProjectId">
-                {{ project.projectname }}
-              </option>
-            </select>
-          </div> -->
-
           <div class="col-md-6 mb-3">
             <label for="selectProject" class="form-label">Client Name</label>
             <select
@@ -911,8 +868,6 @@
               (change)="onProjectChange()"
             >
               <option [ngValue]="null" disabled selected>Select Client</option>
-
-              <!-- ✅ Use correct property names -->
               <option
                 *ngFor="let project of projectList"
                 [value]="project.projectId"
@@ -925,7 +880,6 @@
           <!-- Machine Dropdown -->
           <div class="col-md-6 mb-3">
             <label class="form-label">Select Machine</label>
-
             <div class="position-relative">
               <div
                 class="form-select"
@@ -974,9 +928,8 @@
           </div>
         </div>
 
-        <!-- Installed Dropdown & UID Input in Same Row -->
+        <!-- Installed Dropdown & UID Input -->
         <div class="row">
-          <!-- Installed Dropdown -->
           <div class="col-md-6 mb-3">
             <label class="form-label">Installed</label>
             <select
@@ -989,7 +942,6 @@
             </select>
           </div>
 
-          <!-- UID Input -->
           <div class="col-md-6 mb-3">
             <label class="form-label">UID</label>
             <input
@@ -1003,7 +955,6 @@
 
         <!-- New Row for PCB No and MC SR No -->
         <div class="row">
-          <!-- PCB No Input -->
           <div class="col-md-6 mb-3">
             <label class="form-label">PCB No</label>
             <input
@@ -1014,7 +965,6 @@
             />
           </div>
 
-          <!-- MC SR No Input -->
           <div class="col-md-6 mb-3">
             <label class="form-label">MC SR No</label>
             <input
@@ -1038,14 +988,7 @@
           />
         </div>
 
-        <!-- <div class="col-md-2 mb-2">
-        <label class="form-label">Installed Date </label>
-        <br>
-        <input type="date" id="installedDate" class="form-control" [(ngModel)]="installedDate">
-      <br>
-      </div> -->
-
-        <!-- Submit & Clear Buttons Centered -->
+        <!-- Submit & Clear Buttons -->
         <div class="d-flex justify-content-center gap-2 mt-3">
           <button
             class="btn btn-primary px-4 custom-btn"
@@ -1063,6 +1006,8 @@
       </div>
     </div>
   </div>
+  
+  <!-- Notification Access Tab Content -->
   <div *ngIf="activeTab === 'notificationAccess'">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
@@ -1121,21 +1066,6 @@
           </div>
         </div>
 
-        <!-- Selected Event Types Preview -->
-        <!-- <div class="row" *ngIf="selectedEventTypeIds.length > 0">
-          <div class="col-md-12 mb-3">
-            <label class="form-label">Selected Events:</label>
-            <div class="d-flex flex-wrap gap-2">
-              <span
-                *ngFor="let id of selectedEventTypeIds"
-                class="badge bg-primary"
-              >
-                {{ getEventName(id) }}
-              </span>
-            </div>
-          </div>
-        </div> -->
-
         <!-- Action Buttons -->
         <div class="d-flex justify-content-center gap-2 mt-3">
           <button
@@ -1151,6 +1081,234 @@
             Clear
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMAP-IMEI-MID Tab Content -->
+  <div *ngIf="activeTab === 'remapImeiMid'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Client and Machine Selection Row -->
+        <div class="row mb-4">
+          <!-- Client Name Dropdown -->
+          <div class="col-md-6 mb-3">
+            <label for="selectRemapClient" class="form-label">Client Name</label>
+            <select
+              class="form-select"
+              [(ngModel)]="selectedRemapProjectId"
+              (change)="onRemapClientChange()"
+              id="selectRemapClient"
+            >
+              <option [ngValue]="null" disabled selected>Select Client</option>
+              <option
+                *ngFor="let project of projectList"
+                [value]="project.projectId"
+              >
+                {{ project.projectName }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Machine Dropdown with Search for REMAP tab -->
+          <div class="col-md-6 mb-3">
+            <label for="selectRemapMachine" class="form-label">Machine</label>
+            <div class="position-relative">
+              <div
+                class="form-select"
+                style="cursor: pointer"
+                (click)="toggleRemapDropdown($event)"
+              >
+                {{ selectedRemapMachineId || "Select Machine" }}
+              </div>
+
+              <div
+                *ngIf="remapDropdownOpen"
+                class="border rounded position-absolute bg-white w-100 mt-1 shadow-sm zindex-dropdown"
+                style="max-height: 220px; overflow-y: auto"
+              >
+                <input
+                  type="text"
+                  [(ngModel)]="remapMachineSearchTerm"
+                  (input)="filterRemapMachines()"
+                  class="form-control border-0 border-bottom rounded-0"
+                  placeholder="Search..."
+                  (click)="$event.stopPropagation()"
+                />
+
+                <div
+                  *ngFor="let id of filteredRemapMachineIds"
+                  (click)="selectRemapMachine(id)"
+                  class="px-3 py-2 dropdown-item"
+                  style="cursor: pointer"
+                >
+                  {{ id }}
+                </div>
+
+                <div
+                  class="text-muted px-3 py-2"
+                  *ngIf="filteredRemapMachineIds.length === 0"
+                >
+                  {{ remapMachineIds.length === 0 ? 'Please select a client first' : 'No machines found' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading indicator for machine data fetch -->
+        <div *ngIf="isFetchingMachineData" class="text-center mb-3">
+          <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+          <span class="text-primary">Fetching machine details...</span>
+        </div>
+
+        <!-- Configuration Table -->
+        <div *ngIf="selectedRemapMachineId">
+          <div class="alert alert-info mb-3" *ngIf="remapMachineData === null">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Note:</strong> Machine details not found in system. You can manually enter the GSM details below.
+          </div>
+          
+          <table class="table table-bordered table-hover">
+            <thead class="custom-header">
+              <tr>
+                <th class="text-center">Fields Name</th>
+                <th class="text-center">Current Value</th>
+                <th class="text-center">New Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- MID (Machine ID) Row -->
+              <tr>
+                <td><strong>Machine ID (MID)</strong></td>
+                <td class="text-center">{{ currentRemapValues.mid || 'Not available' }}</td>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [value]="remapData.mid"
+                    placeholder="Select machine above"
+                    [readonly]="true"
+                    style="background-color: #f8f9fa;"
+                  />
+                  <!-- <small class="form-text text-muted">Machine ID (Auto-filled when machine is selected)</small> -->
+                </td>
+              </tr>
+
+              <!-- IME (IMEI Number) Row -->
+              <tr>
+                <td><strong>IMEI Number (IME)</strong></td>
+                <td class="text-center">{{ currentRemapValues.ime || 'Not available' }}</td>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="remapData.ime"
+                    placeholder="Enter IMEI (15-20 digits)"
+                    maxlength="20"
+                    (input)="onRemapFieldChange('ime', $event.target.value)"
+                    [ngClass]="{'is-invalid': (submittedRemap || remapData.ime) && !isValidIMEI(remapData.ime)}"
+                  />
+                  <small class="form-text text-muted">IMEI Number (15-20 digits)</small>
+                  <div *ngIf="(submittedRemap || remapData.ime) && !isValidIMEI(remapData.ime)" class="invalid-feedback">
+                    IMEI must be 15-20 numeric digits
+                  </div>
+                </td>
+              </tr>
+
+              <!-- CPI (Chip ID) Row -->
+              <tr>
+                <td><strong>Chip ID (CPI)</strong></td>
+                <td class="text-center">{{ currentRemapValues.cpi || 'Not available' }}</td>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="remapData.cpi"
+                    placeholder="Enter Chip ID (CPI)"
+                    maxlength="100"
+                    (input)="onRemapFieldChange('cpi', $event.target.value)"
+                    [ngClass]="{'is-invalid': submittedRemap && !remapData.cpi}"
+                  />
+                  <small class="form-text text-muted">Chip ID (CPI)</small>
+                  <div *ngIf="submittedRemap && !remapData.cpi" class="invalid-feedback">
+                    CPI is required
+                  </div>
+                </td>
+              </tr>
+
+              <!-- CVN (Board Version) Row -->
+              <!-- CVN (Board Version) Row -->
+              <tr>
+                <td><strong>Board Version (CVN)</strong></td>
+                <td class="text-center">{{ currentRemapValues.cvn || 'Not available' }}</td>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="remapData.cvn"
+                    placeholder="Enter Board Version (CVN)"
+                    maxlength="50"
+                    (input)="onRemapFieldChange('cvn', $event.target.value)"
+                    [ngClass]="{'is-invalid': submittedRemap && !remapData.cvn}"
+                  />
+                  <small class="form-text text-muted">Board Version (CVN)</small>
+                  <div *ngIf="submittedRemap && !remapData.cvn" class="invalid-feedback">
+                    CVN is required
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Action Buttons -->
+          <div class="d-flex justify-content-center mt-4">
+            <button
+              class="btn btn-sm me-2 custom-btn"
+              (click)="submitRemapImeiMid()"
+              [disabled]="!selectedRemapMachineId || isRemapLoading || !isRemapFormValidState"
+            >
+              <span *ngIf="!isRemapLoading">Submit</span>
+              <span *ngIf="isRemapLoading" class="d-flex align-items-center">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Processing...
+              </span>
+            </button>
+            
+            <button
+              class="btn btn-sm custom-btn"
+              (click)="clearRemapForm()"
+              [disabled]="isRemapLoading"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Message when no machine selected -->
+        <div *ngIf="!selectedRemapMachineId" class="text-center text-muted py-4">
+          <i class="bi bi-motherboard" style="font-size: 3rem;"></i>
+          <!-- <p class="mt-2">Please select a client and machine to view and update GSM details</p>
+          <p class="small text-muted">Select a client first, then select a machine from the dropdown</p> -->
+        </div>
+
+        <!-- API Response Display -->
+        <!-- <div *ngIf="remapResponse" class="mt-4">
+          <div class="alert" [ngClass]="remapResponse.success ? 'alert-success' : 'alert-danger'">
+            <h5 class="alert-heading">
+              {{ remapResponse.success ? '✓ Success' : '✗ Error' }}
+            </h5>
+            <p class="mb-1"><strong>Status:</strong> {{ remapResponse.message }}</p>
+            <div *ngIf="remapResponse.data">
+              <p class="mb-1"><strong>Machine ID:</strong> {{ remapResponse.data.machineId }}</p>
+              <p class="mb-1"><strong>Merchant ID:</strong> {{ remapResponse.data.merchantId }}</p>
+              <p *ngIf="remapResponse.data.imei" class="mb-1"><strong>IMEI:</strong> {{ remapResponse.data.imei }}</p>
+              <p *ngIf="remapResponse.data.cpi" class="mb-1"><strong>CPI:</strong> {{ remapResponse.data.cpi }}</p>
+              <p *ngIf="remapResponse.data.cvn" class="mb-1"><strong>CVN:</strong> {{ remapResponse.data.cvn }}</p>
+              <p class="mb-0"><strong>Timestamp:</strong> {{ remapResponse.timestamp | date:'medium' }}</p>
+            </div>
+          </div>
+        </div> -->
       </div>
     </div>
   </div>

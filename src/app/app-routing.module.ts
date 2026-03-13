@@ -212,7 +212,8 @@ import { MachinereportComponent } from './views/machinereport/machinereport.comp
 import { GoogleMapsComponent } from './views/plugins/maps/google-maps.component';
 import { ZoneDashboardComponent } from './views/zone-dashboard/zone-dashboard.component';
 import { GraphDashboardComponent } from './views/graph-dashboard/graph-dashboard.component';
-import { DataManagementComponent } from './views/settings/data-management/data-management.component';
+import { DataManagementComponent } from './views/settings/data-management/data-management.component'
+import { MachineOnboardingComponent } from './views/settings/machine-on-boarding/machine-onboarding.component';
 
 const routes: Routes = [
   {
@@ -411,6 +412,11 @@ const routes: Routes = [
             path: 'data-management',
             component: DataManagementComponent,
             data: { title: '' },
+          },
+            {
+            path: 'machine-onboarding',
+            component: MachineOnboardingComponent,
+            data: { title: 'Machine Onboarding' },
           },
         ],
       },

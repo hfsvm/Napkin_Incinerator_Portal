@@ -9,12 +9,66 @@ import { DataService } from '../../../service/data.service';
 import { CommonDataService } from '../../../Common/common-data.service';
 import { Router } from '@angular/router';
 
+// Define interfaces for better type safety
+interface RemapData {
+  cpi: string;
+  cvn: string;
+  ime: string;
+  mid: string;
+}
+
+interface Client {
+  id: number;
+  companyName: string;
+  [key: string]: any; // Allow other properties
+}
+
+interface MachineGsmDetails {
+  machineGSMId: number;
+  merchantId: string;
+  machineId: string;
+  batchno: string | null;
+  imei: string;
+  chip_Id: string;
+  sim_number: string | null;
+  serial_gsm: string | null;
+  uid_gsm: string | null;
+  board_version: string;  // This is CVN
+  createddatetime: string;
+  lastupdateddatetime: string;
+}
+
 @Component({
   selector: 'app-advanced-management',
   templateUrl: './advanced-management.component.html',
   styleUrls: ['./advanced-management.component.scss'],
 })
 export class AdvancedManagementComponent implements OnInit {
+
+  // Add these properties for the REMAP-IMEI-MID tab
+  remapData: RemapData = {
+    cpi: '',
+    cvn: '',
+    ime: '',
+    mid: ''
+  };
+  
+  // Current values for REMAP tab - these will show the current values from API
+  currentRemapValues: RemapData = {
+    cpi: '',
+    cvn: '',
+    ime: '',
+    mid: ''
+  };
+  
+  remapResponse: any = null;
+  isRemapLoading: boolean = false;
+  submittedRemap: boolean = false;
+  isRemapChanged: boolean = false;
+  
+  // Property to track REMAP form validity
+  isRemapFormValidState: boolean = false;
+  
   currentTime: string = '';
   private timer: any;
 
@@ -25,7 +79,6 @@ export class AdvancedManagementComponent implements OnInit {
 
   fotaTable: any[] = [];
   fotaRows: any[] = [];
-  // installedDate: string = '';
   selectedFotaRows: Set<string> = new Set(); // store selected machineids
   selectedVersion: string = '';
   selectedMachineInstalledId: string = '';
@@ -46,10 +99,10 @@ export class AdvancedManagementComponent implements OnInit {
   projectList: any[] = [];
   selectedProjectId!: number | null;
   selectedProjectIdfota!: number | null;
+  selectedRemapProjectId: number | null = null; // For REMAP tab client selection
   clientId!: number;
   clientname: string = '';
   currentTab: string = 'Pricing';
-  // projectId: number;
   searchText: string = '';
   filteredMachineIds: string[] = [];
   selectedMachineIdPricing: string | null = null;
@@ -118,20 +171,38 @@ export class AdvancedManagementComponent implements OnInit {
   popupMessage = '';
   popupConfirmAction: () => void = () => {};
 
+  // NEW PROPERTIES FOR REMAP TAB
+  remapClients: any[] = []; // Clients for REMAP tab
+  remapMachineIds: string[] = []; // Machine IDs for REMAP tab
+  filteredRemapMachineIds: string[] = []; // Filtered machine IDs for REMAP tab
+  selectedRemapMachineId: string = ''; // Selected machine for REMAP tab
+  remapMachineSearchTerm: string = ''; // Search term for REMAP machines
+  remapDropdownOpen: boolean = false; // Dropdown state for REMAP machines
+  remapMachineData: MachineGsmDetails | null = null; // Machine data from board API
+  isFetchingMachineData: boolean = false; // Loading state for machine data fetch
+  installedDate: string = '';
+  dropdownOpen = false;
+  dropdownOpenMachine = false;
+  machineSearchTerm = '';
+  clientDropdownOpen = false;
+  clientSearchTerm = '';
+  selectedClientId = '';
+  machineSearch: string = '';
+  submitted: boolean = false;
+
   constructor(
     private router: Router,
     private commonDataService: CommonDataService,
     private dataService: DataService,
-    private changeDetectorRef: ChangeDetectorRef,
-    private eRef: ElementRef,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private eRef: ElementRef
   ) {}
 
   selectMachinePricing(id: string) {
     this.selectedMachineIdPricing = id;
     this.selectedMachineId = id;
     this.dropdownOpenPricing = false;
-    console.log('Machine selected:', id); // ✅ debug
+    console.log('Machine selected:', id);
 
     // Fetch pricing data based on selectedMachineId
     this.dataService
@@ -147,7 +218,7 @@ export class AdvancedManagementComponent implements OnInit {
             return;
           }
 
-          const configData = res.data?.ica?.[0]; // First object in ICA array
+          const configData = res.data?.ica?.[0];
 
           if (configData) {
             this.currentValues.iid = configData.iid || '';
@@ -159,9 +230,10 @@ export class AdvancedManagementComponent implements OnInit {
             this.currentValues.qrBytes = '';
           }
 
-          this.changeDetectorRef.detectChanges();
+         this.cdr.detectChanges();
+
         },
-        (error) => {
+        (error: any) => {
           console.error('❌ Business Config HTTP Error:', error);
 
           if (error.status === 404) {
@@ -215,7 +287,6 @@ export class AdvancedManagementComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    debugger;
     if (
       this.commonDataService.merchantId === null ||
       (this.commonDataService.merchantId === undefined &&
@@ -225,7 +296,7 @@ export class AdvancedManagementComponent implements OnInit {
       this.router.navigate(['/login']);
     }
 
-    this.filteredMachineIds = this.machineIds; // Set initially
+    this.filteredMachineIds = this.machineIds;
     this.merchantId = this.commonDataService.getMerchantId();
     this.clientname = '';
     this.machineIds = Array.isArray(
@@ -241,16 +312,17 @@ export class AdvancedManagementComponent implements OnInit {
         (client: any) =>
           client.projects?.map((project: any) => ({
             clientId: client.clientId,
-            clientName: client.clientName, // Make sure this matches your API response
+            clientName: client.clientName,
             projectId: project.projectId,
-            projectName: project.projectName, // Make sure this matches your API response
+            projectName: project.projectName,
           })) || []
       ) || [];
+    
+    // Initialize REMAP clients from the same project list
+    this.remapClients = [...this.projectList];
+    
     if (this.projectList.length > 0) {
-      // this.selectedProjectId = this.projectList[0].projectId;
-
       this.selectedProjectId = null;
-
       console.log('Selected Project ID:', this.selectedProjectId);
 
       if (this.selectedProjectId !== null) {
@@ -261,19 +333,421 @@ export class AdvancedManagementComponent implements OnInit {
     }
 
     if (this.projectList.length > 0) {
-      // this.selectedProjectId = this.projectList[0].projectId;
-
       this.selectedProjectIdfota = null;
-
       console.log('Selected Project ID fota:', this.selectedProjectIdfota);
 
       if (this.selectedProjectIdfota !== null) {
-        this.getMachinesByProject(this.selectedProjectIdfota);
+        this.getOnlineMachinesByProject(this.selectedProjectIdfota);
       }
 
       this.getItemsByMerchant(this.merchantId);
     }
     this.loadNotificationAccessData();
+  }
+
+  // Load machines for REMAP tab when client is selected
+  onRemapClientChange(): void {
+    this.selectedRemapMachineId = '';
+    this.remapMachineIds = [];
+    this.filteredRemapMachineIds = [];
+    this.remapMachineData = null;
+    this.clearRemapForm();
+
+    if (this.selectedRemapProjectId !== null) {
+      this.getRemapMachinesByProject(this.selectedRemapProjectId);
+    }
+    this.cdr.detectChanges();
+  }
+
+  // Get machines for REMAP tab
+  getRemapMachinesByProject(clientId: number): void {
+    console.log('Getting machines for REMAP client id:', clientId);
+    if (!clientId || !this.merchantId) return;
+
+    this.dataService.getMachinesByClient(this.merchantId, clientId).subscribe(
+      (res: any) => {
+        if (res.code === 200 && Array.isArray(res.data)) {
+          console.log('REMAP machines data:', res.data);
+          this.remapMachineIds = res.data;
+          this.filteredRemapMachineIds = [...this.remapMachineIds];
+          this.selectedRemapMachineId = '';
+          this.cdr.detectChanges();
+        } else {
+          this.remapMachineIds = [];
+          this.filteredRemapMachineIds = [];
+          this.showNotification(
+            '⚠️ No machines found for selected client.',
+            'error'
+          );
+        }
+      },
+      (error: any) => {
+        console.error('❌ Error fetching REMAP machines by client:', error);
+        this.showNotification(
+          '❌ Failed to fetch machines for selected client.',
+          'error'
+        );
+      }
+    );
+  }
+
+  // Select machine in REMAP tab - UPDATED
+  selectRemapMachine(id: string) {
+    this.selectedRemapMachineId = id;
+    this.remapData.mid = id; // Set machine ID in form
+    
+    // Clear form data
+    this.remapData = {
+      cpi: '',
+      cvn: '',
+      ime: '',
+      mid: id
+    };
+    
+    this.remapDropdownOpen = false;
+    
+    console.log('REMAP Machine selected:', id);
+    
+    // Check form validity
+    this.checkRemapFormValidity();
+    
+    // Call board API to get machine details
+    this.fetchMachineDetailsFromBoard(id);
+  }
+
+  // Update the fetchMachineDetailsFromBoard method to add more debugging:
+
+fetchMachineDetailsFromBoard(machineId: string): void {
+  this.isFetchingMachineData = true;
+  this.remapMachineData = null;
+  
+  // Reset current values
+  this.currentRemapValues = {
+    mid: machineId,
+    ime: 'Not available',
+    cpi: 'Not available',
+    cvn: 'Not available'
+  };
+  
+  // Clear form data
+  this.remapData = {
+    cpi: '',
+    cvn: '',
+    ime: '',
+    mid: machineId
+  };
+  
+  // Update form validity
+  this.checkRemapFormValidity();
+  
+  // Call GET API to fetch machine details
+  this.dataService.getMachineGsmDetails(this.merchantId, machineId).subscribe({
+    next: (res: any) => {
+      this.isFetchingMachineData = false;
+      console.log('📥 GET Machine GSM Details Response:', res);
+      
+      if (res?.code === 200 && res?.data) {
+        this.remapMachineData = res.data;
+        
+        // FIXED: Explicitly map each field with logging
+        const apiData = res.data;
+        
+        // Debug: Log what we're getting from API
+        console.log('🔍 Debug - API Response Values:', {
+          imei: apiData.imei,
+          chip_Id: apiData.chip_Id,
+          board_version: apiData.board_version,
+          machineId: apiData.machineId
+        });
+        
+        // Set current values - make sure each field gets the right value
+        this.currentRemapValues = {
+          mid: apiData.machineId || machineId,
+          ime: apiData.imei || 'Not available',
+          cpi: apiData.chip_Id || 'Not available',
+          cvn: apiData.board_version || 'Not available' // This should be "1.4" not IMEI
+        };
+        
+        // Debug: Log what we're setting
+        console.log('🔍 Debug - Setting Current Values:', this.currentRemapValues);
+        
+        // Auto-fill the form fields with current values for editing
+        this.remapData = {
+          mid: machineId, // Machine ID cannot be changed
+          ime: apiData.imei || '',
+          cpi: apiData.chip_Id || '',
+          cvn: apiData.board_version || '' // This should be "1.4"
+        };
+        
+        // Debug: Log what we're setting in the form
+        console.log('🔍 Debug - Setting Form Values:', this.remapData);
+        
+        // Check form validity after loading data
+        this.checkRemapChanges();
+        
+        this.showNotification('✅ Machine details loaded successfully!', 'success');
+      } else {
+        // Machine not found in board API
+        this.showNotification('ℹ️ Machine not found in board system. You can enter new details.', 'error');
+      }
+      this.cdr.detectChanges();
+    },
+    error: (error: any) => {
+      this.isFetchingMachineData = false;
+      console.error('❌ GET Machine GSM Details Error:', error);
+      
+      // Check for CORS error
+      if (error.status === 0 || error?.name === 'HttpErrorResponse') {
+        // CORS or network error - provide user-friendly message
+        console.warn('⚠️ CORS error detected. The API may not be accessible from localhost.');
+        this.showNotification('⚠️ Could not connect to server. You can manually enter GSM details.', 'error');
+        
+        // Still allow manual entry
+        this.remapMachineData = null;
+        this.currentRemapValues = {
+          mid: machineId,
+          ime: 'Not available (Connection error)',
+          cpi: 'Not available (Connection error)',
+          cvn: 'Not available (Connection error)'
+        };
+      } else if (error?.status === 404) {
+        this.showNotification('ℹ️ Machine not found. You can enter new GSM details.', 'error');
+      } else {
+        this.showNotification('❌ Failed to fetch machine details from board.', 'error');
+      }
+      this.cdr.detectChanges();
+    }
+  });
+}
+
+  // Filter machines in REMAP tab
+  filterRemapMachines(): void {
+    const searchTerm = this.remapMachineSearchTerm.toLowerCase();
+    this.filteredRemapMachineIds = this.remapMachineIds.filter((id) =>
+      id.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  // Toggle REMAP machine dropdown
+  toggleRemapDropdown(event: MouseEvent): void {
+    this.remapDropdownOpen = !this.remapDropdownOpen;
+    event.stopPropagation();
+  }
+
+  // Check if REMAP form has been changed - UPDATED
+  checkRemapChanges(): void {
+    if (!this.remapData.mid) {
+      this.isRemapChanged = false;
+      this.isRemapFormValidState = false;
+      return;
+    }
+    
+    // Check if any of the editable fields have been changed
+    // Compare form data with current values
+    this.isRemapChanged = 
+      this.remapData.cpi !== this.currentRemapValues.cpi ||
+      this.remapData.cvn !== this.currentRemapValues.cvn ||
+      this.remapData.ime !== this.currentRemapValues.ime;
+    
+    // Check form validity
+    this.checkRemapFormValidity();
+  }
+
+  // Method to check REMAP form validity - UPDATED (CVN is now optional)
+  checkRemapFormValidity(): void {
+    // Check all required fields are filled
+    const hasMachineId = !!this.remapData.mid && this.remapData.mid.trim() !== '';
+    const hasIMEI = !!this.remapData.ime && this.remapData.ime.trim() !== '';
+    const hasCPI = !!this.remapData.cpi && this.remapData.cpi.trim() !== '';
+    // CVN is now optional - can be empty
+    const hasCVN = true; // CVN is optional, so always true
+    
+    // Validate IMEI format if present
+    const isIMEIValid = hasIMEI ? this.isValidIMEI(this.remapData.ime) : false;
+    
+    // Machine ID, IMEI and CPI are required. CVN is optional.
+    this.isRemapFormValidState = hasMachineId && hasIMEI && hasCPI && isIMEIValid;
+    
+    console.log('REMAP Form Validity:', {
+      hasMachineId,
+      hasIMEI,
+      hasCPI,
+      hasCVN,
+      isIMEIValid,
+      isValid: this.isRemapFormValidState
+    });
+  }
+
+  // IMEI Validation Method
+  isValidIMEI(imei: string): boolean {
+    if (!imei) return false;
+    
+    // Clean the IMEI (remove non-numeric characters)
+    const cleanedImei = imei.replace(/\D/g, '');
+    
+    // Check length: 15-20 digits
+    const isValidLength = cleanedImei.length >= 15 && cleanedImei.length <= 20;
+    
+    // Check if it's all numbers
+    const isAllNumbers = /^\d+$/.test(cleanedImei);
+    
+    return isValidLength && isAllNumbers;
+  }
+
+  // Field change handler for REMAP form
+  onRemapFieldChange(field: keyof RemapData, value: string): void {
+    // Update the field value
+    this.remapData[field] = value;
+    
+    // Check for changes and validate
+    this.checkRemapChanges();
+  }
+
+  // UPDATED: REMAP-IMEI-MID Submit Method - CVN is now optional
+  submitRemapImeiMid(): void {
+    this.submittedRemap = true;
+    
+    if (!this.isRemapFormValidState) {
+      this.showNotification('⚠️ Please fill all required fields with valid values.', 'error');
+      return;
+    }
+
+    // Validate IMEI format one more time
+    if (!this.isValidIMEI(this.remapData.ime)) {
+      this.showNotification('⚠️ IMEI must be 15-20 numeric digits.', 'error');
+      return;
+    }
+
+    this.isRemapLoading = true;
+
+    // Prepare the payload exactly as in your curl example
+    const payload: RemapData = {
+      cpi: this.remapData.cpi,        // Chip ID (required)
+      cvn: this.remapData.cvn || '',  // Current Value Number (Board Version) - optional
+      ime: this.remapData.ime,        // New IMEI value (required)
+      mid: this.remapData.mid         // Machine ID (required)
+    };
+
+    console.log('📤 Sending REMAP-IMEI-MID Payload:', payload);
+    console.log('Calling initializeGSMDetails API...');
+
+    // Call the service method - this is the key line that needs to work
+    this.dataService.initializeGSMDetails(payload).subscribe(
+      (res: any) => {
+        this.isRemapLoading = false;
+        this.submittedRemap = false;
+        
+        console.log('📥 REMAP API Response:', res);
+        
+        if (res && res.code === 200) {
+          this.remapResponse = {
+            success: true,
+            message: res.phrase || 'GSM details processed successfully.',
+            data: {
+              machineId: this.remapData.mid,
+              merchantId: this.merchantId,
+              imei: this.remapData.ime,
+              cpi: this.remapData.cpi,
+              cvn: this.remapData.cvn || 'Not provided'
+            },
+            timestamp: new Date().toISOString()
+          };
+          
+          this.showNotification('✅ ' + (res.phrase || 'GSM details processed successfully!'), 'success');
+          
+          // Update current values after successful submission
+          this.currentRemapValues = {
+            mid: this.remapData.mid,
+            ime: this.remapData.ime,
+            cpi: this.remapData.cpi,
+            cvn: this.remapData.cvn || 'Not provided'
+          };
+          
+          // Reset form data but keep machine selected
+          this.remapData = {
+            cpi: '',
+            cvn: '',
+            ime: '',
+            mid: this.selectedRemapMachineId // Keep machine ID selected
+          };
+          
+          this.isRemapChanged = false;
+          this.isRemapFormValidState = false;
+        } else {
+          this.remapResponse = {
+            success: false,
+            message: res?.phrase || 'Failed to process GSM details',
+            data: null,
+            timestamp: new Date().toISOString()
+          };
+          this.showNotification(`⚠️ ${res?.phrase || 'Remap failed'}`, 'error');
+        }
+        this.cdr.detectChanges();
+      },
+      (error: any) => {
+        this.isRemapLoading = false;
+        this.submittedRemap = false;
+        
+        console.error('❌ REMAP API Error Details:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          url: error.url
+        });
+        
+        this.remapResponse = {
+          success: false,
+          message: error.error?.phrase || error.error?.message || 'API call failed',
+          data: null,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Show detailed error message with CORS specific guidance
+        let errorMsg = 'Error initializing GSM details';
+        if (error.status === 0) {
+          errorMsg = `
+          ❌ CORS/Network Error: 
+          1. The API endpoint may not allow requests from localhost
+          2. Please check if the backend server has CORS enabled for this endpoint
+          3. URL attempted: ${error.url || 'Unknown'}
+        `;
+        } else if (error.status === 404) {
+          errorMsg = 'API endpoint not found. Check URL configuration.';
+        } else if (error.status === 500) {
+          errorMsg = 'Server error. Please try again later.';
+        } else {
+          errorMsg = `Error ${error.status}: ${error.message || 'Unknown error'}`;
+        }
+        
+        this.showNotification('❌ ' + errorMsg, 'error');
+        this.cdr.detectChanges();
+      }
+    );
+  }
+
+  // Clear REMAP form
+  clearRemapForm(): void {
+    this.remapData = {
+      cpi: '',
+      cvn: '',
+      ime: '',
+      mid: this.selectedRemapMachineId || ''
+    };
+    this.remapResponse = null;
+    this.submittedRemap = false;
+    this.isRemapChanged = false;
+    this.isRemapFormValidState = false;
+    this.cdr.detectChanges();
+  }
+
+  // For backward compatibility
+  isRemapFormValid(): boolean {
+    return this.isRemapFormValidState;
+  }
+
+  // IMEI Validation Method (for backward compatibility)
+  validateIMEI(): void {
+    this.checkRemapChanges();
   }
 
   // Add these new methods
@@ -296,7 +770,7 @@ export class AdvancedManagementComponent implements OnInit {
             }));
         }
       },
-      (error) => {
+      (error: any) => {
         console.error('Error loading users:', error);
       }
     );
@@ -316,7 +790,7 @@ export class AdvancedManagementComponent implements OnInit {
           this.notificationTypes = [];
         }
       },
-      (error) => {
+      (error: any) => {
         console.error('Error loading notification types:', error);
         this.notificationTypes = [];
       }
@@ -338,7 +812,7 @@ export class AdvancedManagementComponent implements OnInit {
           this.eventTypes = [];
         }
       },
-      (error) => {
+      (error: any) => {
         console.error('Error loading event types:', error);
         this.eventTypes = [];
       }
@@ -425,7 +899,7 @@ export class AdvancedManagementComponent implements OnInit {
           );
         }
       },
-      (error) => {
+      (error: any) => {
         console.error('❌ Notification Access Error:', error);
         this.showNotification(
           `❌ Error: ${error.message || 'Failed to save notification access.'}`,
@@ -449,7 +923,7 @@ export class AdvancedManagementComponent implements OnInit {
 
   getItemsByMerchant(merchantId: string): void {
     this.dataService.getItemsByMerchant(merchantId).subscribe(
-      (res) => {
+      (res: any) => {
         if (res.code === 200 && res.data) {
           // Map the API response to our item list
           this.itemList = res.data.map((item: any) => ({
@@ -458,7 +932,7 @@ export class AdvancedManagementComponent implements OnInit {
           }));
         }
       },
-      (error) => {
+      (error: any) => {
         console.error('Error fetching items:', error);
       }
     );
@@ -474,31 +948,30 @@ export class AdvancedManagementComponent implements OnInit {
       this.updatedValues.itp = selected.itp;
     }
   }
+  
   onProjectChange(): void {
-    this.selectedMachineId = ''; // 👈 Clear previously selected machine
-    this.filteredMachineIds = []; // 👈 Optionally clear machine list before loading new ones
-    this.selectedMachineIdPricing = ''; // 👈 Clear dropdown placeholder value
+    this.selectedMachineId = ''; // Clear previously selected machine
+    this.filteredMachineIds = []; // Optionally clear machine list before loading new ones
+    this.selectedMachineIdPricing = ''; // Clear dropdown placeholder value
 
     if (this.selectedProjectId !== null) {
       this.getMachinesByProject(this.selectedProjectId);
     }
-    this.cdr.detectChanges(); // 👈 Force refresh if needed
+    this.cdr.detectChanges(); // Force refresh if needed
   }
 
   onProjectChangeFota(): void {
-    this.selectedMachineId = ''; // 👈 Clear previously selected machine
-    this.filteredMachineIds = []; // 👈 Optionally clear machine list before loading new ones
-    this.selectedMachineIdPricing = ''; // 👈 Clear dropdown placeholder value
+    this.selectedMachineId = ''; // Clear previously selected machine
+    this.filteredMachineIds = []; // Optionally clear machine list before loading new ones
+    this.selectedMachineIdPricing = ''; // Clear dropdown placeholder value
 
     if (this.selectedProjectIdfota !== null) {
       this.getOnlineMachinesByProject(this.selectedProjectIdfota);
     }
-    this.cdr.detectChanges(); // 👈 Force refresh if needed
+    this.cdr.detectChanges(); // Force refresh if needed
   }
 
   onMachineChange(): void {
-    // this.getFotaVersionDetails();
-    // this.getFotaVersionDetails();
     // Reset the current values before fetching new data
     this.resetData();
     if (!this.selectedMachineId) {
@@ -531,9 +1004,10 @@ export class AdvancedManagementComponent implements OnInit {
               this.currentValues.qrBytes = '';
             }
 
-            this.changeDetectorRef.detectChanges();
+            this.cdr.detectChanges();
+
           },
-          (error) => {
+          (error: any) => {
             console.error('❌ Business Config HTTP Error:', error);
 
             if (error.status === 404) {
@@ -567,12 +1041,11 @@ export class AdvancedManagementComponent implements OnInit {
           }
         );
 
-      // 🔥 Fetch Incineration Config
+      // Fetch Incineration Config
       this.dataService
         .getAdvanceConfig(this.merchantId, this.selectedMachineId)
         .subscribe(
           (res: any) => {
-            debugger;
             console.log('📥 Incineration Config Response:', res);
 
             if (res.code !== 200 || res.error) {
@@ -620,27 +1093,28 @@ export class AdvancedManagementComponent implements OnInit {
               };
             }
 
-            this.changeDetectorRef.detectChanges();
+            this.cdr.detectChanges();
+
           },
-          (error) => {
+          (error: any) => {
             console.error('❌ Incineration Config HTTP Error:', error);
 
-            if (error.code === 404) {
+            if (error.status === 404) {
               this.showNotification(
                 'No configuration found for the selected machine. Please set configurations.',
                 'error'
               );
-            } else if (error.code === 401) {
+            } else if (error.status === 401) {
               this.showNotification(
                 '🔒 Error 401: Unauthorized access.',
                 'error'
               );
-            } else if (error.code === 500) {
+            } else if (error.status === 500) {
               this.showNotification(
                 '💥 Error 500: Server error occurred.',
                 'error'
               );
-            } else if (error.code === 0) {
+            } else if (error.status === 0) {
               this.showNotification(
                 '🔌 Network error. Please check your connection.',
                 'error'
@@ -684,17 +1158,18 @@ export class AdvancedManagementComponent implements OnInit {
               this.fotaRows = [];
             }
 
-            this.changeDetectorRef.detectChanges();
+            this.cdr.detectChanges();
+
           },
-          (error) => {
+          (error: any) => {
             console.error('❌ FOTA Config HTTP Error:', error);
 
-            if (error.code === 404) {
+            if (error.status === 404) {
               this.showNotification(
                 '⚠️ No FOTA info found for the machine.',
                 'error'
               );
-            } else if (error.code === 0) {
+            } else if (error.status === 0) {
               this.showNotification(
                 '🔌 Network error. Please check your connection.',
                 'error'
@@ -714,7 +1189,7 @@ export class AdvancedManagementComponent implements OnInit {
 
   selectMachineFota(id: string) {
     this.selectedFotaMachineId = id;
-    console.log('Fota Machine selected:', id); // ✅ debug
+    console.log('Fota Machine selected:', id);
 
     const alreadyExists = this.fotaMachines.some(
       (machine) => machine.machineid === id
@@ -750,19 +1225,21 @@ export class AdvancedManagementComponent implements OnInit {
               updatedVersion: fotaData.updatedVersion || [],
               selectedUpdatedVersion: null,
               merchantId: this.merchantId || '',
+              isSelected: false // Add this property for selection
             });
           }
 
-          this.changeDetectorRef.detectChanges();
+          this.cdr.detectChanges();
+
         },
-        (error) => {
+        (error: any) => {
           console.error('❌ FOTA Config HTTP Error:', error);
-          if (error.code === 404) {
+          if (error.status === 404) {
             this.showNotification(
               '⚠️ No FOTA info found for the machine.',
               'error'
             );
-          } else if (error.code === 0) {
+          } else if (error.status === 0) {
             this.showNotification(
               '🔌 Network error. Please check your connection.',
               'error'
@@ -778,18 +1255,21 @@ export class AdvancedManagementComponent implements OnInit {
         }
       );
   }
+  
   toggleSelectAll() {
     for (let i = 0; i < this.fotaMachines.length; i++) {
       this.fotaMachines[i].isSelected = this.masterSelected;
     }
     this.getSelectedMachines();
   }
+  
   checkIfAllSelected() {
     this.masterSelected = this.fotaMachines.every(function (item: any) {
       return item.isSelected == true;
     });
     this.getSelectedMachines();
   }
+  
   toggleSelection1(machine: any) {
     const index = this.selectedMachines.findIndex(
       (x) => x.machineid === machine.machineid
@@ -800,9 +1280,11 @@ export class AdvancedManagementComponent implements OnInit {
       this.selectedMachines.push(machine);
     }
   }
+  
   getSelectedMachines() {
     this.selectedMachines = this.fotaMachines.filter((m) => m.isSelected);
   }
+  
   isSelected(machine: any): boolean {
     return this.selectedMachines.some((x) => x.machineid === machine.machineid);
   }
@@ -883,7 +1365,6 @@ export class AdvancedManagementComponent implements OnInit {
     this.dataService
       .getOnlineMachinesByClient(this.merchantId, clienId)
       .subscribe(
-        // this.dataService.getRunningMachinesDetail(this.merchantId, clientId).subscribe(
         (res: any) => {
           if (res.code === 200 && Array.isArray(res.data)) {
             console.log(
@@ -893,7 +1374,8 @@ export class AdvancedManagementComponent implements OnInit {
             this.machineIds = res.data; // ✅ correct key
             this.selectedMachineId = ''; // reset previously selected machine
             this.selectedFotaMachineId = '';
-            this.changeDetectorRef.detectChanges();
+            this.cdr.detectChanges();
+
           } else {
             this.machineIds = [];
             this.showNotification(
@@ -902,7 +1384,7 @@ export class AdvancedManagementComponent implements OnInit {
             );
           }
         },
-        (error) => {
+        (error: any) => {
           console.error('❌ Error fetching machines by client:', error);
           this.showNotification(
             '❌ Failed to fetch machines for selected client.',
@@ -917,7 +1399,6 @@ export class AdvancedManagementComponent implements OnInit {
     if (!clientId || !this.merchantId) return;
 
     this.dataService.getMachinesByClient(this.merchantId, clientId).subscribe(
-      // this.dataService.getRunningMachinesDetail(this.merchantId, clientId).subscribe(
       (res: any) => {
         if (res.code === 200 && Array.isArray(res.data)) {
           console.log(
@@ -927,7 +1408,8 @@ export class AdvancedManagementComponent implements OnInit {
           this.machineIds = res.data; // ✅ correct key
           this.selectedMachineId = ''; // reset previously selected machine
           this.selectedFotaMachineId = '';
-          this.changeDetectorRef.detectChanges();
+          this.cdr.detectChanges();
+
         } else {
           this.machineIds = [];
           this.showNotification(
@@ -936,7 +1418,7 @@ export class AdvancedManagementComponent implements OnInit {
           );
         }
       },
-      (error) => {
+      (error: any) => {
         console.error('❌ Error fetching machines by client:', error);
         this.showNotification(
           '❌ Failed to fetch machines for selected client.',
@@ -998,7 +1480,7 @@ export class AdvancedManagementComponent implements OnInit {
     console.log('📤 Sending Payload to Business Config API:', payload);
 
     this.dataService.businessQr(payload).subscribe(
-      (response) => {
+      (response: any) => {
         console.log('🔹 API Response Received: ', response);
 
         if (response && response.code === 200) {
@@ -1045,7 +1527,7 @@ export class AdvancedManagementComponent implements OnInit {
           this.showNotification(`⚠️ ${msg}`, 'error');
         }
       },
-      (error) => {
+      (error: any) => {
         console.error('❌ Submission Error:', error);
         console.log('Error Details:', error);
 
@@ -1080,6 +1562,7 @@ export class AdvancedManagementComponent implements OnInit {
       }
     );
   }
+  
   updateQrCode(): void {
     // Prepare the payload to update QR Code
     const payloadWithFlag = {
@@ -1091,7 +1574,7 @@ export class AdvancedManagementComponent implements OnInit {
 
     // Add flag to indicate replacement (flag = 1 for replacement)
     this.dataService.businessQr(payloadWithFlag, 1).subscribe(
-      (retryResponse) => {
+      (retryResponse: any) => {
         console.log('🔄 Retry Response:', retryResponse);
 
         if (retryResponse && retryResponse.code === 200) {
@@ -1103,7 +1586,7 @@ export class AdvancedManagementComponent implements OnInit {
           );
         }
       },
-      (retryErr) => {
+      (retryErr: any) => {
         console.log('❌ Retry Failed:', retryErr);
         this.showNotification(
           `❌ Retry Failed: ${retryErr.error?.message || 'Unknown error'}`,
@@ -1112,57 +1595,6 @@ export class AdvancedManagementComponent implements OnInit {
       }
     );
   }
-
-  // onSubmitMachineInstalled(): void {
-  //   if (
-  //     !this.selectedMachineId ||
-  //     !this.installedStatus ||
-  //     (this.installedStatus === 'Yes' && !this.uid)
-  //   ) {
-  //     this.showNotification('⚠️ Please fill all required fields.', 'error');
-  //     return;
-  //   }
-  //   const machineOnboardingPayload = {
-  //     machineId: this.selectedMachineId,
-  //     machineInfo: {
-  //       uid: this.uid,
-  //       pcbNo: this.pcbNo,
-  //       mcSrNo: this.mcSrNo,
-  //       installed: Number(this.installedStatus),
-  //       installedDate: this.installedDate.toString(),
-  //     },
-  //     installed: Number(this.installedStatus),
-  //     merchantId: this.merchantId,
-  //   };
-
-  //   // 🔍 Log the payload being sent to the API
-  //   console.log(
-  //     '📤 Submitting Machine Onboarding Payload:',
-  //     machineOnboardingPayload
-  //   );
-  //   this.dataService.machineOnboarding(machineOnboardingPayload).subscribe(
-  //     (response: any) => {
-  //       if (response.code === 200) {
-  //         this.showNotification(
-  //           '✅ Machine Installed successfully.',
-  //           'success'
-  //         );
-  //         this.resetMachineInstalledForm();
-  //       } else {
-  //         this.showNotification(
-  //           `⚠️ ${response.error || 'An error occurred.'}`,
-  //           'error'
-  //         );
-  //       }
-  //     },
-  //     (error) => {
-  //       this.showNotification(
-  //         `❌ Error: ${error.message || 'Unknown error.'}`,
-  //         'error'
-  //       );
-  //     }
-  //   );
-  // }
 
   onSubmitMachineInstalled(): void {
     if (
@@ -1215,7 +1647,7 @@ export class AdvancedManagementComponent implements OnInit {
           );
         }
       },
-      (error) => {
+      (error: any) => {
         this.showNotification(
           `❌ Error: ${error.message || 'Unknown error.'}`,
           'error'
@@ -1371,7 +1803,7 @@ export class AdvancedManagementComponent implements OnInit {
       incinerationPayload
     );
     this.dataService.advnaceconfig(incinerationPayload).subscribe(
-      (response) => {
+      (response: any) => {
         console.log('✅ Incineration Config Submitted:', response);
         if (response && response.code === 200) {
           this.showNotification(
@@ -1387,7 +1819,7 @@ export class AdvancedManagementComponent implements OnInit {
           );
         }
       },
-      (error) => {
+      (error: any) => {
         console.error('❌ Submission Error:', error);
         this.showNotification(
           `❌ Error: ${error.message || 'Unknown error occurred'}`,
@@ -1396,7 +1828,7 @@ export class AdvancedManagementComponent implements OnInit {
       }
     );
   }
-
+  
   clearEnteredValues(): void {
     this.updatedValues = { iid: null as number | null, itp: 0, qrBytes: '' };
   }
@@ -1423,37 +1855,50 @@ export class AdvancedManagementComponent implements OnInit {
 
   onTabChange(tab: string): void {
     this.activeTab = tab;
+    this.submittedRemap = false;
 
-    // Clear Machine Installed form when switching tabs
-    // if (tab !== 'machineInstalled') {
-    //   this.resetMachineInstalledForm();
-    // }
-    this.resetMachineInstalledForm();
+    // Clear REMAP data when switching from REMAP tab
+    if (tab !== 'remapImeiMid') {
+      this.clearRemapForm();
+      this.currentRemapValues = {
+        cpi: '',
+        cvn: '',
+        ime: '',
+        mid: ''
+      };
+      this.selectedRemapProjectId = null;
+      this.selectedRemapMachineId = '';
+      this.remapMachineIds = [];
+      this.filteredRemapMachineIds = [];
+      this.remapMachineData = null;
+      this.isFetchingMachineData = false;
+      this.isRemapChanged = false;
+      this.isRemapFormValidState = false; // Clear validity state
+    }
+
+    // Clear form data when switching from machine installed tab
+    if (tab !== 'machineInstalled') {
+      this.resetMachineInstalledForm();
+    }
+
+    // Clear notification access form when switching from that tab
+    if (tab !== 'notificationAccess') {
+      this.clearNotificationAccessForm();
+    }
+
     // Reset other tab-specific data
-    this.selectedMachineId = '';
     this.selectedFotaMachineId = '';
     this.selectedProjectIdfota = null;
     this.fotaMachines = [];
     this.selectedProjectId = null;
     this.machineIds = [];
     this.clientname = '';
-    this.clearClientAndMachine();
+    this.selectedMachineIdPricing = null;
 
-    if (tab !== 'notificationAccess') {
-      this.clearNotificationAccessForm();
-    }
+    // Clear form values
+    this.currentValues = { iid: '', itp: '', qrBytes: '' };
+    this.updatedValues = { iid: null, itp: 0, qrBytes: '' };
 
-    // Reset pricing and incineration values
-    this.currentValues = {
-      iid: '',
-      itp: '',
-      qrBytes: '',
-    };
-    this.updatedValues = {
-      iid: null as number | null,
-      itp: 0,
-      qrBytes: '',
-    };
     this.incinerationCurrentValues = {
       scheduler: '',
       limitSwitch: '',
@@ -1464,52 +1909,10 @@ export class AdvancedManagementComponent implements OnInit {
       heaterBOnTemp: '',
     };
 
-    this.notification = {
-      message: '',
-      type: '',
-    };
+    this.notification = { message: '', type: '' };
   }
 
-  // resetMachineInstalledForm(): void {
-  //   this.selectedMachineInstalledId = '';
-  //   this.installedStatus = '1'; // Reset to default (e
-  //   this.uid = '';
-  //   this.pcbNo = '';
-  //   this.mcSrNo = '';
-  //   this.notificationMessage = '';
-  //   this.notificationType = '';
-  //   this.selectedFotaMachineId = '';
-  //   this.installedDate = '';
-  //   this.machineIds = [];
-  //   this.fotamachineIds = [];
-  // }
-
-  // onTabChange(tab: string): void {
-  //   this.activeTab = tab;
-
-  //   // Reset machine selections
-  //   this.selectedMachineId = '';
-  //   this.selectedMachineIdPricing = '';
-  //   this.selectedFotaMachineId = '';
-
-  //   // Clear form data
-  //   if (tab !== 'machineInstalled') {
-  //     this.resetMachineInstalledForm();
-  //   }
-  //   // this.resetMachineInstalledForm();
-  //   // Reset other tab-specific states
-  //   this.clearEnteredValues();
-  //   this.clearIncinerationValues();
-
-  //   // Clear notifications
-  //   this.notification = {
-  //     message: '',
-  //     type: '',
-  //   };
-  // }
-
   resetMachineInstalledForm(): void {
-    this.selectedMachineId = ''; // Add this line
     this.installedStatus = '1';
     this.uid = '';
     this.pcbNo = '';
@@ -1528,6 +1931,7 @@ export class AdvancedManagementComponent implements OnInit {
       this.notification.type = '';
     }, 8000);
   }
+  
   onInputChange(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     const value = inputElement.value;
@@ -1538,6 +1942,7 @@ export class AdvancedManagementComponent implements OnInit {
       this.updatedIncinerationValues.setHeaterTempA = inputElement.value; // Update the model
     }
   }
+  
   onLimitSwitchInputChange(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
 
@@ -1546,12 +1951,14 @@ export class AdvancedManagementComponent implements OnInit {
       inputElement.value = inputElement.value.slice(0, 2); // Trim the input to 2 digits
     }
   }
+  
   onInputChangeHeaterAMinTemp(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     if (inputElement.value.length > 3) {
       inputElement.value = inputElement.value.slice(0, 3); // Restrict to 4 digits
     }
   }
+  
   onHeaterBOnTempChange(event: any): void {
     const input = event.target;
     let value = input.value;
@@ -1575,6 +1982,7 @@ export class AdvancedManagementComponent implements OnInit {
       inputElement.value = inputElement.value.slice(0, 3); // Restrict to 4 digits
     }
   }
+  
   onHeaterTempBInput(event: any) {
     const rawValue = event.target.value.slice(0, 3);
     const val = Math.min(+rawValue, 1000);
@@ -1598,12 +2006,6 @@ export class AdvancedManagementComponent implements OnInit {
     event.target.value = value;
     this.updatedValues.itp = parseFloat(value); // Update model
   }
-  // onIidChange(): void {
-  //   const selected = this.itemList.find(item => item.iid === this.updatedValues.iid);
-  //   if (selected) {
-  //     this.updatedValues.itp = selected.itp;
-  //   }
-  // }
 
   getFormattedSchedulerTime(): string {
     if (!this.incinerationCurrentValues.scheduler) return '';
@@ -1619,45 +2021,6 @@ export class AdvancedManagementComponent implements OnInit {
     return `${hour} ${hourLabel} ${minute} ${minuteLabel}`;
   }
 
-  dropdownOpen = false;
-  dropdownOpenMachine = false;
-  machineSearchTerm = '';
-
-  // selectMachine(id: string) {
-  //   this.selectedMachineId = id;
-  //   this.dropdownOpen = false;
-  //   this.dropdownOpenMachine = false;
-  //   this.onMachineChange();
-  // }
-
-  selectMachine(id: string) {
-    this.selectedMachineId = id;
-    this.dropdownOpen = false;
-    this.dropdownOpenMachine = false;
-
-    // Only call onMachineChange if we're not on the Machine Installed tab
-    if (this.activeTab !== 'machineInstalled') {
-      this.onMachineChange();
-    }
-  }
-  clientDropdownOpen = false;
-  clientSearchTerm = '';
-  selectedClientId = '';
-
-  selectClient(id: string) {
-    this.selectedClientId = id;
-    this.clientDropdownOpen = false;
-    this.onProjectChange(); // Optional if you want to trigger something
-  }
-
-  machineSearch: string = '';
-
-  filterMachineIds(): void {
-    const searchTerm = this.machineSearch.toLowerCase();
-    this.filteredMachineIds = this.machineIds.filter((id) =>
-      id.toLowerCase().includes(searchTerm)
-    );
-  }
   toggleDropdownPricing(event: MouseEvent): void {
     this.dropdownOpenPricing = !this.dropdownOpenPricing;
     event.stopPropagation(); // Prevent event propagation to document
@@ -1694,17 +2057,17 @@ export class AdvancedManagementComponent implements OnInit {
     if (!clickedInside && this.dropdownOpen) {
       this.dropdownOpen = false;
     }
+
+    // Close REMAP dropdown if clicked outside
+    if (!clickedInside && this.remapDropdownOpen) {
+      this.remapDropdownOpen = false;
+    }
   }
+  
   toggleDropdown(event: MouseEvent): void {
     this.dropdownOpen = !this.dropdownOpen;
     event.stopPropagation(); // Prevent event propagation to document
   }
-
-  // Handle selecting a machine
-
-  // Close dropdown when clicking outside
-
-  installedDate: string = '';
 
   onDateChange(event: string) {
     // Convert to your required format: 'YYYY-MM-DD HH:mm:ss'
@@ -1720,5 +2083,29 @@ export class AdvancedManagementComponent implements OnInit {
     )}   ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
       date.getSeconds()
     )}`;
+  }
+
+  filterMachineIds(): void {
+    const searchTerm = this.machineSearch.toLowerCase();
+    this.filteredMachineIds = this.machineIds.filter((id) =>
+      id.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  selectMachine(id: string) {
+    this.selectedMachineId = id;
+    this.dropdownOpen = false;
+    this.dropdownOpenMachine = false;
+
+    // Only call onMachineChange if we're not on the Machine Installed tab
+    if (this.activeTab !== 'machineInstalled') {
+      this.onMachineChange();
+    }
+  }
+
+  selectClient(id: string) {
+    this.selectedClientId = id;
+    this.clientDropdownOpen = false;
+    this.onProjectChange(); // Optional if you want to trigger something
   }
 }

@@ -1,0 +1,963 @@
+<div class="container p-4">
+  <!-- Fixed Tabs Navigation - No double underline -->
+  <ul
+    class="nav nav-pills mb-4"
+    role="tablist"
+    style="border-bottom: 1px solid #d3d8dc"
+  >
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'basic'"
+        (click)="onTabChange('basic')"
+        style="
+          border: none;
+          color: #0066cc;
+          padding: 12px 20px;
+          font-weight: bold;
+          font-size: 16px;
+          outline: none;
+          background: none;
+          position: relative;
+        "
+      >
+        Basic Info
+        <!-- Single underline for active tab -->
+        <div
+          *ngIf="activeTab === 'basic'"
+          style="
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #0066cc;
+          "
+        ></div>
+      </button>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'billing'"
+        (click)="onTabChange('billing')"
+        style="
+          border: none;
+          color: #0066cc;
+          padding: 12px 20px;
+          font-weight: bold;
+          font-size: 16px;
+          outline: none;
+          background: none;
+          position: relative;
+        "
+      >
+        Billing
+        <div
+          *ngIf="activeTab === 'billing'"
+          style="
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #0066cc;
+          "
+        ></div>
+      </button>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'location'"
+        (click)="onTabChange('location')"
+        style="
+          border: none;
+          color: #0066cc;
+          padding: 12px 20px;
+          font-weight: bold;
+          font-size: 16px;
+          outline: none;
+          background: none;
+          position: relative;
+        "
+      >
+        Location
+        <div
+          *ngIf="activeTab === 'location'"
+          style="
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #0066cc;
+          "
+        ></div>
+      </button>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'gsm'"
+        (click)="onTabChange('gsm')"
+        style="
+          border: none;
+          color: #0066cc;
+          padding: 12px 20px;
+          font-weight: bold;
+          font-size: 16px;
+          outline: none;
+          background: none;
+          position: relative;
+        "
+      >
+        GSM/IMEI
+        <div
+          *ngIf="activeTab === 'gsm'"
+          style="
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #0066cc;
+          "
+        ></div>
+      </button>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'qrcode'"
+        (click)="onTabChange('qrcode')"
+        style="
+          border: none;
+          color: #0066cc;
+          padding: 12px 20px;
+          font-weight: bold;
+          font-size: 16px;
+          outline: none;
+          background: none;
+          position: relative;
+        "
+      >
+        QR Code
+        <div
+          *ngIf="activeTab === 'qrcode'"
+          style="
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #0066cc;
+          "
+        ></div>
+      </button>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        [class.active]="activeTab === 'spring'"
+        (click)="onTabChange('spring')"
+        style="
+          border: none;
+          color: #0066cc;
+          padding: 12px 20px;
+          font-weight: bold;
+          font-size: 16px;
+          outline: none;
+          background: none;
+          position: relative;
+        "
+      >
+        Spring Config
+        <div
+          *ngIf="activeTab === 'spring'"
+          style="
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #0066cc;
+          "
+        ></div>
+      </button>
+    </li>
+  </ul>
+
+  <!-- Notification Toast -->
+  <div
+    *ngIf="notification.show"
+    class="custom-toast"
+    [ngClass]="notification.type"
+  >
+    <div class="d-flex align-items-center">
+      <i class="bi me-2" [ngClass]="{
+        'bi-check-circle': notification.type === 'success',
+        'bi-exclamation-circle': notification.type === 'error',
+        'bi-info-circle': notification.type === 'info'
+      }"></i>
+      {{ notification.message }}
+    </div>
+  </div>
+
+  <!-- Tab 1: Basic Machine Info -->
+  <div *ngIf="activeTab === 'basic'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Increased font size for heading -->
+        <h3 class="mb-4 fw-bold" style="color: #0066cc; font-size: 22px;">Basic Machine Information</h3>
+        
+        <div class="row">
+          <!-- Machine ID -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Machine ID</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.machineId" 
+                   [class.is-invalid]="formErrors.machineId"
+                   placeholder="Enter Machine ID" required>
+            <div *ngIf="formErrors.machineId" class="invalid-feedback">
+              Machine ID is required
+            </div>
+          </div>
+
+          <!-- POS ID -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">POS ID</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.posId" 
+                   placeholder="Enter POS ID">
+          </div>
+
+          <!-- Category -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Category</label>
+            <input type="number" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.category" 
+                   [class.is-invalid]="formErrors.category"
+                   required placeholder="e.g., 1">
+            <div *ngIf="formErrors.category" class="invalid-feedback">
+              Category is required
+            </div>
+          </div>
+          
+          <!-- Client ID -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Client ID</label>
+            <input type="number" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.clientId" 
+                   [class.is-invalid]="formErrors.clientId"
+                   required placeholder="e.g., 3">
+            <div *ngIf="formErrors.clientId" class="invalid-feedback">
+              Client ID is required
+            </div>
+          </div>
+          
+          <!-- Project ID -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Project ID</label>
+            <input type="number" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.projectId" 
+                   [class.is-invalid]="formErrors.projectId"
+                   required placeholder="e.g., 5">
+            <div *ngIf="formErrors.projectId" class="invalid-feedback">
+              Project ID is required
+            </div>
+          </div>
+          
+          <!-- Level Type ID -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Level Type ID</label>
+            <input type="number" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.levelTypeId" 
+                   [class.is-invalid]="formErrors.levelTypeId"
+                   required placeholder="e.g., 32">
+            <div *ngIf="formErrors.levelTypeId" class="invalid-feedback">
+              Level Type ID is required
+            </div>
+          </div>
+
+          <!-- Machine Status -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Machine Status</label>
+            <select class="form-select" [(ngModel)]="onboardingConfig.active">
+              <option [value]="1">Active</option>
+              <option [value]="0">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-sm custom-btn" (click)="saveBasicInfo()">
+            <i class="bi bi-save me-1"></i> Save
+          </button>
+          <button class="btn btn-sm custom-btn" (click)="clearBasicInfo()">
+            <i class="bi bi-x-circle me-1"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Billing Information -->
+  <div *ngIf="activeTab === 'billing'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Increased font size for heading -->
+        <h3 class="mb-4 fw-bold" style="color: #0066cc; font-size: 22px;">Billing Information</h3>
+        
+        <div class="row">
+          <!-- Account ID -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Account ID</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.billingInfo.acId"
+                   placeholder="Enter Account ID">
+          </div>
+          
+          <!-- Account Key -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Account Key</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.billingInfo.acKey"
+                   placeholder="Enter Account Key">
+          </div>
+          
+          <!-- Account Name -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Account Name</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.billingInfo.account" 
+                   [class.is-invalid]="formErrors.account"
+                   required placeholder="Enter account name">
+            <div *ngIf="formErrors.account" class="invalid-feedback">
+              Account name is required
+            </div>
+          </div>
+          
+          <!-- Payment Method -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Payment Method</label>
+            <select class="form-select" [(ngModel)]="onboardingConfig.billingInfo.paymentmethod_Id">
+              <option [value]="0" disabled selected>Select Payment Method</option>
+              <option [value]="1">Paytm</option>
+              <option [value]="2">Razorpay</option>
+              <option [value]="3">PhonePay</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Info Alert -->
+        <div class="alert alert-info mb-4">
+          <i class="bi bi-info-circle me-2"></i>
+          <small>Payment methods: 1=Paytm, 2=Razorpay, 3=PhonePay</small>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-sm custom-btn" (click)="saveBillingInfo()">
+            <i class="bi bi-save me-1"></i> Save
+          </button>
+          <button class="btn btn-sm custom-btn" (click)="clearBillingInfo()">
+            <i class="bi bi-x-circle me-1"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 3: Location & Installation -->
+  <div *ngIf="activeTab === 'location'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Increased font size for heading -->
+        <h3 class="mb-4 fw-bold" style="color: #0066cc; font-size: 22px;">Machine Location & Installation</h3>
+        
+        <div class="row">
+          <!-- Address -->
+          <div class="col-md-12 mb-3">
+            <label class="form-label required">Address</label>
+            <textarea class="form-control" rows="3" [(ngModel)]="onboardingConfig.machineInfo.address" 
+                      [class.is-invalid]="formErrors.address"
+                      required placeholder="Full address"></textarea>
+            <div *ngIf="formErrors.address" class="invalid-feedback">
+              Address is required
+            </div>
+          </div>
+          
+          <!-- Machine Location -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Machine Location</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.machineLocation" 
+                   [class.is-invalid]="formErrors.machineLocation"
+                   required placeholder="Location name">
+            <div *ngIf="formErrors.machineLocation" class="invalid-feedback">
+              Machine location is required
+            </div>
+          </div>
+          
+          <!-- Area Code -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Area Code</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.areaCode" 
+                   placeholder="e.g., 530045">
+          </div>
+          
+          <!-- Latitude -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Latitude</label>
+            <div class="input-group">
+              <input type="number" step="0.0000001" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.latitude" 
+                     [class.is-invalid]="formErrors.latitude"
+                     required placeholder="e.g., 16.5608701">
+              <button class="btn btn-outline-secondary" (click)="getCurrentLocation()" [disabled]="isLoading">
+                <span *ngIf="!isLoading"><i class="bi bi-geo-alt"></i> Get</span>
+                <span *ngIf="isLoading">
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                  Loading
+                </span>
+              </button>
+            </div>
+            <div *ngIf="formErrors.latitude" class="invalid-feedback">
+              Latitude is required
+            </div>
+          </div>
+          
+          <!-- Longitude -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Longitude</label>
+            <input type="number" step="0.0000001" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.logntitude" 
+                   [class.is-invalid]="formErrors.longitude"
+                   required placeholder="e.g., 80.839388">
+            <div *ngIf="formErrors.longitude" class="invalid-feedback">
+              Longitude is required
+            </div>
+          </div>
+          
+          <!-- Installed Status -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Installed Status</label>
+            <select class="form-select" [(ngModel)]="onboardingConfig.machineInfo.installed" required>
+              <option [value]="1">Installed</option>
+              <option [value]="0">Not Installed</option>
+            </select>
+          </div>
+
+          <!-- Installed Date -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Installed Date</label>
+            <input type="datetime-local" class="form-control" 
+                   [value]="formatDateForInput(onboardingConfig.machineInfo.installedDate)"
+                   (change)="updateDateField('installedDate', $event.target.value)">
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-sm custom-btn" (click)="saveLocationInfo()">
+            <i class="bi bi-save me-1"></i> Save
+          </button>
+          <button class="btn btn-sm custom-btn" (click)="clearLocationInfo()">
+            <i class="bi bi-x-circle me-1"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4: GSM/IMEI Details -->
+  <div *ngIf="activeTab === 'gsm'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Increased font size for heading -->
+        <h3 class="mb-4 fw-bold" style="color: #0066cc; font-size: 22px;">GSM/IMEI Details</h3>
+        
+        <div class="row">
+          <!-- CPI -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">CPI</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.cpi" 
+                   [class.is-invalid]="formErrors.cpi"
+                   required placeholder="e.g., 869356070005893">
+            <div *ngIf="formErrors.cpi" class="invalid-feedback">
+              CPI is required
+            </div>
+          </div>
+          
+          <!-- IMEI -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">IMEI</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.machineInfo.ime" 
+                   [class.is-invalid]="formErrors.ime"
+                   required placeholder="e.g., 869356070005893">
+            <div *ngIf="formErrors.ime" class="invalid-feedback">
+              IMEI is required
+            </div>
+          </div>
+        </div>
+
+        <!-- Warning Alert -->
+        <div class="alert alert-warning mb-4">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <small>GSM/IMEI details are required for network connectivity and device identification.</small>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-sm custom-btn" (click)="saveGsmInfo()">
+            <i class="bi bi-save me-1"></i> Save
+          </button>
+          <button class="btn btn-sm custom-btn" (click)="clearGsmInfo()">
+            <i class="bi bi-x-circle me-1"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 5: QR Code Configuration -->
+  <div *ngIf="activeTab === 'qrcode'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Increased font size for heading -->
+        <h3 class="mb-4 fw-bold" style="color: #0066cc; font-size: 22px;">QR Code Configuration</h3>
+        
+        <div class="row">
+          <!-- QR Code UPI String -->
+          <div class="col-md-12 mb-3">
+            <label class="form-label required">QR Code UPI String</label>
+            <textarea class="form-control" rows="4" [(ngModel)]="onboardingConfig.machineInfo.qrcode" 
+                      [class.is-invalid]="formErrors.qrcode"
+                      required placeholder="Enter UPI QR Code string"></textarea>
+            <div *ngIf="formErrors.qrcode" class="invalid-feedback">
+              QR Code string is required
+            </div>
+            <small class="form-text text-muted">
+              Format: upi://pay?mode=02&pa=EQR2507281845098131449247@ybl&purpose=00&mc=5199&am=10.00&pn=PhonePeMerchant&orgid=180001&sign=...
+            </small>
+          </div>
+        </div>
+
+        <!-- QR Code Format Example -->
+        <div class="card bg-light mb-4">
+          <div class="card-body">
+            <h6 style="font-size: 16px;"><i class="bi bi-info-circle me-2"></i> QR Code Format Example:</h6>
+            <code class="d-block mt-2 p-2 bg-white rounded wrap-text">
+              upi://pay?mode=02&pa=EQR2507281845098131449247@ybl&purpose=00&mc=5199&am=10.00&pn=PhonePeMerchant&orgid=180001&sign=MEUCIBA8HQ9FWtq0d2u2oXZYI7MbbRrmPde/S/ze4hZ3cLEUAiEAzgcqRvEKjaOmzwZugknxD76NOGILtwoGg4epWB4ro7Q=
+            </code>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-sm custom-btn" (click)="saveQrCodeInfo()">
+            <i class="bi bi-save me-1"></i> Save
+          </button>
+          <button class="btn btn-sm custom-btn" (click)="clearQrCodeInfo()">
+            <i class="bi bi-x-circle me-1"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 6: Spring Configuration -->
+  <div *ngIf="activeTab === 'spring'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Increased font size for heading -->
+        <h3 class="mb-4 fw-bold" style="color: #0066cc; font-size: 22px;">Spring Configuration</h3>
+        
+        <div class="row">
+          <!-- Spring Number (Always 1) -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Spring Number</label>
+            <input type="number" class="form-control" [(ngModel)]="onboardingConfig.springInfo.sNo" 
+                   value="1" readonly>
+          </div>
+          
+          <!-- Spring Name (Always A1) -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Spring Name</label>
+            <input type="text" class="form-control" [(ngModel)]="onboardingConfig.springInfo.springName" 
+                   value="A1" readonly>
+          </div>
+          
+          <!-- Item From Stock ID -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label required">Item From Stock ID</label>
+            <input type="number" class="form-control" [(ngModel)]="onboardingConfig.springInfo.stock.itemFromStockId" 
+                   [class.is-invalid]="formErrors.itemFromStockId"
+                   required placeholder="e.g., 1">
+            <div *ngIf="formErrors.itemFromStockId" class="invalid-feedback">
+              Item From Stock ID is required
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-sm custom-btn" (click)="saveSpringInfo()">
+            <i class="bi bi-save me-1"></i> Save
+          </button>
+          <button class="btn btn-sm custom-btn" (click)="clearSpringInfo()">
+            <i class="bi bi-x-circle me-1"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary & Submit Section -->
+  <div class="card shadow-sm mt-4">
+    <div class="card-body">
+      <!-- Increased font size for heading -->
+      <h3 class="mb-4 fw-bold" style="color: #0066cc; font-size: 22px;">Complete Onboarding</h3>
+      
+      <!-- Progress Summary -->
+      <div class="mb-4">
+        <h5 style="font-size: 18px;">Configuration Progress:</h5>
+        <div class="progress" style="height: 20px;">
+          <div class="progress-bar" [style.width]="getProgressPercentage() + '%'"
+               style="background-color: #4A90E2">
+            {{ getProgressPercentage() }}%
+          </div>
+        </div>
+        <small class="text-muted">{{ getCompletedSections() }} out of 6 sections completed</small>
+      </div>
+
+      <!-- Summary Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead class="custom-header">
+            <tr>
+              <th class="text-center" style="font-size: 16px;">Section</th>
+              <th class="text-center" style="font-size: 16px;">Status</th>
+              <th class="text-center" style="font-size: 16px;">Preview</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-size: 15px;"><strong>Basic Info</strong></td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="isBasicInfoComplete() ? 'bg-success' : 'bg-warning'">
+                  {{ isBasicInfoComplete() ? 'Complete' : 'Pending' }}
+                </span>
+              </td>
+              <td>
+                <small style="font-size: 14px;">Machine ID: {{ onboardingConfig.machineId || 'Not set' }}</small><br>
+                <small style="font-size: 14px;">Category: {{ onboardingConfig.machineInfo.category || 'Not set' }}</small>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 15px;"><strong>Billing</strong></td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="isBillingInfoComplete() ? 'bg-success' : 'bg-warning'">
+                  {{ isBillingInfoComplete() ? 'Complete' : 'Pending' }}
+                </span>
+              </td>
+              <td>
+                <small style="font-size: 14px;">Account: {{ onboardingConfig.billingInfo.account || 'Not set' }}</small><br>
+                <small style="font-size: 14px;">Payment: {{ getPaymentMethodName(onboardingConfig.billingInfo.paymentmethod_Id) }}</small>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 15px;"><strong>Location</strong></td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="isLocationInfoComplete() ? 'bg-success' : 'bg-warning'">
+                  {{ isLocationInfoComplete() ? 'Complete' : 'Pending' }}
+                </span>
+              </td>
+              <td><small style="font-size: 14px;">{{ onboardingConfig.machineInfo.machineLocation || 'Not set' }}</small></td>
+            </tr>
+            <tr>
+              <td style="font-size: 15px;"><strong>IMEI/GSM</strong></td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="isGsmInfoComplete() ? 'bg-success' : 'bg-warning'">
+                  {{ isGsmInfoComplete() ? 'Complete' : 'Pending' }}
+                </span>
+              </td>
+              <td>
+                <small style="font-size: 14px;">IMEI: {{ onboardingConfig.machineInfo.ime || 'Not set' }}</small><br>
+                <small style="font-size: 14px;">CPI: {{ onboardingConfig.machineInfo.cpi || 'Not set' }}</small>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 15px;"><strong>QR Code</strong></td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="isQrCodeInfoComplete() ? 'bg-success' : 'bg-warning'">
+                  {{ isQrCodeInfoComplete() ? 'Complete' : 'Pending' }}
+                </span>
+              </td>
+              <td><small style="font-size: 14px;">{{ (onboardingConfig.machineInfo.qrcode?.substring(0, 30) || 'Not set') + (onboardingConfig.machineInfo.qrcode?.length > 30 ? '...' : '') }}</small></td>
+            </tr>
+            <tr>
+              <td style="font-size: 15px;"><strong>Spring Config</strong></td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="isSpringInfoComplete() ? 'bg-success' : 'bg-warning'">
+                  {{ isSpringInfoComplete() ? 'Complete' : 'Pending' }}
+                </span>
+              </td>
+              <td>
+                <small style="font-size: 14px;">Spring: {{ onboardingConfig.springInfo.springName || 'Not set' }}</small><br>
+                <small style="font-size: 14px;">Item ID: {{ onboardingConfig.springInfo.stock.itemFromStockId || 'Not set' }}</small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Final Submit Button -->
+      <div class="d-flex justify-content-center mt-4">
+        <button class="btn custom-btn px-4" (click)="submitCompleteOnboarding()" 
+                [disabled]="!isAllSectionsComplete() || isSubmitting"
+                style="font-size: 16px; padding: 10px 30px;">
+          <i class="bi bi-check-circle me-2"></i>
+          <span *ngIf="!isSubmitting">Submit Complete Onboarding</span>
+          <span *ngIf="isSubmitting">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Submitting...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Popup -->
+<div *ngIf="showPopup" class="custom-popup-overlay">
+  <div class="custom-popup-container">
+    <div class="custom-popup-header">
+      <h5 class="mb-0" style="font-size: 20px;">{{ popupTitle }}</h5>
+      <button type="button" class="btn-close" (click)="cancelPopup()"></button>
+    </div>
+    <div class="custom-popup-body" [innerHTML]="popupMessage">
+    </div>
+    <div class="custom-popup-footer">
+      <div class="d-flex justify-content-center w-100">
+        <button class="btn btn-sm custom-btn me-3" (click)="confirmPopup()">
+          OK
+        </button>
+        <button class="btn btn-sm custom-btn" (click)="cancelPopup()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Main container */
+  .container {
+    max-width: 1100px;
+    margin: auto;
+  }
+
+  .card {
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Form elements */
+  .form-label {
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  .form-label.required::after {
+    content: ' *';
+    color: #dc3545;
+  }
+
+  .form-control {
+    height: 45px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+
+  .form-control:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+  }
+
+  /* Buttons */
+  .custom-btn {
+    background-color: #65a6e6;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    min-width: 120px;
+  }
+
+  .custom-btn:hover {
+    background-color: #4A90E2;
+  }
+
+  .custom-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  /* Table styling */
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-bordered {
+    border: 1px solid #ddd;
+  }
+
+  .table-bordered td,
+  .table-bordered th {
+    padding: 10px;
+    vertical-align: middle;
+  }
+
+  .custom-header {
+    background-color: #65a6e6 !important;
+    color: rgb(247, 247, 247);
+    font-size: medium;
+  }
+
+  /* Badges */
+  .badge {
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .bg-success { background-color: #28a745 !important; }
+  .bg-warning { background-color: #ffc107 !important; color: #212529; }
+
+  /* Progress bar */
+  .progress {
+    height: 20px;
+    border-radius: 10px;
+    background-color: #e9ecef;
+  }
+
+  .progress-bar {
+    background-color: #4A90E2;
+  }
+
+  /* Toast notification */
+  .custom-toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    animation: fadeInOut 8s ease-in-out;
+  }
+
+  .custom-toast.success {
+    background-color: #7ED321;
+  }
+
+  .custom-toast.error {
+    background-color: #E57373;
+  }
+
+  .custom-toast.info {
+    background-color: #4A90E2;
+  }
+
+  @keyframes fadeInOut {
+    0% { opacity: 0; top: 70px; }
+    10% { opacity: 1; top: 80px; }
+    90% { opacity: 1; top: 80px; }
+    100% { opacity: 0; top: 70px; }
+  }
+
+  /* Text wrapping */
+  .wrap-text {
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Alerts */
+  .alert-info {
+    background-color: #e6f2ff;
+    border-color: #b3d9ff;
+    color: #0066cc;
+  }
+
+  .alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+  }
+
+  /* Popup */
+  .custom-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+  }
+
+  .custom-popup-container {
+    background-color: white;
+    border-radius: 4px;
+    width: 500px;
+    max-width: 95%;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  }
+
+  .custom-popup-header {
+    padding: 12px 15px;
+    border-bottom: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .custom-popup-body {
+    padding: 15px;
+  }
+
+  .custom-popup-footer {
+    padding: 10px 15px;
+    border-top: 1px solid #dee2e6;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px;
+    }
+    
+    .card-body {
+      padding: 15px;
+    }
+    
+    .custom-btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    
+    h3 {
+      font-size: 20px !important;
+    }
+  }
+</style>

@@ -1226,11 +1226,11 @@ createUser() {
  
     this.dataService.getClientDetails().subscribe({
       next: (client) => {
-        if (client && client.id) {
-          this.userAccess.clientId = client.id;
-          this.userAccess.companyName = client.companyName;
-          localStorage.setItem('clientId', client.id.toString());
- 
+       if (client && client['id']) {
+      this.userAccess.clientId = client['id'];
+      this.userAccess.companyName = client['companyName'];
+      localStorage.setItem('clientId', client['id'].toString());
+    
           console.log('Client Loaded:', client);
  
           this.cdr.detectChanges();

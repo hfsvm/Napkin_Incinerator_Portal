@@ -1247,3 +1247,272 @@ overflow-wrap: break-word;
 .text-pink {
   color: hotpink !important;
 }
+/* =========================
+   GLOBAL LAYOUT
+========================= */
+.container {
+  max-width: 1100px;
+  margin: auto;
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background-color: #4A90E2;
+  color: #fff;
+}
+
+/* =========================
+   TYPOGRAPHY
+========================= */
+h2 {
+  font-size: 28px;
+}
+
+.form-label {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.form-check-label {
+  font-size: 15px;
+}
+
+/* =========================
+   FORM CONTROLS
+========================= */
+.form-control-lg {
+  height: 32px !important;
+  font-size: 14px !important;
+  padding: 4px 8px !important;
+}
+
+.same-size {
+  height: 45px !important;
+}
+
+input[type="number"].form-control-lg {
+  max-width: 70px;
+}
+
+input[type="number"]::placeholder {
+  font-size: 12px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+button {
+  padding: 10px 27px;
+  font-size: 18px;
+  margin-top: 10px;
+  margin-right: 20px;
+}
+
+.save-btn,
+.clear-btn,
+.edit-btn,
+.custom-btn {
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  transition: 0.3s ease;
+}
+
+.save-btn,
+.clear-btn,
+.edit-btn {
+  background: #4A90E2;
+  box-shadow: 0 3px 8px rgba(74, 144, 226, 0.3);
+}
+
+.custom-btn {
+  width: 120px;
+  font-size: 14px;
+  padding: 6px 12px;
+  background-color: #65a6e6;
+}
+
+.custom-btn:hover {
+  background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #ccc !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* =========================
+   TABS
+========================= */
+.tab-header {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  position: relative;
+
+  &.active {
+    color: #4A90E2;
+    font-weight: bold;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #4A90E2;
+    }
+  }
+}
+
+.tab-pane {
+  animation: fadeIn 0.3s ease;
+}
+
+/* =========================
+   TABLE
+========================= */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-bordered {
+  border: 1px solid #ddd;
+
+  td,
+  th {
+    padding: 10px;
+    vertical-align: middle;
+  }
+}
+
+.wrap-text {
+  white-space: normal;
+  word-break: break-word;
+  max-width: 300px;
+}
+
+/* =========================
+   DROPDOWN & SEARCH
+========================= */
+.dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown input,
+.dropdown select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* =========================
+   TOAST / NOTIFICATION
+========================= */
+.custom-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  color: white;
+  animation: fadeInOut 8s ease-in-out;
+}
+
+.success {
+  background-color: #7ED321;
+}
+
+.error {
+  background-color: #E57373;
+}
+
+/* =========================
+   POPUP
+========================= */
+.custom-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.custom-popup-container {
+  background: white;
+  width: 500px;
+  max-width: 95%;
+  border-radius: 4px;
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+}
+
+.custom-popup-header {
+  padding: 12px 15px;
+  background: #f8f9fa;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.custom-popup-body {
+  padding: 15px;
+}
+
+.custom-popup-footer {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+/* =========================
+   UTILITIES
+========================= */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.text-pink {
+  color: hotpink !important;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; top: 70px; }
+  10%  { opacity: 1; top: 80px; }
+  90%  { opacity: 1; top: 80px; }
+  100% { opacity: 0; top: 70px; }
+}

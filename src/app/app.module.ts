@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-
 import {
   HashLocationStrategy,
   LocationStrategy,
@@ -65,11 +64,10 @@ import { DataManagementComponent } from './views/settings/data-management/data-m
 import { ConfirmDialogComponent } from './views/confirm-dialog/confirm-dialog.component';
 import { MachinereportComponent } from './views/machinereport/machinereport.component';
 import { ShareModule } from './share/share.module';
-
 import { GraphDashboardComponent } from './views/graph-dashboard/graph-dashboard.component';
-
 import { ZoneDashboardComponent } from './views/zone-dashboard/zone-dashboard.component';
 import { ConfigureMachinesComponent } from './views/settings/configure-machines/configure-machines.component';
+import { MachineOnboardingComponent } from './views/settings/machine-on-boarding/machine-onboarding.component'; // ADD THIS IMPORT
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -96,10 +94,10 @@ const APP_CONTAINERS = [
     MachinereportComponent,
     GraphDashboardComponent,
     ZoneDashboardComponent,
+    // REMOVE MachineOnboardingComponent from here since it's standalone
   ],
   imports: [
     FormsModule,
-
     BrowserModule,
     ShareModule,
     BrowserAnimationsModule,
@@ -131,9 +129,11 @@ const APP_CONTAINERS = [
     HttpClientModule,
     GoogleMapsModule,
     FormsModule,
-    FormsModule,
     ReactiveFormsModule,
     PagesModule,
+    SmartTablesModule,
+    // Add standalone components to imports array
+    MachineOnboardingComponent, // ADDED HERE TO IMPORTS ARRAY
   ],
   providers: [
     {
@@ -144,9 +144,7 @@ const APP_CONTAINERS = [
       provide: PERFECT_SCROLLBAR_CONFIG,
       useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG,
     },
-
     DataService,
-
     IconSetService,
     Title,
   ],

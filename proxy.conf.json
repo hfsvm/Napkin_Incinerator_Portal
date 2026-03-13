@@ -1,0 +1,12 @@
+{
+  "/hfs_napkinIncinerator": {
+    "target": "https://vmuat.hfsgroup.in",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "headers": {
+      "hfskey": "HFSAdmin@1",
+      "accept": "*/*"
+    }
+  }
+}

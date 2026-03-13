@@ -48,22 +48,32 @@ export const navItems: INavData[] = [
       {
         name: 'User Management',
         url: '/settings/user-management',
+        iconComponent: { name: 'cil-user' }
       },
       {
         name: 'Machine Management',
         url: '/settings/machine-management',
+        iconComponent: { name: 'cil-devices' }
+      },
+      {
+        name: 'Machine Onboarding',
+        url: '/settings/machine-onboarding',
+        iconComponent: { name: 'cil-plus' } // or 'cil-cloud-upload'
       },
       {
         name: 'Advanced Configurations',
         url: '/settings/advanced-management',
+        iconComponent: { name: 'cil-cog' }
       },
       {
         name: 'Configured Machines',
         url: '/settings/configure-machines',
+        iconComponent: { name: 'cil-list' }
       },
       {
         name: 'Data Management',
         url: '/settings/data-management',
+        iconComponent: { name: 'cil-storage' }
       },
     ],
   },
