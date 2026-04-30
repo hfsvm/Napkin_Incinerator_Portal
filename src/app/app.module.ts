@@ -1,8 +1,7 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'; // ADD CUSTOM_ELEMENTS_SCHEMA here
 import {
   HashLocationStrategy,
   LocationStrategy,
-  PathLocationStrategy,
 } from '@angular/common';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -67,7 +66,7 @@ import { ShareModule } from './share/share.module';
 import { GraphDashboardComponent } from './views/graph-dashboard/graph-dashboard.component';
 import { ZoneDashboardComponent } from './views/zone-dashboard/zone-dashboard.component';
 import { ConfigureMachinesComponent } from './views/settings/configure-machines/configure-machines.component';
-import { MachineOnboardingComponent } from './views/settings/machine-on-boarding/machine-onboarding.component'; // ADD THIS IMPORT
+import { MachineOnboardingComponent } from './views/settings/machine-on-boarding/machine-onboarding.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -86,7 +85,7 @@ const APP_CONTAINERS = [
     AppComponent,
     ...APP_CONTAINERS,
     UserManagementComponent,
-    MachineManagementComponent,
+    MachineManagementComponent, // Your component is here
     AdvancedManagementComponent,
     DataManagementComponent,
     ConfigureMachinesComponent,
@@ -94,7 +93,6 @@ const APP_CONTAINERS = [
     MachinereportComponent,
     GraphDashboardComponent,
     ZoneDashboardComponent,
-    // REMOVE MachineOnboardingComponent from here since it's standalone
   ],
   imports: [
     FormsModule,
@@ -109,7 +107,7 @@ const APP_CONTAINERS = [
     GridModule,
     HeaderModule,
     SidebarModule,
-    IconModule,
+    IconModule, // This is already here - good!
     PerfectScrollbarModule,
     NavModule,
     ButtonModule,
@@ -117,23 +115,17 @@ const APP_CONTAINERS = [
     UtilitiesModule,
     ButtonGroupModule,
     ReactiveFormsModule,
-    SidebarModule,
     SharedModule,
     TabsModule,
     ListGroupModule,
     ProgressModule,
     BadgeModule,
-    ListGroupModule,
     CardModule,
-    BrowserModule,
     HttpClientModule,
     GoogleMapsModule,
-    FormsModule,
-    ReactiveFormsModule,
     PagesModule,
     SmartTablesModule,
-    // Add standalone components to imports array
-    MachineOnboardingComponent, // ADDED HERE TO IMPORTS ARRAY
+    MachineOnboardingComponent,
   ],
   providers: [
     {
@@ -149,5 +141,6 @@ const APP_CONTAINERS = [
     Title,
   ],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA] // ✅ ADD THIS LINE
 })
 export class AppModule {}

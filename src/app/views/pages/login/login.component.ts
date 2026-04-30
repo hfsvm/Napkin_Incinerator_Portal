@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private dataService: DataService,
-    private commonDataService: CommonDataService
+    private commonDataService: CommonDataService,
   ) {}
 
   ngOnInit(): void {
@@ -53,7 +53,7 @@ export class LoginComponent implements OnInit {
       },
       (error) => {
         console.error('❌ CAPTCHA fetch failed:', error);
-      }
+      },
     );
   }
 
@@ -122,13 +122,13 @@ export class LoginComponent implements OnInit {
     }
 
     if (controls['captcha'].value !== this.captchaCode) {
-  setTimeout(() => {
-    this.fieldErrors.captcha = '❌ Invalid CAPTCHA. Please match the code exactly.';
-  });
-  this.loadCaptcha();
-  return;
-} 
-
+      setTimeout(() => {
+        this.fieldErrors.captcha =
+          '❌ Invalid CAPTCHA. Please match the code exactly.';
+      });
+      this.loadCaptcha();
+      return;
+    }
 
     const { email, password, merchantId, captcha } = this.loginForm.value;
 
@@ -141,9 +141,18 @@ export class LoginComponent implements OnInit {
           debugger;
           // this.router.navigate(['/widgets']);
 
-          const { userId, roleName, userName } = response.data;
+          const {
+            userId,
+            roleName,
+            userName,
+            projectId,
+            projectName,
+            clientId,
+            clientName,
+          } = response.data;
           this.commonDataService.updateUserDetails(response.data);
           this.startAutoRefresh(merchantId, userId);
+
           // Save to storage
           const stringified = JSON.stringify(response.data);
           sessionStorage.setItem('merchantId', merchantId);
@@ -151,12 +160,26 @@ export class LoginComponent implements OnInit {
           sessionStorage.setItem('roleName', roleName);
           sessionStorage.setItem('userName', userName);
           sessionStorage.setItem('userDetails', stringified);
+
+          // NEW: Save project-related fields
+          sessionStorage.setItem('projectId', projectId?.toString() || '');
+          sessionStorage.setItem('projectName', projectName || '');
+          sessionStorage.setItem('clientId', clientId?.toString() || '');
+          sessionStorage.setItem('clientName', clientName || '');
+          sessionStorage.setItem('isSSAUser', (projectId === 8).toString());
+
           localStorage.setItem('merchantId', merchantId);
           localStorage.setItem('userId', userId.toString());
           localStorage.setItem('roleName', roleName);
           localStorage.setItem('userName', userName);
           localStorage.setItem('userDetails', stringified);
 
+          // NEW: Save project-related fields to localStorage
+          localStorage.setItem('projectId', projectId?.toString() || '');
+          localStorage.setItem('projectName', projectName || '');
+          localStorage.setItem('clientId', clientId?.toString() || '');
+          localStorage.setItem('clientName', clientName || '');
+          localStorage.setItem('isSSAUser', (projectId === 8).toString());
           this.getUserDetailsByHierarchy(merchantId, userId);
         } else {
           this.setSpecificFieldError(response?.error);
@@ -169,7 +192,7 @@ export class LoginComponent implements OnInit {
           error?.error?.error || 'Login failed. Please try again.';
         this.setSpecificFieldError(errorMessage);
         this.loadCaptcha(); // ✅ Load new captcha on error too
-      }
+      },
     );
   }
 
@@ -182,52 +205,69 @@ export class LoginComponent implements OnInit {
     // Using RxJS interval for better Angular cleanup
     this.intervalSub = new Subscription();
 
-    const refreshInterval = setInterval(() => {
-      console.log(
-        '🔁 Auto-refresh triggered from login service at:',
-        new Date().toLocaleTimeString()
-      );
+    const refreshInterval = setInterval(
+      () => {
+        console.log(
+          '🔁 Auto-refresh triggered from login service at:',
+          new Date().toLocaleTimeString(),
+        );
 
-      this.dataService.getUserDetailsByHierarchy(merchantId, userId).subscribe(
-        (res: any) => {
-          if (res.code === 200 && res.phrase === 'Success' && res.data) {
-            const userData = res.data;
+        this.dataService
+          .getUserDetailsByHierarchy(merchantId, userId)
+          .subscribe(
+            (res: any) => {
+              if (res.code === 200 && res.phrase === 'Success' && res.data) {
+                const userData = res.data;
 
-            // Process the data like you do in getUserDetails
-            const projectName = Array.isArray(userData.projects.projectName)
-              ? userData.projects.projectName
-              : [];
-            const projectId = Array.isArray(userData.projects.projectId)
-              ? userData.projects.projectId
-              : [];
+                // Process the data like you do in getUserDetails
+                const projectName = Array.isArray(userData.projects.projectName)
+                  ? userData.projects.projectName
+                  : [];
+                const projectId = Array.isArray(userData.projects.projectId)
+                  ? userData.projects.projectId
+                  : [];
 
-            const companyData =
-              userData.companyName && userData.companyName.length > 0
-                ? userData.companyName[0]
-                : null;
-            const companyName = companyData ? companyData.companyname : null;
-            const clientId = companyData ? companyData.ClientId : null;
+                const companyData =
+                  userData.companyName && userData.companyName.length > 0
+                    ? userData.companyName[0]
+                    : null;
+                const companyName = companyData
+                  ? companyData.companyname
+                  : null;
+                const clientId = companyData ? companyData.ClientId : null;
 
-            // Create the enriched user details
-            const enrichedUserDetails = {
-              ...userData,
-              projectName,
-              projectId,
-              companyName,
-              clientId,
-            };
+                // Create the enriched user details
+                // Get existing projectId from storage to preserve it
+                const existingProjectId = this.commonDataService.getProjectId();
+                const finalProjectId =
+                  projectId.length > 0 ? projectId[0] : existingProjectId;
+                const finalProjectName =
+                  projectName.length > 0
+                    ? projectName[0]
+                    : this.commonDataService.getProjectName();
 
-            // Update CommonDataService
-            this.commonDataService.updateUserDetails(enrichedUserDetails);
+                // Create the enriched user details
+                const enrichedUserDetails = {
+                  ...userData,
+                  projectName: finalProjectName,
+                  projectId: finalProjectId,
+                  companyName,
+                  clientId,
+                };
 
-            console.log('🔄 Auto-refreshed user details from login:', res);
-          }
-        },
-        (err) => {
-          console.error('🚨 Error during auto-refresh:', err);
-        }
-      );
-    }, 2 * 60 * 1000); // ⏱ Every 2 minutes
+                // Update CommonDataService
+                this.commonDataService.updateUserDetails(enrichedUserDetails);
+
+                console.log('🔄 Auto-refreshed user details from login:', res);
+              }
+            },
+            (err) => {
+              console.error('🚨 Error during auto-refresh:', err);
+            },
+          );
+      },
+      2 * 60 * 1000,
+    ); // ⏱ Every 2 minutes
 
     // Save it to clear later if needed
     this.intervalSub.add({
@@ -282,7 +322,7 @@ export class LoginComponent implements OnInit {
       (response: any) => {
         console.log(
           '✅ getUserDetailsByHierarchy API Response from service:',
-          response
+          response,
         );
 
         if (
@@ -326,31 +366,53 @@ export class LoginComponent implements OnInit {
           console.log('🏢 Extracted Company Name:', companyName);
 
           // ✅ Update CommonDataService
+          const existingProjectId = this.commonDataService.getProjectId();
+          const finalProjectId =
+            projectId.length > 0 ? projectId[0] : existingProjectId;
+          const finalProjectName =
+            projectName.length > 0
+              ? projectName[0]
+              : this.commonDataService.getProjectName();
+
           this.commonDataService.userDetails = {
             ...userData,
-            projectName,
-            projectId,
+            projectName: finalProjectName,
+            projectId: finalProjectId,
             companyName,
             clientId,
           };
 
+          // Also save to storage to ensure persistence
+          if (finalProjectId) {
+            sessionStorage.setItem('projectId', finalProjectId.toString());
+            localStorage.setItem('projectId', finalProjectId.toString());
+            sessionStorage.setItem(
+              'isSSAUser',
+              (finalProjectId === 8).toString(),
+            );
+            localStorage.setItem(
+              'isSSAUser',
+              (finalProjectId === 8).toString(),
+            );
+          }
+
           console.log(
             '✅✅✅ CommonDataService Updated with User Details:',
-            this.commonDataService
+            this.commonDataService,
           );
           console.log(
             '✅✅✅ CommonDataService Updated with User Details:',
-            this.commonDataService.userDetails
+            this.commonDataService.userDetails,
           );
 
           // ✅ Persist updated details in sessionStorage & localStorage
           sessionStorage.setItem(
             'userDetails',
-            JSON.stringify(this.commonDataService.userDetails)
+            JSON.stringify(this.commonDataService.userDetails),
           );
           localStorage.setItem(
             'userDetails',
-            JSON.stringify(this.commonDataService.userDetails)
+            JSON.stringify(this.commonDataService.userDetails),
           );
 
           console.log('✅ User Details Persisted in Both Storages');
@@ -371,7 +433,7 @@ export class LoginComponent implements OnInit {
         } else {
           alert('❌ Failed to retrieve user details. Please try again.');
         }
-      }
+      },
     );
   }
 }

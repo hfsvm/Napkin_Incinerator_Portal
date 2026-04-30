@@ -6,7 +6,6 @@
   <form>
     <div class="row align-items-center">
       <!-- Row 1: First 6 filters -->
-
       <div class="row filter">
         <div
           class="col"
@@ -31,7 +30,7 @@
                 options: wards
               },
               {
-                name: 'Zone',
+                name: getZoneLabel(),
                 key: 'selectedSubZones',
                 selected: selectedSubZones,
                 options: subZones
@@ -45,35 +44,44 @@
         </div>
       </div>
 
-      <!-- Row 2: Remaining 4 filters -->
+      <!-- Row 2: Remaining filters - Hide the District (SSA/PMSHRI) filter for SSA login -->
       <div class="row filter mt-3">
+        <!-- Only show the Ward/District filter for non-SSA users -->
         <div
           class="col"
-          *ngFor="
-            let filter of [
-              {
-                name: 'Ward',
-                key: 'selectedWardList',
-                selected: selectedWardList,
-                options: wardList
-              },
-              {
-                name: 'Beat',
-                key: 'selectedBeatList',
-                selected: selectedBeatList,
-                options: beatList
-              },
-              {
-                name: 'Machines',
-                key: 'beats',
-                selected: selectedBeats,
-                options: beats
-              }
-            ]
-          "
+          *ngIf="!isSSALogin()"
         >
           <ng-container
-            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"
+            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
+              name: getWardLabel(),
+              key: 'selectedWardList',
+              selected: selectedWardList,
+              options: wardList
+            } }"
+          ></ng-container>
+        </div>
+        <div
+          class="col"
+        >
+          <ng-container
+            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
+              name: getBeatLabel(),
+              key: 'selectedBeatList',
+              selected: selectedBeatList,
+              options: beatList
+            } }"
+          ></ng-container>
+        </div>
+        <div
+          class="col"
+        >
+          <ng-container
+            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
+              name: 'Machines',
+              key: 'beats',
+              selected: selectedBeats,
+              options: beats
+            } }"
           ></ng-container>
         </div>
         <div class="col">
@@ -108,10 +116,6 @@
           <button
             class="btn btn-light dropdown-toggle w-100"
             type="button"
-            [disabled]="
-              (filter.key === 'zones' && disabledStates) ||
-              (filter.key === 'wards' && disabledDistricts)
-            "
             (click)="toggleDropdown(filter.key)"
           >
             {{
@@ -218,14 +222,12 @@
       <td><b>REPORT TYPE</b></td>
       <td>{{ reportType }}</td>
     </tr>
-
     <tr>
       <td><b>STATE</b></td>
       <td>All</td>
       <td><b>DISTRICT</b></td>
       <td>All</td>
     </tr>
-
     <tr>
       <td><b>REPORT GENERATED</b></td>
       <td>{{ reportGenerated | date : "dd-MMM-yyyy" }}</td>
@@ -272,7 +274,6 @@
         <th rowspan="2">ADDRESS</th>
         <th rowspan="2">MACHINE TYPE</th>
         <th rowspan="2">TOILET TYPE</th>
-        <!-- <th rowspan="2">TOILET TYPE</th> -->
         <th colspan="3">VENDING</th>
         <th colspan="3">INCINERATOR</th>
       </tr>
@@ -320,9 +321,9 @@
                 *ngIf="txnIndex === 0"
                 [attr.rowspan]="machine.transactions.length"
               >
-                <div>Zone: {{ machine.Zone }}</div>
-                <div>Ward: {{ machine.Ward }}</div>
-                <div>Beat: {{ machine.Beat }}</div>
+                <div>{{ getZoneLabel() }}: {{ machine.Zone }}</div>
+                <div>{{ getWardLabel() }}: {{ machine.Ward }}</div>
+                <div>{{ getBeatLabel() }}: {{ machine.Beat }}</div>
               </td>
               <td
                 *ngIf="txnIndex === 0"
@@ -350,18 +351,38 @@
                 >
                 <span *ngIf="txn.date !== 'Total'">{{ txn.date }}</span>
               </td>
+
+              <!-- QTY column - Show N/A for SSA only -->
               <td [class.font-weight-bold]="txn.date === 'Total'">
-                {{ txn.qty ?? "" }}
+                <ng-container *ngIf="isSSALogin(); else normalQty">
+                  N/A
+                </ng-container>
+                <ng-template #normalQty>
+                  {{ txn.qty ?? '' }}
+                </ng-template>
               </td>
+
+              <!-- CASH column - Show N/A for SSA only -->
               <td [class.font-weight-bold]="txn.date === 'Total'">
-                {{ txn.cash ?? "₹ 0" }}
+                <ng-container *ngIf="isSSALogin(); else normalCash">
+                  N/A
+                </ng-container>
+                <ng-template #normalCash>
+                  {{ txn.cash ?? '₹ 0' }}
+                </ng-template>
               </td>
+
+              <!-- ON TIME column - NO CHANGE -->
               <td [class.font-weight-bold]="txn.date === 'Total'">
-                {{ txn.onTime !== "-" ? txn.onTime : "-" }}
+                {{ txn.onTime !== '-' ? txn.onTime : '-' }}
               </td>
+
+              <!-- BURN CYCLES column - NO CHANGE -->
               <td [class.font-weight-bold]="txn.date === 'Total'">
                 {{ txn.burnCycles ?? 0 }}
               </td>
+
+              <!-- SAN NAPKINS BURNT column - NO CHANGE -->
               <td [class.font-weight-bold]="txn.date === 'Total'">
                 {{ txn.sanNapkinsBurnt ?? 0 }}
               </td>
@@ -369,13 +390,10 @@
           </ng-container>
         </ng-container>
 
+        <!-- Totals View -->
         <tr *ngIf="summaryType === 'Totals'">
           <td>{{ machine.srNo }}</td>
           <td>
-            <!-- <a [routerLink]="['/machine-report', machine.machineId]">
-              {{ machine.machineId }}
-            </a> -->
-
             <a
               [routerLink]="
                 machine.isWorking
@@ -394,93 +412,125 @@
           <td>{{ machine.toiletType }}</td>
           <td><b></b></td>
 
+          <!-- QTY Total - Show N/A for SSA only -->
           <td>
-            <b>{{ getTotalQty(machine) }}</b>
+            <ng-container *ngIf="isSSALogin(); else normalTotalQty">
+              <b>N/A</b>
+            </ng-container>
+            <ng-template #normalTotalQty>
+              <b>{{ getTotalQty(machine) }}</b>
+            </ng-template>
           </td>
-          <td>
-            <b>{{ getTotalCash(machine) }}</b>
-          </td>
-          <td>
-            <!-- Only show the total onTime (not the average per day) in the Totals view -->
-            <!-- <div><b>{{ machine['_totalOnTime'] ?? '-' }}</b></div> -->
 
-            <!-- Show both total onTime and average per day in the Totals view -->
-            <div>
-              <b>{{ machine["_totalOnTime"] ?? "-" }}</b>
-            </div>
+          <!-- CASH Total - Show N/A for SSA only -->
+          <td>
+            <ng-container *ngIf="isSSALogin(); else normalTotalCash">
+              <b>N/A</b>
+            </ng-container>
+            <ng-template #normalTotalCash>
+              <b>{{ getTotalCash(machine) }}</b>
+            </ng-template>
+          </td>
+
+          <td>
+            <div><b>{{ machine['_totalOnTime'] ?? '-' }}</b></div>
             <div *ngIf="machine['_avgOnTimePerDay'] !== '-'">
-              <b>{{ machine["_avgOnTimePerDay"] }}</b>
+              <b>{{ machine['_avgOnTimePerDay'] }}</b>
             </div>
           </td>
+
+          <!-- BURN CYCLES Total - NO CHANGE -->
           <td>
             <b>{{ getTotalBurnCycles(machine) }}</b>
           </td>
+
+          <!-- SAN NAPKINS BURNT Total - NO CHANGE -->
           <td>
             <b>{{ getTotalSanNapkinsBurnt(machine) }}</b>
           </td>
         </tr>
       </ng-container>
 
+      <!-- Grand Total Row -->
       <tr class="grand-total-row">
         <td colspan="6"><b>Grand Total</b></td>
         <td><b>Total</b></td>
+
+        <!-- Grand Total QTY - Show N/A for SSA only -->
         <td>
-          <b>{{ grandTotal.quantity }}</b>
+          <ng-container *ngIf="isSSALogin(); else normalGrandQty">
+            <b>N/A</b>
+          </ng-container>
+          <ng-template #normalGrandQty>
+            <b>{{ grandTotal.quantity }}</b>
+          </ng-template>
         </td>
+
+        <!-- Grand Total CASH - Show N/A for SSA only -->
         <td>
-          <b>{{ grandTotal.cash }}</b>
+          <ng-container *ngIf="isSSALogin(); else normalGrandCash">
+            <b>N/A</b>
+          </ng-container>
+          <ng-template #normalGrandCash>
+            <b>{{ grandTotal.cash }}</b>
+          </ng-template>
         </td>
+
         <td>-</td>
+
+        <!-- Grand Total BURN CYCLES - NO CHANGE -->
         <td>
           <b>{{ grandTotal.burnCycles }}</b>
         </td>
+
+        <!-- Grand Total SAN NAPKINS - NO CHANGE -->
         <td>
           <b>{{ grandTotal.sanNapkinsBurnt }}</b>
         </td>
       </tr>
 
+      <!-- Averages Row -->
       <tr class="average-row">
         <td colspan="6"><b>Average (per machine per day)</b></td>
         <td><b>Avg</b></td>
+
+        <!-- Average QTY - Show N/A for SSA only -->
         <td>
-          <b>{{ averages.quantity }}</b>
+          <ng-container *ngIf="isSSALogin(); else normalAvgQty">
+            <b>N/A</b>
+          </ng-container>
+          <ng-template #normalAvgQty>
+            <b>{{ averages.quantity }}</b>
+          </ng-template>
         </td>
+
+        <!-- Average CASH - Show N/A for SSA only -->
         <td>
-          <b>{{ averages.cash }}</b>
+          <ng-container *ngIf="isSSALogin(); else normalAvgCash">
+            <b>N/A</b>
+          </ng-container>
+          <ng-template #normalAvgCash>
+            <b>{{ averages.cash }}</b>
+          </ng-template>
         </td>
+
         <td>-</td>
+
+        <!-- Average BURN CYCLES - NO CHANGE -->
         <td>
           <b>{{ averages.burnCycles }}</b>
         </td>
+
+        <!-- Average SAN NAPKINS - NO CHANGE -->
         <td>
           <b>{{ averages.sanNapkinsBurnt }}</b>
         </td>
       </tr>
     </tbody>
   </table>
-  <div
-    class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3"
-  >
-    <!-- Items per page
-    <div class="d-flex align-items-center gap-2">
-      <label class="mb-0 fw-bold text-dark" style="font-size: 1rem"
-        >Items per page:</label
-      >
-      <div class="position-relative" style="min-width: 100px">
-        <select
-          class="form-select form-select-lg custom-select"
-          [(ngModel)]="itemsPerPage"
-          (change)="onPageChange(1)"
-        >
-          <option *ngFor="let option of [10, 20, 50, 100]" [value]="option">
-            {{ option }}
-          </option>
-        </select>
-        <span class="dropdown-icon"></span>
-      </div>
-    </div> -->
 
-    <!-- Pagination controls -->
+  <!-- Pagination -->
+  <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
     <div class="d-flex align-items-center gap-2">
       <button
         class="btn btn-lg pagination-btn"
@@ -505,7 +555,6 @@
       </button>
     </div>
 
-    <!-- Showing X to Y of Z entries -->
     <div class="text-muted" style="font-size: 0.95rem">
       Showing
       {{ (currentPage - 1) * itemsPerPage + 1 }}

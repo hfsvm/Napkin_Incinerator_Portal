@@ -21,16 +21,21 @@ import { DashboardRefreshService } from '../../../service/dashboard-refresh.serv
 export class WidgetsComponent implements AfterContentInit, OnDestroy {
   @ViewChild('machineChart') machineChartRef!: ElementRef;
   @ViewChild('stockChart') stockChartRef!: ElementRef;
+  @ViewChild('burningChart') burningChartRef!: ElementRef;
 
   totalMachines = 0;
   activeMachines = 0;
   inactiveMachines = 0;
-  napkinsDispensed = 0;
+  napkinsDispensed: number | string = 0;
   okStock = 0;
   lowStock = 0;
   emptyStock = 0;
   totalburningcycles = 0;
   totalCollection = 0;
+
+  // Burning stats (only for SSA)
+  burningEnabled = 0;
+  burningDisabled = 0;
 
   merchantId: string | null = null;
   refreshCountdown = 0;
@@ -75,12 +80,27 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     this.refreshCountdown = this.refreshInterval;
   }
 
+  isSSALogin(): boolean {
+    if (this.commonDataService.userDetails?.projectId === 8) {
+      return true;
+    }
+    const projectId = localStorage.getItem('projectId');
+    return projectId === '8';
+  }
+
+ getNapkinsLabel(): string {
+  // For SSA users, show "Napkins Dispensed" as title, but value will be N/A
+  return 'Napkins Dispensed';
+}
+
   fetchDashboardData(): void {
-    debugger;
     if (!this.merchantId) return;
 
     const userDetails = this.commonDataService.userDetails;
     if (!userDetails || !Array.isArray(userDetails.clients)) return;
+    
+    const isSSA = this.isSSALogin();
+    
     const states: string[] = [];
     const districts: string[] = [];
     const zones: string[] = [];
@@ -143,7 +163,6 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
       burnStatus: ['1', '2'],
       state: states.join(','),
       district: districts.join(','),
-      // machineId: machines.join(','),
       client: clientIds.join(','),
       project: projectIds.join(','),
       zone: zones.join(','),
@@ -162,6 +181,7 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
             itemsDispensed = 0,
             stockEmpty = 0,
             stockLow = 0,
+            burningEnabled = 0,
           } = response.data;
 
           this.totalMachines = machinesInstalled;
@@ -169,14 +189,31 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
           this.inactiveMachines = machinesInstalled - machinesRunning;
           this.totalburningcycles = totalBurningCycles;
           this.totalCollection = totalCollection;
-          this.napkinsDispensed = itemsDispensed;
+          
+          // For SSA users, show N/A for napkins
+          this.napkinsDispensed = isSSA ? 'N/A' : itemsDispensed;
+          
           this.emptyStock = stockEmpty;
           this.lowStock = stockLow;
           this.okStock = machinesInstalled - (stockEmpty + stockLow);
 
+          // Calculate burning stats for SSA users
+          this.burningEnabled = burningEnabled;
+          this.burningDisabled = machinesInstalled - burningEnabled;
+
+          // Update machine chart (always show)
           this.updateMachineChart();
-          this.updateStockChart();
+          
+          // Show different chart based on login type
+          if (isSSA) {
+            this.updateBurningChart();  // Show Burning Status for SSA
+          } else {
+            this.updateStockChart();     // Show Stock Status for normal users
+          }
         }
+      },
+      error: (error) => {
+        console.error('Error fetching dashboard data:', error);
       },
     });
   }
@@ -198,145 +235,27 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
     this.drawD3PieChart(this.stockChartRef.nativeElement, data, 50);
   }
 
-  // drawD3PieChart(
-  //   container: HTMLElement,
-  //   data: { label: string; value: number; color: string }[],
-  //   marginOffset: number // controls donut hole size
-  // ): void {
-  //   // Clear previous chart
-  //   d3.select(container).selectAll('*').remove();
-
-  //   const width = 400;
-  //   const height = 400;
-  //   const radius = Math.min(width, height) / 2.5;
-
-  //   const svg = d3
-  //     .select(container)
-  //     .append('svg')
-  //     .attr('width', width)
-  //     .attr('height', height)
-  //     .append('g')
-  //     .attr('transform', `translate(${width / 2}, ${height / 2})`);
-
-  //   const pie = d3.pie<any>().value((d: any) => d.value);
-
-  //   // Main arc for drawing slices
-  //   const arc = d3
-  //     .arc<any>()
-  //     .innerRadius(marginOffset)
-  //     .outerRadius(radius - 15);
-
-  //   // Outer arc for placing labels outside
-  //   const outerArc = d3
-  //     .arc<any>()
-  //     .innerRadius(radius * 0.9)
-  //     .outerRadius(radius * 0.9);
-
-  //   // Custom arc for reducing the starting point of arrow line
-  //   const labelLineStartArc = d3
-  //     .arc<any>()
-  //     .innerRadius((radius + marginOffset) / 2) // midway between outer and inner
-  //     .outerRadius((radius + marginOffset) / 2);
-
-  //   const total = data.reduce((sum, d) => sum + d.value, 0);
-  //   const pieData = pie(data);
-
-  //   const arcs = svg.selectAll('arc').data(pieData).enter().append('g');
-
-  //   // Draw pie slices
-  //   arcs
-  //     .append('path')
-  //     .attr('d', arc)
-  //     .attr('fill', (d: any) => d.data.color);
-
-  //   // Labels and connecting lines
-  //   arcs.each(function (d: any) {
-  //     const group = d3.select(this);
-  //     const percent = total === 0 ? 0 : (d.data.value / total) * 100;
-
-  //     if (percent <= 0) return;
-
-  //     const labelText = `${percent.toFixed(1)}%`;
-
-  //     const centroid = labelLineStartArc.centroid(d); // reduced starting point
-  //     const outerCentroid = outerArc.centroid(d);
-  //     const midAngle = (d.startAngle + d.endAngle) / 2;
-  //     const direction = midAngle < Math.PI ? 1 : -1;
-
-  //     if (percent > 5) {
-  //       group
-  //         .append('text')
-  //         .attr('transform', `translate(${centroid})`)
-  //         .attr('text-anchor', 'middle')
-  //         .attr('alignment-baseline', 'middle')
-  //         .text(labelText)
-  //         .style('font-size', '12px')
-  //         .style('fill', '#000')
-  //         .style('font-weight', 'bold');
-  //     } else {
-  //       const labelPos = [
-  //         outerCentroid[0] + 20 * direction,
-  //         outerCentroid[1] - 20,
-  //       ];
-
-  //       group
-  //         .append('polyline')
-  //         .attr('points', [centroid, outerCentroid, labelPos].join(' '))
-  //         .attr('stroke', '#000')
-  //         .attr('fill', 'none')
-  //         .attr('stroke-width', 1);
-
-  //       group
-  //         .append('text')
-  //         .attr('transform', `translate(${labelPos})`)
-  //         .attr('text-anchor', direction === 1 ? 'start' : 'end')
-  //         .attr('alignment-baseline', 'middle')
-  //         .attr('dy', '-0.5em')
-  //         .text(labelText)
-  //         .style('font-size', '12px')
-  //         .style('fill', '#000')
-  //         .style('font-weight', 'bold');
-  //     }
-  //   });
-
-  //   // Color legend below the chart
-  //   const legend = d3
-  //     .select(container)
-  //     .append('div')
-  //     .attr('class', 'd3-legend')
-  //     .style('display', 'flex')
-  //     .style('justify-content', 'center')
-  //     .style('flex-wrap', 'wrap')
-  //     .style('margin-top', '10px')
-  //     .style('gap', '12px');
-
-  //   data.forEach((d) => {
-  //     const item = legend
-  //       .append('div')
-  //       .style('display', 'flex')
-  //       .style('align-items', 'center')
-  //       .style('margin', '0 8px');
-
-  //     item
-  //       .append('div')
-  //       .style('width', '14px')
-  //       .style('height', '14px')
-  //       .style('background-color', d.color)
-  //       .style('margin-right', '6px')
-  //       .style('border-radius', '50%');
-
-  //     item
-  //       .append('span')
-  //       .text(d.label)
-  //       .style('font-size', '13px')
-  //       .style('color', '#333');
-  //   });
-  // }
+  // Burning Status Pie Chart - Only for SSA users
+  updateBurningChart(): void {
+    const data = [
+      {
+        label: 'Burning Enabled',
+        value: this.burningEnabled,
+        color: '#D32F2F', // 🔴 Red
+      },
+      {
+        label: 'Burning Disabled',
+        value: this.burningDisabled,
+        color: '#4CAF50', // 🟢 Green
+      },
+    ];
+    this.drawD3PieChart(this.burningChartRef.nativeElement, data, 50);
+  }
 
   drawD3PieChart(
     container: HTMLElement,
     data: { label: string; value: number; color: string }[],
-    marginOffset: number // controls donut hole size
+    marginOffset: number
   ): void {
     // Clear previous chart
     d3.select(container).selectAll('*').remove();
@@ -355,22 +274,19 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
 
     const pie = d3.pie<any>().value((d: any) => d.value);
 
-    // Main arc for drawing slices
     const arc = d3
       .arc<any>()
       .innerRadius(marginOffset)
       .outerRadius(radius - 15);
 
-    // Outer arc for placing labels outside
     const outerArc = d3
       .arc<any>()
       .innerRadius(radius * 1.1)
       .outerRadius(radius * 1.1);
 
-    // Custom arc for reducing the starting point of arrow line
     const labelLineStartArc = d3
       .arc<any>()
-      .innerRadius((radius + marginOffset) / 2) // midway between outer and inner
+      .innerRadius((radius + marginOffset) / 2)
       .outerRadius((radius + marginOffset) / 2);
 
     const total = data.reduce((sum, d) => sum + d.value, 0);
@@ -384,7 +300,7 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
       .attr('d', arc)
       .attr('fill', (d: any) => d.data.color);
 
-    // Labels and connecting lines with improved positioning for small slices
+    // Labels and connecting lines
     let smallLabelCount = 0;
     const spacing = 16;
 
@@ -396,11 +312,10 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
 
       const labelText = `${percent.toFixed(1)}%`;
 
-      const centroid = labelLineStartArc.centroid(d); // reduced starting point
+      const centroid = labelLineStartArc.centroid(d);
       const outerCentroid = outerArc.centroid(d);
       const midAngle = (d.startAngle + d.endAngle) / 2;
       const direction = midAngle < Math.PI ? 1 : -1;
-      const side = direction === 1 ? 'right' : 'left';
 
       if (percent > 5) {
         group
@@ -413,9 +328,8 @@ export class WidgetsComponent implements AfterContentInit, OnDestroy {
           .style('fill', '#000')
           .style('font-weight', 'bold');
       } else {
-        // Offset vertically to avoid collision
         smallLabelCount++;
-        const direction = smallLabelCount % 2 === 0 ? -1 : 1; // alternate
+        const direction = smallLabelCount % 2 === 0 ? -1 : 1;
         const yOffset = (Math.ceil(smallLabelCount / 2) - 1) * spacing;
 
         const labelPos = [

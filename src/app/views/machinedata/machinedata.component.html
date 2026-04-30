@@ -1,7 +1,19 @@
 <!-- Dashboard Summary Cards -->
+
+<ng-template #loading>
+  <div class="text-center p-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3">Loading machine data...</p>
+  </div>
+</ng-template>
+
 <div class="refresh-circle">
   <span class="time">{{ formattedRefreshTime }}</span>
 </div>
+
+<!-- Summary Cards -->
 <div class="row g-2">
   <div
     class="col-lg-3 col-md-6 col-sm-12 d-flex"
@@ -21,17 +33,18 @@
         },
         {
           title: 'Stock Status',
-          value:
-            'Empty: ' +
-            dashboardData.stockEmpty +
-            '<br>Full: ' +
-            dashboardData.stockOk,
+          value: isSSALogin()
+            ? 'N/A'
+            : 'Empty: ' +
+              dashboardData.stockEmpty +
+              '<br>Full: ' +
+              dashboardData.stockOk,
           color: '#E57373',
           icon: 'https://img.icons8.com/ios-filled/50/FFFFFF/box.png'
         },
         {
           title: 'Stock Low',
-          value: dashboardData.stockLow,
+          value: isSSALogin() ? 'N/A' : dashboardData.stockLow,
           color: '#FFCC80',
           icon: 'https://img.icons8.com/ios-filled/50/FFFFFF/low-battery.png'
         },
@@ -49,13 +62,13 @@
         },
         {
           title: 'Total Collection',
-          value: '₹ ' + dashboardData.totalCollection,
+          value: isSSALogin() ? 'N/A' : '₹ ' + dashboardData.totalCollection,
           color: '#64B5F6',
           icon: 'https://img.icons8.com/ios-filled/50/FFFFFF/money-bag.png'
         },
         {
           title: 'Items Dispensed',
-          value: dashboardData.itemsDispensed,
+          value: isSSALogin() ? 'N/A' : dashboardData.itemsDispensed,
           color: '#4DB6AC',
           icon: 'assets/img/icon/pad1.png'
         }
@@ -73,234 +86,190 @@
         <div class="ms-2">
           <h6 class="card-title">{{ card.title }}</h6>
 
-          <!-- ✅ Special case: Machines Running -->
+          <!-- Machines Running special case (Online/Offline) -->
           <div
-            *ngIf="card.title === 'Machines Running'; else normalCardValue"
-            style="
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              font-size: 14px;
-              line-height: 1.2;
-              height: 40px;
-              margin-top: auto;
-              margin-bottom: auto;
-            "
+            *ngIf="card.title === 'Machines Running'"
+            style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; line-height: 1.2; height: 40px;"
           >
             <div>Online: {{ dashboardData.machinesOnline || 0 }}</div>
             <div>Offline: {{ dashboardData.machinesOffline || 0 }}</div>
           </div>
 
-          <!-- ✅ All other cards -->
-          <ng-template #normalCardValue>
-            <p
-              *ngIf="card.title !== 'Stock Status'"
-              style="
-                text-align: center;
-                font-size: 16px;
-                margin-top: auto;
-                margin-bottom: auto;
-              "
-            >
-              {{ card.value }}
-            </p>
+          <!-- Stock Status special case (shows N/A for SSA, actual values for non-SSA) -->
+          <div
+            *ngIf="card.title === 'Stock Status'"
+            style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; line-height: 1.2; height: 40px;"
+          >
+            <span *ngIf="isSSALogin()">N/A</span>
+            <span *ngIf="!isSSALogin()"
+              >Empty: {{ dashboardData.stockEmpty }} | Full:
+              {{ dashboardData.stockOk }}</span>
+          </div>
 
-            <!-- ✅ Stock Status Special Handling -->
-            <p
-              *ngIf="card.title === 'Stock Status'"
-              style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                font-size: 14px;
-                line-height: 1.2;
-                height: 40px;
-                margin-top: auto;
-                margin-bottom: auto;
-              "
-            >
-              <span>
-                Empty: {{ dashboardData.stockEmpty }} | Full:
-                {{ dashboardData.stockOk }}
-              </span>
-            </p>
-          </ng-template>
+          <!-- Normal card value (including N/A for SSA) -->
+          <p
+            *ngIf="card.title !== 'Machines Running' && card.title !== 'Stock Status'"
+            style="text-align: center; font-size: 16px; margin-top: auto; margin-bottom: auto;"
+          >
+            {{ card.value }}
+          </p>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Filters Section -->
 <div class="card mb-3 mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
     <div class="mb-3 d-flex align-items-center gap-2">
-      <!-- Search<input
-  type="text"
-  placeholder="Search ..."
-  [(ngModel)]="searchTerm"
-  (input)="onSearchChange()"
-  /> -->
-
-      <!-- <small class="text-muted">Supports RegEx (e.g. `^A.*`, `Machine[0-9]+`)</small> -->
       <button class="btn btn-primary btn-sm ms-2" (click)="clearFilters()">
         Clear Filters
       </button>
     </div>
-
-    <!-- <h3 class="mb-3">Filters</h3> -->
     <button class="btn btn-primary btn-sm" (click)="refreshData()">
       🔄 Refresh Data
     </button>
   </div>
   <div class="card-body">
     <div class="container">
-      <!-- Row 1: First 6 filters -->
+      <!-- Row 1: Basic Filters -->
       <div class="row filter">
-        <div
-          class="col"
-          *ngFor="
-            let filter of [
-              {
-                name: 'Client Name',
-                key: 'projects',
-                selected: selectedProjects,
-                options: projects
-              },
-              {
-                name: 'Machine Status',
-                key: 'machineStatuses',
-                selected: selectedMachineStatuses,
-                options: machineStatuses
-              },
-              {
-                name: 'Stock Status',
-                key: 'stockStatuses',
-                selected: selectedStockStatuses,
-                options: stockStatuses
-              },
-              {
-                name: 'Burn Status',
-                key: 'burnStatuses',
-                selected: selectedBurnStatuses,
-                options: burnStatuses
-              },
-              {
-                name: 'State',
-                key: 'zones',
-                selected: selectedZones,
-                options: zones
-              },
-              {
-                name: 'District',
-                key: 'wards',
-                selected: selectedWards,
-                options: wards
-              }
-            ]
-          "
-        >
-          <ng-container
-            *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"
-          ></ng-container>
+        <!-- Client Name filter -->
+        <div class="col">
+          <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
+            name: 'Client Name',
+            key: 'projects',
+            selected: selectedProjects,
+            options: projects
+          } }"></ng-container>
+        </div>
+
+        <!-- Machine Status filter -->
+        <div class="col">
+          <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
+            name: 'Machine Status',
+            key: 'machineStatuses',
+            selected: selectedMachineStatuses,
+            options: machineStatuses
+          } }"></ng-container>
+        </div>
+
+        <!-- Stock Status filter - ONLY for non-SSA users -->
+        <div class="col" *ngIf="!isSSALogin()">
+          <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
+            name: 'Stock Status',
+            key: 'stockStatuses',
+            selected: selectedStockStatuses,
+            options: stockStatuses
+          } }"></ng-container>
+        </div>
+
+        <!-- Burn Status filter -->
+        <div class="col">
+          <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
+            name: 'Burn Status',
+            key: 'burnStatuses',
+            selected: selectedBurnStatuses,
+            options: burnStatuses
+          } }"></ng-container>
+        </div>
+
+        <!-- State filter -->
+        <div class="col">
+          <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
+            name: 'State',
+            key: 'zones',
+            selected: selectedZones,
+            options: zones
+          } }"></ng-container>
+        </div>
+
+        <!-- District filter -->
+        <div class="col">
+          <ng-container *ngTemplateOutlet="dropdownTemplate; context: { $implicit: {
+            name: 'District',
+            key: 'wards',
+            selected: selectedWards,
+            options: wards
+          } }"></ng-container>
         </div>
       </div>
 
-      <!-- Row 2: Remaining 4 filters -->
-      <!-- <div class="row filter mt-3">
-        <div
-          class="col"
-          *ngFor="
-            let filter of [
-              {
-                name: 'Zone',
-                key: 'selectedSubZones',
-                selected: selectedSubZones,
-                options: subZones,
-                show: checkIfDistrictsHaveZones()
-              },
-              {
-                name: 'Ward',
-                key: 'selectedWardList',
-                selected: selectedWardList,
-                options: wardList,
-                show: checkIfDistrictsHaveZones()
-              },
-              {
-                name: 'Beat',
-                key: 'selectedBeatList',
-                selected: selectedBeatList,
-                options: beatList,
-                show: checkIfDistrictsHaveZones()
-              },
-              {
-                name: 'Machines',
-                key: 'beats',
-                selected: selectedBeats,
-                options: beats,
-                show: true
-              }
-            ]
-          "
-        >
-          <ng-container *ngIf="filter.show">
-            <ng-container
-              *ngTemplateOutlet="
-                dropdownTemplate;
-                context: { $implicit: filter }
-              "
-            ></ng-container>
-          </ng-container>
-        </div>
-      </div> -->
-
-      <!-- Row 2: Remaining 4 filters -->
+      <!-- Row 2: Hierarchy Filters -->
       <div class="row filter mt-3">
-        <!-- If zones/wards/beats are shown, display all normally -->
         <ng-container *ngIf="checkIfDistrictsHaveZones(); else onlyMachines">
-          <div
-            class="col"
-            *ngFor="
-              let filter of [
-                {
-                  name: 'Zone',
-                  key: 'selectedSubZones',
-                  selected: selectedSubZones,
-                  options: subZones
-                },
-                {
-                  name: 'Ward',
-                  key: 'selectedWardList',
-                  selected: selectedWardList,
-                  options: wardList
-                },
-                {
-                  name: 'Beat',
-                  key: 'selectedBeatList',
-                  selected: selectedBeatList,
-                  options: beatList
-                },
-                {
-                  name: 'Machines',
-                  key: 'beats',
-                  selected: selectedBeats,
-                  options: beats
-                }
-              ]
-            "
-          >
-            <ng-container
-              *ngIf="filter.name !== 'Machines' || checkIfDistrictsHaveZones()"
+          <!-- For non-SSA users: show all 4 filters -->
+          <ng-container *ngIf="!isSSALogin()">
+            <div
+              class="col"
+              *ngFor="
+                let filter of [
+                  {
+                    name: getZoneName(),
+                    key: 'selectedSubZones',
+                    selected: selectedSubZones,
+                    options: subZones
+                  },
+                  {
+                    name: getWardName(),
+                    key: 'selectedWardList',
+                    selected: selectedWardList,
+                    options: wardList
+                  },
+                  {
+                    name: getBeatName(),
+                    key: 'selectedBeatList',
+                    selected: selectedBeatList,
+                    options: beatList
+                  },
+                  {
+                    name: 'Machines',
+                    key: 'beats',
+                    selected: selectedBeats,
+                    options: beats
+                  }
+                ]
+              "
             >
               <ng-container
-                *ngTemplateOutlet="
-                  dropdownTemplate;
-                  context: { $implicit: filter }
-                "
+                *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"
               ></ng-container>
-            </ng-container>
-          </div>
+            </div>
+          </ng-container>
+
+          <!-- For SSA users: show only 3 filters (exclude Ward) -->
+          <ng-container *ngIf="isSSALogin()">
+            <div
+              class="col"
+              *ngFor="
+                let filter of [
+                  {
+                    name: getZoneName(),
+                    key: 'selectedSubZones',
+                    selected: selectedSubZones,
+                    options: subZones
+                  },
+                  {
+                    name: getBeatName(),
+                    key: 'selectedBeatList',
+                    selected: selectedBeatList,
+                    options: beatList
+                  },
+                  {
+                    name: 'Machines',
+                    key: 'beats',
+                    selected: selectedBeats,
+                    options: beats
+                  }
+                ]
+              "
+            >
+              <ng-container
+                *ngTemplateOutlet="dropdownTemplate; context: { $implicit: filter }"
+              ></ng-container>
+            </div>
+          </ng-container>
         </ng-container>
 
         <!-- Only Machines aligned to left when other filters are hidden -->
@@ -334,9 +303,7 @@
           type="button"
           [disabled]="shouldDisableFilter(filter.name)"
           [class.disabled]="shouldDisableFilter(filter.name)"
-          (click)="
-            !shouldDisableFilter(filter.name) && toggleDropdown(filter.key)
-          "
+          (click)="!shouldDisableFilter(filter.name) && toggleDropdown(filter.key)"
         >
           {{
             filter.selected.length
@@ -372,44 +339,26 @@
             />
           </div>
 
-          <label
-            class="dropdown-item d-flex align-items-center"
-            style="gap: 6px"
-          >
+          <label class="dropdown-item d-flex align-items-center" style="gap: 6px">
             <input
               type="checkbox"
               [checked]="
                 filter.selected.length === filter.options.length &&
                 filter.options.length > 0
               "
-              (change)="
-                toggleSelectAll(filter.selected, filter.options, filter.key)
-              "
+              (change)="toggleSelectAll(filter.selected, filter.options, filter.key)"
             />
             <strong style="margin: 0">Select All</strong>
           </label>
 
           <label
-            *ngFor="
-              let option of filter.options
-                | filterDropdown : searchText[filter.key]
-            "
+            *ngFor="let option of filter.options | filterDropdown: searchText[filter.key]"
             class="dropdown-item"
           >
             <input
               type="checkbox"
-              [checked]="
-                filter.selected.includes(
-                  option.ProjectId || option.key || option
-                )
-              "
-              (change)="
-                toggleSelection(
-                  filter.selected,
-                  option.ProjectId || option.key || option,
-                  filter.key
-                )
-              "
+              [checked]="filter.selected.includes(option.ProjectId || option.key || option)"
+              (change)="toggleSelection(filter.selected, option.ProjectId || option.key || option, filter.key)"
             />
             {{ option.projectname || option.value || option }}
           </label>
@@ -418,110 +367,57 @@
     </ng-template>
   </div>
 
+  <!-- Machine Report Table -->
   <div class="card p-3">
-    <!-- Move this div to wrap both the button and heading -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3 class="mb-0">Machine Report</h3>
-      <!-- Added mb-0 to remove margin-bottom -->
       <button class="btn btn-primary btn-sm" (click)="exportToExcel()">
         <i class="fas fa-file-excel"></i> Export to Excel
       </button>
     </div>
 
-    <!-- Filters -->
-
     <div class="table-responsive">
       <table class="table table-bordered">
         <thead>
-          <!-- Column Headings -->
           <tr>
             <th>S.No</th>
-            <!--          
-  <th (click)="sortData('machineId')" style="cursor: pointer;">Machine ID 🔽</th>
-  <th (click)="sortData('burningStatus')" style="cursor: pointer;" >Location Name</th>
-  <th >Location Address</th>
-  <th>Uid</th>
-  <th (click)="sortData('machineType')" style="cursor: pointer;">Machine Type 🔽</th>
-  <th (click)="sortData('status')" style="cursor: pointer;">Status 🔽</th>
-  <th (click)="sortData('stockStatus')" style="cursor: pointer;">Stock Status 🔽</th>
-  <th (click)="sortData('burningStatus')" style="cursor: pointer;">Burning Status 🔽</th> -->
-            <th
-              (click)="sortData('machineId')"
-              style="cursor: pointer; white-space: nowrap"
-            >
+            <th (click)="sortData('machineId')" style="cursor: pointer; white-space: nowrap">
               Machine ID 🔽
             </th>
-            <th
-              (click)="sortData('mcSrNo')"
-              style="cursor: pointer; white-space: nowrap"
-            >
+            <th (click)="sortData('mcSrNo')" style="cursor: pointer; white-space: nowrap">
               MC SrNo 🔽
             </th>
-            <th
-              (click)="sortData('pcbNo')"
-              style="cursor: pointer; white-space: nowrap"
-            >
+            <th (click)="sortData('pcbNo')" style="cursor: pointer; white-space: nowrap">
               Pcb No 🔽
             </th>
-            <th
-              (click)="sortData('address')"
-              style="cursor: pointer; white-space: nowrap"
-            >
+            <th (click)="sortData('address')" style="cursor: pointer; white-space: nowrap">
               Location Name 🔽
             </th>
-            <th
-              (click)="sortData('address')"
-              style="cursor: pointer; white-space: nowrap"
-            >
+            <th (click)="sortData('address')" style="cursor: pointer; white-space: nowrap">
               Location Address 🔽
             </th>
-            <th
-              (click)="sortData('uid')"
-              style="cursor: pointer; white-space: nowrap"
-            >
-              Uid 🔽
+            <th (click)="sortData('uid')" style="cursor: pointer; white-space: nowrap">
+              {{ isSSALogin() ? "UDISE" : "Uid" }} 🔽
             </th>
-            <th
-              (click)="sortData('machineType')"
-              style="cursor: pointer; white-space: nowrap"
-            >
+            <th (click)="sortData('machineType')" style="cursor: pointer; white-space: nowrap">
               Machine Type 🔽
             </th>
-            <th
-              (click)="sortData('status')"
-              style="cursor: pointer; white-space: nowrap"
-            >
+            <th (click)="sortData('status')" style="cursor: pointer; white-space: nowrap">
               Status 🔽
             </th>
-            <th
-              (click)="sortData('stockStatus')"
-              style="cursor: pointer; white-space: nowrap"
-            >
+            <!-- Stock Status column header - HIDDEN for SSA users -->
+            <th *ngIf="!isSSALogin()" (click)="sortData('stockStatus')" style="cursor: pointer; white-space: nowrap">
               Stock Status 🔽
             </th>
-            <th
-              (click)="sortData('burningStatus')"
-              style="cursor: pointer; white-space: nowrap"
-            >
+            <th (click)="sortData('burningStatus')" style="cursor: pointer; white-space: nowrap">
               Burning Status 🔽
             </th>
-
             <th>Info</th>
           </tr>
 
           <!-- Search Filters Row -->
           <tr>
-            <!-- Sr. No. filter (disabled input) -->
-            <th>
-              <!-- <input
-      type="text"
-      class="form-control form-control-sm"
-      placeholder="Search"
-      disabled
-    /> -->
-            </th>
-
-            <!-- Filter inputs for each searchable column -->
+            <th></th>
             <th>
               <input
                 type="text"
@@ -531,7 +427,6 @@
                 (ngModelChange)="applyFiltersAndSort()"
               />
             </th>
-
             <th>
               <input
                 type="text"
@@ -541,7 +436,6 @@
                 (ngModelChange)="applyFiltersAndSort()"
               />
             </th>
-
             <th>
               <input
                 type="text"
@@ -551,7 +445,6 @@
                 (ngModelChange)="applyFiltersAndSort()"
               />
             </th>
-
             <th>
               <input
                 type="text"
@@ -561,7 +454,6 @@
                 (ngModelChange)="applyFiltersAndSort()"
               />
             </th>
-
             <th>
               <input
                 type="text"
@@ -571,27 +463,15 @@
                 (ngModelChange)="applyFiltersAndSort()"
               />
             </th>
-
             <th>
               <input
                 type="text"
                 class="form-control form-control-sm"
-                placeholder="uid"
+                [placeholder]="isSSALogin() ? 'UDISE' : 'uid'"
                 [(ngModel)]="columnFilters['Uid']"
                 (ngModelChange)="applyFiltersAndSort()"
               />
             </th>
-
-            <!-- <th>
-    <input
-    type="text"
-    class="form-control form-control-sm"
-    placeholder="pcbNo"
-    [(ngModel)]="columnFilters['PcbNO']"
-    (ngModelChange)="applyFiltersAndSort()"
-  />
-  </th> -->
-
             <th>
               <input
                 type="text"
@@ -610,7 +490,8 @@
                 (ngModelChange)="applyFiltersAndSort()"
               />
             </th>
-            <th>
+            <!-- Stock Status search input - HIDDEN for SSA users -->
+            <th *ngIf="!isSSALogin()">
               <input
                 type="text"
                 class="form-control form-control-sm"
@@ -628,44 +509,16 @@
                 (ngModelChange)="applyFiltersAndSort()"
               />
             </th>
-
-            <!-- Info filter (disabled input) -->
-            <th>
-              <!-- <input
-                type="text"
-                class="form-control form-control-sm"
-                placeholder="Search"
-                disabled
-              /> -->
-            </th>
+            <th></th>
           </tr>
         </thead>
 
         <tbody>
-          <tr
-            *ngFor="
-              let machine of filteredMachines.slice(
-                (currentPage - 1) * itemsPerPage,
-                currentPage * itemsPerPage
-              );
-              let i = index
-            "
-          >
+          <tr *ngFor="let machine of paginatedMachines; let i = index">
             <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
-
             <td>
-              <!-- Machine ID as clickable link -->
-              <!-- <a [routerLink]="['/machine-report', machine.machineId]" style="color: #007bff; text-decoration: underline; cursor: pointer;">
-          
-          {{ machine.machineId }}
-        </a> -->
-
               <a
-                [routerLink]="
-                  machine.isWorking
-                    ? ['/machine-report', machine.machineId]
-                    : null
-                "
+                [routerLink]="machine.isWorking ? ['/machine-report', machine.machineId] : null"
                 (click)="!machine.isWorking && $event.preventDefault()"
                 [ngStyle]="{
                   color: machine.isWorking ? '#007bff' : 'black',
@@ -677,31 +530,28 @@
                 {{ machine.machineId }}
               </a>
             </td>
-            <!-- ✅ MCSRNo -->
             <td>{{ machine.mcSrNo || "" }}</td>
-
-            <!-- ✅ PCB NO -->
             <td>{{ machine.pcbNo || "" }}</td>
-
-            <!-- ✅ Location Name -->
-            <td
-              style="
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              "
-            >
-              <!-- {{ getLastPartAfterLastComma(machine.address) || 'No Address' }} -->
-              <div>Zone: {{ machine.zone }}</div>
-              <div>Ward: {{ machine.ward }}</div>
-              <div>Beat: {{ machine.beat }}</div>
+            
+            <!-- Location Name Column - DIFFERENT ORDER FOR SSA USERS -->
+            <td style="white-space: normal; overflow: visible; min-width: 200px;">
+              <!-- FOR SSA USERS ONLY: District → Segment → Mandal -->
+              <ng-container *ngIf="isSSALogin()">
+                <div><strong>{{ getWardName() }}:</strong> {{ machine.level2 || machine.ward || 'N/A' }}</div>
+                <div><strong>{{ getZoneName() }}:</strong> {{ machine.zone || 'SSA' }}</div>
+                <div><strong>{{ getBeatName() }}:</strong> {{ machine.beat || 'N/A' }}</div>
+              </ng-container>
+              
+              <!-- FOR NON-SSA USERS: Zone → Ward → Beat (NO CHANGE) -->
+              <ng-container *ngIf="!isSSALogin()">
+                <div><strong>{{ getZoneName() }}:</strong> {{ machine.zone || 'N/A' }}</div>
+                <div><strong>{{ getWardName() }}:</strong> {{ machine.ward || 'N/A' }}</div>
+                <div><strong>{{ getBeatName() }}:</strong> {{ machine.beat || 'N/A' }}</div>
+              </ng-container>
             </td>
-
-            <!-- ✅ Location Address -->
             <td>{{ machine.address || "" }}</td>
             <td>{{ machine.uid || "N/A" }}</td>
             <td>{{ machine.machineType }}</td>
-
             <td>
               <span
                 class="badge badge-fixed px-3 py-2"
@@ -718,8 +568,8 @@
                 {{ machine.status === "1" ? "Online" : "Offline" }}
               </span>
             </td>
-
-            <td>
+            <!-- Stock Status value cell - HIDDEN for SSA users -->
+            <td *ngIf="!isSSALogin()">
               <span
                 class="badge badge-fixed px-3 py-2"
                 [ngStyle]="{
@@ -727,23 +577,18 @@
                     machine.stockStatus === 'Empty'
                       ? '#E57373'
                       : machine.stockStatus === 'Low'
-                      ? '#FFA500'
-                      : machine.stockStatus === 'Full'
-                      ? machine.stockIsManuallyUpdated
-                        ? '#B5E57D'
-                        : '#7ED321'
-                      : 'transparent',
+                        ? '#FFA500'
+                        : machine.stockStatus === 'Full'
+                          ? machine.stockIsManuallyUpdated
+                            ? '#B5E57D'
+                            : '#7ED321'
+                          : 'transparent',
                   color: '#000000'
                 }"
               >
                 {{ machine.stockStatus }}
               </span>
             </td>
-
-            <!-- <td>{{ machine.machineType }}</td> -->
-
-            <!-- <td>{{ machine.pcbNo || ''}}</td> -->
-
             <td>
               <span
                 class="badge badge-fixed px-3 py-2"
@@ -753,121 +598,80 @@
                   'bg-light text-black': machine.burningStatus === 'N/A'
                 }"
               >
-                <ng-container *ngIf="machine.burningStatus === '2'"
-                  >🔥Burning</ng-container
-                >
+                <ng-container *ngIf="machine.burningStatus === '2'">🔥Burning</ng-container>
                 <ng-container *ngIf="machine.burningStatus === '1'">
-                  <img
-                    src="./assets/img/icon/hourglass.png"
-                    width="16"
-                    height="16"
-                    style="vertical-align: middle; margin-right: 4px"
-                  />
+                  <img src="./assets/img/icon/hourglass.png" width="16" height="16" style="vertical-align: middle; margin-right: 4px" />
                   Idle
                 </ng-container>
-                <ng-container
-                  *ngIf="
-                    machine.burningStatus !== '1' &&
-                    machine.burningStatus !== '2'
-                  "
-                  >N/A</ng-container
-                >
+                <ng-container *ngIf="machine.burningStatus !== '1' && machine.burningStatus !== '2'">N/A</ng-container>
               </span>
             </td>
-
             <td>
-              <div
-                class="view-btn-container"
-                style="position: relative; display: inline-block"
-              >
+              <div class="view-btn-container" style="position: relative; display: inline-block">
                 <button class="btn btn-info btn-sm">View</button>
                 <div class="tooltip-info">
                   <strong>MachineId:</strong> {{ machine.machineId }}<br />
-                  <strong>Stock Status:</strong> {{ machine.stockStatus }}<br />
-                  <strong>Items Dispensed:</strong> {{ machine.itemsDispensed
-                  }}<br />
-                  <strong>Status:</strong>
-                  {{ machine.status === "1" ? "Online " : "Offline " }}<br />
-                  <strong>Collection:</strong> {{ machine.collection }}<br />
+                  <strong>Stock Status:</strong> {{ isSSALogin() ? "N/A" : machine.stockStatus }}<br />
+                  <strong>Items Dispensed:</strong> {{ isSSALogin() ? "N/A" : machine.itemsDispensed }}<br />
+                  <strong>Status:</strong> {{ machine.status === "1" ? "Online " : "Offline " }}<br />
+                  <strong>Collection:</strong> {{ isSSALogin() ? "N/A" : machine.collection }}<br />
                   <strong>Items Burnt:</strong> {{ machine.itemsBurnt }}<br />
-                  <strong>Burning Cycles:</strong> {{ machine.burningCycles
-                  }}<br />
-                  <strong>Installed Date:</strong>
-                  {{ machine.machineInstalledDate || "N/A" }}<br />
+                  <strong>Burning Cycles:</strong> {{ machine.burningCycles }}<br />
+                  <strong>Installed Date:</strong> {{ machine.machineInstalledDate || "N/A" }}<br />
                 </div>
               </div>
+            </td>
+          </tr>
+          <tr *ngIf="paginatedMachines.length === 0 && !isLoading">
+            <td [attr.colspan]="isSSALogin() ? 11 : 12" class="text-center text-muted py-4">
+              No machines found matching the selected filters
+            </td>
+          </tr>
+          <tr *ngIf="isLoading">
+            <td [attr.colspan]="isSSALogin() ? 11 : 12" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Loading machine data...</p>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <!-- Pagination -->
-    <!-- <div class="pagination-controls">
-  <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
-  <span>Page {{ currentPage }}</span>
-  <button (click)="onPageChange(currentPage + 1)" [disabled]="currentPage * itemsPerPage >= filteredMachines.length">Next</button>
-  </div> -->
-    <!-- Pagination -->
-    <!-- Pagination -->
 
-    <div
-      class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3"
-    >
-      <!-- Items per page -->
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
       <div class="d-flex align-items-center gap-2">
-        <label class="mb-0 fw-bold text-dark" style="font-size: 1rem"
-          >Items per page:</label
-        >
+        <label class="mb-0 fw-bold text-dark" style="font-size: 1rem">Items per page:</label>
         <div class="position-relative" style="min-width: 100px">
-          <select
-            class="form-select form-select-lg custom-select"
-            [(ngModel)]="itemsPerPage"
-            (change)="onPageChange(1)"
-          >
-            <option *ngFor="let option of [10, 20, 50, 100]" [value]="option">
-              {{ option }}
-            </option>
+          <select class="form-select form-select-lg custom-select" [(ngModel)]="itemsPerPage" (change)="onPageChange(1)">
+            <option *ngFor="let option of [10, 20, 50, 100]" [value]="option">{{ option }}</option>
           </select>
           <span class="dropdown-icon"></span>
         </div>
       </div>
 
-      <!-- Pagination controls -->
       <div class="d-flex align-items-center gap-2">
-        <button
-          class="btn btn-lg pagination-btn"
-          (click)="onPageChange(currentPage - 1)"
-          [disabled]="currentPage === 1"
-          title="Previous Page"
-        >
-          ‹
-        </button>
-
-        <span class="fw-bold text-dark" style="font-size: 1.1rem">
-          Page {{ currentPage }} of {{ totalPages }}
-        </span>
-
-        <button
-          class="btn btn-lg pagination-btn"
-          (click)="onPageChange(currentPage + 1)"
-          [disabled]="currentPage === totalPages"
-          title="Next Page"
-        >
-          ›
-        </button>
+        <button class="btn btn-lg pagination-btn" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1" title="Previous Page">‹</button>
+        <span class="fw-bold text-dark" style="font-size: 1.1rem">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button class="btn btn-lg pagination-btn" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages" title="Next Page">›</button>
       </div>
-      <!-- Showing X to Y of Z entries -->
+
       <div class="text-muted" style="font-size: 0.95rem">
-        Showing
-        {{ (currentPage - 1) * itemsPerPage + 1 }}
-        to
-        {{
-          currentPage * itemsPerPage > totalItems
-            ? totalItems
-            : currentPage * itemsPerPage
-        }}
-        of {{ totalItems }} entries
+        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
+        {{ currentPage * itemsPerPage > filteredMachines.length ? filteredMachines.length : currentPage * itemsPerPage }}
+        of {{ filteredMachines.length }} entries
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div *ngIf="isLoading" class="loading-overlay">
+  <div class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading data...</p>
   </div>
 </div>

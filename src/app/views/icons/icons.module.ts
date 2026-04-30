@@ -6,7 +6,8 @@ import { IconModule } from '@coreui/icons-angular';
 
 import { CoreUIIconsComponent } from './coreui-icons.component';
 import { IconsRoutingModule } from './icons-routing.module';
-import { DocsComponentsModule } from '@docs-components/docs-components.module';
+
+// ✅ Removed DocsComponentsModule — it's a CoreUI demo dependency not available in this project
 
 @NgModule({
   imports: [
@@ -15,11 +16,9 @@ import { DocsComponentsModule } from '@docs-components/docs-components.module';
     GridModule,
     IconModule,
     CommonModule,
-    DocsComponentsModule
   ],
   declarations: [
     CoreUIIconsComponent
   ]
 })
-export class IconsModule {
-}
+export class IconsModule {}

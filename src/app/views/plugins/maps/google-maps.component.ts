@@ -3,7 +3,6 @@ import {
   OnInit,
   AfterViewInit,
   ChangeDetectorRef,
-  SimpleChanges,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { DataService } from '../../../service/data.service';
@@ -354,6 +353,124 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     this.initializeMap(); // Call the new initializeMap method
   }
 
+  // ✅ Consistent SSA Detection Method
+  isSSALogin(): boolean {
+    // Check from CommonDataService first
+    if (this.commonDataService.userDetails?.projectId === 8) {
+      return true;
+    }
+    // Check from storage
+    const projectId = localStorage.getItem('projectId') || sessionStorage.getItem('projectId');
+    if (projectId === '8') {
+      return true;
+    }
+    // Check from userName (fallback)
+    const userName = this.commonDataService.userName || sessionStorage.getItem('userName');
+    if (userName && userName.includes('SSA')) {
+      return true;
+    }
+    return false;
+  }
+
+  // ✅ Dynamic label getters
+  getZoneLabel(): string {
+    return this.isSSALogin() ? 'Segment' : 'Zone';
+  }
+
+  getWardLabel(): string {
+    return this.isSSALogin() ? 'District' : 'Ward';
+  }
+
+  getBeatLabel(): string {
+    return this.isSSALogin() ? 'Mandal' : 'Beat';
+  }
+
+  // ✅ Auto-select all options ONLY for SSA users
+  autoSelectAllOptionsForSSA(): void {
+    // Only proceed if user is SSA
+    if (!this.isSSALogin()) {
+      console.log('⏭️ Non-SSA user - skipping auto-select all');
+      return;
+    }
+
+    console.log('🔄 SSA User - Auto-selecting all filter options...');
+
+    // 1. Auto-select all Projects
+    if (this.projects && this.projects.length > 0) {
+      this.selectedProjects = this.projects.map(p => p.ProjectId);
+      this.updateHierarchySelection('projects', [...this.selectedProjects]);
+      console.log(`✅ SSA: Selected ${this.selectedProjects.length} projects`);
+    }
+
+    // 2. After projects are selected, load states/zones
+    this.filterStates();
+
+    // 3. Auto-select all States/Zones
+    if (this.zones && this.zones.length > 0) {
+      this.selectedZones = [...this.zones];
+      this.updateHierarchySelection('zones', [...this.selectedZones]);
+      console.log(`✅ SSA: Selected ${this.selectedZones.length} states/zones`);
+    }
+
+    // 4. Filter and auto-select all Districts/Wards
+    this.filterWards();
+
+    if (this.wards && this.wards.length > 0) {
+      this.selectedWards = [...this.wards];
+      this.updateHierarchySelection('wards', [...this.selectedWards]);
+      console.log(`✅ SSA: Selected ${this.selectedWards.length} districts/wards`);
+    }
+
+    // 5. Filter and auto-select all SubZones/Zones
+    this.filterSubZones();
+
+    if (this.subZones && this.subZones.length > 0) {
+      this.selectedSubZones = [...this.subZones];
+      this.updateHierarchySelection('selectedSubZones', [...this.selectedSubZones]);
+      console.log(`✅ SSA: Selected ${this.selectedSubZones.length} sub-zones/zones`);
+    }
+
+    // 6. Filter and auto-select all WardList
+    this.filterWardList();
+
+    if (this.wardList && this.wardList.length > 0) {
+      this.selectedWardList = [...this.wardList];
+      this.updateHierarchySelection('selectedWardList', [...this.selectedWardList]);
+      console.log(`✅ SSA: Selected ${this.selectedWardList.length} wards`);
+    }
+
+    // 7. Filter and auto-select all BeatList
+    this.filterBeatList();
+
+    if (this.beatList && this.beatList.length > 0) {
+      this.selectedBeatList = [...this.beatList];
+      this.updateHierarchySelection('selectedBeatList', [...this.selectedBeatList]);
+      console.log(`✅ SSA: Selected ${this.selectedBeatList.length} beats`);
+    }
+
+    // 8. Filter and auto-select all Machines
+    this.filterMachines();
+
+    if (this.beats && this.beats.length > 0) {
+      this.selectedBeats = [...this.beats];
+      console.log(`✅ SSA: Selected ${this.selectedBeats.length} machines`);
+    }
+
+    // 9. Auto-select status filters for SSA users
+    this.selectedMachineStatuses = ['1', '2']; // Online & Offline both selected
+    this.selectedStockStatuses = ['0', '1', '2']; // Empty, Low, Full all selected
+    this.selectedBurnStatuses = ['1', '2']; // Idle & Burning both selected
+
+    // Update FormControl values for status filters
+    this.machineStatusFilter.setValue(this.selectedMachineStatuses);
+    this.stockStatusFilter.setValue(this.selectedStockStatuses);
+    this.buttonStatusFilter.setValue(
+      this.selectedBurnStatuses.map(s => s === '1' ? 'Idle' : 'Burning')
+    );
+
+    console.log('✅ SSA User: All filters auto-selected successfully!');
+  }
+
   // Load hierarchical data from API
   loadHierarchicalData(): void {
     this.isLoading = true;
@@ -371,7 +488,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
 
           if (response?.code === 200 && response.data) {
             console.log('✅✅✅✅✅✅Hierarchy API Response:', response);
-            debugger;
             // Collect all projects from all clients
             const allProjects =
               response.data.clients?.flatMap(
@@ -393,6 +509,9 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
 
             // 🛠 Ensure both values are not accidentally set the same unless it's valid
             console.log('📌 Extracted clientId:', this.clientId);
+
+            // ✅ Auto-select all options ONLY for SSA users
+            this.autoSelectAllOptionsForSSA();
 
             //this.processHierarchicalData();
             this.loadMachineData(); // Load machine data after hierarchy is processed
@@ -718,7 +837,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
   /*start*/
 
   updateMap(): void {
-    debugger;
     console.log(`🔄 updateMap() called! Current view: ${this.selectedMapView}`);
 
     // Clear old markers
@@ -928,19 +1046,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
       // markerElement.textContent = groupName;
       markerElement.textContent = `${viewTypeCapitalized}: ${groupName}`;
 
-      // Calculate statistics for this group
-      // const totalMachines = groupMachines.length;
-      // const onlineMachines = groupMachines.filter(m => m.status === 'Online').length;
-      // const offlineMachines = groupMachines.filter(m => m.status === 'Offline').length;
-      // const lowStockMachines = groupMachines.filter(m =>
-      //   m.stockStatus === 'Low Stock' ||
-      //   (m.stockStatus && m.stockStatus.some && m.stockStatus.some((s: any) => s.SpringStatus === 'Low Stock'))
-      // ).length;
-      // const emptyStockMachines = groupMachines.filter(m =>
-      //   m.stockStatus === 'Empty' ||
-      //   (m.stockStatus && m.stockStatus.some && m.stockStatus.some((s: any) => s.SpringStatus === 'Empty'))
-      // ).length;
-
       const installedMachines = groupMachines.length;
 
       const runningMachines = groupMachines.filter(
@@ -999,20 +1104,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
         (sum, m) => sum + (m.burningCycle || 0),
         0
       );
-
-      // Create popup with group info
-      // const popupHTML = `
-      //   <div class="${viewType}-popup">
-      //     <h4>${viewTypeCapitalized}: ${groupName}</h4>
-      //     <div class="${viewType}-stats">
-      //       <div><strong>Total Machines:</strong> ${totalMachines}</div>
-      //       <div><strong>Online:</strong> ${onlineMachines}</div>
-      //       <div><strong>Offline:</strong> ${offlineMachines}</div>
-      //       <div><strong>Low Stock:</strong> ${lowStockMachines}</div>
-      //       <div><strong>Empty Stock:</strong> ${emptyStockMachines}</div>
-      //     </div>
-      //   </div>
-      // `;
 
       const popupHTML = `
   <div class="${viewType}-popup">
@@ -1300,7 +1391,6 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
 
   // Renamed from original updateMap to handle machine-level view
   displayMachineView(filteredMachines: any[]): void {
-    debugger;
     console.log('🔍 Displaying Machine View');
 
     // Handle overlapping markers
@@ -1692,7 +1782,7 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
     this.errorMessage = '';
 
     const merchantId = this.commonDataService.merchantId ?? '';
-    const userDetailsList = this.commonDataService.userDetails.clients || [];
+    const userDetailsList = this.commonDataService.userDetails?.clients || [];
 
     // 🔁 Collect all clientIds and projectIds
     const clientIds = userDetailsList.map((c: any) => c.clientId);
@@ -2038,9 +2128,9 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
      <p><strong>Machine ID:</strong> ${machine.machineId}</p>
     <p><strong>State:</strong> ${machine.state}</p>
     <p><strong>District:</strong> ${machine.district}</p>
-          <p><strong>Zone:</strong> ${machine.zone || 'N/A'}</p>
-      <p><strong>Ward:</strong> ${machine.ward || 'N/A'}</p>
-      <p><strong>Beat:</strong> ${machine.beat || 'N/A'}</p>
+          <p><strong>${this.getZoneLabel()}:</strong> ${machine.zone || 'N/A'}</p>
+      <p><strong>${this.getWardLabel()}:</strong> ${machine.ward || 'N/A'}</p>
+      <p><strong>${this.getBeatLabel()}:</strong> ${machine.beat || 'N/A'}</p>
     <p><strong>Status:</strong> ${machine.status}</p>
     <p><strong>Stock Status:</strong> ${stockStatusText}</p>
     <p><strong>Burning Status:</strong> ${burningStatusText}</p>
@@ -2183,6 +2273,7 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
         break;
     }
   }
+  
   filterStates() {
     this.zones = [];
     this.selectedZones = [];
@@ -2416,10 +2507,39 @@ export class GoogleMapsComponent implements OnInit, AfterViewInit {
   }
 
   navigateToGraph(graphType: string, zones: string[]): void {
-    debugger;
     // Navigate to zone dashboard with the zone name as parameter
     this.router.navigate(['/graph-dashboard'], {
       queryParams: { zone: zones },
     });
+  }
+
+  // Add this method to your GoogleMapsComponent
+  checkIfDistrictsHaveZonesSSA(): boolean {
+    const userName = this.commonDataService?.userName;
+    console.log('🔍 checkIfDistrictsHaveZonesSSA - userName:', userName);
+    const isSSA = userName ? userName.includes('SSA') : false;
+    console.log('🔍 isSSA:', isSSA);
+    return isSSA;
+  }
+
+  getFilterLabel(filterName: string): string {
+    // Check if user is SSA type
+    const isSSAUser = this.checkIfDistrictsHaveZonesSSA();
+    
+    // Map filter names to dynamic labels
+    const labelMap: { [key: string]: string } = {
+      'State': isSSAUser ? 'State' : 'State',
+      'District': isSSAUser ? 'District' : 'District',
+      'Zone': isSSAUser ? 'Segment' : 'Zone',
+      'Ward': isSSAUser ? 'District' : 'Ward',
+      'Beat': isSSAUser ? 'Mandal' : 'Beat',
+      'Machines': 'Machines',
+      'Client Name': 'Client Name',
+      'Machine Status': 'Machine Status',
+      'Stock Status': 'Stock Status',
+      'Burn Status': 'Burn Status'
+    };
+    
+    return labelMap[filterName] || filterName;
   }
 }
